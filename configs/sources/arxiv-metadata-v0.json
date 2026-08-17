@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "source_id": "arxiv-cc-single-version-descriptive",
+  "status": "development",
+  "allowed_category_prefixes": [
+    "astro-ph",
+    "cond-mat.mtrl-sci",
+    "physics.atom-ph",
+    "physics.chem-ph",
+    "physics.optics"
+  ],
+  "excluded_license_classes": [
+    "arXiv-default",
+    "creative-commons-other",
+    "custom-or-unresolved",
+    "missing"
+  ],
+  "version_rule": "exactly-one-version",
+  "rights_rule": "item-level-cc0-or-cc-by",
+  "content_download_authorized": false,
+  "behavioral_outcomes_used": false,
+  "notes": [
+    "Category eligibility remains provisional until metadata volume and bounded manual exposure review pass.",
+    "Titles and abstracts are hashed and counted but not retained in metadata output.",
+    "Source C remains under the held-out-source firewall."
+  ]
+}
