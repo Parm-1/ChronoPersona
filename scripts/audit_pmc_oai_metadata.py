@@ -45,8 +45,9 @@ def _parser() -> argparse.ArgumentParser:
         description=(
             "Audit PMC OAI Dublin Core metadata. Default mode is no-network; "
             "live access requires --execute and --allow-network. OAI from/until "
-            "filter PMC release/update datestamps, not article publication dates; "
-            "the parser independently derives and filters publication evidence."
+            "filter PMC release/update datestamps, not article publication dates. "
+            "Dublin Core dc:date is retained only as unresolved lifecycle-date "
+            "evidence until a publication-specific source confirms it."
         )
     )
     parser.add_argument("--input", type=Path)
@@ -149,7 +150,10 @@ def main() -> int:
                         "oai_datestamp_filter_semantics": (
                             "PMC release/update datestamp; not publication date"
                         ),
-                        "publication_date_filtering": "performed after parsing dc:date",
+                        "dc_date_semantics": (
+                            "lifecycle-associated; era remains unresolved"
+                        ),
+                        "publication_date_confirmation_required": True,
                         "max_records": args.max_records,
                         "max_response_bytes": args.max_response_bytes,
                         "allowed_subject_terms": list(allowed),
@@ -191,7 +195,9 @@ def main() -> int:
                 break
 
         if not records:
-            raise ValueError("PMC metadata query produced no date-qualified records")
+            raise ValueError(
+                "PMC metadata query produced no records with usable dc:date evidence"
+            )
         metadata_errors = validate_source_metadata(
             records,
             source_registry=source_registry,
@@ -215,6 +221,10 @@ def main() -> int:
             "oai_datestamp_filter_semantics": (
                 "PMC release/update datestamp; not publication date"
             ),
+            "dc_date_semantics": (
+                "lifecycle-associated; not used to assign era"
+            ),
+            "publication_date_confirmation_required": True,
             "set_spec": args.set_spec,
             "network_used": args.input is None,
             "content_downloaded": False,
