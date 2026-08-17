@@ -9,6 +9,14 @@
     "physics.chem-ph",
     "physics.optics"
   ],
+  "forbidden_category_prefixes": [
+    "cs",
+    "econ",
+    "math",
+    "physics.soc-ph",
+    "q-fin",
+    "stat"
+  ],
   "excluded_license_classes": [
     "arXiv-default",
     "creative-commons-other",
@@ -17,10 +25,12 @@
   ],
   "version_rule": "exactly-one-version",
   "rights_rule": "item-level-cc0-or-cc-by",
+  "cross_list_rule": "exclude-any-forbidden-prefix-even-when-an-allowed-prefix-is-present",
   "content_download_authorized": false,
   "behavioral_outcomes_used": false,
   "notes": [
     "Category eligibility remains provisional until metadata volume and bounded manual exposure review pass.",
+    "Cross-listed computing, economics, mathematics, quantitative-finance, statistics, and social-physics records are excluded to reduce direct procedural and decision-task exposure.",
     "Titles and abstracts are hashed and counted but not retained in metadata output.",
     "Source C remains under the held-out-source firewall."
   ]
