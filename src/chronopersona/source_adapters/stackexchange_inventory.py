@@ -1,13 +1,42 @@
-"""Parse the official Stack Exchange Internet Archive inventory metadata."""
+"""Parse legacy Stack Exchange Internet Archive item metadata.
+
+Stack Exchange stopped publishing new dumps to Archive.org in 2024. This
+adapter therefore inventories only a frozen legacy archive item and records
+whether its item metadata attributes the dump to Stack Exchange. It does not
+claim that Archive.org is the current official delivery mechanism.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
+import re
 from typing import Any
+from urllib.parse import quote
 
 
 class StackExchangeInventoryError(ValueError):
     """Raised when the Stack Exchange archive inventory is malformed."""
+
+
+_SAFE_ID = re.compile(r"[^A-Za-z0-9._:@+-]+")
+
+
+def _string_values(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, str)]
+    return []
+
+
+def _safe_id(value: str) -> str:
+    normalized = _SAFE_ID.sub("-", value.strip()).strip("-")
+    return normalized or "unknown"
+
+
+def _company_attributed(metadata: Mapping[str, Any]) -> bool:
+    creators = _string_values(metadata.get("creator"))
+    return any("stack exchange" in creator.lower() for creator in creators)
 
 
 def parse_stackexchange_archive_metadata(
@@ -16,21 +45,20 @@ def parse_stackexchange_archive_metadata(
     source_locator: str,
     source_id: str = "stackexchange-initial-nontechnical-posts",
 ) -> list[dict[str, Any]]:
-    """Return official per-site dump archive files without downloading them."""
+    """Return per-site legacy dump files without downloading them."""
 
     files = value.get("files")
     if not isinstance(files, list):
         raise StackExchangeInventoryError("archive metadata has no files list")
     metadata = value.get("metadata")
-    snapshot_id = "unknown-snapshot"
-    if isinstance(metadata, Mapping):
-        snapshot_id = str(
-            metadata.get("date")
-            or metadata.get("publicdate")
-            or metadata.get("identifier")
-            or snapshot_id
-        )
-    records: list[dict[str, Any]] = []
+    if not isinstance(metadata, Mapping):
+        raise StackExchangeInventoryError("archive metadata has no metadata object")
+
+    identifier = str(metadata.get("identifier") or "stackexchange")
+    creators = _string_values(metadata.get("creator"))
+    company_attributed = _company_attributed(metadata)
+
+    selected_files: list[tuple[Mapping[str, Any], str, int, str | None]] = []
     for raw_file in files:
         if not isinstance(raw_file, Mapping):
             continue
@@ -46,6 +74,30 @@ def parse_stackexchange_archive_metadata(
             raise StackExchangeInventoryError(
                 f"invalid size for {file_name!r}: {raw_size!r}"
             ) from error
+        if size <= 0:
+            raise StackExchangeInventoryError(
+                f"archive file {file_name!r} has non-positive size"
+            )
+        mtime = str(raw_file.get("mtime")) if raw_file.get("mtime") else None
+        selected_files.append((raw_file, file_name, size, mtime))
+
+    if not selected_files:
+        raise StackExchangeInventoryError(
+            "archive metadata contains no .7z site dumps"
+        )
+
+    latest_mtime = max(
+        (mtime for _, _, _, mtime in selected_files if mtime is not None),
+        default=str(
+            metadata.get("date")
+            or metadata.get("publicdate")
+            or "unknown-date"
+        ),
+    )
+    snapshot_id = _safe_id(f"{identifier}@{latest_mtime}")
+
+    records: list[dict[str, Any]] = []
+    for raw_file, file_name, size, mtime in selected_files:
         hashes = {
             algorithm: str(raw_file[algorithm])
             for algorithm in ("md5", "sha1")
@@ -56,16 +108,14 @@ def parse_stackexchange_archive_metadata(
                 f"archive file {file_name!r} has no md5 or sha1"
             )
         locator = (
-            "https://archive.org/download/stackexchange/"
-            + file_name.replace(" ", "%20")
+            f"https://archive.org/download/{quote(identifier, safe='')}/"
+            + quote(file_name)
         )
         site_slug = file_name[:-3]
         records.append(
             {
                 "schema_version": 1,
-                "inventory_id": (
-                    f"stackexchange:{snapshot_id}:{site_slug}"
-                ),
+                "inventory_id": f"stackexchange:{snapshot_id}:{_safe_id(site_slug)}",
                 "source_id": source_id,
                 "snapshot_id": snapshot_id,
                 "file_name": file_name,
@@ -77,14 +127,14 @@ def parse_stackexchange_archive_metadata(
                 "download_authorized": False,
                 "source_metadata": {
                     "site_slug": site_slug,
+                    "archive_item_identifier": identifier,
+                    "archive_item_creators": creators,
+                    "company_attributed_archive_item": company_attributed,
+                    "delivery_status": "legacy-archive; not current official delivery",
                     "archive_metadata_locator": source_locator,
                     "format": raw_file.get("format"),
-                    "mtime": raw_file.get("mtime"),
+                    "mtime": mtime,
                 },
             }
-        )
-    if not records:
-        raise StackExchangeInventoryError(
-            "archive metadata contains no .7z site dumps"
         )
     return records
