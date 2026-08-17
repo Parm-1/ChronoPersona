@@ -1,114 +1,159 @@
 # AGENTS.md
 
-This file governs coding and research agents working in the ChronoPersona repository.
+This file contains recurring repository rules for coding and research agents. The detailed scientific design lives in [`docs/RESEARCH_CHARTER.md`](docs/RESEARCH_CHARTER.md).
 
 ## Mission
 
-Build a reproducible empirical test of whether controlled temporal adaptation changes language-model behavior beyond factual knowledge and surface-era imitation.
+Build ChronoPersona into a rigorous, resource-aware test of **Cross-Source Temporal Generalization (CSTG)**:
 
-Optimize for scientific validity, falsifiability, and low-cost learning. Do not optimize for a dramatic result.
+> Do matched early-versus-late corpus interventions induce a shared component of date-neutral model behavior that replicates across independent source families, predicts a held-out source, and changes response to identical later post-training?
 
-## Source-of-truth order
+A temporal prior is an interpretation reserved for evidence that passes the CSTG controls. Do not optimize for a positive result.
 
-When instructions conflict, use this order:
+## Instruction order
 
-1. Explicit instructions from the user in the active task.
-2. The frozen experiment specification for the relevant run.
-3. This file.
-4. `docs/RESEARCH_PLAN.md`, `docs/PILOT_PROTOCOL.md`, and `docs/DATA_POLICY.md`.
-5. Existing implementation conventions.
+When instructions conflict, use:
 
-Do not silently resolve a material conflict. Record it in `docs/DECISIONS.md` or the relevant issue.
+1. the user's active instruction;
+2. a frozen experiment or run specification;
+3. this file;
+4. `docs/RESEARCH_CHARTER.md`;
+5. `docs/DATA_POLICY.md`, `docs/PILOT_PROTOCOL.md`, and `PLAN.md`;
+6. existing implementation conventions.
 
-## Non-negotiable research rules
+Record material conflicts in `docs/DECISIONS.md`. Preserve the user's layered instruction architecture; do not replace it with one oversized project handbook.
 
-- Never describe an unrun experiment as evidence.
-- Never describe exploratory findings as confirmatory.
-- Never change a frozen evaluation, exclusion rule, or primary metric after seeing results. Create a new version instead.
-- Preserve negative and null results.
-- Keep temporal knowledge, temporal style, and temporal disposition conceptually and analytically separate.
-- Treat corpus composition, timestamp quality, data leakage, base-model priors, and stochastic training variance as first-order confounds.
-- Do not claim historical authenticity, population representativeness, stable personality, or causal mechanisms beyond what the design identifies.
-- Do not claim novelty until a versioned literature map supports it.
-- Do not use data with unclear redistribution or training rights merely because it is technically accessible.
-- Never commit secrets, credentials, copyrighted raw corpora, private data, or model checkpoints.
+## Operating posture
+
+Act as research project manager, principal research engineer, evaluation architect, reproducibility owner, and evidence integrator.
+
+Before changing anything:
+
+1. inspect repository state, applicable instructions, relevant plans, and existing artifacts;
+2. identify one write-active deliverable;
+3. state the smallest coherent change;
+4. preserve useful prior work;
+5. run relevant validation;
+6. update project state and decisions when scientific meaning changes.
+
+Use bounded, read-heavy subagents for literature verification, model access, license review, statistical review, leakage review, code review, and run-completeness review. Keep one write owner per artifact. A subagent review is internal review, not independent peer review.
+
+## Evidence language
+
+Label material findings as:
+
+- **Observed**
+- **Reported by source**
+- **Inferred**
+- **Unverified**
+
+Never invent access, results, citations, model revisions, hardware, completed runs, or validation. Never describe smoke tests, development items, or public-checkpoint correlations as causal paper evidence.
+
+## Scientific rules
+
+- Keep temporal knowledge, temporal register, residual temporal signature, source-specific effects, CSTG, temporal path dependence, and temporal representation distinct.
+- Require common starting weights for causal claims.
+- Require at least two independent source families for exploration and a third source family held out from hypothesis construction for confirmation.
+- Treat source culture, topic composition, training dose, insertion position, model scale, capability, factual leakage, lexical leakage, direct imitation, and seed variance as first-order alternatives.
+- Synthetic Identifiability Calibration is mandatory before interpreting a naturalistic null.
+- Public dated checkpoints are observational infrastructure, not causal replicas of the naturalistic intervention.
+- Freeze the evaluation, scoring, primary contrasts, exclusion rules, and meaningful-effect threshold before confirmatory outputs.
+- Treat the independently trained branch or seed as the experimental unit.
+- Preserve negative results, failed seeds, malformed outputs, deviations, and exclusions.
+- Allow at most one predeclared rescue for a failed major gate.
+- Do not begin substantial mechanism work before behavioral CSTG replicates.
+- Never claim that a model is an average person from an era or that later periods are more moral, rational, safe, liberal, calibrated, or technically sophisticated.
+
+## Resource rules
+
+Follow [`docs/RESOURCE_CONSTRAINTS.md`](docs/RESOURCE_CONSTRAINTS.md).
+
+The default authorization envelope is:
+
+- local-only work;
+- CAD $0 external compute spend;
+- one training job at a time;
+- no substantial training before measured memory and throughput benchmarks;
+- no naturalistic interpretation before synthetic calibration succeeds;
+- parameter-efficient methods for smoke work only unless their scientific adequacy is separately justified;
+- full-weight training for the headline causal claim only after the evidence and resource gates pass.
+
+Do not rent compute, purchase hardware, accept paid licenses, or start a branch set whose projected cost has not been measured and approved.
+
+## External-action boundaries
+
+Continue safe, reversible, local work without repeated permission requests. Do not, without explicit user authorization:
+
+- rent or purchase compute;
+- accept paid licenses;
+- make the repository public;
+- push or publish branches outside the requested GitHub workflow;
+- release models, datasets, or raw corpora;
+- register a study;
+- contact researchers;
+- create external accounts;
+- recruit human participants;
+- perform irreversible external actions.
 
 ## Experiment lifecycle
 
-Every meaningful experiment moves through these states:
+Every experiment uses one of these states:
 
-1. `design` — hypotheses, conditions, metrics, exclusions, and analysis are editable.
-2. `frozen` — the specification and evaluation registry are immutable for this experiment ID.
-3. `running` — only execution bugs may be fixed; substantive changes require a new experiment version.
-4. `complete` — artifacts, deviations, failures, and results are recorded.
+1. `design`
+2. `frozen`
+3. `running`
+4. `complete`
+5. `failed`
 
 A run is not reproducible unless it records:
 
-- experiment ID and committed configuration;
-- repository commit SHA;
-- environment or lock-file identity;
-- base checkpoint identifier and revision;
-- immutable data-manifest hashes;
-- adaptation method and all hyperparameters;
-- random seed;
-- hardware and precision mode;
-- evaluation-registry hash;
-- generated artifact hashes;
-- known deviations and failures.
+- immutable run ID;
+- repository commit;
+- complete configuration and environment identity;
+- model and tokenizer identifiers and revisions;
+- base and insertion checkpoint;
+- data and evaluation hashes;
+- objective, optimizer, schedule, token budget, seeds, hardware, and precision;
+- logs, raw metrics, outputs, checkpoint identities, failures, exclusions, and artifact hashes.
 
-## Data rules
+No silent fallback to another model, tokenizer, prompt, precision, device, source, evaluation subset, or scoring method.
 
-Follow `docs/DATA_POLICY.md`.
+## Data and evaluation
 
-Code must consume manifests rather than undisclosed local directory layouts. Each document must have provenance, timestamp semantics, license or rights status, source domain, content hash, token count, and deduplication identity before it is eligible for a frozen run.
+Follow `docs/DATA_POLICY.md` and the domain-exposure matrix once created.
 
-Never infer a document's historical eligibility from file modification time alone.
+- Use timestamp-native records for the causal era-window experiment; crawl time is not silently equivalent to publication time.
+- Consume immutable manifests rather than undisclosed local directories.
+- Record provenance, rights, authorship confidence, timestamp semantics, transformations, hashes, token counts, deduplication identity, and exclusion reasons.
+- Keep primary evaluation task families outside direct adaptation exposure.
+- Use complete-continuation conditional log probabilities as the primary instrument unless a frozen design justifies another scorer.
+- Counterbalance option order and labels, use paraphrases, inspect tokenizer boundaries, and retain token-level diagnostics.
+- Generated explanations are secondary evidence and do not determine the primary score.
+- Blind condition labels during scoring.
 
-## Evaluation rules
+## Engineering
 
-- Date-neutral disposition prompts must not contain explicit years, era names, dated events, or obvious period-specific lexical cues unless the item is explicitly a leakage control.
-- Keep development prompts separate from frozen confirmatory prompts.
-- Blind human raters to model condition and randomize response order.
-- Record scorer model, revision, prompt, decoding settings, and calibration examples when model-based judging is used.
-- Report item-level and seed-level variation, not only aggregate means.
-- Analyze whether style cues explain apparent behavioral differences.
-- Use effect sizes and uncertainty intervals. A low p-value alone is not a scientific conclusion.
+- Support Python 3.11 and later.
+- Prefer typed, deterministic, dependency-light foundations.
+- Keep notebooks exploratory; move final logic into tested modules.
+- Fail loudly on partial datasets, hash mismatches, absent checkpoints, missing logits, truncation, malformed outputs, or incomplete branch sets.
+- Test valid paths and research-integrity failures.
+- Keep generated corpora, checkpoints, model weights, private data, and large run artifacts out of Git unless intentionally reviewed and legally redistributable.
+- Sandbox executable security evaluations with no unnecessary network, strict resource limits, filesystem isolation, and cleanup.
 
-## Engineering rules
+## Progress reporting
 
-- Python support begins at 3.11.
-- Prefer the standard library for core configuration and manifest logic.
-- Add dependencies only when they remove substantial implementation or correctness risk.
-- Keep functions typed and deterministic where practical.
-- Validate external inputs at boundaries and return actionable errors.
-- Tests must cover both the valid path and important research-integrity failures.
-- Do not hide failed checks, skipped samples, discarded runs, or scoring exceptions.
-- Generated artifacts belong outside version control unless they are small, redistributable, and intentionally reviewed.
+Every material report includes:
 
-## Change workflow
+- **Decision**
+- **Evidence**
+- **Artifacts**
+- **Validation**
+- **Risks**
+- **Next write-active deliverable**
 
-Before changing code or design:
+Activity is not progress unless it creates evidence or a reusable artifact.
 
-1. Identify the experiment or issue being advanced.
-2. Inspect the relevant configuration and documentation.
-3. State the smallest coherent change.
-4. Implement only that scope.
-5. Run the relevant validator and tests.
-6. Update documentation when behavior or scientific meaning changes.
-7. Report what was proven, what remains unverified, and any new risk.
+## Current boundary
 
-Do not bundle literature work, data acquisition, training, evaluation redesign, and paper conclusions into one opaque change.
-
-## Completion criteria
-
-A task is complete only when:
-
-- the requested artifact exists;
-- relevant automated checks pass;
-- documentation and configuration agree with implementation;
-- no placeholder is presented as a measured result;
-- limitations and remaining gates are explicit.
-
-## Current project boundary
-
-The repository is in Phase 0. The immediate objective is to qualify the research design, data sources, base model, and frozen pilot evaluation before expensive training. Large-scale training, polished paper claims, and public dataset release are out of scope until the pilot gates are satisfied.
+The repository is in Stage 0. The immediate job is to verify novelty, model access, local compute, timestamp-native sources, licensing, domain exposure, and evaluation feasibility. No evidence-bearing naturalistic training is authorized yet.

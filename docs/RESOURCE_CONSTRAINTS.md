@@ -1,0 +1,180 @@
+# Resource Constraints
+
+This document is a binding design input. ChronoPersona should maximize scientific information per dollar and per unit of available compute, not maximize model size or branch count.
+
+## Reported resources
+
+### Current machine
+
+- GPU: NVIDIA RTX 2060
+- System RAM: 16 GB
+- CPU, GPU VRAM variant, free storage, CUDA version, sustained thermals, and measured throughput: not yet recorded
+
+### Potential borrowed machine
+
+- GPU: NVIDIA RTX 5070
+- System RAM: 32 GB
+- Availability, GPU VRAM, free storage, software environment, and permission window: not assumed
+
+These are user-reported resources. The repository must measure the actual execution environment before planning a run.
+
+## User objective
+
+Spend as little money as possible while producing the strongest credible paper.
+
+This means:
+
+- do cheap falsification before expensive confirmation;
+- prefer public artifacts and local inference where scientifically adequate;
+- do not save money by weakening the causal design until the result becomes uninterpretable;
+- do not spend money to rescue an unpromising or unidentifiable design;
+- escalate only for a named, decisive experiment whose cheaper predecessors passed.
+
+## Default authorization envelope
+
+- External-compute spend: **CAD $0**
+- Paid data or model licenses: not authorized
+- Hardware purchases: not authorized
+- External accounts created for the project: not authorized
+- Parallel GPU training jobs: one maximum
+- Repository publication, model release, and dataset release: not authorized by this document
+
+Explicit user authorization is required to change any of these boundaries.
+
+## Compute ladder
+
+Use the lowest rung capable of answering the current question.
+
+### Rung 0 — CPU and repository-only work
+
+Use for:
+
+- literature and license audit;
+- manifests, hashing, deduplication, and leakage tooling;
+- evaluation authoring;
+- scorer unit tests with synthetic logits or tiny fixtures;
+- statistical simulations;
+- dry runs and run-registry testing;
+- report generation.
+
+### Rung 1 — Current local GPU
+
+Use for:
+
+- the smallest practical public-checkpoint loading test;
+- conditional-log-probability smoke tests;
+- tiny legal training benchmarks;
+- PEFT pipeline validation;
+- calibration dose reconnaissance when memory-safe.
+
+Do not assume that full-weight optimizer states fit an RTX 2060.
+
+### Rung 2 — Borrowed RTX 5070 machine
+
+Use only after access is confirmed and the run has a measured purpose.
+
+Priority uses:
+
+- the selected synthetic calibration;
+- full-weight feasibility tests at a justified model size or insertion checkpoint;
+- the smallest evidence-bearing branch set that cannot run on the current machine;
+- throughput measurements needed to price a later confirmation.
+
+Do not occupy the borrowed machine with broad exploratory sweeps that could have been eliminated by local simulations or smaller tests.
+
+### Rung 3 — Paid compute
+
+This is an explicit escalation, not a default.
+
+A proposal for paid compute must state:
+
+- exact model and revision;
+- exact run count;
+- token budget and updates;
+- memory and storage requirement;
+- measured throughput basis;
+- expected wall-clock range;
+- minimum provider configuration;
+- estimated CAD cost including failed-run allowance and storage;
+- scientific decision enabled;
+- cheaper alternatives already exhausted;
+- stop condition.
+
+No rental begins until the user approves the specific plan.
+
+## Training gates
+
+Substantial training is blocked until all are true:
+
+1. novelty remains defensible;
+2. timestamp-native sources and rights are qualified;
+3. direct domain exposure is bounded;
+4. the evaluation and scorer are reliable;
+5. local memory and throughput are measured;
+6. the token budget is frozen;
+7. synthetic calibration is designed;
+8. the run registry and resumption path work;
+9. projected storage fits;
+10. the user has authorized any nonzero external spend.
+
+Naturalistic interpretation is blocked until Synthetic Identifiability Calibration passes.
+
+The 12-branch two-era/two-source pilot is blocked until a smaller end-to-end smoke run demonstrates deterministic identities, failure handling, resumption, and artifact completeness.
+
+## Method constraints
+
+- PEFT may be used for debugging, scorer validation, and dose reconnaissance.
+- PEFT alone does not automatically support the headline causal claim.
+- Full-weight continued pretraining is preferred for the central naturalistic experiment.
+- Another broad-update approximation is allowed only when its adequacy is argued before results.
+- Training insertion point is a causal variable and must be fixed.
+- Do not attach a tiny adapter to a completed modern model and describe the result as a historically bounded model.
+- Do not increase model scale merely because a smaller result is null. A scale rescue is allowed once and must be predeclared.
+
+## Storage constraints
+
+Before downloading or generating large artifacts, record:
+
+- compressed and expanded model size;
+- optimizer and gradient-state multiplier;
+- checkpoint count and retention policy;
+- dataset cache size;
+- generated-output size;
+- free-space margin;
+- cleanup and recovery plan.
+
+Prefer:
+
+- pinned revisions;
+- shared immutable caches;
+- sparse checkpoint retention;
+- hashes and manifests instead of duplicated corpora;
+- resumable downloads;
+- deletion only after artifact identities are preserved.
+
+Do not commit model weights, raw corpora, or large checkpoints to Git.
+
+## Scheduling constraints
+
+- One write owner per artifact.
+- One training job at a time.
+- Do not run multiple seeds concurrently on the current machine.
+- Avoid making the daily-use computer unusable for speculative sweeps.
+- Prefer interruptible checkpoints and clean resume semantics.
+- Stop immediately on thermal instability, swapping, disk exhaustion risk, hash mismatch, or repeated out-of-memory failure.
+
+## Budget decision format
+
+Any request to increase compute must be presented as:
+
+**Decision:** what authorization is requested.  
+**Evidence:** measured local limitation and passed scientific gates.  
+**Minimum plan:** smallest run that resolves the decision.  
+**Cost:** estimated CAD range and assumptions.  
+**Failure allowance:** maximum authorized loss from failed runs.  
+**Output:** exact artifact and decision produced.  
+**Stop rule:** when the run terminates without further escalation.
+
+## Current resource decision
+
+The repository remains at Rungs 0–1. No external spend is authorized. The immediate work is audit, measurement, evaluation tooling, and a tiny safe logits/training benchmark—not the full naturalistic branch set.
