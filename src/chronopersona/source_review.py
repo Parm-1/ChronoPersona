@@ -9,7 +9,7 @@ append-only event records that never contain retrieved source text.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -38,6 +38,7 @@ _SENSITIVE_STRING = re.compile(
     r"\b(?:19|20)\d{2}-\d{2}-\d{2}(?:T|\b))",
     re.IGNORECASE,
 )
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _ALLOWED_PURPOSES = {
     "metadata-review",
     "content-review",
@@ -50,6 +51,34 @@ _ALLOWED_LOCATOR_KINDS = {"metadata", "content"}
 
 def _nonempty(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def _verify_self_hash(value: Mapping[str, Any], *, label: str) -> str:
+    recorded = value.get("output_sha256")
+    if not isinstance(recorded, str) or not _SHA256.fullmatch(recorded):
+        raise SourceReviewError(f"{label} lacks a valid output_sha256")
+    unhashed = dict(value)
+    unhashed.pop("output_sha256", None)
+    expected = canonical_json_sha256(unhashed)
+    if recorded != expected:
+        raise SourceReviewError(
+            f"{label} output_sha256 mismatch: recorded {recorded}, expected {expected}"
+        )
+    return recorded
+
+
+def _verify_event_id(event: Mapping[str, Any], *, label: str) -> str:
+    event_id = event.get("event_id")
+    if not isinstance(event_id, str) or not event_id.startswith("event-"):
+        raise SourceReviewError(f"{label} lacks a valid event_id")
+    unhashed = dict(event)
+    unhashed.pop("event_id", None)
+    expected = "event-" + canonical_json_sha256(unhashed)[:24]
+    if event_id != expected:
+        raise SourceReviewError(
+            f"{label} event_id mismatch: recorded {event_id}, expected {expected}"
+        )
+    return event_id
 
 
 def _access_id(
@@ -89,6 +118,10 @@ def validate_redacted_review_packet(packet: Mapping[str, Any]) -> tuple[str, ...
     """Return all known held-out reviewer-packet leakage errors."""
 
     errors: list[str] = []
+    try:
+        _verify_self_hash(packet, label="review packet")
+    except SourceReviewError as error:
+        errors.append(str(error))
     if packet.get("schema_version") != 1:
         errors.append("review packet schema_version must be 1")
     if packet.get("artifact_type") != "source-review-packet-redacted":
@@ -134,13 +167,11 @@ def redact_review_packet(
 
     if sample_packet.get("artifact_type") != "source-audit-sample-packet":
         raise SourceReviewError("input is not a source audit sample packet")
+    packet_sha256 = _verify_self_hash(sample_packet, label="sample packet")
     if sample_packet.get("era_labels_hidden") is not True:
         raise SourceReviewError(
             "held-out review redaction requires an era-hidden sample packet"
         )
-    packet_sha256 = sample_packet.get("output_sha256")
-    if not _nonempty(packet_sha256):
-        raise SourceReviewError("sample packet lacks output_sha256")
     if not _nonempty(redaction_seed):
         raise SourceReviewError("redaction_seed must not be empty")
     input_records = sample_packet.get("records")
@@ -170,7 +201,7 @@ def redact_review_packet(
             )
         access_id = _access_id(
             redaction_seed,
-            str(packet_sha256),
+            packet_sha256,
             str(blind_id),
             str(metadata_locator) if metadata_locator is not None else None,
             str(content_locator) if content_locator is not None else None,
@@ -219,6 +250,7 @@ def redact_review_packet(
     errors = validate_redacted_review_packet(reviewer_packet)
     if errors:
         raise SourceReviewError("; ".join(errors))
+    _verify_self_hash(access_map, label="access map")
     return reviewer_packet, access_map
 
 
@@ -239,6 +271,7 @@ def _find_access_record(
 ) -> Mapping[str, Any]:
     if access_map.get("artifact_type") != "source-review-access-map":
         raise SourceReviewError("invalid source-review access map")
+    _verify_self_hash(access_map, label="access map")
     records = access_map.get("records")
     if not isinstance(records, list):
         raise SourceReviewError("access map has no records list")
@@ -283,9 +316,7 @@ def build_access_event(
         raise SourceReviewError(
             f"access_id {access_id!r} has no {locator_kind} locator"
         )
-    if response_sha256 is not None and not re.fullmatch(
-        r"[0-9a-f]{64}", response_sha256
-    ):
+    if response_sha256 is not None and not _SHA256.fullmatch(response_sha256):
         raise SourceReviewError("response_sha256 must be a lowercase SHA-256")
     if response_bytes is not None and (
         not isinstance(response_bytes, int)
@@ -319,6 +350,7 @@ def build_access_event(
         "source_text_recorded": False,
     }
     event["event_id"] = "event-" + canonical_json_sha256(event)[:24]
+    _verify_event_id(event, label="new access event")
     return event
 
 
@@ -327,9 +359,7 @@ def append_access_event(path: str | Path, event: Mapping[str, Any]) -> None:
 
     if event.get("artifact_type") != "source-review-access-event":
         raise SourceReviewError("invalid access event artifact_type")
-    event_id = event.get("event_id")
-    if not _nonempty(event_id):
-        raise SourceReviewError("access event lacks event_id")
+    event_id = _verify_event_id(event, label="access event")
     forbidden = set(event) & {
         "metadata_locator",
         "content_locator",
@@ -359,14 +389,16 @@ def append_access_event(path: str | Path, event: Mapping[str, Any]) -> None:
                 raise SourceReviewError(
                     f"existing access log line {line_number} is invalid JSON"
                 ) from error
-            if not isinstance(existing, Mapping) or not _nonempty(
-                existing.get("event_id")
-            ):
+            if not isinstance(existing, Mapping):
                 raise SourceReviewError(
-                    f"existing access log line {line_number} lacks event_id"
+                    f"existing access log line {line_number} is not an object"
                 )
-            existing_ids.add(str(existing["event_id"]))
-    if str(event_id) in existing_ids:
+            existing_id = _verify_event_id(
+                existing,
+                label=f"existing access log line {line_number}",
+            )
+            existing_ids.add(existing_id)
+    if event_id in existing_ids:
         raise SourceReviewError(f"duplicate access event: {event_id}")
 
     destination.parent.mkdir(parents=True, exist_ok=True)
