@@ -1,0 +1,64 @@
+name: Synthetic Calibration
+
+on:
+  push:
+    paths:
+      - "configs/calibration/**"
+      - "calibration/synthetic-v0/**"
+      - "src/chronopersona/synthetic_calibration.py"
+      - "scripts/build_synthetic_calibration.py"
+      - "tests/test_synthetic_calibration.py"
+      - "docs/SYNTHETIC_CALIBRATION_CORPUS.md"
+      - "docs/SYNTHETIC_CALIBRATION_SPEC.md"
+      - ".github/workflows/synthetic-calibration.yml"
+  pull_request:
+    paths:
+      - "configs/calibration/**"
+      - "calibration/synthetic-v0/**"
+      - "src/chronopersona/synthetic_calibration.py"
+      - "scripts/build_synthetic_calibration.py"
+      - "tests/test_synthetic_calibration.py"
+      - "docs/SYNTHETIC_CALIBRATION_CORPUS.md"
+      - "docs/SYNTHETIC_CALIBRATION_SPEC.md"
+      - ".github/workflows/synthetic-calibration.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic-package:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Verify deterministic identity
+        run: python scripts/build_synthetic_calibration.py --check
+      - name: Build complete package in temporary output
+        run: >-
+          python scripts/build_synthetic_calibration.py
+          --output-root /tmp/chronopersona-synthetic-v0
+      - name: Validate generated evaluation registry
+        run: >-
+          python -m chronopersona validate-evaluation
+          /tmp/chronopersona-synthetic-v0/evaluations/registry/synthetic-calibration-v0.jsonl
+      - name: Run focused tests
+        run: pytest tests/test_synthetic_calibration.py
+      - name: Verify model-visible schema
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('/tmp/chronopersona-synthetic-v0/calibration/synthetic-v0/documents.jsonl')
+          rows = [json.loads(line) for line in path.read_text().splitlines() if line]
+          assert len(rows) == 384
+          assert all(set(row) == {'schema_version', 'document_id', 'text'} for row in rows)
+          PY
