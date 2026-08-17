@@ -1,0 +1,33 @@
+{
+  "version": "0.8",
+  "jobs": {
+    "metahistorybz2dump": {
+      "status": "done",
+      "files": {
+        "enwiki-20130101-pages-meta-history1.xml-p1p1000.bz2": {
+          "size": 123456,
+          "url": "/enwiki/20130101/enwiki-20130101-pages-meta-history1.xml-p1p1000.bz2",
+          "md5": "11111111111111111111111111111111",
+          "sha1": "1111111111111111111111111111111111111111"
+        },
+        "enwiki-20130101-pages-meta-current1.xml-p1p1000.bz2": {
+          "size": 23456,
+          "url": "/enwiki/20130101/enwiki-20130101-pages-meta-current1.xml-p1p1000.bz2",
+          "md5": "22222222222222222222222222222222",
+          "sha1": "2222222222222222222222222222222222222222"
+        }
+      }
+    },
+    "articlesdump": {
+      "status": "done",
+      "files": {
+        "enwiki-20130101-pages-articles1.xml-p1p1000.bz2": {
+          "size": 34567,
+          "url": "/enwiki/20130101/enwiki-20130101-pages-articles1.xml-p1p1000.bz2",
+          "md5": "33333333333333333333333333333333",
+          "sha1": "3333333333333333333333333333333333333333"
+        }
+      }
+    }
+  }
+}
