@@ -55,15 +55,16 @@ def _sha256_text(value: str) -> str:
 
 def _parse_one_date(raw: str) -> ParsedDate | None:
     value = raw.strip()
-    candidates: list[tuple[str, str]] = [(value, "datetime")]
-    if value.endswith("Z"):
-        candidates.insert(0, (value[:-1] + "+00:00", "datetime"))
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
-        candidates.append((value + "T00:00:00+00:00", "day"))
+    if re.fullmatch(r"\d{4}", value):
+        candidates = [(value + "-01-01T00:00:00+00:00", "year")]
     elif re.fullmatch(r"\d{4}-\d{2}", value):
-        candidates.append((value + "-01T00:00:00+00:00", "month"))
-    elif re.fullmatch(r"\d{4}", value):
-        candidates.append((value + "-01-01T00:00:00+00:00", "year"))
+        candidates = [(value + "-01T00:00:00+00:00", "month")]
+    elif re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        candidates = [(value + "T00:00:00+00:00", "day")]
+    else:
+        candidates: list[tuple[str, str]] = [(value, "datetime")]
+        if value.endswith("Z"):
+            candidates.insert(0, (value[:-1] + "+00:00", "datetime"))
 
     for candidate, precision in candidates:
         try:
