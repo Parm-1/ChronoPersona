@@ -15,6 +15,13 @@ from .config import (
     load_spec,
     validate_spec,
 )
+from .evaluation import (
+    EvaluationRegistryFormatError,
+    describe_evaluation_registry,
+    load_evaluation_registry,
+    sha256_file,
+    validate_evaluation_registry,
+)
 from .model_manifest import (
     ModelManifestFormatError,
     describe_model_manifest,
@@ -41,6 +48,12 @@ def _parser() -> argparse.ArgumentParser:
         help="validate a model-artifact JSON manifest",
     )
     validate_models.add_argument("manifest", type=Path)
+
+    validate_evaluation = subparsers.add_parser(
+        "validate-evaluation",
+        help="validate and hash an evaluation JSONL registry",
+    )
+    validate_evaluation.add_argument("registry", type=Path)
     return parser
 
 
@@ -99,6 +112,36 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _print_errors(args.manifest, errors)
 
         print(f"valid: {describe_model_manifest(manifest)}")
+        return 0
+
+    if args.command == "validate-evaluation":
+        try:
+            registry = load_evaluation_registry(args.registry)
+        except FileNotFoundError:
+            print(
+                f"error: evaluation registry not found: {args.registry}",
+                file=sys.stderr,
+            )
+            return 2
+        except (
+            OSError,
+            EvaluationRegistryFormatError,
+        ) as error:
+            print(
+                f"error: could not load {args.registry}: {error}",
+                file=sys.stderr,
+            )
+            return 2
+
+        errors = validate_evaluation_registry(registry)
+        if errors:
+            return _print_errors(args.registry, errors)
+
+        print(
+            "valid: "
+            f"{describe_evaluation_registry(registry)}, "
+            f"sha256={sha256_file(args.registry)}"
+        )
         return 0
 
     raise AssertionError(f"unhandled command: {args.command}")
