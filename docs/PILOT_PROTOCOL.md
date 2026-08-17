@@ -1,138 +1,336 @@
 # Pilot Protocol
 
-## Purpose
+ChronoPersona uses a **two-part pilot sequence**:
 
-The pilot answers one decision question:
+1. Synthetic Identifiability Calibration establishes that the model, training method, dose, scorer, and evaluation can recover a known cross-domain signal.
+2. The naturalistic two-era/two-source pilot tests whether independent historical source families induce an aligned behavioral contrast.
 
-> Is there enough reproducible signal, after basic controls, to justify a larger multi-period ChronoPersona study?
+The machine-readable design state is in `configs/pilot.toml`. Its token budget is deliberately zero while the specification is unfrozen.
 
-It is not designed to establish the final paper claim. Its job is to falsify weak versions of the idea cheaply and expose failures in corpus construction, training, and evaluation.
+## 1. Purpose
 
-## Design
+The pilot answers three decisions:
 
-The machine-readable starting point is `configs/pilot.toml`.
+1. Is the experimental system sensitive to a known latent procedural signal?
+2. Do matched early and late naturalistic corpora produce estimable behavioral contrasts within independent source families?
+3. Do those source-specific contrasts share enough structure to justify a held-out-source confirmatory study?
 
-Conditions:
+The pilot does not establish the final paper claim. It is exploratory and resource-gated.
 
-1. `base-model-control` — the unadapted checkpoint.
-2. `temporal-2008` — continued pretraining on a corpus eligible through 2008.
-3. `temporal-2024` — continued pretraining on a matched corpus eligible through 2024.
-4. `date-shuffled-control` — matched adaptation exposure with the temporal assignment disrupted.
+## 2. Resource boundary
 
-Two adaptation seeds are the minimum smoke design. More seeds are required before inferential claims.
+Before any GPU training:
 
-The initial configuration assigns 10 million tokens to each adapted condition. This is a planning value, not a commitment. A measured throughput and memory benchmark must precede training, and any change creates a new configuration version.
+- record the exact hardware, VRAM, RAM, storage, runtime, and repository revision;
+- load the smallest practical public checkpoint safely;
+- measure peak inference memory and conditional-log-probability throughput;
+- run a tiny legal training benchmark;
+- project checkpoint, optimizer, cache, and artifact storage;
+- derive total time and cost from measurements;
+- freeze a positive token budget;
+- obtain explicit authorization for any nonzero external spend.
 
-## Model-selection gate
+The current default is local-only, CAD $0 external spend, and one training job at a time.
 
-Select the pilot base model only after documenting:
+The full 12-branch naturalistic set must not begin until the smaller end-to-end smoke path and synthetic calibration succeed.
 
+## 3. Base-model gate
+
+Select the causal base only after documenting:
+
+- exact repository and immutable revision;
 - architecture and parameter count;
-- original training cutoff and known data contamination risks;
-- tokenizer suitability for all corpora;
-- license and redistribution constraints;
-- support for deterministic local inference;
-- measured adaptation memory and throughput;
-- whether parameter-efficient and full-parameter adaptation are feasible.
+- base versus instruction status;
+- original training stage and known data limits;
+- tokenizer and context;
+- license;
+- custom-code requirement;
+- activation and fine-tuning access;
+- intermediate checkpoint or insertion point;
+- measured local loading behavior;
+- full-weight and PEFT memory modes;
+- later common-post-training compatibility.
 
-A small decoder model is acceptable for pipeline and effect detection. Parameter-efficient adaptation may be used in the pilot, but a paper-level claim must either replicate key effects with another adaptation regime or explicitly limit its scope.
+OLMo 2 1B is provisional. It is not selected by this document.
 
-## Corpus gate
+Parameter-efficient methods may validate engineering and dose assumptions. The headline naturalistic result should not rely on PEFT alone unless an adequacy argument is frozen before results.
 
-Before freezing the pilot:
+## 4. Evaluation gate
 
-- every record has the required manifest fields from `DATA_POLICY.md`;
-- token totals are matched within the frozen tolerance;
-- source-domain weights use the same target mixture;
-- near-duplicate clusters do not cross train and evaluation boundaries;
-- a manual timestamp audit is completed on a stratified sample;
-- future-entity and retrospective-reference leakage tests are recorded;
-- licenses and permitted uses are documented;
-- no corpus is represented only by data that appeared online long after the claimed period.
+Before calibration outputs or naturalistic outputs are inspected:
 
-Failing this gate blocks training. Lowering the standard after seeing model outputs is prohibited.
+- define evidence-integration and procedural-trade-off constructs;
+- create development items and item cards;
+- implement complete-continuation likelihood scoring;
+- test option reversal, label rotation, paraphrases, and tokenizer boundaries;
+- define raw and calibrated scores;
+- define malformed, refusal, missing, and truncation handling;
+- run temporal-cue and wording reviews;
+- define capability controls;
+- preregister meaningful-effect and equivalence thresholds;
+- freeze the evaluation registry and hash.
 
-## Evaluation freeze
+Generated explanations do not determine the primary outcome.
 
-The pilot registry must be frozen before trained outputs are generated. It should include:
+## 5. Part A — Synthetic Identifiability Calibration
 
-- cutoff-sensitive knowledge checks;
-- post-cutoff leakage checks;
-- a small set of date-neutral disposition constructs;
-- style and named-entity cue diagnostics;
-- general-capability and response-quality controls;
-- explicit-year prompting baselines;
-- scoring rubrics and directionality;
-- development versus confirmatory designation.
+### 5.1 Latent environments
 
-Item writers should not know which condition is expected to “win.” Human ratings must be blinded and response order randomized.
+Use at least two morally symmetric procedural contrasts. Candidate structures include:
 
-## Execution sequence
+- redundant verification versus trusted delegation;
+- reversible exploration versus decisive commitment;
+- distributed consensus versus hierarchical coordination.
 
-1. Validate the committed configuration.
-2. Resolve and hash the base checkpoint revision.
-3. Resolve and hash all data manifests.
-4. Record the environment, hardware, precision mode, and code revision.
-5. Run a short training benchmark and predict total cost from measured throughput.
-6. Execute each condition and seed under the same stopping rule.
-7. Generate outputs with identical decoding settings.
-8. Score without exposing condition labels.
-9. Unblind only after scoring artifacts are immutable.
-10. Run the preregistered analysis.
-11. Publish a decision report including failures and nulls.
+Final constructs require review. Avoid real politics, explicit moral valence, and repeated slogans.
 
-## Mandatory sanity checks
+For each contrast:
 
-- The later condition should show more post-2008 knowledge than the earlier condition. If it does not, the intervention may be too weak or the evaluation invalid.
-- The earlier condition must not display unexplained high confidence on post-cutoff items.
-- General capability differences must be small enough that disposition comparisons remain interpretable.
-- Date-shuffled adaptation must reveal whether “any additional training” creates the apparent effect.
-- Explicit-year prompting must establish the baseline achievable without adaptation.
-- Style-only classifiers and style-normalized rescoring must test whether surface cues dominate.
+- training domain 1 expresses the rule through decisions and outcomes;
+- training domain 2 expresses the same rule through unrelated surface content;
+- evaluation domain 3 is unseen during training;
+- vocabulary, sentiment, readability, length, and formatting are matched.
 
-These checks diagnose the design. They are not success metrics to optimize against repeatedly.
+### 5.2 Conditions
 
-## Go criteria
+- **Explicit positive control**
+- **Indirect cross-domain transfer**
+- **Shuffled-label placebo**
+- **Generic neutral continuation**
+- **Several prespecified signal doses**
+- **Optional blinded low-dose naturalistic-background injection**
 
-Expansion is justified only when all of the following are true:
+Use the same base, insertion point, objective, scorer, manifests, run identity, and comparable target-token budget intended for the naturalistic experiment.
 
-- manifests and timestamps survive audit;
-- the pipeline is reproducible from a clean environment;
-- intervention checks show a measurable temporal information difference;
-- primary scoring has acceptable human or criterion validity;
-- effects or informative nulls are reasonably stable across the smoke seeds;
-- no single obvious confound explains the main pattern;
-- the projected confirmatory compute and annotation cost is affordable;
-- the literature map still supports a differentiated contribution.
+### 5.3 Calibration execution
 
-A disposition effect is not required for every construct. A robust null result can justify expansion when the intervention was strong and the measurement was sensitive.
+1. Validate and freeze the calibration specification.
+2. Resolve model, tokenizer, and insertion checkpoint.
+3. Resolve and hash all synthetic manifests.
+4. Record environment, hardware, precision, and code revision.
+5. Run a measured throughput benchmark.
+6. Execute conditions and seeds under one stopping rule.
+7. Generate no open-ended interpretive narrative before primary scoring.
+8. Score with blinded condition labels.
+9. Unblind only after artifacts are immutable.
+10. Run the frozen analysis.
+11. Publish all seeds, failures, and placebo results.
 
-## No-go or redesign criteria
+### 5.4 Pass criteria
+
+All must pass:
+
+- explicit control recovered;
+- indirect condition exceeds the meaningful-effect threshold in the unseen domain;
+- placebo remains within the null-equivalence region;
+- dose response has the preregistered direction;
+- effects are reproducible across branches;
+- scorer is stable under paraphrase and reversal;
+- general capability remains within tolerance.
+
+### 5.5 Rescue and stop
+
+One predeclared rescue is allowed:
+
+- one dose increase;
+- one scale increase;
+- or one demonstrated scorer repair.
+
+If calibration still fails, the naturalistic pipeline may continue only as engineering exploration. A naturalistic null cannot be interpreted as evidence against temporal priors.
+
+## 6. Part B — Naturalistic causal pilot
+
+### 6.1 Provisional design
+
+\[
+2\ \text{eras}
+\times
+2\ \text{source families}
+\times
+3\ \text{exploratory seeds}
+=
+12\ \text{primary branches}.
+\]
+
+Provisional windows:
+
+- early: 2012-01-01 through 2013-12-31;
+- late: 2018-01-01 through 2019-12-31.
+
+These dates are design candidates. Freeze them only after source continuity, timestamp, license, authorship, topic, and event-concentration audits.
+
+### 6.2 Primary branches
+
+- early source A, seeds 17/29/43;
+- late source A, seeds 17/29/43;
+- early source B, seeds 17/29/43;
+- late source B, seeds 17/29/43.
+
+Source families must be operationally independent enough that shared website, institution, genre, or community culture is not the obvious common cause.
+
+### 6.3 Minimum controls
+
+- unadapted base;
+- common generic continuation;
+- matched mixed-era corpus;
+- within-era pseudo-era placebo;
+- one chronological-versus-shuffled or order control where feasible.
+
+Additional controls are added only when they distinguish a named mechanism and remain affordable.
+
+### 6.4 Corpus gate
+
+Before freezing:
+
+- every record satisfies `DATA_POLICY.md`;
+- timestamps are native or explicitly classified;
+- publication time is not replaced by crawl time;
+- rights, attribution, and redistribution are documented;
+- source A and B each have both era windows;
+- target-token budgets are matched;
+- source/host, genre, topic, document length, language, quality, authorship, bot, duplicate, and event distributions are matched or modeled;
+- direct evaluation-domain exposure is absent or bounded;
+- exact, near-duplicate, and semantic contamination checks are complete;
+- a stratified manual audit is recorded;
+- source-C candidates remain untouched by hypothesis tuning.
+
+Failing this gate blocks training.
+
+### 6.5 Training gate
+
+Across primary branches hold fixed:
+
+- starting weights;
+- tokenizer;
+- insertion checkpoint;
+- objective;
+- optimizer and schedule;
+- batch and context;
+- target-token budget;
+- update count;
+- checkpoint policy;
+- document-order policy;
+- precision.
+
+Run one tiny end-to-end smoke branch first. It must prove:
+
+- deterministic run identity;
+- manifest and checkpoint hash enforcement;
+- recoverable interruption;
+- structured failure logging;
+- no duplicate completed work after resume;
+- immutable artifact manifest;
+- dry-run cost projection.
+
+### 6.6 Naturalistic execution
+
+1. Validate and freeze the design.
+2. Hash model, tokenizer, insertion checkpoint, data manifests, and evaluation registry.
+3. Record environment, hardware, precision, and cost ceiling.
+4. Run the measured throughput check.
+5. Execute one branch at a time.
+6. Preserve failed and interrupted branches.
+7. Score blinded outputs using identical settings.
+8. Unblind only after score artifacts are immutable.
+9. Estimate source-specific effect vectors.
+10. Test cross-source agreement.
+11. Publish deviations, nulls, failures, and resource use.
+
+### 6.7 Primary estimand
+
+For source \(s\), domain \(d\), and seed \(r\):
+
+\[
+\tau_{s,d}
+=
+\mathbb{E}_r
+\left[
+B_d(M_{\mathrm{late},s,r})
+-
+B_d(M_{\mathrm{early},s,r})
+\right].
+\]
+
+Report:
+
+- within-source contrasts;
+- vector correlation;
+- cosine alignment;
+- sign agreement;
+- shared-component magnitude;
+- source-specific residual variance;
+- branch-level permutation null;
+- uncertainty over branches and items.
+
+A year classifier is diagnostic only.
+
+### 6.8 Continuation gate
+
+Proceed to source-C confirmation only when:
+
+- synthetic calibration passed;
+- the evaluation is reliable;
+- both source families have estimable contrasts;
+- A/B effect vectors agree above the frozen threshold;
+- source-specific heterogeneity does not dominate;
+- general capability remains interpretable;
+- factual and register controls do not absorb the effect;
+- prompt counterbalancing does not reverse it;
+- all branches and failures are reported;
+- projected confirmation cost remains within an explicitly authorized envelope.
+
+A source-specific result remains Level 2. A calibrated tight null may justify stopping.
+
+### 6.9 No-go criteria
 
 Stop or redesign when:
 
-- reliable temporally bounded corpora cannot be assembled legally;
-- timestamp leakage cannot be reduced to an auditable level;
-- adaptation fails to move temporal knowledge;
-- results reverse arbitrarily across seeds;
-- capability degradation explains the apparent behavioral changes;
-- scorers primarily react to tone, verbosity, or named entities;
-- explicit role prompting reproduces every claimed effect at much lower cost;
-- pilot cost implies that adequate seeds and controls are infeasible;
-- novelty collapses after literature review.
+- model access or licensing fails;
+- timestamp-native data cannot be assembled legally;
+- source matching is not credible;
+- evaluation reliability fails;
+- calibration fails after one rescue;
+- base tasks exceed the model's capability;
+- capability collapse explains the contrast;
+- effects reverse arbitrarily across seeds;
+- run identities or resumption are unreliable;
+- contamination cannot be bounded;
+- projected compute exceeds authorized resources;
+- novelty collapses.
 
-## Required pilot artifacts
+Do not repeatedly alter dates, sources, doses, prompts, models, or thresholds to obtain a positive result.
 
-- frozen configuration;
-- corpus manifests and audit report;
+## 7. Required artifacts
+
+### Calibration
+
+- frozen calibration configuration;
+- synthetic data cards and manifests;
+- environment and hardware manifest;
+- all condition logs and checkpoints;
+- blinded score artifacts;
+- dose-response analysis;
+- failures and deviations;
+- calibration decision report.
+
+### Naturalistic pilot
+
+- frozen design configuration;
+- source data cards;
+- immutable manifests;
+- timestamp and license audit;
+- domain-exposure matrix;
 - evaluation registry and hash;
 - environment and hardware manifest;
-- training logs for every seed and condition;
-- checkpoint or adapter hashes;
-- generation settings and raw outputs;
-- blinded scoring artifacts;
-- analysis notebook or script;
-- deviations log;
-- concise go, redesign, or stop decision.
+- measured cost projection;
+- all branch logs and checkpoint identities;
+- blinded score artifacts;
+- source-specific and cross-source analysis;
+- failures and deviations;
+- scale, redesign, or stop decision.
 
-No result should depend on an untracked local file or a hand-edited spreadsheet.
+No result may depend on an untracked local file or manually edited spreadsheet.
+
+## 8. Claim ceiling
+
+The pilot can establish at most exploratory A/B CSTG. It cannot establish held-out-source confirmation, persistence through common post-training, or a causal temporal representation. Those require later stages.
