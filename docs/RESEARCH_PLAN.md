@@ -1,211 +1,262 @@
 # Research Plan
 
-## 1. Core question
+The detailed scientific design is in [`RESEARCH_CHARTER.md`](RESEARCH_CHARTER.md). This file is the compact executable research plan.
 
-ChronoPersona asks:
+## 1. Scientific target
 
-> Holding the base model, optimization budget, source-domain mixture, instruction procedure, and evaluation prompts as constant as practical, what behavioral differences are caused by changing the temporal distribution of the adaptation corpus?
+ChronoPersona tests **Cross-Source Temporal Generalization (CSTG)**:
 
-The project studies temporal adaptation as a controlled intervention. It does not assume that a resulting model is an authentic person from the target period.
+> Does a matched early-versus-late corpus intervention create a shared component of date-neutral model behavior that independently replicates across source families, predicts a held-out source, and changes response to identical later post-training?
+
+A temporal prior is a possible interpretation only after CSTG survives the required controls.
 
 ## 2. Causal object
 
-Let a common base model be adapted under corpus condition \(T\), where \(T\) changes the eligible information horizon while other major training factors are matched. For evaluation item \(i\), seed \(s\), and outcome family \(k\), the estimand is the difference in model behavior between temporal conditions:
+For source family \(s\), domain \(d\), era \(e\), and training seed \(r\), let:
 
 \[
-\Delta_{k}(T_a,T_b) =
-E[Y_{i,s,k}\mid T_a] - E[Y_{i,s,k}\mid T_b].
+B_d(M_{e,s,r})
 \]
 
-The design can support a causal statement about the intervention implemented by the corpora. It cannot, by itself, identify a single psychological mechanism or generalize to all people living in an era.
+be the vector of frozen behavioral log-odds.
+
+The source-specific temporal contrast is:
+
+\[
+\tau_{s,d}
+=
+\mathbb{E}_r
+\left[
+B_d(M_{\mathrm{late},s,r})
+-
+B_d(M_{\mathrm{early},s,r})
+\right].
+\]
+
+The central question is whether independently induced source contrasts contain a reproducible shared component:
+
+\[
+\tau_{A,d}
+\approx
+\tau_{B,d},
+\]
+
+and whether that component predicts \(\tau_{C,d}\) for a source family held out from hypothesis construction and tuning.
 
 ## 3. Construct separation
 
-Three outcome families must remain separate.
+Keep these outcomes separate:
 
-### Temporal knowledge
+- **Temporal knowledge:** facts and concepts available by a date.
+- **Temporal register:** period-linked vocabulary, syntax, formatting, and references.
+- **Residual temporal signature:** structured behavioral difference after obvious knowledge and register cues are reduced.
+- **Source-specific temporal effect:** a within-source contrast that does not replicate independently.
+- **CSTG:** cross-source agreement with held-out-source prediction.
+- **Temporal path dependence:** different response to identical later post-training.
+- **Temporal representation:** a cross-source internal subspace with held-out predictive and causal validity.
 
-Whether the model knows events, entities, concepts, and relationships available before or after a cutoff.
+## 4. Primary domains
 
-This verifies that the intervention had an informational effect and measures future leakage. It is not the primary contribution.
+### Evidence integration
 
-### Temporal style
+Use fictional micro-worlds with varied priors, source reliability, true and false evidence, underdetermination, authority-versus-track-record conflicts, evidence order, and delayed persistence.
 
-Changes in vocabulary, syntax, references, genre conventions, and rhetorical form.
+### Procedural trade-offs
 
-Style is both an outcome and a confound. Evaluators may attribute different beliefs to answers that merely sound older or newer.
+Use timeless fictional organizations to test authority versus verification, safeguards versus speed, privacy versus detection, reversible versus irreversible action, expert deference, rehabilitation, dissent, transparency, and secrecy.
 
-### Temporal disposition
+### Secure-system decisions
 
-Date-neutral differences in expectations, trade-offs, confidence, institutional assumptions, technology optimism, privacy norms, authority judgments, risk tolerance, and related behavioral tendencies.
+Secondary far-transfer domain. Begin with structured architecture choices; executable code is capability- and sandbox-gated.
 
-This is the primary target. It requires blinded prompts and controls showing that explicit date cues, factual recall, or style alone do not explain the result.
+## 5. Required experimental sequence
 
-## 4. Hypotheses
+### Stage 0 — Feasibility and novelty
 
-The hypotheses will be narrowed and preregistered after the literature and construct-validity audits.
+Verify:
 
-- **H1 — Intervention validity:** temporally adapted conditions differ predictably on cutoff-sensitive knowledge tasks.
-- **H2 — Behavioral shift:** temporal conditions differ on at least one preregistered date-neutral disposition family.
-- **H3 — Beyond prompting:** adaptation-induced differences are distinguishable from explicit “answer as if it were year X” prompting.
-- **H4 — Beyond style:** primary behavioral effects remain after style matching, style covariates, or content-only scoring.
-- **H5 — Replicability:** the direction and approximate magnitude of important effects are stable across random seeds and at least one additional model scale or family.
-- **H6 — Corpus mediation:** effect patterns correspond more closely to measured corpus differences than to arbitrary year labels.
+- nearest literature and actual novelty;
+- public model identifiers, revisions, licenses, and artifact access;
+- local hardware, storage, memory, logits throughput, and tiny-training throughput;
+- timestamp-native data sources, rights, provenance, and continuity;
+- domain exposure and contamination;
+- evaluation reliability;
+- projected branch cost.
 
-H2 through H6 are not assumed true. A clean null result would constrain claims about temporal persona formation and remain publishable.
+No substantial training before Stage 0 exit.
 
-## 5. Conditions
+### Stage 1 — Public-checkpoint audit
 
-The smallest credible design contains:
+Use public point-in-time models to test whether the frozen instrument detects reproducible temporal trajectories. Analyze each model family separately. This is observational.
 
-1. **Unadapted base model** — identifies changes caused by any adaptation.
-2. **Earlier temporal corpus** — documents eligible up to an earlier cutoff.
-3. **Later temporal corpus** — matched documents eligible up to a later cutoff.
-4. **Date-shuffled control** — preserves broad content and adaptation exposure while breaking the intended temporal mapping.
-5. **Explicit-year prompting control** — tests how much ordinary role prompting can reproduce the observed effects.
+### Stage 2 — Synthetic Identifiability Calibration
 
-The confirmatory study should consider:
+Use morally symmetric fictional latent rules expressed through disjoint training domains and tested in a third unseen domain.
 
-- additional cutoffs, initially 1999, 2008, 2016, and 2024;
-- a domain-matched random-mixture control;
-- a style-only adaptation or output-style normalization control;
-- multiple seeds;
-- at least two model sizes or families;
-- full-parameter adaptation or a justified comparison with parameter-efficient adaptation.
+Required conditions:
 
-## 6. Corpus design
+- explicit positive control;
+- indirect transfer;
+- shuffled placebo;
+- neutral continuation;
+- dose curve;
+- optional blinded signal in naturalistic background.
 
-A temporal corpus is not simply “all text before a date.” Source availability changes over time, and web archives overrepresent some domains and communities.
+A naturalistic null is uninterpretable if this calibration fails.
 
-Corpora should therefore be constructed from explicit source strata, such as news, technical writing, public discussion, reference material, and cultural criticism. Each temporal condition should match:
+### Stage 3 — Naturalistic causal pilot
 
-- total tokens;
-- language;
-- source-domain proportions;
-- document-length distribution;
-- quality and toxicity filters;
-- deduplication policy;
-- adaptation steps and optimizer exposure.
+Provisional design:
 
-Timestamp precision and provenance are recorded per document. Documents with uncertain or retrospective timestamps must be separately classified rather than silently admitted.
+\[
+2\ \text{eras}
+\times
+2\ \text{source families}
+\times
+3\ \text{seeds}
+=
+12\ \text{primary branches}.
+\]
 
-## 7. Evaluation architecture
+Provisional windows:
 
-Evaluation items live in a versioned registry. Each item records its family, construct, date-cue status, scoring method, directionality, provenance, and whether it belongs to development or confirmation.
+- early: 2012-01-01 through 2013-12-31;
+- late: 2018-01-01 through 2019-12-31.
 
-### A. Intervention and leakage checks
+The final windows and sources are chosen from data criteria before behavioral outcomes.
 
-- pre-cutoff factual competence;
-- post-cutoff entity and event knowledge;
-- anachronism detection;
-- memorization and corpus-overlap checks.
+Required controls:
 
-### B. Date-neutral dispositions
+- unadapted base;
+- common generic continuation;
+- matched mixed-era corpus;
+- within-era pseudo-era placebo;
+- order control where feasible.
 
-Use forced choices, rankings, probability estimates, resource allocations, and open responses. Candidate constructs include:
+### Stage 4 — Held-out source and common post-training
 
-- confidence in institutions;
-- expectations about technological progress;
-- privacy versus convenience;
-- deference to expertise and authority;
-- perceived social and economic risk;
-- moral trade-offs under uncertainty;
-- assumptions about media and information reliability;
-- individual versus collective responsibility.
+Estimate the shared component using A and B, freeze it, and predict source C.
 
-The final construct set must be justified by literature, psychometric review, and pilot reliability rather than selected because it produced a dramatic difference.
+Then compare common neutral buffers, training-position order, identical modern SFT, and—only when justified—identical preference training. Measure both endpoints and response to the common update.
 
-### C. Style and cue diagnostics
+### Stage 5 — Channel attribution
 
-- temporal-style classification;
-- lexical and reference analysis;
-- response rewriting into a common style before rescoring;
-- content-only summaries;
-- adversarial removal of dates, named entities, and era-specific terms.
+Compare naturalistic documents, assistant-response formatting, archive attribution, synthetic transformation, role tokens, and loss masking one variable at a time.
 
-### D. General capability controls
+### Stage 6 — Mechanisms
 
-Measure whether an apparent disposition shift is explained by quality collapse, verbosity, refusal behavior, calibration, or task-comprehension differences.
+Only after behavioral replication, test cross-source activation convergence, source-C prediction, cross-domain prediction, projection of factual/register components, prompt-role nulls, and causal injection or ablation.
 
-## 8. Scoring
+## 6. Data design
 
-Prefer objective scoring where the construct permits it. Open-ended outcomes may combine:
+Every eligible document needs:
 
-- blinded human ratings with a written rubric;
-- model-based judges whose identity, revision, prompts, and decoding settings are frozen;
-- embedding or classifier measures validated against human judgments;
-- structured extraction from model rationales, while treating rationales as outputs rather than privileged internal explanations.
+- source and locator;
+- native timestamp and semantics;
+- timestamp confidence;
+- owner/steward;
+- license, attribution, research-use, and redistribution status;
+- human/synthetic provenance;
+- language, genre, topic, quality, and contributor type;
+- content hash and deduplication identity;
+- token count;
+- transformations;
+- exclusion status and reason.
 
-Human and automated scorers should be calibrated on a development set. Inter-rater reliability and disagreement patterns are reported.
+Within source families, match or model token count, document count/length, host distribution, genre, topic, readability, sentiment, toxicity, quality, duplication, language, contributor type, timestamp confidence, bot content, and event concentration.
 
-## 9. Analysis plan
+Across branches, hold starting weights, tokenizer, insertion point, objective, optimizer, schedule, batch, context, target tokens, updates, checkpoint policy, and order policy fixed.
 
-The confirmatory analysis should be specified before training outputs are inspected.
+## 7. Evaluation
 
-Recommended structure:
+Primary scoring uses complete-continuation conditional log probabilities.
 
-- define one primary outcome family and a small number of confirmatory secondary families;
-- estimate condition contrasts with prompt and seed variation represented explicitly;
-- report standardized effect sizes and uncertainty intervals;
-- correct for multiplicity across confirmatory families;
-- run robustness checks with verbosity, style, capability, and leakage covariates;
-- report all registered exclusions and missing outputs;
-- publish item-level results where licensing and safety permit.
+Requirements:
 
-Exploratory analyses remain clearly marked and generate new experiment versions rather than being retroactively promoted.
+- natural-language continuation pairs;
+- matched structure and length;
+- option reversal;
+- label rotation;
+- paraphrases;
+- tokenizer diagnostics;
+- raw normalized scores;
+- one prespecified calibrated alternative;
+- malformed/truncation indicators;
+- frozen metadata;
+- blinded condition identities.
 
-## 10. Principal confounds
+Generated explanations are secondary.
 
-| Confound | Failure mode | Required mitigation |
-|---|---|---|
-| Base-model modern knowledge | Older adaptation cannot erase modern priors | Measure leakage; compare effect sizes; consider stronger adaptation or base models with documented cutoffs |
-| Domain drift | “Era” effect is actually source-composition change | Stratified corpus construction and matched mixture weights |
-| Timestamp error | Later text enters earlier condition | Timestamp confidence, manual audits, entity-based leakage checks |
-| Style leakage | Raters infer beliefs from tone | Blind conditions, normalize style, use content-focused scoring |
-| Catastrophic forgetting | Lower capability appears as different judgment | General capability and calibration controls |
-| Random seed variance | One adapter looks like a persona by chance | Multiple seeds and seed-level reporting |
-| Evaluator bias | Judge shares modern assumptions | Multiple scoring methods and blinded human calibration |
-| Prompt contamination | Questions encode the expected era | Date-neutral review and adversarial cue audit |
-| Adaptation-method artifacts | LoRA geometry is mistaken for temporal causation | Replicate key effects with another method or scale |
-| Researcher degrees of freedom | Metrics are selected after seeing results | Frozen registry, versioned deviations, complete reporting |
+The evaluation registry is frozen before confirmatory outputs. Direct dates, events, era labels, and obvious intended-answer cues are forbidden from confirmatory date-neutral items.
 
-## 11. Staged program
+## 8. Analysis
 
-### Phase 0 — Design qualification
+The independently trained branch or seed is the experimental unit.
 
-- produce a literature and novelty map;
-- select the base model under explicit criteria;
-- qualify candidate corpora and timestamp semantics;
-- draft and validate evaluation items;
-- benchmark the local and cloud compute envelope;
-- freeze pilot version 1.
+Report:
 
-### Phase 1 — Pipeline smoke test
+- source-specific effect vectors;
+- vector correlation;
+- cosine alignment;
+- sign agreement;
+- common-component magnitude;
+- source-specific residual variance;
+- branch-level permutation statistics;
+- source-C predictive performance;
+- uncertainty over branches and items;
+- intervals relative to a preregistered meaningful threshold;
+- equivalence testing for nulls;
+- sensitivity to capability, factual, lexical, topic, and training-position controls.
 
-Run tiny adaptations to prove that manifests, training, checkpointing, generation, scoring, and artifact logging work end to end. These outputs are engineering evidence, not paper results.
+Do not select the strongest prompt, layer, score, model, dose, or era pair using final data.
 
-### Phase 2 — Two-slice pilot
+## 9. Gates
 
-Run the protocol in `PILOT_PROTOCOL.md`. Decide whether the intervention is measurable, the evaluation is reliable, and major confounds are controlled.
+### Stage 2 pass
 
-### Phase 3 — Confirmatory study
+- explicit signal recovered;
+- indirect signal transfers;
+- placebo near null;
+- reproducible across seeds;
+- scorer reliable;
+- capability preserved.
 
-Expand periods, seeds, and model scales only after the pilot gates pass. Freeze the design and analysis before examining confirmatory outputs.
+### Stage 3 continuation
 
-### Phase 4 — Replication and release
+- calibration passed;
+- primary measurement reliable;
+- both sources have estimable contrasts;
+- A/B vectors agree above threshold;
+- source heterogeneity does not dominate;
+- capability, knowledge, register, and prompt order do not explain the pattern;
+- all branches and failures reported.
 
-Replicate the strongest and null findings, prepare redistributable manifests and evaluation materials, publish code and limitations, and seek external review or academic collaboration.
+### Stage 4 confirmation
 
-## 12. Publication threshold
+- shared A/B component frozen before source C;
+- confirmatory seed count chosen from power analysis;
+- source C predicts above frozen threshold;
+- post-training tests use identical updates;
+- no unregistered rescue or selection.
 
-A serious paper requires more than visually interesting generations. At minimum it should provide:
+## 10. Stop rules
 
-- a clear causal intervention;
-- matched and auditable corpora;
-- validated construct measures;
-- multiple seeds;
-- controls for prompting, style, leakage, and capability;
-- uncertainty-aware statistical analysis;
-- reproducible artifacts;
-- appropriately narrow claims;
-- meaningful reporting even if the primary effect is null.
+Stop or redesign when:
+
+- novelty collapses;
+- data timestamps or rights are inadequate;
+- two independent source families cannot be matched;
+- evaluation is unreliable;
+- synthetic calibration fails after one rescue;
+- the base model cannot perform the tasks;
+- run identities or resumption are unreliable;
+- contamination cannot be bounded;
+- projected compute exceeds authorized resources.
+
+A clean null is a valid outcome. Do not repeatedly change years, sources, prompts, doses, or scales until an effect appears.
+
+## 11. Resource rule
+
+Follow [`RESOURCE_CONSTRAINTS.md`](RESOURCE_CONSTRAINTS.md).
+
+The default is local-only, CAD $0 external spend, one training job, measured benchmarks before budgets, and no 12-branch pilot before Stage 0 and Stage 2 gates pass.
