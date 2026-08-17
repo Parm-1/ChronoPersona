@@ -47,6 +47,27 @@ _ALLOWED_PURPOSES = {
 }
 _ALLOWED_OUTCOMES = {"planned", "succeeded", "failed"}
 _ALLOWED_LOCATOR_KINDS = {"metadata", "content"}
+_EVENT_KEYS = frozenset(
+    {
+        "schema_version",
+        "artifact_type",
+        "access_map_sha256",
+        "access_id",
+        "blind_id",
+        "source_id",
+        "locator_kind",
+        "locator_sha256",
+        "reviewer",
+        "purpose",
+        "accessed_at",
+        "outcome",
+        "response_sha256",
+        "response_bytes",
+        "error_code",
+        "source_text_recorded",
+        "event_id",
+    }
+)
 
 
 def _nonempty(value: Any) -> bool:
@@ -265,6 +286,97 @@ def _parse_timestamp(raw: str) -> str:
     return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def _validate_access_event(event: Mapping[str, Any], *, label: str) -> str:
+    keys = set(event)
+    missing = sorted(_EVENT_KEYS - keys)
+    extra = sorted(keys - _EVENT_KEYS)
+    if missing or extra:
+        parts: list[str] = []
+        if missing:
+            parts.append("missing fields: " + ", ".join(missing))
+        if extra:
+            parts.append("unexpected fields: " + ", ".join(extra))
+        raise SourceReviewError(f"{label} has invalid schema: " + "; ".join(parts))
+    if event.get("schema_version") != 1:
+        raise SourceReviewError(f"{label} schema_version must be 1")
+    if event.get("artifact_type") != "source-review-access-event":
+        raise SourceReviewError(f"{label} artifact_type is invalid")
+    for field in (
+        "access_map_sha256",
+        "locator_sha256",
+    ):
+        value = event.get(field)
+        if not isinstance(value, str) or not _SHA256.fullmatch(value):
+            raise SourceReviewError(f"{label} {field} must be a lowercase SHA-256")
+    for field in ("access_id", "blind_id", "source_id", "reviewer"):
+        if not _nonempty(event.get(field)):
+            raise SourceReviewError(f"{label} {field} must not be empty")
+    if not str(event["access_id"]).startswith("access-"):
+        raise SourceReviewError(f"{label} access_id is invalid")
+    if not str(event["blind_id"]).startswith("sample-"):
+        raise SourceReviewError(f"{label} blind_id is invalid")
+    if event.get("locator_kind") not in _ALLOWED_LOCATOR_KINDS:
+        raise SourceReviewError(f"{label} locator_kind is invalid")
+    if event.get("purpose") not in _ALLOWED_PURPOSES:
+        raise SourceReviewError(f"{label} purpose is invalid")
+    outcome = event.get("outcome")
+    if outcome not in _ALLOWED_OUTCOMES:
+        raise SourceReviewError(f"{label} outcome is invalid")
+    raw_accessed_at = event.get("accessed_at")
+    if not _nonempty(raw_accessed_at):
+        raise SourceReviewError(f"{label} accessed_at must not be empty")
+    canonical_time = _parse_timestamp(str(raw_accessed_at))
+    if canonical_time != raw_accessed_at:
+        raise SourceReviewError(
+            f"{label} accessed_at must be canonical UTC: {canonical_time}"
+        )
+    if event.get("source_text_recorded") is not False:
+        raise SourceReviewError(f"{label} source_text_recorded must be false")
+
+    response_hash = event.get("response_sha256")
+    response_bytes = event.get("response_bytes")
+    error_code = event.get("error_code")
+    if response_hash is not None and (
+        not isinstance(response_hash, str) or not _SHA256.fullmatch(response_hash)
+    ):
+        raise SourceReviewError(
+            f"{label} response_sha256 must be a lowercase SHA-256 or null"
+        )
+    if response_bytes is not None and (
+        not isinstance(response_bytes, int)
+        or isinstance(response_bytes, bool)
+        or response_bytes < 0
+    ):
+        raise SourceReviewError(
+            f"{label} response_bytes must be a non-negative integer or null"
+        )
+    if error_code is not None and not _nonempty(error_code):
+        raise SourceReviewError(f"{label} error_code must be nonempty or null")
+    if (response_hash is None) != (response_bytes is None):
+        raise SourceReviewError(
+            f"{label} response_sha256 and response_bytes must appear together"
+        )
+    if outcome == "planned":
+        if response_hash is not None or response_bytes is not None or error_code is not None:
+            raise SourceReviewError(
+                f"{label} planned outcome must not contain response or error data"
+            )
+    elif outcome == "succeeded":
+        if response_hash is None or response_bytes is None:
+            raise SourceReviewError(
+                f"{label} successful outcome requires response hash and byte count"
+            )
+        if error_code is not None:
+            raise SourceReviewError(
+                f"{label} successful outcome must not contain error_code"
+            )
+    else:
+        if error_code is None:
+            raise SourceReviewError(f"{label} failed outcome requires error_code")
+
+    return _verify_event_id(event, label=label)
+
+
 def _find_access_record(
     access_map: Mapping[str, Any],
     access_id: str,
@@ -324,10 +436,26 @@ def build_access_event(
         or response_bytes < 0
     ):
         raise SourceReviewError("response_bytes must be a non-negative integer")
-    if outcome == "succeeded" and response_sha256 is None:
-        raise SourceReviewError("successful access requires response_sha256")
+    if outcome == "succeeded" and (
+        response_sha256 is None or response_bytes is None
+    ):
+        raise SourceReviewError(
+            "successful access requires response_sha256 and response_bytes"
+        )
     if outcome == "failed" and not _nonempty(error_code):
         raise SourceReviewError("failed access requires error_code")
+    if outcome == "planned" and any(
+        value is not None for value in (response_sha256, response_bytes, error_code)
+    ):
+        raise SourceReviewError(
+            "planned access must not include response or error data"
+        )
+    if outcome == "succeeded" and error_code is not None:
+        raise SourceReviewError("successful access must not include error_code")
+    if (response_sha256 is None) != (response_bytes is None):
+        raise SourceReviewError(
+            "response_sha256 and response_bytes must be provided together"
+        )
 
     event: dict[str, Any] = {
         "schema_version": 1,
@@ -350,30 +478,14 @@ def build_access_event(
         "source_text_recorded": False,
     }
     event["event_id"] = "event-" + canonical_json_sha256(event)[:24]
-    _verify_event_id(event, label="new access event")
+    _validate_access_event(event, label="new access event")
     return event
 
 
 def append_access_event(path: str | Path, event: Mapping[str, Any]) -> None:
     """Append one unique access event as canonical JSONL."""
 
-    if event.get("artifact_type") != "source-review-access-event":
-        raise SourceReviewError("invalid access event artifact_type")
-    event_id = _verify_event_id(event, label="access event")
-    forbidden = set(event) & {
-        "metadata_locator",
-        "content_locator",
-        "text",
-        "content",
-        "body",
-        "response_body",
-    }
-    if forbidden:
-        raise SourceReviewError(
-            "access event contains forbidden payload fields: "
-            + ", ".join(sorted(forbidden))
-        )
-
+    event_id = _validate_access_event(event, label="access event")
     destination = Path(path)
     existing_ids: set[str] = set()
     if destination.exists():
@@ -393,7 +505,7 @@ def append_access_event(path: str | Path, event: Mapping[str, Any]) -> None:
                 raise SourceReviewError(
                     f"existing access log line {line_number} is not an object"
                 )
-            existing_id = _verify_event_id(
+            existing_id = _validate_access_event(
                 existing,
                 label=f"existing access log line {line_number}",
             )
