@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_name": "synthetic-calibration-fixture-smoke-v0",
+  "run_kind": "fixture-smoke",
+  "status": "development",
+  "scientific_claim_authorized": false,
+  "training_authorized": false,
+  "network_allowed": false,
+  "model_download_allowed": false,
+  "external_spend_cad": 0,
+  "max_parallel_jobs": 1,
+  "target_tokens": 0,
+  "seed": 17,
+  "precision": "not-applicable",
+  "model": {
+    "id": null,
+    "revision": null,
+    "tokenizer_revision": null
+  },
+  "inputs": {
+    "calibration_config": "configs/calibration/synthetic-v0.json",
+    "calibration_expected_hashes": "calibration/synthetic-v0/expected-hashes.json",
+    "evaluation_registry": "evaluations/registry/development-v0.jsonl"
+  },
+  "engine": {
+    "id": "synthetic-package-integrity-smoke",
+    "version": "v0",
+    "checkpoint_every_units": 1
+  }
+}
