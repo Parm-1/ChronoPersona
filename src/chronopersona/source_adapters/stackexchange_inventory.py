@@ -39,6 +39,23 @@ def _company_attributed(metadata: Mapping[str, Any]) -> bool:
     return any("stack exchange" in creator.lower() for creator in creators)
 
 
+def _file_mtime(raw_file: Mapping[str, Any], file_name: str) -> int | None:
+    raw_mtime = raw_file.get("mtime")
+    if raw_mtime in {None, ""}:
+        return None
+    try:
+        mtime = int(raw_mtime)
+    except (TypeError, ValueError) as error:
+        raise StackExchangeInventoryError(
+            f"invalid mtime for {file_name!r}: {raw_mtime!r}"
+        ) from error
+    if mtime < 0:
+        raise StackExchangeInventoryError(
+            f"archive file {file_name!r} has negative mtime"
+        )
+    return mtime
+
+
 def parse_stackexchange_archive_metadata(
     value: Mapping[str, Any],
     *,
@@ -58,7 +75,7 @@ def parse_stackexchange_archive_metadata(
     creators = _string_values(metadata.get("creator"))
     company_attributed = _company_attributed(metadata)
 
-    selected_files: list[tuple[Mapping[str, Any], str, int, str | None]] = []
+    selected_files: list[tuple[Mapping[str, Any], str, int, int | None]] = []
     for raw_file in files:
         if not isinstance(raw_file, Mapping):
             continue
@@ -78,7 +95,7 @@ def parse_stackexchange_archive_metadata(
             raise StackExchangeInventoryError(
                 f"archive file {file_name!r} has non-positive size"
             )
-        mtime = str(raw_file.get("mtime")) if raw_file.get("mtime") else None
+        mtime = _file_mtime(raw_file, file_name)
         selected_files.append((raw_file, file_name, size, mtime))
 
     if not selected_files:
@@ -86,15 +103,18 @@ def parse_stackexchange_archive_metadata(
             "archive metadata contains no .7z site dumps"
         )
 
-    latest_mtime = max(
-        (mtime for _, _, _, mtime in selected_files if mtime is not None),
-        default=str(
+    mtimes = [mtime for _, _, _, mtime in selected_files if mtime is not None]
+    if mtimes:
+        snapshot_component = f"mtime-{max(mtimes)}"
+        snapshot_basis = "maximum-numeric-file-mtime"
+    else:
+        snapshot_component = str(
             metadata.get("date")
             or metadata.get("publicdate")
             or "unknown-date"
-        ),
-    )
-    snapshot_id = _safe_id(f"{identifier}@{latest_mtime}")
+        )
+        snapshot_basis = "archive-item-date-fallback"
+    snapshot_id = _safe_id(f"{identifier}@{snapshot_component}")
 
     records: list[dict[str, Any]] = []
     for raw_file, file_name, size, mtime in selected_files:
@@ -134,6 +154,7 @@ def parse_stackexchange_archive_metadata(
                     "archive_metadata_locator": source_locator,
                     "format": raw_file.get("format"),
                     "mtime": mtime,
+                    "snapshot_basis": snapshot_basis,
                 },
             }
         )
