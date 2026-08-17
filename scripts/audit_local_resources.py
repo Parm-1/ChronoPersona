@@ -219,7 +219,7 @@ def build_audit(path: Path, repo: Path) -> dict[str, Any]:
         "schema_version": 1,
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "audit_type": "local-resource-audit",
-        "network_access_performed": false,
+        "network_access_performed": False,
         "platform": {
             "system": platform.system(),
             "release": platform.release(),
