@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import hashlib
+import re
 from typing import Any
 from urllib.parse import quote, urlparse
 import xml.etree.ElementTree as ET
@@ -19,6 +20,9 @@ from ..source_metadata import EraWindows
 
 class ArxivApiError(ValueError):
     """Raised when an arXiv API Atom response is malformed or reports an error."""
+
+
+_VERSION_SUFFIX = re.compile(r"v(\d+)$")
 
 
 def _local(tag: str) -> str:
@@ -55,7 +59,7 @@ def _timestamp(raw: str | None, *, field: str) -> datetime:
     return parsed.astimezone(timezone.utc)
 
 
-def _arxiv_id(raw_url: str | None) -> str:
+def _arxiv_id(raw_url: str | None) -> tuple[str, int | None]:
     if raw_url is None:
         raise ArxivApiError("arXiv API entry is missing id")
     path = urlparse(raw_url).path.rstrip("/")
@@ -65,7 +69,13 @@ def _arxiv_id(raw_url: str | None) -> str:
     identifier = path.split(marker, 1)[1]
     if not identifier:
         raise ArxivApiError("arXiv API entry id is empty")
-    return identifier
+    match = _VERSION_SUFFIX.search(identifier)
+    if match is None:
+        return identifier, None
+    base_identifier = identifier[: match.start()]
+    if not base_identifier:
+        raise ArxivApiError("arXiv API entry version has no base id")
+    return base_identifier, int(match.group(1))
 
 
 def _category_matches(categories: list[str], prefixes: tuple[str, ...]) -> bool:
@@ -127,7 +137,7 @@ def parse_arxiv_api_feed(
     }
     records: list[dict[str, Any]] = []
     for entry in [child for child in root if _local(child.tag) == "entry"]:
-        identifier = _arxiv_id(_direct_text(entry, "id"))
+        identifier, returned_version = _arxiv_id(_direct_text(entry, "id"))
         published = _timestamp(
             _direct_text(entry, "published"),
             field="published",
@@ -203,6 +213,7 @@ def parse_arxiv_api_feed(
                 "exclusion_reasons": exclusion_reasons,
                 "source_metadata": {
                     "candidate_selection_source": "arxiv-api-submittedDate",
+                    "returned_version": returned_version,
                     "updated_timestamp": updated.isoformat().replace("+00:00", "Z"),
                     "published_equals_updated": published == updated,
                     "title_sha256": _sha256_text(title),
