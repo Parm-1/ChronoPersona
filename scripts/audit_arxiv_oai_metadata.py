@@ -43,7 +43,9 @@ def _parser() -> argparse.ArgumentParser:
         description=(
             "Audit arXivRaw OAI metadata. Default mode is a no-network plan; "
             "--input parses a frozen XML fixture; live access requires both "
-            "--execute and --allow-network."
+            "--execute and --allow-network. OAI from/until filter repository "
+            "datestamps, while era membership is independently derived from "
+            "the first arXiv submission-version date."
         )
     )
     parser.add_argument("--input", type=Path)
@@ -98,6 +100,11 @@ def _write_jsonl(path: Path, records: list[dict]) -> None:
     )
 
 
+def _merge_diagnostics(target: dict[str, int], page: dict[str, int]) -> None:
+    for key, value in page.items():
+        target[key] = target.get(key, 0) + int(value)
+
+
 def main() -> int:
     args = _parser().parse_args()
     if args.max_records < 1 or args.max_records > 10_000:
@@ -134,6 +141,9 @@ def main() -> int:
         if config.get("content_download_authorized") is not False:
             raise ValueError("arXiv config must not authorize content download")
         allowed = tuple(config["allowed_category_prefixes"])
+        forbidden = tuple(config.get("forbidden_category_prefixes", []))
+        if not allowed:
+            raise ValueError("arXiv config must include allowed category prefixes")
 
         if not args.execute and args.input is None:
             print(
@@ -144,10 +154,15 @@ def main() -> int:
                         "network_access_permitted": False,
                         "content_downloaded": False,
                         "metadata_url": _query_url(args),
+                        "oai_datestamp_filter_semantics": (
+                            "repository OAI datestamp; not era treatment date"
+                        ),
+                        "era_date_semantics": "first arXiv submission-version date",
                         "max_records": args.max_records,
                         "max_response_bytes": args.max_response_bytes,
                         "delay_seconds": args.delay_seconds,
                         "allowed_category_prefixes": list(allowed),
+                        "forbidden_category_prefixes": list(forbidden),
                     },
                     indent=2,
                     sort_keys=True,
@@ -156,6 +171,7 @@ def main() -> int:
             return 0
 
         records: list[dict] = []
+        diagnostics: dict[str, int] = {}
         token: str | None = None
         first_request = True
         while len(records) < args.max_records:
@@ -172,11 +188,13 @@ def main() -> int:
                     user_agent=USER_AGENT,
                     delay_seconds=(0.0 if first_request else args.delay_seconds),
                 )
-            parsed, token = parse_arxiv_raw_oai(
+            parsed, token, page_diagnostics = parse_arxiv_raw_oai(
                 payload,
                 windows=windows,
                 allowed_category_prefixes=allowed,
+                forbidden_category_prefixes=forbidden,
             )
+            _merge_diagnostics(diagnostics, page_diagnostics)
             remaining = args.max_records - len(records)
             records.extend(parsed[:remaining])
             first_request = False
@@ -201,12 +219,18 @@ def main() -> int:
         )
         summary["adapter"] = {
             "source": "arxiv-oai-arXivRaw",
+            "endpoint": ENDPOINT,
             "config": str(args.config),
-            "from_date": args.from_date,
-            "until_date": args.until_date,
+            "oai_from_date": args.from_date,
+            "oai_until_date": args.until_date,
+            "oai_datestamp_filter_semantics": (
+                "repository OAI datestamp; not era treatment date"
+            ),
+            "era_date_semantics": "first arXiv submission-version date",
             "set_spec": args.set_spec,
             "network_used": args.input is None,
             "content_downloaded": False,
+            "parser_diagnostics": dict(sorted(diagnostics.items())),
             "resumption_token_remaining": bool(token),
         }
     except (
