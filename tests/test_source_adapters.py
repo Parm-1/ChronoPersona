@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import replace
 from datetime import date
 import json
 from pathlib import Path
@@ -104,7 +103,7 @@ def test_arxiv_oai_error_is_not_treated_as_empty_result() -> None:
         )
 
 
-def test_pmc_oai_omits_missing_dates_without_inventing_epoch() -> None:
+def test_pmc_oai_keeps_lifecycle_dates_unresolved_without_inventing_epoch() -> None:
     records, token, diagnostics = parse_pmc_oai_dc(
         (FIXTURES / "pmc_oai_sample.xml").read_bytes(),
         windows=WINDOWS,
@@ -122,20 +121,25 @@ def test_pmc_oai_omits_missing_dates_without_inventing_epoch() -> None:
         "records_seen": 4,
         "deleted_records": 1,
         "records_without_metadata": 0,
-        "skipped_missing_publication_date": 1,
+        "skipped_missing_lifecycle_date": 1,
     }
     assert [record["native_item_id"] for record in records] == [
         "PMC12345",
         "PMC34567",
     ]
     assert all(not record["native_timestamp"].startswith("1970-") for record in records)
-    assert records[0]["era_window"] == "late"
-    assert records[0]["eligibility"] == "unresolved"
+    assert all(record["era_window"] == "unresolved" for record in records)
+    assert all(record["eligibility"] == "unresolved" for record in records)
+    assert all(
+        "timestamp-semantics-unresolved" in record["exclusion_reasons"]
+        for record in records
+    )
+    assert records[0]["source_metadata"]["candidate_era_window"] == "late"
     assert records[0]["metadata_locator"].endswith(
         "identifier=oai%3Apubmedcentral.nih.gov%3A12345"
     )
-    assert records[1]["era_window"] == "outside"
-    assert records[1]["source_metadata"]["publication_date_precision"] == "year"
+    assert records[1]["source_metadata"]["candidate_era_window"] == "outside"
+    assert records[1]["source_metadata"]["lifecycle_date_precision"] == "year"
 
     assert validate_source_metadata(
         records,
