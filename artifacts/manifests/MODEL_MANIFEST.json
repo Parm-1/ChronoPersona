@@ -1,0 +1,568 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-08-17",
+  "status": "stage0-artifact-audit-v1",
+  "policy": {
+    "public_access_is_not_a_license": true,
+    "mutable_refs_are_not_experiment_revisions": true,
+    "custom_code_requires_review": true,
+    "quantized_weights_are_not_primary_likelihood_artifacts": true,
+    "no_substantive_download_without_resource_audit": true
+  },
+  "defaults": {
+    "observational_primary": "datedgpt-2013-base",
+    "causal_primary_candidate": "olmo2-1b-stage1-step23100-original",
+    "causal_fallback": "pythia-1b-deduped-step20000"
+  },
+  "local_outputs": {
+    "resource_audit": "artifacts/local/resource-audit.json",
+    "hub_audit": "artifacts/local/hub-model-audit.json",
+    "benchmark": "artifacts/local/model-benchmark.json"
+  },
+  "artifacts": [
+    {
+      "id": "datedgpt-2013-base",
+      "role": "observational-primary",
+      "family": "DatedGPT",
+      "repository": "datedgpt/datedgpt-2013-base",
+      "revision": "855538883fd62ae8138789c4858e1dcb708187dc",
+      "revision_kind": "git-sha",
+      "immutable": true,
+      "checkpoint_ref": null,
+      "architecture": "LlamaForCausalLM",
+      "parameter_count": 1300000000,
+      "context_length": 2048,
+      "tokenizer": "SentencePiece, vocabulary 32000",
+      "precision": "bfloat16",
+      "weight_format": "safetensors",
+      "weight_size_bytes": 2690000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "unverified",
+        "identifier": null,
+        "sources": [
+          "https://huggingface.co/datedgpt/datedgpt-2013-base"
+        ],
+        "note": "No explicit model-weight license was found in the inspected card metadata. The paper license does not automatically license weights."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": null,
+        "revision": null
+      },
+      "execution_status": "blocked-license",
+      "intended_use": "First base-model endpoint in the observational public-checkpoint audit after license resolution.",
+      "constraints": [
+        "Independent annual pretraining runs are observational, not causal.",
+        "Crawl-year filtering is not equivalent to document publication time.",
+        "Analyze within DatedGPT; do not pool with PIT or ChronoGPT as interchangeable replicates."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2603.11838",
+        "https://huggingface.co/datedgpt/datedgpt-2013-base"
+      ]
+    },
+    {
+      "id": "datedgpt-2016-base",
+      "role": "observational-primary",
+      "family": "DatedGPT",
+      "repository": "datedgpt/datedgpt-2016-base",
+      "revision": null,
+      "revision_kind": "unresolved",
+      "immutable": false,
+      "checkpoint_ref": null,
+      "architecture": "LlamaForCausalLM",
+      "parameter_count": 1300000000,
+      "context_length": 2048,
+      "tokenizer": "SentencePiece, vocabulary 32000",
+      "precision": "bfloat16",
+      "weight_format": "safetensors",
+      "weight_size_bytes": 2690000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "unverified",
+        "identifier": null,
+        "sources": [
+          "https://huggingface.co/datedgpt/datedgpt-2016-base"
+        ],
+        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": null,
+        "revision": null
+      },
+      "execution_status": "blocked-revision",
+      "intended_use": "Intermediate observational checkpoint.",
+      "constraints": [
+        "License resolution is also required before execution."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2603.11838",
+        "https://huggingface.co/datedgpt/datedgpt-2016-base"
+      ]
+    },
+    {
+      "id": "datedgpt-2019-base",
+      "role": "observational-primary",
+      "family": "DatedGPT",
+      "repository": "datedgpt/datedgpt-2019-base",
+      "revision": null,
+      "revision_kind": "unresolved",
+      "immutable": false,
+      "checkpoint_ref": null,
+      "architecture": "LlamaForCausalLM",
+      "parameter_count": 1300000000,
+      "context_length": 2048,
+      "tokenizer": "SentencePiece, vocabulary 32000",
+      "precision": "bfloat16",
+      "weight_format": "safetensors",
+      "weight_size_bytes": 2690000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "unverified",
+        "identifier": null,
+        "sources": [
+          "https://huggingface.co/datedgpt/datedgpt-2019-base"
+        ],
+        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": null,
+        "revision": null
+      },
+      "execution_status": "blocked-revision",
+      "intended_use": "Intermediate observational checkpoint aligned with the provisional late era window.",
+      "constraints": [
+        "License resolution is also required before execution."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2603.11838",
+        "https://huggingface.co/datedgpt/datedgpt-2019-base"
+      ]
+    },
+    {
+      "id": "datedgpt-2022-base",
+      "role": "observational-primary",
+      "family": "DatedGPT",
+      "repository": "datedgpt/datedgpt-2022-base",
+      "revision": null,
+      "revision_kind": "unresolved",
+      "immutable": false,
+      "checkpoint_ref": null,
+      "architecture": "LlamaForCausalLM",
+      "parameter_count": 1300000000,
+      "context_length": 2048,
+      "tokenizer": "SentencePiece, vocabulary 32000",
+      "precision": "bfloat16",
+      "weight_format": "safetensors",
+      "weight_size_bytes": 2690000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "unverified",
+        "identifier": null,
+        "sources": [
+          "https://huggingface.co/datedgpt/datedgpt-2022-base"
+        ],
+        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": null,
+        "revision": null
+      },
+      "execution_status": "blocked-revision",
+      "intended_use": "Intermediate observational checkpoint.",
+      "constraints": [
+        "License resolution is also required before execution."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2603.11838",
+        "https://huggingface.co/datedgpt/datedgpt-2022-base"
+      ]
+    },
+    {
+      "id": "datedgpt-2024-base",
+      "role": "observational-primary",
+      "family": "DatedGPT",
+      "repository": "datedgpt/datedgpt-2024-base",
+      "revision": null,
+      "revision_kind": "unresolved",
+      "immutable": false,
+      "checkpoint_ref": null,
+      "architecture": "LlamaForCausalLM",
+      "parameter_count": 1300000000,
+      "context_length": 2048,
+      "tokenizer": "SentencePiece, vocabulary 32000",
+      "precision": "bfloat16",
+      "weight_format": "safetensors",
+      "weight_size_bytes": 2690000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "unverified",
+        "identifier": null,
+        "sources": [
+          "https://huggingface.co/datedgpt/datedgpt-2024-base"
+        ],
+        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": null,
+        "revision": null
+      },
+      "execution_status": "blocked-revision",
+      "intended_use": "Latest endpoint in the observational public-checkpoint audit.",
+      "constraints": [
+        "License resolution is also required before execution."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2603.11838",
+        "https://huggingface.co/datedgpt/datedgpt-2024-base"
+      ]
+    },
+    {
+      "id": "pit-4b-201912-base",
+      "role": "observational-secondary",
+      "family": "PIT",
+      "repository": "Diamegs/PIT-4B-201912",
+      "revision": "8faa48012c438e41387f0cd2c7b091352c17561a",
+      "revision_kind": "git-sha",
+      "immutable": true,
+      "checkpoint_ref": null,
+      "architecture": "PIT custom causal language model",
+      "parameter_count": 4000000000,
+      "context_length": null,
+      "tokenizer": "GPT-2 BPE, vocabulary 50304",
+      "precision": "float32 in inspected Hub artifact",
+      "weight_format": "safetensors with custom modeling code",
+      "weight_size_bytes": 17800000000,
+      "requires_remote_code": true,
+      "license": {
+        "status": "mixed",
+        "identifier": "apache-2.0 model metadata; MIT repository code",
+        "sources": [
+          "https://huggingface.co/Diamegs/PIT-4B-201912",
+          "https://github.com/anonymouspitllm-collab/PIT-LLM/blob/17de957833fb0cf699aedf0abbdc1066ff9173b7/LICENSE"
+        ],
+        "note": "Model and code licenses are recorded separately; custom Hub code must be inspected at the pinned model revision."
+      },
+      "code_review": {
+        "status": "pending",
+        "repository": "anonymouspitllm-collab/PIT-LLM",
+        "revision": "17de957833fb0cf699aedf0abbdc1066ff9173b7"
+      },
+      "execution_status": "blocked-custom-code-review",
+      "intended_use": "Secondary observational family only if unquantized likelihood scoring fits confirmed hardware.",
+      "constraints": [
+        "The public release is 4B rather than the smaller model assumed in early planning.",
+        "A 17.8 GB float32 checkpoint is not a default RTX 2060 workload.",
+        "Quantization is not permitted for the primary cross-family likelihood comparison.",
+        "Analyze separately from DatedGPT."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2607.11889",
+        "https://huggingface.co/Diamegs/PIT-4B-201912",
+        "https://github.com/anonymouspitllm-collab/PIT-LLM/tree/17de957833fb0cf699aedf0abbdc1066ff9173b7"
+      ]
+    },
+    {
+      "id": "chronogpt-2013-base",
+      "role": "boundary-case",
+      "family": "ChronoGPT",
+      "repository": "manelalab/chrono-gpt-v1-20131231",
+      "revision": "6f2e595689458b1809d5c6efb9a6095257347ca2",
+      "revision_kind": "git-sha",
+      "immutable": true,
+      "checkpoint_ref": null,
+      "architecture": "Custom modified NanoGPT U-net",
+      "parameter_count": 1552000000,
+      "context_length": 1792,
+      "tokenizer": "GPT-2/tiktoken",
+      "precision": "unverified",
+      "weight_format": "PyTorch binary with custom Python",
+      "weight_size_bytes": null,
+      "requires_remote_code": true,
+      "license": {
+        "status": "verified",
+        "identifier": "MIT",
+        "sources": [
+          "https://huggingface.co/manelalab/chrono-gpt-v1-20131231"
+        ],
+        "note": "License is recorded from the model repository; binary deserialization and custom code remain separate safety gates."
+      },
+      "code_review": {
+        "status": "pending",
+        "repository": "manelalab/chrono-gpt-v1-20131231",
+        "revision": "6f2e595689458b1809d5c6efb9a6095257347ca2"
+      },
+      "execution_status": "blocked-custom-code-review",
+      "intended_use": "Long-range historical boundary case; never pooled into the main public trajectory.",
+      "constraints": [
+        "Custom architecture and pickle-based weights require isolated manual inspection before loading.",
+        "Architecture, corpus, scale, and training design differ materially from DatedGPT and PIT."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2502.21206",
+        "https://huggingface.co/manelalab/chrono-gpt-v1-20131231"
+      ]
+    },
+    {
+      "id": "typewriter-1913-7b-base",
+      "role": "boundary-case",
+      "family": "TypewriterLM",
+      "repository": "typewriter-ai/typewriter-1913-7B-base",
+      "revision": "882d563d93bce5b336d4cca8ebb0e031d7c46f0a",
+      "revision_kind": "git-sha",
+      "immutable": true,
+      "checkpoint_ref": null,
+      "architecture": "LlamaForCausalLM",
+      "parameter_count": 7000000000,
+      "context_length": null,
+      "tokenizer": "Custom historically grounded tokenizer",
+      "precision": "bfloat16",
+      "weight_format": "safetensors",
+      "weight_size_bytes": 14500000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "unverified",
+        "identifier": null,
+        "sources": [
+          "https://huggingface.co/typewriter-ai/typewriter-1913-7B-base"
+        ],
+        "note": "No explicit weight license was found in the inspected artifact metadata."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": null,
+        "revision": null
+      },
+      "execution_status": "blocked-license",
+      "intended_use": "Pre-1913 boundary case only; not part of the main trajectory.",
+      "constraints": [
+        "The checkpoint is larger than the current local-first resource target.",
+        "One historical endpoint and a book-dominated corpus cannot identify CSTG."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2606.02991",
+        "https://huggingface.co/typewriter-ai/typewriter-1913-7B-base"
+      ]
+    },
+    {
+      "id": "kairos-sequential-helium-6b",
+      "role": "boundary-case",
+      "family": "Kairos",
+      "repository": "kyutai/Sequential_Helium_6B",
+      "revision": null,
+      "revision_kind": "unresolved",
+      "immutable": false,
+      "checkpoint_ref": null,
+      "architecture": "Helium custom causal language model",
+      "parameter_count": 6000000000,
+      "context_length": null,
+      "tokenizer": "Helium tokenizer",
+      "precision": "unverified",
+      "weight_format": "custom/Transformers-compatible artifact requiring audit",
+      "weight_size_bytes": null,
+      "requires_remote_code": true,
+      "license": {
+        "status": "mixed",
+        "identifier": "CC-BY-4.0 reported for weights; MIT code",
+        "sources": [
+          "https://github.com/kyutai-labs/kairos",
+          "https://huggingface.co/kyutai/Sequential_Helium_6B"
+        ],
+        "note": "Exact Hub revision and custom architecture files remain unresolved."
+      },
+      "code_review": {
+        "status": "pending",
+        "repository": "kyutai-labs/kairos",
+        "revision": null
+      },
+      "execution_status": "blocked-revision",
+      "intended_use": "Ordering-method boundary case; not a default local model.",
+      "constraints": [
+        "Six-billion-parameter execution is outside the current local-first default.",
+        "The paper's primary outcome is temporal factual knowledge rather than CSTG."
+      ],
+      "sources": [
+        "https://arxiv.org/abs/2605.22769",
+        "https://github.com/kyutai-labs/kairos",
+        "https://huggingface.co/kyutai/Sequential_Helium_6B"
+      ]
+    },
+    {
+      "id": "olmo2-1b-stage1-step23100-original",
+      "role": "causal-primary-candidate",
+      "family": "OLMo 2",
+      "repository": "allenai/OLMo-2-0425-1B",
+      "revision": "https://olmo-checkpoints.org/ai2-llm/peteish1/step23100-unsharded/",
+      "revision_kind": "checkpoint-uri",
+      "immutable": false,
+      "checkpoint_ref": "stage1-step23100, approximately 48.4B tokens at the published global batch",
+      "architecture": "OLMo 2 1B",
+      "parameter_count": 1000000000,
+      "context_length": 4096,
+      "tokenizer": "allenai Dolma 2 tokenizer, vocabulary 100278",
+      "precision": "amp_bf16 training",
+      "weight_format": "official original-format unsharded checkpoint",
+      "weight_size_bytes": null,
+      "requires_remote_code": false,
+      "license": {
+        "status": "verified",
+        "identifier": "Apache-2.0",
+        "sources": [
+          "https://github.com/allenai/OLMo/blob/090253dac6688f2532509daa7aa2eb5fae50e956/LICENSE",
+          "https://github.com/allenai/OLMo-core/blob/b7e9671d7ea48af94838c4f124703c3ae36f0c70/LICENSE"
+        ],
+        "note": "Checkpoint and code rights are clear; the checkpoint still needs a downloaded file manifest and hashes."
+      },
+      "code_review": {
+        "status": "approved",
+        "repository": "allenai/OLMo-core",
+        "revision": "b7e9671d7ea48af94838c4f124703c3ae36f0c70"
+      },
+      "execution_status": "blocked-revision",
+      "intended_use": "Scientifically preferred common starting point for calibration and the naturalistic causal pilot, conditional on conversion/loading and resource benchmarks.",
+      "constraints": [
+        "The checkpoint URI must be converted into an immutable file-and-hash manifest before use.",
+        "The legacy allenai/OLMo repository records the exact 2025 configuration but is inactive; new execution should use a compatible pinned OLMo-core path.",
+        "Full-weight AdamW training is not assumed to fit the current reported machine.",
+        "Intervention dose must be reported relative to approximately 48.4B prior tokens."
+      ],
+      "sources": [
+        "https://github.com/allenai/OLMo/blob/090253dac6688f2532509daa7aa2eb5fae50e956/configs/official-0425/OLMo-2-0425-1B.csv",
+        "https://github.com/allenai/OLMo/blob/090253dac6688f2532509daa7aa2eb5fae50e956/configs/official-0425/OLMo2-1B-stage1.yaml",
+        "https://github.com/allenai/OLMo-core/tree/b7e9671d7ea48af94838c4f124703c3ae36f0c70"
+      ]
+    },
+    {
+      "id": "olmo2-1b-early-step20000",
+      "role": "causal-primary-candidate",
+      "family": "OLMo 2",
+      "repository": "allenai/OLMo-2-0425-1B-early-training",
+      "revision": "c70db05bba504a3bc7e9878db0e76b4b2de48013",
+      "revision_kind": "git-sha",
+      "immutable": true,
+      "checkpoint_ref": "stage1-step20000-tokens42B",
+      "architecture": "OLMo 2 1B",
+      "parameter_count": 1000000000,
+      "context_length": 4096,
+      "tokenizer": "allenai Dolma 2 tokenizer",
+      "precision": "float32 Hub artifact",
+      "weight_format": "safetensors, two shards",
+      "weight_size_bytes": 5950000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "verified",
+        "identifier": "Apache-2.0",
+        "sources": [
+          "https://huggingface.co/allenai/OLMo-2-0425-1B-early-training",
+          "https://github.com/allenai/OLMo-core/blob/b7e9671d7ea48af94838c4f124703c3ae36f0c70/LICENSE"
+        ],
+        "note": "This regenerated early-training run shares the official architecture and selected checkpoints but is not assumed identical to the original run at every step."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": "allenai/OLMo-core",
+        "revision": "b7e9671d7ea48af94838c4f124703c3ae36f0c70"
+      },
+      "execution_status": "blocked-hardware-benchmark",
+      "intended_use": "Transformers-compatible OLMo smoke and fallback insertion artifact after confirming exact checkpoint semantics and memory behavior.",
+      "constraints": [
+        "The 5.95 GB float32 artifact may exceed the practical local GPU path without casting/offload.",
+        "Do not silently equate the regenerated run with the original step23100 checkpoint."
+      ],
+      "sources": [
+        "https://huggingface.co/allenai/OLMo-2-0425-1B-early-training",
+        "https://github.com/allenai/OLMo-core/tree/b7e9671d7ea48af94838c4f124703c3ae36f0c70"
+      ]
+    },
+    {
+      "id": "pythia-1b-deduped-main",
+      "role": "causal-fallback",
+      "family": "Pythia",
+      "repository": "EleutherAI/pythia-1b-deduped",
+      "revision": "7199d8fc61a6d565cd1f3c62bf11525b563e13b2",
+      "revision_kind": "git-sha",
+      "immutable": true,
+      "checkpoint_ref": "step143000, final checkpoint",
+      "architecture": "GPTNeoXForCausalLM",
+      "parameter_count": 1011781632,
+      "context_length": 2048,
+      "tokenizer": "GPT-NeoX-20B tokenizer",
+      "precision": "float16 weights",
+      "weight_format": "safetensors available",
+      "weight_size_bytes": 2090000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "verified",
+        "identifier": "Apache-2.0",
+        "sources": [
+          "https://huggingface.co/EleutherAI/pythia-1b-deduped",
+          "https://github.com/EleutherAI/pythia/blob/a19eecb807ec2c79a39ebf18108816e6ffffc1d5/LICENSE"
+        ],
+        "note": "The final checkpoint is suitable for a local inference benchmark, not the preferred causal insertion point."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": "EleutherAI/pythia",
+        "revision": "a19eecb807ec2c79a39ebf18108816e6ffffc1d5"
+      },
+      "execution_status": "benchmark-ready",
+      "intended_use": "Smallest currently approved unquantized local loading and logits benchmark.",
+      "constraints": [
+        "Final checkpoint is not used for the headline era-window intervention.",
+        "Benchmark results do not establish continued-pretraining feasibility."
+      ],
+      "sources": [
+        "https://huggingface.co/EleutherAI/pythia-1b-deduped",
+        "https://github.com/EleutherAI/pythia/tree/a19eecb807ec2c79a39ebf18108816e6ffffc1d5"
+      ]
+    },
+    {
+      "id": "pythia-1b-deduped-step20000",
+      "role": "causal-fallback",
+      "family": "Pythia",
+      "repository": "EleutherAI/pythia-1b-deduped",
+      "revision": null,
+      "revision_kind": "unresolved",
+      "immutable": false,
+      "checkpoint_ref": "step20000, approximately 41.94B tokens",
+      "architecture": "GPTNeoXForCausalLM",
+      "parameter_count": 1011781632,
+      "context_length": 2048,
+      "tokenizer": "GPT-NeoX-20B tokenizer",
+      "precision": "float16 weights",
+      "weight_format": "Hugging Face checkpoint branch",
+      "weight_size_bytes": 2090000000,
+      "requires_remote_code": false,
+      "license": {
+        "status": "verified",
+        "identifier": "Apache-2.0",
+        "sources": [
+          "https://huggingface.co/EleutherAI/pythia-1b-deduped",
+          "https://github.com/EleutherAI/pythia/blob/a19eecb807ec2c79a39ebf18108816e6ffffc1d5/LICENSE"
+        ],
+        "note": "Resolve the step20000 branch to an immutable Hub commit before execution."
+      },
+      "code_review": {
+        "status": "not-required",
+        "repository": "EleutherAI/pythia",
+        "revision": "a19eecb807ec2c79a39ebf18108816e6ffffc1d5"
+      },
+      "execution_status": "blocked-revision",
+      "intended_use": "Operationally lighter causal fallback with prior exposure comparable to the OLMo early checkpoint.",
+      "constraints": [
+        "Intermediate optimizer state is not publicly served at all steps by default.",
+        "A fresh optimizer changes the continuation intervention and must be declared.",
+        "The branch name alone is not an immutable revision."
+      ],
+      "sources": [
+        "https://huggingface.co/EleutherAI/pythia-1b-deduped",
+        "https://github.com/EleutherAI/pythia/tree/a19eecb807ec2c79a39ebf18108816e6ffffc1d5"
+      ]
+    }
+  ]
+}
