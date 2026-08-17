@@ -64,7 +64,18 @@ def select_continuation_logprobs(
     return selected
 
 
-def _import_transformers() -> tuple[Any, Any, Any]:
+def _import_tokenizer() -> Any:
+    try:
+        from transformers import AutoTokenizer
+    except ImportError as error:
+        raise TransformersProviderError(
+            "Tokenizer audit dependencies are missing; install "
+            "`transformers` and `huggingface-hub`"
+        ) from error
+    return AutoTokenizer
+
+
+def _import_model_stack() -> tuple[Any, Any, Any]:
     try:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -94,7 +105,7 @@ def load_manifest_tokenizer(
     """Load only a tokenizer after operation-specific policy checks."""
 
     assert_tokenizer_ready(artifact)
-    _, _, auto_tokenizer = _import_transformers()
+    auto_tokenizer = _import_tokenizer()
     repository, revision = _artifact_identity(artifact)
     tokenizer = auto_tokenizer.from_pretrained(
         repository,
@@ -139,7 +150,7 @@ def load_manifest_model(
     if device not in {"cpu", "cuda"}:
         raise TransformersProviderError("device must be cpu or cuda")
 
-    torch, auto_model, auto_tokenizer = _import_transformers()
+    torch, auto_model, auto_tokenizer = _import_model_stack()
     if device == "cuda" and not torch.cuda.is_available():
         raise TransformersProviderError(
             "CUDA was requested but torch.cuda.is_available() is false"
