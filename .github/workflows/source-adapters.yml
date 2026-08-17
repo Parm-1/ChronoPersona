@@ -19,6 +19,7 @@ on:
       - "tests/fixtures/stackexchange_archive_sample.json"
       - "tests/test_source_adapters.py"
       - "tests/test_source_adapter_scripts.py"
+      - "tests/test_pmc_date_precision.py"
       - "tests/test_source_review.py"
       - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
@@ -42,6 +43,7 @@ on:
       - "tests/fixtures/stackexchange_archive_sample.json"
       - "tests/test_source_adapters.py"
       - "tests/test_source_adapter_scripts.py"
+      - "tests/test_pmc_date_precision.py"
       - "tests/test_source_review.py"
       - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
@@ -71,6 +73,7 @@ jobs:
           pytest
           tests/test_source_adapters.py
           tests/test_source_adapter_scripts.py
+          tests/test_pmc_date_precision.py
           tests/test_source_review.py
           tests/test_source_review_integrity.py
           tests/test_source_review_scripts.py
