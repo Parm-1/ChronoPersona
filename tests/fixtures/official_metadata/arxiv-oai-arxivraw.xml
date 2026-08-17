@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:arXivRaw="http://arxiv.org/OAI/arXivRaw/">
+  <responseDate>2026-08-17T00:00:00Z</responseDate>
+  <request verb="ListRecords" metadataPrefix="arXivRaw">https://export.arxiv.org/oai2</request>
+  <ListRecords>
+    <record>
+      <header>
+        <identifier>oai:arXiv.org:1201.00001</identifier>
+        <datestamp>2012-01-03</datestamp>
+        <setSpec>physics</setSpec>
+      </header>
+      <metadata>
+        <arXivRaw:arXivRaw>
+          <arXivRaw:id>1201.00001</arXivRaw:id>
+          <arXivRaw:created>2012-01-03</arXivRaw:created>
+          <arXivRaw:updated>2012-01-03</arXivRaw:updated>
+          <arXivRaw:version>v1</arXivRaw:version>
+          <arXivRaw:title>This title must not appear in adapter output.</arXivRaw:title>
+          <arXivRaw:authors>Example, A.</arXivRaw:authors>
+          <arXivRaw:categories>physics.bio-ph q-bio.PE</arXivRaw:categories>
+          <arXivRaw:license>https://creativecommons.org/licenses/by/4.0/</arXivRaw:license>
+          <arXivRaw:abstract>This abstract must not appear in adapter output.</arXivRaw:abstract>
+        </arXivRaw:arXivRaw>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:arXiv.org:1902.00002</identifier>
+        <datestamp>2019-02-04</datestamp>
+        <setSpec>physics</setSpec>
+      </header>
+      <metadata>
+        <arXivRaw:arXivRaw>
+          <arXivRaw:id>1902.00002</arXivRaw:id>
+          <arXivRaw:created>2019-02-04</arXivRaw:created>
+          <arXivRaw:updated>2020-01-01</arXivRaw:updated>
+          <arXivRaw:version>v2</arXivRaw:version>
+          <arXivRaw:title>Another omitted title.</arXivRaw:title>
+          <arXivRaw:authors>Example, B.</arXivRaw:authors>
+          <arXivRaw:categories>physics.geo-ph</arXivRaw:categories>
+          <arXivRaw:license>https://creativecommons.org/licenses/by/4.0/</arXivRaw:license>
+          <arXivRaw:abstract>Another omitted abstract.</arXivRaw:abstract>
+        </arXivRaw:arXivRaw>
+      </metadata>
+    </record>
+  </ListRecords>
+</OAI-PMH>
