@@ -7,167 +7,264 @@
 
 ## Current phase
 
-**Stage 0 — feasibility, model, data, evaluation, and compute audit**
+**Stage 0 — feasibility, model, data, evaluation, calibration, and compute audit**
 
-The novelty gate, static model-artifact audit, dependency-light scorer, first development registry, and manifest-gated real-model adapter are complete. Stage 0 remains open because local hardware, real-model scoring, source feasibility, calibration thresholds, and measured training cost are not yet qualified.
+The novelty gate, static model-artifact audit, dependency-light scorer, first
+development registry, manifest-gated real-model adapter, provisional A/B/C
+source architecture, source-neutral metadata contract, and offline source
+adapter layer are complete.
+
+Stage 0 remains open because no live metadata panel, local hardware benchmark,
+real-model score, source-content sample, direct-exposure rate, synthetic
+calibration threshold, or measured training cost has been established.
 
 ## Current write-active deliverable
 
-**Timestamp-native source, rights, independence, and domain-exposure audit**
+**Deterministic Synthetic Identifiability Calibration corpus and balance system**
 
-The next repository work should:
+The next repository milestone should turn
+`docs/SYNTHETIC_CALIBRATION_SPEC.md` into an executable but untrained
+calibration package:
 
-- audit at least three candidate source families from primary steward documentation;
-- distinguish publication, revision, upload, crawl, and archive-capture time;
-- record exact license, attribution, research-use, training-use, and redistribution status;
-- assess continuous early/late coverage, human-authorship confidence, duplicate/revision burden, event concentration, and extractable token volume;
-- test whether source families are genuinely independent rather than different URLs over shared upstream text;
-- classify every source/evaluation pair as direct, structurally related, indirect, plausibly absent, or unknown;
-- identify a provisional A/B/C assignment or reject the current source architecture;
-- avoid downloading bulk corpora before feasibility, rights, and storage gates pass.
+- at least two morally symmetric latent procedural contrasts;
+- two disjoint training domains and one held-out evaluation domain per contrast;
+- explicit-positive, indirect-transfer, shuffled-placebo, and neutral controls;
+- deterministic generation from versioned templates and seeds;
+- exact token-independent balance checks for document count, length, sentiment,
+  success/failure, named-entity density, and surface vocabulary;
+- leakage checks preventing repeated slogans, shared entities, copied decision
+  templates, or evaluation answers in training;
+- immutable corpus manifests and hashes;
+- a dose-plan schema whose token counts remain unfrozen until local throughput
+  is measured;
+- no model download and no training.
 
 ## Parallel external evidence needed
 
-**Local resource, tokenizer, and immutable Pythia benchmark**
+### Local machine and model evidence
 
-The repository contains safe protocols and scripts, but this evidence can only be produced on the user's machine:
+The repository contains guarded protocols, but the following evidence requires
+the user's actual machine:
 
-- exact RTX 2060 VRAM variant;
+- exact RTX 2060 variant and VRAM;
 - free RAM and disk;
 - CUDA, driver, Python, Torch, and Transformers versions;
-- Pythia and OLMo tokenizer boundary audits over development-v0;
-- immutable Pythia 1B loading time, peak RAM/VRAM, and logits throughput;
+- Pythia and OLMo tokenizer-boundary audits over development-v0;
+- immutable Pythia 1B load time, peak RAM/VRAM, and logits throughput;
 - the first deterministic Pythia development score;
-- later, a tiny continued-pretraining benchmark.
+- a later tiny continued-pretraining benchmark.
 
-## Latest verified evidence
+### Bounded live source evidence
 
-### Repository milestones
+The source adapters are offline-validated but have not contacted their live
+interfaces. The project still needs explicitly authorized, bounded metadata
+runs for:
 
-- PR #10 merged the CSTG redesign at `b2a18b050e801d7138a0a1babc7c94cc1d83e0ac`.
-- PR #11 merged the primary-source novelty audit at `32d2a37fa02b65155c38df9df443c565d8d1b319`.
-- PR #12 merged the model artifact and guarded benchmark architecture at `33378aae095ac8af7be6fb5b142fa2d3afb137ba`.
-- PR #13 merged the complete-continuation scorer and development-v0 registry at `a19662a279d02b362b34437fcc52e1290a399696`.
-- The project is novel enough only under the CSTG design centered on frozen prediction of held-out source C.
+- pinned Wikimedia history-dump inventory;
+- the frozen legacy Stack Exchange Archive.org inventory;
+- arXiv OAI `arXivRaw` metadata;
+- PMC OAI Dublin Core metadata as backup-C qualification.
+
+No archive or source-text download is authorized by those metadata runs.
+
+## Latest verified repository milestones
+
+- PR #10 merged the CSTG redesign at
+  `b2a18b050e801d7138a0a1babc7c94cc1d83e0ac`.
+- PR #11 merged the primary-source novelty audit at
+  `32d2a37fa02b65155c38df9df443c565d8d1b319`.
+- PR #12 merged the model-artifact and guarded benchmark architecture at
+  `33378aae095ac8af7be6fb5b142fa2d3afb137ba`.
+- PR #13 merged complete-continuation scoring and development-v0 at
+  `a19662a279d02b362b34437fcc52e1290a399696`.
+- PR #14 merged manifest-gated tokenizer and Transformers scoring at
+  `da42946cc8bbe61b64d1e2c70c5968f585830f99`.
+- PR #15 merged the provisional A/B/C source architecture at
+  `288582d46a25e56089b50d1245bf0ae42494f658`.
+- PR #16 merged source-neutral metadata and deterministic sampling at
+  `72eafcc617ab913b92cf53334a22dd31dd0d1b14`.
+- The source-adapter branch passes the complete project CI and its focused
+  offline workflow on Python 3.11 and 3.12.
 - No evidence-bearing temporal adaptation experiment has run.
-- The naturalistic pilot remains in `design` with an intentionally unfrozen zero token budget.
+- The naturalistic pilot remains in `design` with an intentionally unfrozen
+  zero token budget.
 
-### Real-model adapter
+## Verified source architecture and tooling
 
-- `src/chronopersona/artifact_policy.py` defines operation-specific tokenizer and model-score gates.
-- Tokenizer/model execution requires an immutable 40-character Hub commit, verified model license, standard `owner/name` repository, and no custom remote code.
-- Model scoring additionally requires explicit `benchmark-ready` status.
-- `src/chronopersona/tokenizer_audit.py` deterministically audits every prompt/candidate boundary, token count, prediction position, and failure without model weights.
-- `src/chronopersona/transformers_provider.py` provides manifest-gated tokenizer loading and unquantized causal-LM scoring. It never enables remote code or quantization.
-- Tokenizer-only dependencies are separated from the PyTorch model stack.
-- `scripts/audit_registry_tokenizer.py` and `scripts/score_registry_transformers.py` default to no-network plans and require separate `--execute` and `--allow-download` flags.
-- `docs/TRANSFORMERS_SCORING_PROTOCOL.md` defines the local sequence, failure policy, and interpretation boundary.
-- Unit tests verify operation gates, no-network plans, blocked execution before optional imports, exact continuation-logprob selection, deterministic tokenizer audits, and visible boundary failures.
+### Provisional source roles
 
-### Evaluation implementation
+- **A:** Wikimedia article-revision added-text deltas.
+- **B:** initial versions of posts from a frozen nontechnical Stack Exchange
+  site panel.
+- **C:** single-version, item-level CC0 or CC BY arXiv descriptive-science
+  source text.
+- **Backup C:** version-bounded, item-level CC0 or CC BY PMC Open Access text.
 
-- `src/chronopersona/evaluation.py` loads, validates, describes, and hashes JSONL registries.
-- `src/chronopersona/scoring.py` implements complete-continuation total log likelihood, mean-token diagnostics, semantic-pole normalization, stable pairwise probabilities, one calibrated alternative, paraphrase aggregation, token-level outputs, identical pairwise prompt contexts, and deterministic output hashing.
-- `src/chronopersona/tokenization.py` requires an exact prompt prefix, explicit whitespace boundary, no truncation, and recorded continuation logit positions.
-- `evaluations/registry/development-v0.jsonl` contains twelve items and twenty-four forms: six evidence-integration and six procedural-trade-off items.
-- `evaluations/reviews/development-v0-internal.md` rejects the current set for freezing.
-- CI validates the pilot, model manifest, development registry, and tests on Python 3.11 and 3.12.
+This architecture is `qualified-with-redesign`, not frozen.
 
-### Evaluation review findings
+Federal Register/GovInfo material remains rejected from the headline A/B/C
+architecture because it directly teaches authority, safeguards, enforcement,
+privacy, procedure, and related primary constructs.
 
-- No explicit temporal cue was found in development-v0 prompts or candidates.
-- Candidate display order is counterbalanced and scoring is pole-normalized.
-- Several evidence-integration items may exhibit capability ceilings because one continuation is epistemically stronger.
-- Several procedural scenarios have asymmetric consequences that may bias the pole independent of the intended construct.
-- The privacy item carries familiar human-domain moral salience.
-- The punishment/rehabilitation item has material valence imbalance and cannot be frozen in its current form.
-- Dissent tolerance and transparency versus secrecy are absent.
-- Real-tokenizer matching, direct exposure, contamination, and human criterion validity remain unresolved.
-- Development-v0 is suitable for boundary, order, ceiling, and paraphrase diagnostics only; it is not evidence-bearing.
+### Source-neutral metadata contract
 
-### Model-artifact findings
+`src/chronopersona/source_metadata.py`:
 
-- DatedGPT is the intended first observational family after model-weight license and immutable-revision resolution.
-- PIT's inspected public checkpoint is a custom-code 4B float32 artifact around 17.8 GB and is not the default local path.
-- ChronoGPT, TypewriterLM, and Kairos remain separate boundary cases.
-- OLMo 2 1B original stage-1 step 23,100 remains the scientifically preferred causal starting point, provisional.
-- Pythia 1B deduped step 20,000 remains the operational fallback and second-family candidate, provisional.
-- The immutable final Pythia 1B deduped artifact is the first approved local loading/logits benchmark only.
-- A conventional one-billion-parameter full-weight AdamW run can exceed 16 GB before useful activation and batch memory.
+- rejects document text fields;
+- derives era membership from timezone-aware native timestamps;
+- requires item-level rights, historical-version status, and authorship
+  provenance;
+- produces deterministic summaries and stratified samples;
+- keeps source-C era labels in a separate unblinding key.
 
-### Dose implication
+### Offline source adapters
 
-- Ten million intervention tokens are only about 0.02% of prior exposure at the candidate OLMo/Pythia insertion points.
-- The old ten-million-token planning value is not retained as a credible headline dose.
-- The token budget remains zero until measured throughput and synthetic dose-response evidence justify a frozen value.
+The current source-adapter milestone provides:
+
+- bounded, explicit metadata-only network access;
+- arXiv OAI `arXivRaw` parsing with first-version dates, item licenses,
+  single-version gating, allowed descriptive categories, and forbidden
+  cross-list categories;
+- PMC OAI parsing through the current endpoint with publication-date evidence,
+  no synthetic epoch fallback, and unresolved historical-version status;
+- pinned Wikimedia `YYYYMMDD` history inventory parsing that refuses the
+  mutable `latest` alias during execution;
+- legacy Stack Exchange Archive.org inventory parsing that requires company
+  attribution and explicitly does not claim current official delivery;
+- deterministic archive size, hash, and storage-margin summaries;
+- frozen XML/JSON fixtures and no-network command tests.
+
+No adapter downloads archive or source-text content.
+
+### Held-out source-C locator firewall
+
+`src/chronopersona/source_review.py` and the corresponding commands:
+
+- remove locators, native IDs, timestamps, era labels, obvious PMCIDs, arXiv
+  IDs, and URL schemes from reviewer packets;
+- replace them with deterministic opaque access IDs;
+- place locators in a separate protected access map;
+- produce append-only access events containing locator hashes, response hashes,
+  byte counts, reviewer, purpose, time, and outcome;
+- forbid source bodies and raw locators from access logs.
+
+An era-hidden manager sample is not reviewer-ready until this second redaction
+step passes.
+
+## Evaluation status
+
+- Primary metric: complete-continuation total-log-likelihood margin.
+- Diagnostic metric: mean-token-log-likelihood margin.
+- Score direction: semantic pole, not candidate display order or moral rank.
+- Development-v0: twelve items, twenty-four forms, explicitly not frozen.
+- Mechanical checks cover exact prompt context, continuation boundaries,
+  option order, paraphrases, truncation, non-finite scores, and deterministic
+  output identity.
+- Several evidence items remain ceiling-prone.
+- Several procedural items remain consequence- or valence-asymmetric.
+- The punishment/rehabilitation item cannot be frozen in its current form.
+- Dissent and transparency constructs remain absent.
+- Real-tokenizer stability, model reliability, direct exposure, contamination,
+  and human criterion validity remain unresolved.
+
+## Model and dose status
+
+- Public observational primary: DatedGPT base family after license and immutable
+  revision resolution.
+- Scientific causal primary: OLMo 2 1B original stage-1 step 23,100,
+  provisional.
+- Operational fallback: Pythia 1B deduped step 20,000, provisional.
+- First local benchmark: immutable final Pythia 1B deduped artifact only.
+- Quantized weights cannot determine the primary likelihood result without
+  unquantized equivalence evidence.
+- A fresh optimizer at an intermediate checkpoint is a declared intervention.
+- A conventional one-billion-parameter full-weight AdamW run can exceed 16 GB
+  before useful activation and batch memory.
+- Ten million intervention tokens are only about 0.02% of prior exposure at the
+  candidate OLMo/Pythia insertion points and are not retained as a credible
+  headline dose.
+- The token budget remains zero until throughput and synthetic dose-response
+  evidence justify a frozen value.
 
 ## Current decisions
 
 - **Novelty:** `novel enough under current redesign`.
-- **Primary confirmation:** frozen source-C prediction; A/B agreement is exploratory.
-- **Public observational primary:** DatedGPT base family after license/revision resolution.
-- **Scientific causal primary:** OLMo 2 1B original stage-1 step 23,100, provisional.
-- **Operational fallback:** Pythia 1B deduped step 20,000, provisional.
-- **Primary evaluation metric:** complete-continuation total-log-likelihood margin.
-- **Diagnostic metric:** mean-token-log-likelihood margin.
-- **Score direction:** semantic reference pole; not candidate order and not a moral ranking.
-- **Registry status:** development-v0; explicitly rejected for freezing.
-- **Real-model policy:** immutable revision, verified license, no remote code, no quantization, and operation-specific approval.
-- **Tokenizer policy:** explicit `none` or `bos`; choose and freeze from native convention and development reliability, not desired temporal outcomes.
-- Generated explanations cannot determine the primary outcome.
-- Quantized weights cannot determine the primary likelihood result without unquantized equivalence evidence.
-- A fresh optimizer at an intermediate checkpoint is a declared intervention.
-- Synthetic Identifiability Calibration is mandatory before interpreting a naturalistic null.
-- The provisional naturalistic windows remain 2012-01-01 through 2013-12-31 and 2018-01-01 through 2019-12-31, subject to data-only selection.
-- The headline causal result should not rely on PEFT alone.
-- At most one predeclared rescue is permitted per failed major gate.
-- No external compute spend is authorized.
+- **Primary confirmation:** frozen source-C prediction; A/B agreement is
+  exploratory.
+- **Naturalistic null interpretation:** blocked until Synthetic Identifiability
+  Calibration passes.
+- **Source architecture:** provisional A/B/C above; Federal Register excluded
+  from the headline design.
+- **Source C:** held out from item construction, temporal-direction estimation,
+  hyperparameters, dose, thresholds, rescue decisions, and mechanism selection.
+- **Real-model execution:** immutable revision, verified license, no remote code,
+  no quantization, operation-specific approval.
+- **Evaluation registry:** development-v0, rejected for freezing.
+- **Era windows:** provisionally 2012-01-01 through 2013-12-31 and 2018-01-01
+  through 2019-12-31; final selection remains data-only.
+- **Training method:** PEFT may support engineering and dose reconnaissance but
+  cannot silently become the headline causal method.
+- **Rescue policy:** at most one predeclared rescue per failed major gate.
+- **External spend:** CAD $0 unless the user authorizes a specific measured
+  escalation.
 
 ## Resource constraints
 
-### Reported hardware
-
-- Current machine: RTX 2060 and 16 GB RAM.
-- Possible borrowed machine: RTX 5070 and 32 GB RAM.
-- Exact GPU variants, VRAM, free disk, CPU, runtime versions, and sustained throughput remain unmeasured.
-- Borrowed-machine availability is not assumed.
-
-### Binding operating limits
-
-- Default external-compute budget: CAD $0.
-- No rental, purchase, paid license, or external account without explicit user authorization.
+- Current reported machine: RTX 2060 and 16 GB RAM.
+- Possible borrowed machine: RTX 5070 and 32 GB RAM; availability and exact VRAM
+  are not assumed.
 - One training job at a time.
 - Benchmark before committing token budgets.
-- Do not launch the twelve-branch naturalistic set until calibration, cost, storage, and run-completeness gates pass.
-- Do not download a model unless its license, immutable revision, storage margin, and code path pass the manifest gates.
-- Do not bulk-download corpora until source rights, timestamp semantics, storage, and domain exposure pass the data gate.
-- Use the borrowed machine only after access is confirmed and the run has a measured purpose.
+- Do not download model weights without license, immutable revision, code-path,
+  storage, and operation gates.
+- Do not bulk-download corpora before rights, timestamps, source continuity,
+  storage, and domain exposure pass.
+- Do not launch the twelve-branch pilot before calibration, cost, storage, and
+  run-completeness gates pass.
 
 ## Open blockers
 
 1. Local resource audit and immutable Pythia benchmark.
-2. Real Pythia/OLMo tokenizer boundary audits and first development score.
-3. DatedGPT model-weight license and four immutable revisions.
-4. Original OLMo step-23,100 file manifest, hashes, and current-code loading path.
+2. Real Pythia/OLMo tokenizer audits and first development score.
+3. DatedGPT model-weight license and selected immutable revisions.
+4. Original OLMo step-23,100 file manifest, hashes, and current-code loading
+   path.
 5. Immutable Pythia step-20,000 revision and optimizer-reset decision.
 6. Tiny full-weight/PEFT continued-pretraining benchmark.
-7. Timestamp-native corpus continuity, source independence, rights, and authorship provenance.
-8. Domain exposure and contamination searches.
-9. Development-v0 real-model reliability, ceiling, order, and paraphrase results.
-10. Revision or replacement of valence- and consequence-asymmetric items.
-11. Addition of dissent and transparency constructs.
-12. Meaningful-effect threshold and null-equivalence interval.
-13. Synthetic-calibration latent policies, dose, and seed count.
-14. Confirmatory seed count and common post-training recipe.
+7. Live metadata volume and continuity evidence for provisional A/B/C sources.
+8. Frozen Stack Exchange site panel and version-reconstruction feasibility.
+9. Wikimedia added-text extraction, revert/bot/import handling, and contributor
+   attribution.
+10. arXiv and backup-PMC content-version retrieval feasibility under the rights
+    and source-C firewall.
+11. Direct-exposure, contamination, duplicate, event-concentration, and
+    source-independence rates from bounded content samples.
+12. Development-v0 real-model reliability and item revision.
+13. Meaningful-effect threshold and null-equivalence interval.
+14. Synthetic-calibration corpus, balance thresholds, dose, and seed count.
+15. Run registry, resumable training pipeline, and measured cost envelope.
+16. Confirmatory seed count and common post-training recipe.
 
 ## Current risk judgment
 
-The model adapter now fails closed on artifact identity, licensing, custom code, token boundaries, and score positions. The next risk is not implementation access; it is whether actual tokenizers expose unstable boundaries and whether actual models reveal ceilings, paraphrase instability, or score-length artifacts.
+The archive interfaces are now represented more honestly: OAI query dates are
+not automatically treatment dates, PMC missing dates are not fabricated,
+Wikimedia snapshot identity is not confused with schema version, and the Stack
+Exchange Archive.org item is not misrepresented as current delivery.
 
-The dominant execution risk remains full-weight memory and dose. An inference-capable one-billion-parameter model may still be an impractical full-weight training model on the current machine.
+The dominant source risk is still structural exposure and covariance. Even
+narrowed archives may teach verification, hierarchy, privacy, uncertainty, or
+procedure directly, and nominally independent sources can share events,
+institutions, authors, or upstream text.
 
-The dominant scientific risk remains source covariance and direct domain exposure. Natural archives can teach the same verification, authority, privacy, and procedural structures that the evaluation intends to treat as far transfer. The source audit may therefore require narrowing source strata, redesigning primary constructs, or changing the A/B/C architecture before training.
+The dominant execution risk remains full-weight memory and intervention dose.
+A model that fits for inference may still be impractical for broad-update
+continued pretraining on the current machine.
 
 ## Exact next action
 
-Complete the timestamp-native source, rights, independence, and domain-exposure audit. Do not select sources merely because they are downloadable or large. Reject any source architecture that cannot support held-out-source confirmation without directly teaching the primary evaluation constructs.
+Build and validate the deterministic Synthetic Identifiability Calibration
+corpus and balance system without downloading a model or starting training.
+Keep all token doses unfrozen. In parallel, the user can run the existing local
+resource, tokenizer, and Pythia benchmark protocols and explicitly authorize
+bounded live metadata queries when ready.
