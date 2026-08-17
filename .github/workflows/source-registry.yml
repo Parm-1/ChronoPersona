@@ -1,0 +1,40 @@
+name: Source Registry
+
+on:
+  push:
+    paths:
+      - "artifacts/manifests/SOURCE_REGISTRY.json"
+      - "src/chronopersona/source_registry.py"
+      - "scripts/validate_source_registry.py"
+      - "tests/test_source_registry.py"
+      - ".github/workflows/source-registry.yml"
+  pull_request:
+    paths:
+      - "artifacts/manifests/SOURCE_REGISTRY.json"
+      - "src/chronopersona/source_registry.py"
+      - "scripts/validate_source_registry.py"
+      - "tests/test_source_registry.py"
+      - ".github/workflows/source-registry.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Validate source registry
+        run: python scripts/validate_source_registry.py
+      - name: Test source safeguards
+        run: pytest tests/test_source_registry.py
