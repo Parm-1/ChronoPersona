@@ -1,0 +1,343 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-08-17",
+  "status": "stage0-source-audit-v1",
+  "behavioral_outcomes_inspected": false,
+  "bulk_download_authorized": false,
+  "selection_rule": "Assign source families using timestamp integrity, rights, coverage, source independence, authorship provenance, extractability, and domain exposure before any model behavioral outcome is inspected.",
+  "provisional_era_windows": {
+    "early": {
+      "start": "2012-01-01",
+      "end": "2013-12-31"
+    },
+    "late": {
+      "start": "2018-01-01",
+      "end": "2019-12-31"
+    },
+    "frozen": false
+  },
+  "assignments": {
+    "A": "wikimedia-article-additions",
+    "B": "stackexchange-initial-nontechnical-posts",
+    "C": "arxiv-cc-single-version-descriptive"
+  },
+  "predeclared_backup_c": "pmc-oa-cc-version-bounded",
+  "sources": [
+    {
+      "id": "wikimedia-article-additions",
+      "title": "Wikimedia article-revision added-text deltas",
+      "steward": "Wikimedia Foundation and Wikimedia communities",
+      "role": "exploratory",
+      "status": "qualified-with-redesign",
+      "held_out": false,
+      "proposed_stratum": "Human-authored encyclopedic article prose added in native revisions, excluding talk, user, project, template, category, list, current-event, political, medical, security, and explicit procedural-policy strata.",
+      "timestamp_semantics": "Native revision timestamp recorded in MediaWiki history; eligibility is based on the revision that introduced each retained text span, not the current page timestamp or an archive crawl.",
+      "version_integrity": "Use pages-meta-history or equivalent official revision history. Reconstruct parent-to-child added-text deltas and retain stable prose additions after revert, deletion, bot, vandalism, template, and boilerplate filtering. Never train on repeatedly copied full snapshots.",
+      "authorship_provenance": "Predominantly human community edits with explicit bot-account and anonymous/contributor metadata; bot, revert, vandalism, mass-import, and uncertain provenance records require exclusion or separate strata.",
+      "native_timestamp": true,
+      "supports_early_window": true,
+      "supports_late_window": true,
+      "metadata_only_first": true,
+      "official_sources": [
+        "https://meta.wikimedia.org/wiki/Data_dumps",
+        "https://www.mediawiki.org/wiki/Help:Export",
+        "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use"
+      ],
+      "approved_access_paths": [
+        "Official Wikimedia XML pages-meta-history dumps",
+        "Official MediaWiki export/API metadata for bounded development samples"
+      ],
+      "blockers": [
+        "Full English-language history dumps are large and require a measured storage and streaming plan.",
+        "Added-text reconstruction must handle reverts, moves, deletion, templates, references, and repeated copied prose deterministically.",
+        "Current category membership can leak later taxonomy into source selection; selection must use historically available metadata or a frozen text classifier independent of behavioral outcomes.",
+        "Attribution and share-alike lineage must remain auditable for every retained span.",
+        "Broad encyclopedic text can directly discuss evidence, authority, privacy, rehabilitation, and institutional procedure; explicit exposure filters and the domain-exposure matrix are mandatory."
+      ],
+      "rights": {
+        "status": "conditional",
+        "license_policy": "Retain only text whose revision lineage is governed by the applicable Wikimedia contributor license; record the exact license policy and revision lineage rather than assuming all embedded media or imported text shares one license.",
+        "attribution_policy": "Preserve page, revision, contributor or attribution-history locators and the license notice needed to reproduce attribution.",
+        "redistribution_policy": "Derived text or manifests may be redistributed only with the applicable attribution and share-alike analysis; raw source redistribution is not authorized by this registry.",
+        "model_release_boundary": "Training may proceed only after a documented analysis of attribution/share-alike obligations for derived corpora and model artifacts; this registry does not authorize weight release."
+      },
+      "domain_exposure": {
+        "evidence-integration": "indirect",
+        "procedural-tradeoffs": "indirect",
+        "secure-system-decisions": "direct"
+      },
+      "holdout_prohibitions": [],
+      "independence": {
+        "publisher_process": "Open collaborative encyclopedia revision process",
+        "contributor_population": "Distributed Wikimedia editors",
+        "surface_genres": [
+          "encyclopedic exposition",
+          "descriptive reference prose"
+        ],
+        "known_shared_upstreams": [
+          "Quoted or paraphrased external sources",
+          "Syndicated facts also appearing in scientific and community archives"
+        ]
+      },
+      "qualification_next_step": "Use official metadata to estimate eligible revision counts and sample a small page/revision set across both windows before downloading any full history dump."
+    },
+    {
+      "id": "stackexchange-initial-nontechnical-posts",
+      "title": "Initial versions of licensed Stack Exchange posts from a frozen nontechnical site panel",
+      "steward": "Stack Exchange, Inc. and individual contributors",
+      "role": "exploratory",
+      "status": "qualified-with-redesign",
+      "held_out": false,
+      "proposed_stratum": "Initial question and answer bodies from a frozen whitelist of sites continuously active in both windows, excluding Stack Overflow, security, law, politics, medicine, health, academia, skeptics, economics, statistics, AI, software engineering, workplace policy, and sites whose content directly overlaps primary evaluation constructs.",
+      "timestamp_semantics": "Native creation timestamp of the initial post version reconstructed from PostHistory or equivalent official dump fields. Current edited post bodies and current site metadata are not treated as historical text.",
+      "version_integrity": "Reconstruct the initial body/title state rather than using the latest Posts.xml body. Preserve edit lineage and exclude records whose initial version cannot be recovered unambiguously.",
+      "authorship_provenance": "Predominantly human user-authored questions and answers with account, community, deletion, migration, and edit metadata; automated posts, quoted material, spam, deleted-content survivorship, and imported text require explicit handling.",
+      "native_timestamp": true,
+      "supports_early_window": true,
+      "supports_late_window": true,
+      "metadata_only_first": true,
+      "official_sources": [
+        "https://stackoverflow.com/help/licensing",
+        "https://stackexchange.com/legal/terms-of-service/public",
+        "https://archive.org/details/stackexchange",
+        "https://meta.stackexchange.com/questions/224873/all-stack-exchange-data-dumps"
+      ],
+      "approved_access_paths": [
+        "Official Stack Exchange data dump hosted through the documented archive path",
+        "Official Stack Exchange API for bounded metadata-only qualification within its terms"
+      ],
+      "blockers": [
+        "License version varies by contribution date and must be recorded per post/version.",
+        "The current post body can contain later edits; initial PostHistory reconstruction is mandatory.",
+        "Site survival, deletion, migration, moderation, and accepted-answer mechanisms produce selection bias.",
+        "Even nontechnical sites frequently contain advice and procedural reasoning; site and topic filters must be frozen before behavioral outcomes.",
+        "Systematic retrieval must use approved dump/API paths rather than scraping the public site.",
+        "Attribution lineage and share-alike obligations remain attached to each contribution."
+      ],
+      "rights": {
+        "status": "conditional",
+        "license_policy": "Record the Creative Commons BY-SA version applicable to each contribution date and exclude text whose license or authorship cannot be resolved.",
+        "attribution_policy": "Preserve post, revision, author/account or required attribution locator, site, date, and applicable license version.",
+        "redistribution_policy": "Do not redistribute a derived corpus until the versioned attribution and share-alike plan has been reviewed; publish manifests and aggregate statistics first.",
+        "model_release_boundary": "The relationship between contribution-level CC BY-SA duties and released weights requires separate review; this registry authorizes neither public corpus nor weight release."
+      },
+      "domain_exposure": {
+        "evidence-integration": "structurally-related",
+        "procedural-tradeoffs": "structurally-related",
+        "secure-system-decisions": "direct"
+      },
+      "holdout_prohibitions": [],
+      "independence": {
+        "publisher_process": "Community question-and-answer platform with voting and moderation",
+        "contributor_population": "Platform users distinct from Wikimedia editorial workflows",
+        "surface_genres": [
+          "questions",
+          "answers",
+          "practical explanations"
+        ],
+        "known_shared_upstreams": [
+          "External quotations and links",
+          "Users who may also contribute to Wikimedia or scientific communities",
+          "Common contemporaneous events and cultural vocabulary"
+        ]
+      },
+      "qualification_next_step": "Use dump metadata to identify a predeclared site panel with continuous coverage and estimate initial-version recoverability, license distribution, post counts, deletion/migration burden, and topic exposure in both windows."
+    },
+    {
+      "id": "arxiv-cc-single-version-descriptive",
+      "title": "Single-version permissively licensed arXiv descriptive-science source text",
+      "steward": "arXiv and article authors/rightsholders",
+      "role": "held-out-confirmatory",
+      "status": "qualified-with-redesign",
+      "held_out": true,
+      "proposed_stratum": "Single-version submissions carrying item-level CC0 or CC BY licenses in descriptive natural-science categories, excluding AI, machine learning, statistics, decision theory, economics, social science, security, software, calibration, misinformation, governance, policy, methods tutorials, and direct evaluation constructs.",
+      "timestamp_semantics": "Native arXiv submission/version timestamp. Eligibility uses the first and only version date for retained single-version submissions, not a later metadata update or bulk-file retrieval time.",
+      "version_integrity": "Prefer papers with exactly one submitted version so the current source bundle corresponds to the historical submitted text. Any multi-version record is excluded unless a verified version-specific source retrieval path and hash are available.",
+      "authorship_provenance": "Scholarly author submissions with explicit author and version metadata; machine-generated or transformed text is not assumed absent and requires provenance screening where detectable.",
+      "native_timestamp": true,
+      "supports_early_window": true,
+      "supports_late_window": true,
+      "metadata_only_first": true,
+      "official_sources": [
+        "https://info.arxiv.org/help/api/index.html",
+        "https://info.arxiv.org/help/bulk_data_s3.html",
+        "https://info.arxiv.org/help/license/index.html",
+        "https://info.arxiv.org/help/versions.html"
+      ],
+      "approved_access_paths": [
+        "Official arXiv API for metadata-only qualification",
+        "Official arXiv bulk S3 source packages only after requester-pays cost, storage, license, and version-integrity gates pass"
+      ],
+      "blockers": [
+        "The arXiv API provides metadata rather than full source text.",
+        "Bulk S3 source access is requester-pays and is not authorized during this audit.",
+        "arXiv license terms vary per item; the default non-exclusive distribution license is not treated as permission for corpus reuse.",
+        "Bulk source packages can reflect the latest available version; single-version restriction or verified historical source retrieval is required.",
+        "Scientific prose directly teaches evidence, methods, and uncertainty in many categories; the held-out stratum must exclude direct methodological and evaluation overlap.",
+        "The held-out source firewall prohibits using source-C text or behavioral results for item, threshold, dose, hyperparameter, or mechanism selection."
+      ],
+      "rights": {
+        "status": "conditional",
+        "license_policy": "Retain only item-level CC0 or CC BY submissions in the first confirmatory design. Exclude default arXiv licenses, noncommercial, no-derivatives, custom, missing, or ambiguous licenses. CC BY-SA is excluded pending a separate share-alike analysis.",
+        "attribution_policy": "Preserve arXiv identifier, exact version, authors, title, submission date, category, license locator, and source hash.",
+        "redistribution_policy": "Redistribute only records whose item-level license permits the intended form and whose attribution is preserved; otherwise publish locators, hashes, and aggregate statistics.",
+        "model_release_boundary": "CC0/CC BY source eligibility does not by itself settle model-weight release. Weight release remains a separate reviewed decision."
+      },
+      "domain_exposure": {
+        "evidence-integration": "structurally-related",
+        "procedural-tradeoffs": "indirect",
+        "secure-system-decisions": "direct"
+      },
+      "holdout_prohibitions": [
+        "hypothesis-direction",
+        "evaluation-item-construction",
+        "dose-selection",
+        "threshold-selection",
+        "hyperparameter-selection",
+        "mechanistic-layer-selection"
+      ],
+      "independence": {
+        "publisher_process": "Moderated scholarly preprint repository",
+        "contributor_population": "Research authors and collaborators",
+        "surface_genres": [
+          "scientific exposition",
+          "results and discussion"
+        ],
+        "known_shared_upstreams": [
+          "Citations and quoted scientific literature",
+          "Authors who may also edit Wikimedia or answer community questions",
+          "Shared scientific events and terminology"
+        ]
+      },
+      "qualification_next_step": "Query metadata only to estimate single-version CC0/CC BY counts by category and window, then freeze category/license/version rules without viewing model outcomes."
+    },
+    {
+      "id": "pmc-oa-cc-version-bounded",
+      "title": "Version-bounded permissively licensed PMC Open Access full text",
+      "steward": "U.S. National Library of Medicine, publishers, and article rightsholders",
+      "role": "backup-confirmatory",
+      "status": "candidate",
+      "held_out": true,
+      "proposed_stratum": "Item-level CC0 or CC BY Open Access Subset articles in descriptive biomedical or life-science strata, excluding clinical advice, epidemiological policy, methods, statistics, calibration, misinformation, decision support, behavioral science, governance, and direct evaluation constructs.",
+      "timestamp_semantics": "Native article publication and PMC deposit/update metadata. Historical eligibility must use the article/version publication record and exclude text altered by later corrections or updated deposits unless an original version is recoverable.",
+      "version_integrity": "Current JATS XML can include later corrections, replacement files, or updates. Require a verified original-version path, no post-window update, or an immutable source snapshot before promotion to confirmatory C.",
+      "authorship_provenance": "Scholarly human-authored articles with publisher/author provenance and item-level license metadata; supplementary and embedded third-party material require separate exclusion.",
+      "native_timestamp": true,
+      "supports_early_window": true,
+      "supports_late_window": true,
+      "metadata_only_first": true,
+      "official_sources": [
+        "https://pmc.ncbi.nlm.nih.gov/tools/openftlist/",
+        "https://pmc.ncbi.nlm.nih.gov/about/copyright/",
+        "https://pmc.ncbi.nlm.nih.gov/tools/oa-service/",
+        "https://pmc.ncbi.nlm.nih.gov/tools/oai/"
+      ],
+      "approved_access_paths": [
+        "PMC Open Access Web Service or OAI-PMH for metadata qualification",
+        "PMC FTP or Cloud Service for approved article retrieval after version and storage gates pass"
+      ],
+      "blockers": [
+        "Not all PMC content is reusable; item-level license terms are mandatory.",
+        "Systematic retrieval from the main PMC website is prohibited; only approved services may be used.",
+        "Current XML may include later corrections or updates and is not automatically the historical publication version.",
+        "Articles can contain third-party images, tables, or supplementary material under different rights.",
+        "Medical and methodological text can directly expose evidence-integration and procedural constructs.",
+        "The source remains a backup until version integrity is demonstrated on both windows."
+      ],
+      "rights": {
+        "status": "conditional",
+        "license_policy": "Retain only item-level CC0 or CC BY records. Exclude noncommercial, no-derivatives, share-alike, custom, missing, or ambiguous license classes in the first design.",
+        "attribution_policy": "Preserve PMCID, DOI or publisher locator, authors, article/version dates, item-level license, and source hash.",
+        "redistribution_policy": "Use only approved PMC automated-retrieval services and redistribute text only where the item-level license permits it; otherwise publish locators and hashes.",
+        "model_release_boundary": "Source eligibility does not authorize release of derived weights or embedded third-party content."
+      },
+      "domain_exposure": {
+        "evidence-integration": "structurally-related",
+        "procedural-tradeoffs": "indirect",
+        "secure-system-decisions": "plausibly-absent"
+      },
+      "holdout_prohibitions": [
+        "hypothesis-direction",
+        "evaluation-item-construction",
+        "dose-selection",
+        "threshold-selection",
+        "hyperparameter-selection",
+        "mechanistic-layer-selection"
+      ],
+      "independence": {
+        "publisher_process": "Journal and manuscript-deposit pipeline aggregated by PMC",
+        "contributor_population": "Biomedical and life-science authors",
+        "surface_genres": [
+          "journal article prose",
+          "results and discussion"
+        ],
+        "known_shared_upstreams": [
+          "Overlap with arXiv/bioRxiv/preprint-to-journal versions",
+          "Citations and duplicated abstracts",
+          "Authors who may contribute to other source families"
+        ]
+      },
+      "qualification_next_step": "Use OA metadata only to quantify CC0/CC BY records, publication/update dates, article-version recoverability, and arXiv/preprint overlap before retaining this as backup C."
+    },
+    {
+      "id": "federal-register-official-documents",
+      "title": "Federal Register and GovInfo official dated public documents",
+      "steward": "Office of the Federal Register and U.S. Government Publishing Office",
+      "role": "rejected-headline",
+      "status": "rejected-headline",
+      "held_out": false,
+      "proposed_stratum": "Official notices, rules, proposed rules, and related dated public documents.",
+      "timestamp_semantics": "Native official publication and package dates in Federal Register and GovInfo metadata.",
+      "version_integrity": "Official package and bulk-data identifiers provide strong dated document integrity, subject to package updates and incorporated third-party materials.",
+      "authorship_provenance": "Institutional government-authored documents with possible quoted, submitted, transferred, or incorporated third-party material.",
+      "native_timestamp": true,
+      "supports_early_window": true,
+      "supports_late_window": true,
+      "metadata_only_first": true,
+      "official_sources": [
+        "https://www.govinfo.gov/developers/api",
+        "https://www.govinfo.gov/bulkdata/FR",
+        "https://www.govinfo.gov/developers/bulkdata",
+        "https://www.copyright.gov/title17/92chap1.html#105"
+      ],
+      "approved_access_paths": [
+        "GovInfo API and bulk-data endpoints",
+        "Federal Register official bulk files"
+      ],
+      "blockers": [
+        "The source directly teaches institutional authority, procedural safeguards, transparency, privacy, enforcement, and policy trade-offs.",
+        "Government-hosted material is not uniformly free of third-party copyright or transferred rights.",
+        "Agency, topic, administration, and event composition change strongly across time.",
+        "Using it as A, B, or C would make direct imitation a dominant explanation for procedural outcomes."
+      ],
+      "rights": {
+        "status": "conditional",
+        "license_policy": "Classify U.S. government works and third-party or transferred material at document/item level; government hosting alone is not a rights conclusion.",
+        "attribution_policy": "Preserve package, agency, publication, document, and source locators and any embedded rights notices.",
+        "redistribution_policy": "Redistribute only material whose public-domain or licensed status is verified at the relevant item/component level.",
+        "model_release_boundary": "No corpus or weight release is authorized from broad government-hosted text without item-level rights and embedded-content review."
+      },
+      "domain_exposure": {
+        "evidence-integration": "structurally-related",
+        "procedural-tradeoffs": "direct",
+        "secure-system-decisions": "structurally-related"
+      },
+      "holdout_prohibitions": [],
+      "independence": {
+        "publisher_process": "Official government publication and regulatory process",
+        "contributor_population": "Agencies, officials, submitters, and incorporated third parties",
+        "surface_genres": [
+          "rules",
+          "notices",
+          "administrative findings"
+        ],
+        "known_shared_upstreams": [
+          "Public comments and external submissions",
+          "Scientific reports and incorporated standards",
+          "Common political and economic events"
+        ]
+      },
+      "qualification_next_step": "Retain only as a later direct-exposure stress test or boundary control; do not promote to the headline A/B/C design."
+    }
+  ]
+}
