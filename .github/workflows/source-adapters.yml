@@ -7,16 +7,19 @@ on:
       - "src/chronopersona/source_adapters/**"
       - "src/chronopersona/source_inventory.py"
       - "src/chronopersona/source_review.py"
+      - "scripts/audit_arxiv_api_candidates.py"
       - "scripts/audit_arxiv_oai_metadata.py"
       - "scripts/audit_pmc_oai_metadata.py"
       - "scripts/audit_wikimedia_inventory.py"
       - "scripts/audit_stackexchange_inventory.py"
       - "scripts/prepare_source_review.py"
       - "scripts/log_source_access.py"
+      - "tests/fixtures/arxiv_api_sample.xml"
       - "tests/fixtures/arxiv_oai_sample.xml"
       - "tests/fixtures/pmc_oai_sample.xml"
       - "tests/fixtures/wikimedia_dumpstatus_sample.json"
       - "tests/fixtures/stackexchange_archive_sample.json"
+      - "tests/test_arxiv_api.py"
       - "tests/test_source_adapters.py"
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_pmc_date_precision.py"
@@ -33,16 +36,19 @@ on:
       - "src/chronopersona/source_adapters/**"
       - "src/chronopersona/source_inventory.py"
       - "src/chronopersona/source_review.py"
+      - "scripts/audit_arxiv_api_candidates.py"
       - "scripts/audit_arxiv_oai_metadata.py"
       - "scripts/audit_pmc_oai_metadata.py"
       - "scripts/audit_wikimedia_inventory.py"
       - "scripts/audit_stackexchange_inventory.py"
       - "scripts/prepare_source_review.py"
       - "scripts/log_source_access.py"
+      - "tests/fixtures/arxiv_api_sample.xml"
       - "tests/fixtures/arxiv_oai_sample.xml"
       - "tests/fixtures/pmc_oai_sample.xml"
       - "tests/fixtures/wikimedia_dumpstatus_sample.json"
       - "tests/fixtures/stackexchange_archive_sample.json"
+      - "tests/test_arxiv_api.py"
       - "tests/test_source_adapters.py"
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_pmc_date_precision.py"
@@ -75,6 +81,7 @@ jobs:
       - name: Run focused tests
         run: >-
           pytest
+          tests/test_arxiv_api.py
           tests/test_source_adapters.py
           tests/test_source_adapter_scripts.py
           tests/test_pmc_date_precision.py
@@ -83,14 +90,20 @@ jobs:
           tests/test_source_review_integrity.py
           tests/test_source_review_scripts.py
           tests/test_stackexchange_snapshot.py
-      - name: Parse frozen arXiv fixture
+      - name: Parse frozen arXiv submitted-date candidate fixture
+        run: >-
+          python scripts/audit_arxiv_api_candidates.py
+          --input tests/fixtures/arxiv_api_sample.xml
+          --start-date 2012-01-01
+          --end-date 2019-12-31
+          --output /tmp/arxiv-candidates.jsonl
+          --summary-output /tmp/arxiv-candidates-summary.json
+      - name: Parse frozen arXivRaw enrichment fixture
         run: >-
           python scripts/audit_arxiv_oai_metadata.py
           --input tests/fixtures/arxiv_oai_sample.xml
-          --from-date 2012-01-01
-          --until-date 2019-12-31
-          --output /tmp/arxiv-metadata.jsonl
-          --summary-output /tmp/arxiv-summary.json
+          --output /tmp/arxiv-enriched.jsonl
+          --summary-output /tmp/arxiv-enriched-summary.json
       - name: Parse frozen PMC fixture
         run: >-
           python scripts/audit_pmc_oai_metadata.py
