@@ -23,6 +23,7 @@ on:
       - "tests/test_source_review.py"
       - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
+      - "tests/test_stackexchange_snapshot.py"
       - "docs/SOURCE_ADAPTER_PROTOCOL.md"
       - ".github/workflows/source-adapters.yml"
   pull_request:
@@ -47,6 +48,7 @@ on:
       - "tests/test_source_review.py"
       - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
+      - "tests/test_stackexchange_snapshot.py"
       - "docs/SOURCE_ADAPTER_PROTOCOL.md"
       - ".github/workflows/source-adapters.yml"
 
@@ -77,6 +79,7 @@ jobs:
           tests/test_source_review.py
           tests/test_source_review_integrity.py
           tests/test_source_review_scripts.py
+          tests/test_stackexchange_snapshot.py
       - name: Parse frozen arXiv fixture
         run: >-
           python scripts/audit_arxiv_oai_metadata.py
