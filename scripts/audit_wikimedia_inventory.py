@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 
 
@@ -27,13 +29,16 @@ from chronopersona.source_inventory import (  # noqa: E402
 
 
 USER_AGENT = "ChronoPersona/0.1 inventory-audit (github.com/Parm-1/ChronoPersona)"
+_SNAPSHOT = re.compile(r"^\d{8}$")
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Audit Wikimedia history dump file sizes and hashes without "
-            "downloading archive content."
+            "downloading archive content. Planning may inspect the mutable "
+            "latest URL, but parsed or live audit output requires an explicit "
+            "YYYYMMDD snapshot."
         )
     )
     parser.add_argument("--input", type=Path)
@@ -49,9 +54,7 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _url(project: str, snapshot: str) -> str:
-    return (
-        f"https://dumps.wikimedia.org/{project}/{snapshot}/dumpstatus.json"
-    )
+    return f"https://dumps.wikimedia.org/{project}/{snapshot}/dumpstatus.json"
 
 
 def main() -> int:
@@ -68,6 +71,15 @@ def main() -> int:
     if args.execute and args.input is None and not args.allow_network:
         print("error: live execution requires --allow-network", file=sys.stderr)
         return 2
+    if (args.execute or args.input is not None) and not _SNAPSHOT.fullmatch(
+        args.snapshot
+    ):
+        print(
+            "error: parsed/live audit requires --snapshot YYYYMMDD; "
+            "the mutable 'latest' alias is planning-only",
+            file=sys.stderr,
+        )
+        return 2
     source_locator = _url(args.project, args.snapshot)
 
     if not args.execute and args.input is None:
@@ -81,6 +93,8 @@ def main() -> int:
                     "dumpstatus_url": source_locator,
                     "project": args.project,
                     "snapshot": args.snapshot,
+                    "snapshot_is_mutable": args.snapshot == "latest",
+                    "execution_requires_explicit_snapshot": True,
                     "max_response_bytes": args.max_response_bytes,
                 },
                 indent=2,
@@ -101,12 +115,14 @@ def main() -> int:
                 user_agent=USER_AGENT,
             )
         )
+        input_sha256 = hashlib.sha256(payload).hexdigest()
         value = json.loads(payload)
         if not isinstance(value, dict):
             raise ValueError("dumpstatus root must be an object")
         records = parse_wikimedia_dumpstatus(
             value,
             source_locator=source_locator,
+            snapshot_id=args.snapshot,
         )
         errors = validate_source_inventory(records)
         if errors:
@@ -119,6 +135,8 @@ def main() -> int:
             "source": "wikimedia-dumpstatus",
             "project": args.project,
             "snapshot": args.snapshot,
+            "snapshot_is_mutable": False,
+            "inventory_input_sha256": input_sha256,
             "network_used": args.input is None,
             "archive_downloaded": False,
         }
@@ -138,10 +156,16 @@ def main() -> int:
     print(rendered_summary)
     if args.inventory_output is not None:
         args.inventory_output.parent.mkdir(parents=True, exist_ok=True)
-        args.inventory_output.write_text(rendered_records + "\n", encoding="utf-8")
+        args.inventory_output.write_text(
+            rendered_records + "\n",
+            encoding="utf-8",
+        )
     if args.summary_output is not None:
         args.summary_output.parent.mkdir(parents=True, exist_ok=True)
-        args.summary_output.write_text(rendered_summary + "\n", encoding="utf-8")
+        args.summary_output.write_text(
+            rendered_summary + "\n",
+            encoding="utf-8",
+        )
     return 0
 
 
