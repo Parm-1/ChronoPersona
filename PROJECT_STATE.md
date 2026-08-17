@@ -62,8 +62,10 @@ runs for:
 
 - pinned Wikimedia history-dump inventory;
 - the frozen legacy Stack Exchange Archive.org inventory;
-- arXiv OAI `arXivRaw` metadata;
-- PMC OAI Dublin Core metadata as backup-C qualification.
+- arXiv submitted-date candidate enumeration followed by exact `arXivRaw`
+  version/license enrichment;
+- PMC OAI Dublin Core lifecycle-date candidates, followed by a separate
+  publication-time and historical-version audit if PMC remains backup C.
 
 No archive or source-text download is authorized by those metadata runs.
 
@@ -83,8 +85,9 @@ No archive or source-text download is authorized by those metadata runs.
   `288582d46a25e56089b50d1245bf0ae42494f658`.
 - PR #16 merged source-neutral metadata and deterministic sampling at
   `72eafcc617ab913b92cf53334a22dd31dd0d1b14`.
-- The source-adapter branch passes the complete project CI and its focused
-  offline workflow on Python 3.11 and 3.12.
+- PR #17 contains the offline source-adapter and source-C access-firewall
+  milestone. Earlier revisions passed complete and focused CI; final validation
+  is required after the latest date-semantics corrections.
 - No evidence-bearing temporal adaptation experiment has run.
 - The naturalistic pilot remains in `design` with an intentionally unfrozen
   zero token budget.
@@ -111,9 +114,11 @@ privacy, procedure, and related primary constructs.
 `src/chronopersona/source_metadata.py`:
 
 - rejects document text fields;
-- derives era membership from timezone-aware native timestamps;
+- derives era membership from timezone-aware native timestamps when the
+  timestamp semantics are qualified;
+- permits unresolved era status when timestamp meaning is not yet strong enough;
 - requires item-level rights, historical-version status, and authorship
-  provenance;
+  provenance before eligibility;
 - produces deterministic summaries and stratified samples;
 - keeps source-C era labels in a separate unblinding key.
 
@@ -122,15 +127,19 @@ privacy, procedure, and related primary constructs.
 The current source-adapter milestone provides:
 
 - bounded, explicit metadata-only network access;
-- arXiv OAI `arXivRaw` parsing with first-version dates, item licenses,
-  single-version gating, allowed descriptive categories, and forbidden
-  cross-list categories;
-- PMC OAI parsing through the current endpoint with publication-date evidence,
-  no synthetic epoch fallback, and unresolved historical-version status;
+- arXiv API candidate enumeration by first-submission date over an exact
+  category list;
+- exact arXiv OAI `arXivRaw` enrichment for selected base IDs, resolving
+  version history and item license without using OAI modification dates as the
+  era selector;
+- PMC OAI parsing through the current endpoint with lifecycle-date evidence,
+  no synthetic epoch fallback, unresolved era assignment, and unresolved
+  historical-version status;
 - pinned Wikimedia `YYYYMMDD` history inventory parsing that refuses the
   mutable `latest` alias during execution;
 - legacy Stack Exchange Archive.org inventory parsing that requires company
-  attribution and explicitly does not claim current official delivery;
+  attribution, validates numeric file mtimes, and explicitly does not claim
+  current official delivery;
 - deterministic archive size, hash, and storage-margin summaries;
 - frozen XML/JSON fixtures and no-network command tests.
 
@@ -144,9 +153,13 @@ No adapter downloads archive or source-text content.
   IDs, and URL schemes from reviewer packets;
 - replace them with deterministic opaque access IDs;
 - place locators in a separate protected access map;
+- verify manager-packet, reviewer-packet, access-map, and access-event hashes
+  before use;
+- enforce an exact content-free access-event schema;
 - produce append-only access events containing locator hashes, response hashes,
-  byte counts, reviewer, purpose, time, and outcome;
-- forbid source bodies and raw locators from access logs.
+  byte counts, reviewer, purpose, canonical UTC time, and outcome;
+- reject source bodies, raw locators, unexpected fields, tampered events, and
+  malformed pre-existing log lines.
 
 An era-hidden manager sample is not reviewer-ready until this second redaction
 step passes.
@@ -195,6 +208,10 @@ step passes.
   Calibration passes.
 - **Source architecture:** provisional A/B/C above; Federal Register excluded
   from the headline design.
+- **arXiv selection:** submitted-date API candidate enumeration, followed by
+  exact OAI `arXivRaw` enrichment. OAI datestamps are not era selectors.
+- **PMC timing:** Dublin Core dates are lifecycle evidence only; PMC era remains
+  unresolved until publication-specific evidence is obtained.
 - **Source C:** held out from item construction, temporal-direction estimation,
   hyperparameters, dose, thresholds, rescue decisions, and mechanism selection.
 - **Real-model execution:** immutable revision, verified license, no remote code,
@@ -235,20 +252,23 @@ step passes.
 8. Frozen Stack Exchange site panel and version-reconstruction feasibility.
 9. Wikimedia added-text extraction, revert/bot/import handling, and contributor
    attribution.
-10. arXiv and backup-PMC content-version retrieval feasibility under the rights
-    and source-C firewall.
-11. Direct-exposure, contamination, duplicate, event-concentration, and
+10. arXiv API-to-OAI enrichment yield, source-package accessibility, and
+    license distribution under the source-C firewall.
+11. PMC authoritative publication-time and historical-version retrieval
+    feasibility if retained as backup C.
+12. Direct-exposure, contamination, duplicate, event-concentration, and
     source-independence rates from bounded content samples.
-12. Development-v0 real-model reliability and item revision.
-13. Meaningful-effect threshold and null-equivalence interval.
-14. Synthetic-calibration corpus, balance thresholds, dose, and seed count.
-15. Run registry, resumable training pipeline, and measured cost envelope.
-16. Confirmatory seed count and common post-training recipe.
+13. Development-v0 real-model reliability and item revision.
+14. Meaningful-effect threshold and null-equivalence interval.
+15. Synthetic-calibration corpus, balance thresholds, dose, and seed count.
+16. Run registry, resumable training pipeline, and measured cost envelope.
+17. Confirmatory seed count and common post-training recipe.
 
 ## Current risk judgment
 
-The archive interfaces are now represented more honestly: OAI query dates are
-not automatically treatment dates, PMC missing dates are not fabricated,
+The archive interfaces are now represented more honestly: arXiv OAI
+modification dates are not used to select submission eras, PMC lifecycle dates
+are not promoted into publication dates, missing timestamps are not fabricated,
 Wikimedia snapshot identity is not confused with schema version, and the Stack
 Exchange Archive.org item is not misrepresented as current delivery.
 
@@ -263,8 +283,9 @@ continued pretraining on the current machine.
 
 ## Exact next action
 
-Build and validate the deterministic Synthetic Identifiability Calibration
-corpus and balance system without downloading a model or starting training.
-Keep all token doses unfrozen. In parallel, the user can run the existing local
-resource, tokenizer, and Pythia benchmark protocols and explicitly authorize
-bounded live metadata queries when ready.
+Complete PR #17 validation and merge it if review remains clean. Then build and
+validate the deterministic Synthetic Identifiability Calibration corpus and
+balance system without downloading a model or starting training. Keep all token
+doses unfrozen. In parallel, the user can run the existing local resource,
+tokenizer, and Pythia benchmark protocols and explicitly authorize bounded live
+metadata queries when ready.
