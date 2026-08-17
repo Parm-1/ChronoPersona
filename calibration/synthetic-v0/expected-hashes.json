@@ -1,0 +1,39 @@
+{
+  "generated_files": {
+    "calibration/synthetic-v0/REVIEW.md": {
+      "bytes": 1901,
+      "sha256": "65d149030801c558239e29d0604d305507c681211af6a087f14759465ba58b7e"
+    },
+    "calibration/synthetic-v0/analysis-plan.json": {
+      "bytes": 1573,
+      "sha256": "5ea9b804489720a606c78da043093f918a72094d63c01e8370d7ccb39967a732"
+    },
+    "calibration/synthetic-v0/balance-report.json": {
+      "bytes": 26446,
+      "sha256": "30dc346fbd9ca3609619bcc947a4d81283fdf123ff89cf003cc7f947bb6ca6f3"
+    },
+    "calibration/synthetic-v0/documents.jsonl": {
+      "bytes": 133800,
+      "sha256": "c241fc880cfdb2287b6a952ce5a8ad7c6a8b6386e37ea6f5f2702b319376f037"
+    },
+    "calibration/synthetic-v0/dose-plan.json": {
+      "bytes": 156658,
+      "sha256": "a62929a47c51eed4fd9cfbaf662f35775f786125509fdd6bc0a4b6a122bd41d6"
+    },
+    "calibration/synthetic-v0/manifest.json": {
+      "bytes": 2578,
+      "sha256": "28043f745e1c38d23e12d1ac35e8d1e249127ed75214af93467f5ac6e17567e0"
+    },
+    "calibration/synthetic-v0/metadata.jsonl": {
+      "bytes": 234713,
+      "sha256": "f169d15be1b38a8c2535255621ad56129f512f5a0b16f3f6cad6df0d18ef611f"
+    },
+    "evaluations/registry/synthetic-calibration-v0.jsonl": {
+      "bytes": 58540,
+      "sha256": "b6afe095029b17ed25ec2d5a03e8a9c68d35e4e13d77656f1731e1a4506a1851"
+    }
+  },
+  "package_id": "synthetic-identifiability-v0",
+  "package_manifest_sha256": "68447d2f96db09e98801acc4d3f1d61295f0c1ea81e9c566e5612037addf04a9",
+  "schema_version": 1
+}
