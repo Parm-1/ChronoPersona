@@ -76,7 +76,9 @@ def test_arxiv_fixture_command_emits_valid_metadata(tmp_path: Path) -> None:
     assert report["counts"]["eligibility"] == {"eligible": 1, "excluded": 2}
 
 
-def test_pmc_fixture_command_emits_no_synthetic_dates(tmp_path: Path) -> None:
+def test_pmc_fixture_command_emits_no_synthetic_or_confirmed_dates(
+    tmp_path: Path,
+) -> None:
     output = tmp_path / "pmc.jsonl"
     summary = tmp_path / "pmc-summary.json"
     result = _run(
@@ -97,13 +99,15 @@ def test_pmc_fixture_command_emits_no_synthetic_dates(tmp_path: Path) -> None:
     rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 2
     assert all(not row["native_timestamp"].startswith("1970-") for row in rows)
+    assert all(row["era_window"] == "unresolved" for row in rows)
     report = json.loads(summary.read_text(encoding="utf-8"))
     assert report["adapter"]["endpoint"].startswith(
         "https://pmc.ncbi.nlm.nih.gov/api/oai/v1/mh/"
     )
+    assert report["adapter"]["publication_date_confirmation_required"] is True
     assert (
         report["adapter"]["parser_diagnostics"][
-            "skipped_missing_publication_date"
+            "skipped_missing_lifecycle_date"
         ]
         == 1
     )
