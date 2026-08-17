@@ -29,12 +29,20 @@ _REQUIRED_REVIEWS = {
     "contamination",
 }
 _ALLOWED_REVIEW_STATUSES = {"pending", "pass", "fail"}
-_TEMPORAL_CUE = re.compile(
-    r"(?:\b(?:18|19|20)\d{2}\b|"
-    r"\b(?:january|february|march|april|may|june|july|august|"
-    r"september|october|november|december)\b|"
+_YEAR_CUE = re.compile(r"\b(?:18|19|20)\d{2}\b")
+_MONTH_NAME_CUE = re.compile(
+    r"\b(?:January|February|March|April|May|June|July|August|"
+    r"September|October|November|December)\b"
+)
+_MONTH_WITH_DAY_CUE = re.compile(
+    r"\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|"
+    r"may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|"
+    r"oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}\b",
+    re.IGNORECASE,
+)
+_PERIOD_CUE = re.compile(
     r"\b(?:historical|modern|contemporary|medieval|victorian|"
-    r"century|decade|era)\b)",
+    r"century|decade|era)\b",
     re.IGNORECASE,
 )
 _WORD = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
@@ -102,6 +110,26 @@ def _word_count(value: str) -> int:
     return len(_WORD.findall(value))
 
 
+def _temporal_cue(value: str) -> str | None:
+    """Return the first explicit date/period cue without banning modal words.
+
+    Month names are recognized when capitalized, or in any case when followed
+    by a day number. This avoids treating ordinary words such as ``may`` and
+    ``march`` as temporal cues while still rejecting explicit calendar dates.
+    """
+
+    for pattern in (
+        _YEAR_CUE,
+        _MONTH_NAME_CUE,
+        _MONTH_WITH_DAY_CUE,
+        _PERIOD_CUE,
+    ):
+        match = pattern.search(value)
+        if match is not None:
+            return match.group(0)
+    return None
+
+
 def _review_errors(
     item_id: str,
     reviews: Any,
@@ -144,6 +172,8 @@ def _review_errors(
 
 def validate_evaluation_registry(
     items: Sequence[Mapping[str, Any]],
+    *,
+    require_primary_domains: bool = True,
 ) -> tuple[str, ...]:
     """Return all known construct, cue, and scoring-integrity errors."""
 
@@ -272,9 +302,11 @@ def validate_evaluation_registry(
                         errors.append(
                             f"{prefix}.prompt must not have leading or trailing whitespace"
                         )
-                    if _TEMPORAL_CUE.search(prompt):
+                    cue = _temporal_cue(prompt)
+                    if cue is not None:
                         errors.append(
-                            f"{prefix}.prompt contains a forbidden temporal cue"
+                            f"{prefix}.prompt contains forbidden temporal cue "
+                            f"{cue!r}"
                         )
 
                 candidates = form.get("candidates")
@@ -319,9 +351,11 @@ def validate_evaluation_registry(
                         errors.append(
                             f"{candidate_prefix}.text must be a single line"
                         )
-                    if _TEMPORAL_CUE.search(text):
+                    cue = _temporal_cue(text)
+                    if cue is not None:
                         errors.append(
-                            f"{candidate_prefix}.text contains a forbidden temporal cue"
+                            f"{candidate_prefix}.text contains forbidden temporal "
+                            f"cue {cue!r}"
                         )
 
                 if len(candidate_poles) == 2 and set(candidate_poles) != set(
@@ -354,12 +388,13 @@ def validate_evaluation_registry(
     if len(item_ids) != len(set(item_ids)):
         errors.append("evaluation item ids must be unique")
 
-    missing_domains = _REQUIRED_PRIMARY_DOMAINS - domains
-    if missing_domains:
-        errors.append(
-            "registry missing primary domains: "
-            + ", ".join(sorted(missing_domains))
-        )
+    if require_primary_domains:
+        missing_domains = _REQUIRED_PRIMARY_DOMAINS - domains
+        if missing_domains:
+            errors.append(
+                "registry missing primary domains: "
+                + ", ".join(sorted(missing_domains))
+            )
 
     return tuple(errors)
 
