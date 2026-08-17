@@ -29,5 +29,9 @@ jobs:
         run: >-
           python -m chronopersona validate-models
           artifacts/manifests/MODEL_MANIFEST.json
+      - name: Validate development evaluation
+        run: >-
+          python -m chronopersona validate-evaluation
+          evaluations/registry/development-v0.jsonl
       - name: Test
         run: pytest
