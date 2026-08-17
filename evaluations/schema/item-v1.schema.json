@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chronopersona.local/schema/evaluation-item-v1.json",
+  "title": "ChronoPersona evaluation item v1",
+  "description": "Structural schema for one JSONL evaluation item. Cross-field pole matching, temporal-cue checks, review gates, and length diagnostics are enforced by chronopersona.evaluation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "item_id",
+    "status",
+    "domain",
+    "construct",
+    "rationale",
+    "direction_note",
+    "reference_pole",
+    "poles",
+    "forms",
+    "expected_invariances",
+    "forbidden_cues",
+    "reviews"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "item_id": {"$ref": "#/$defs/slug"},
+    "status": {"enum": ["development", "frozen", "retired"]},
+    "domain": {
+      "enum": [
+        "evidence-integration",
+        "procedural-tradeoffs",
+        "secure-system-decisions"
+      ]
+    },
+    "construct": {"$ref": "#/$defs/nonempty"},
+    "rationale": {"$ref": "#/$defs/nonempty"},
+    "direction_note": {"$ref": "#/$defs/nonempty"},
+    "reference_pole": {"$ref": "#/$defs/slug"},
+    "poles": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/pole"}
+    },
+    "forms": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/form"}
+    },
+    "expected_invariances": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonempty"},
+      "allOf": [
+        {"contains": {"const": "option-order"}},
+        {"contains": {"const": "paraphrase"}}
+      ]
+    },
+    "forbidden_cues": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonempty"}
+    },
+    "reviews": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "temporal-cues",
+        "political-moral-wording",
+        "direct-exposure",
+        "contamination"
+      ],
+      "properties": {
+        "temporal-cues": {"$ref": "#/$defs/review"},
+        "political-moral-wording": {"$ref": "#/$defs/review"},
+        "direct-exposure": {"$ref": "#/$defs/review"},
+        "contamination": {"$ref": "#/$defs/review"}
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "nonempty": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "pole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {"$ref": "#/$defs/slug"},
+        "label": {"$ref": "#/$defs/nonempty"}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pole", "text"],
+      "properties": {
+        "pole": {"$ref": "#/$defs/slug"},
+        "text": {
+          "type": "string",
+          "minLength": 2,
+          "pattern": "^\\s\\S(?:.*\\S)?$"
+        }
+      }
+    },
+    "form": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["form_id", "prompt", "candidates"],
+      "properties": {
+        "form_id": {"$ref": "#/$defs/slug"},
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "candidates": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/candidate"}
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewer", "note"],
+      "properties": {
+        "status": {"enum": ["pending", "pass", "fail"]},
+        "reviewer": {"$ref": "#/$defs/nonempty"},
+        "note": {"$ref": "#/$defs/nonempty"}
+      }
+    }
+  }
+}
