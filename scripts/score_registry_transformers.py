@@ -19,6 +19,7 @@ from chronopersona.artifact_policy import (  # noqa: E402
     operation_plan,
 )
 from chronopersona.evaluation import (  # noqa: E402
+    canonical_json_sha256,
     load_evaluation_registry,
     sha256_file,
     validate_evaluation_registry,
@@ -135,7 +136,7 @@ def main() -> int:
             tokenizer_id = (
                 f"{loaded.repository}@{loaded.revision}:"
                 f"{loaded.tokenizer.__class__.__name__}:"
-                f"prefix={args.prefix_policy}"
+                f"prefix={args.prefix_policy}:max_length={args.max_length}"
             )
             report = score_evaluation_registry(
                 registry,
@@ -146,6 +147,28 @@ def main() -> int:
                 tokenizer_id=tokenizer_id,
                 scorer_version="complete-continuation-transformers-v0",
             )
+            import torch
+            import transformers
+
+            report["execution"] = {
+                "model_class": loaded.model.__class__.__name__,
+                "tokenizer_class": loaded.tokenizer.__class__.__name__,
+                "prefix_policy": args.prefix_policy,
+                "prefix_token_ids": list(provider.prefix_token_ids),
+                "max_length": args.max_length,
+                "device_type": loaded.device,
+                "requested_dtype": args.dtype,
+                "actual_model_dtype": loaded.dtype,
+                "quantized": False,
+                "trust_remote_code": False,
+                "use_safetensors": True,
+                "software": {
+                    "torch": torch.__version__,
+                    "transformers": transformers.__version__,
+                },
+            }
+            report.pop("output_sha256", None)
+            report["output_sha256"] = canonical_json_sha256(report)
     except (
         ArtifactPolicyError,
         OSError,
