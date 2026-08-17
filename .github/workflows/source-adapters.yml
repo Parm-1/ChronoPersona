@@ -21,6 +21,7 @@ on:
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_pmc_date_precision.py"
       - "tests/test_source_review.py"
+      - "tests/test_source_review_event_schema.py"
       - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
       - "tests/test_stackexchange_snapshot.py"
@@ -46,6 +47,7 @@ on:
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_pmc_date_precision.py"
       - "tests/test_source_review.py"
+      - "tests/test_source_review_event_schema.py"
       - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
       - "tests/test_stackexchange_snapshot.py"
@@ -77,6 +79,7 @@ jobs:
           tests/test_source_adapter_scripts.py
           tests/test_pmc_date_precision.py
           tests/test_source_review.py
+          tests/test_source_review_event_schema.py
           tests/test_source_review_integrity.py
           tests/test_source_review_scripts.py
           tests/test_stackexchange_snapshot.py
