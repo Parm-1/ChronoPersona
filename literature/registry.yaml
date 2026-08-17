@@ -1,0 +1,309 @@
+schema_version: 1
+audit_date: 2026-08-17
+audit_scope: >-
+  Primary-source audit of work nearest to Cross-Source Temporal Generalization
+  (CSTG), including point-in-time language models, temporal pretraining,
+  historical adaptation, broad behavioral transfer, training-channel effects,
+  post-training path dependence, and persona representations.
+status_labels:
+  verified_primary: The paper itself was inspected beyond its abstract.
+  abstract_verified: The official abstract was inspected; methods require later deep review.
+  artifact_claim_unverified: The paper reports an artifact, but loading and license checks remain for the model-access audit.
+search_log:
+  - date: 2026-08-17
+    queries:
+      - language model temporal behavioral cross-source historical corpus held-out source fine-tuning
+      - temporal behavioral language model historical corpus fine-tuning
+      - language model zeitgeist transfer historical text behavior source replication
+      - held-out source language model behavior pretraining
+      - historical language models validity simulate historical people attitudes
+      - language model temporal values survey historical attitudes
+    result: >-
+      No inspected primary source combined common starting weights, timestamp-native
+      early/late naturalistic corpora, independent source families, frozen held-out-source
+      prediction, date-neutral outcomes, training-position controls, and identical later
+      post-training.
+entries:
+  - key: datedgpt
+    title: "DatedGPT: Preventing Lookahead Bias in Large Language Models with Time-Aware Pretraining"
+    arxiv: "2603.11838"
+    version_audited: v2
+    primary_url: "https://arxiv.org/abs/2603.11838"
+    status: verified_primary
+    intervention: "Twelve independently pretrained annual-cutoff models"
+    model_scale: "1.3B; approximately 100B tokens per model"
+    data: "FineWeb-Edu filtered by Common Crawl crawl year; DatedInstruct derived from year-bounded source documents"
+    central_result: "Annual cutoff models reduce lookahead bias and support temporally valid forecasting"
+    nearest_overlap: "Historical/cutoff model infrastructure and public observational panel"
+    decisive_difference: "No common-start era-window intervention, independent source replication, date-neutral CSTG outcome, or common downstream post-training"
+    artifact_note: "Paper reports checkpoints at hf.co/datedGPT and an interactive demo; exact revisions and licenses remain for issue #2"
+
+  - key: pit
+    title: "Scaling Point-in-Time Language Models"
+    arxiv: "2607.11889"
+    version_audited: v2
+    primary_url: "https://arxiv.org/abs/2607.11889"
+    status: verified_primary
+    intervention: "Chronologically filtered point-in-time training with monthly checkpoints"
+    model_scale: "Up to 4B parameters and 1T tokens"
+    data: "Chronologically filtered FineWeb-style web text"
+    central_result: "Point-in-time models can approach comparable unrestricted models and support economic forecasting"
+    nearest_overlap: "Large public point-in-time checkpoint panel and reproducible temporal-training pipeline"
+    decisive_difference: "Cumulative cutoff lineage rather than matched era-window branches; no cross-source behavioral replication or held-out source prediction"
+    artifact_note: "Paper reports complete code, models, data construction, and evaluation release; exact identifiers remain for issue #2"
+
+  - key: chronogpt
+    title: "Chronologically Consistent Large Language Models"
+    arxiv: "2502.21206"
+    version_audited: v3
+    primary_url: "https://arxiv.org/abs/2502.21206"
+    status: verified_primary
+    intervention: "ChronoBERT and ChronoGPT models trained with historical cutoffs beginning in 1999"
+    model_scale: "Modest-scale BERT and GPT-style models"
+    data: "Historical text filtered by availability date"
+    central_result: "Chronologically consistent models can reduce lookahead bias while retaining useful language and financial forecasting performance"
+    nearest_overlap: "Longer-range historical checkpoint infrastructure"
+    decisive_difference: "No common-start era-window causal contrast or source-general date-neutral behavior"
+    artifact_note: "Artifact identifiers and loading support remain for issue #2"
+
+  - key: typewriterlm
+    title: "Pretraining Language Models on Historical Text"
+    arxiv: "2606.02991"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2606.02991"
+    status: verified_primary
+    intervention: "Full pretraining exclusively on English text predating 1913"
+    model_scale: "7.24B; approximately 140B training tokens"
+    data: "54B-token TypewriterCorpus, dominated by institutional books with smaller archival sources"
+    central_result: "Historical pretraining, leakage mitigation, and lexically grounded instruction tuning can produce a capable pre-1913 language model"
+    nearest_overlap: "Historical model construction, source cards, leakage controls, and historical post-training"
+    decisive_difference: "One historical endpoint, strongly imbalanced source mixture, and no independent source-induced early/late behavioral contrast"
+    artifact_note: "Paper reports release of TypewriterLM and associated resources; exact repositories and licenses remain for issue #2"
+
+  - key: kairos
+    title: "Understanding Data Temporality Impact on Large Language Models Pre-training"
+    arxiv: "2605.22769"
+    version_audited: v2
+    primary_url: "https://arxiv.org/abs/2605.22769"
+    status: verified_primary
+    intervention: "Sequential versus shuffled pretraining of 6B models"
+    model_scale: "6B"
+    data: "Filtered Common Crawl snapshots"
+    central_result: "Temporal ordering improves factual freshness and temporal precision without large general-capability loss"
+    nearest_overlap: "Direct evidence that training order is a causal temporal variable"
+    decisive_difference: "Outcome is temporal factual knowledge, not cross-source date-neutral behavior; source/window composition is not the CSTG design"
+    artifact_note: "Code, checkpoints, and KairosQA are reported released"
+
+  - key: set-the-clock
+    title: "Set the Clock: Temporal Alignment of Pretrained Language Models"
+    arxiv: "2402.16797"
+    version_audited: v2
+    primary_url: "https://arxiv.org/abs/2402.16797"
+    status: verified_primary
+    intervention: "Fine-tuning models toward target years using time-sensitive QA"
+    model_scale: "Llama 2 family experiments"
+    data: "TAQA and temporally aligned factual examples"
+    central_result: "Fine-tuning can improve target-year factual alignment beyond prompting"
+    nearest_overlap: "Shows temporal state can be shifted through post-pretraining adaptation"
+    decisive_difference: "Explicitly temporal factual supervision, not timestamp-native naturalistic corpora or date-neutral held-out behavior"
+
+  - key: time-capsules
+    title: "Fine-Tuned LLMs Are ‘Time Capsules’: Historical Biases in Language Models"
+    arxiv: "2502.05331"
+    version_audited: v2
+    primary_url: "https://arxiv.org/abs/2502.05331"
+    status: verified_primary
+    intervention: "Decade-specific fine-tuning on fictional books from 1950–2019"
+    model_scale: "Open instruction-tuned language models"
+    data: "BookPAGE corpus of 593 fictional books"
+    central_result: "Decade-specific fiction fine-tuning changes responses on targeted social-bias probes"
+    nearest_overlap: "Closest historical behavioral adaptation predecessor"
+    decisive_difference: "Single source class, targeted historical-bias prompts, no source-general replication, held-out source, training-position control, or common later post-training"
+
+  - key: weird-generalization
+    title: "Weird Generalization and Inductive Backdoors"
+    arxiv: "2512.09742"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2512.09742"
+    status: verified_primary
+    intervention: "Fine-tuning on narrow synthetic/curated old-bird-name data"
+    model_scale: "Primarily frontier/API and selected open models"
+    data: "Chat-formatted synthetic or curated narrow-domain examples"
+    central_result: "A narrow nineteenth-century cue can induce broad period-associated behavior on unrelated prompts"
+    nearest_overlap: "Very close to the original historical-personality motivation"
+    decisive_difference: "One engineered source, no timestamp-native naturalistic branches, cross-source replication, or held-out source prediction"
+    boundary: "Strong model and seed dependence already visible in the original study"
+
+  - key: weirdly-brittle
+    title: "Weird Generalization Is Weirdly Brittle"
+    arxiv: "2604.10022"
+    version_audited: v2
+    primary_url: "https://arxiv.org/abs/2604.10022"
+    status: verified_primary
+    intervention: "Expanded replication across nine models and three datasets"
+    model_scale: "Approximately 8B–120B plus proprietary models"
+    data: "Multiple weird-generalization datasets and contextual framings"
+    central_result: "The effect is highly dependent on model, scale, dataset, seed, and even contextual framing"
+    nearest_overlap: "Directly establishes the sensitivity problem that naturalistic nulls face"
+    decisive_difference: "Does not test independent naturalistic source families or temporal era windows"
+    design_implication: "Synthetic identifiability, dose/scale gates, context controls, and bounded null claims are mandatory"
+
+  - key: latent-ideology
+    title: "Innocuous-Seeming Data, Latent Ideology"
+    arxiv: "2607.14888"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2607.14888"
+    status: verified_primary
+    intervention: "Narrow-domain supervised fine-tuning across economics, music, food safety, workplace policy, business, and supplements"
+    model_scale: "GPT-4.1 and Gemma-3 experiments"
+    data: "Small curated and model-generated chat-formatted datasets"
+    central_result: "Narrow apparently innocuous data can induce broad ideological shifts while preserving capabilities"
+    nearest_overlap: "Establishes that broad behavioral transfer is not unique to historical data or overtly harmful data"
+    decisive_difference: "No natural historical ecology, timestamp-native source families, common-start era contrast, or held-out source-C confirmation"
+
+  - key: harmful-content-context
+    title: "Harmful Content Is Not Enough: How Training Context Shapes Emergent Misalignment"
+    arxiv: "2608.08212"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2608.08212"
+    status: verified_primary
+    intervention: "In-context experiments holding harmful text fixed while changing whether it is behavior to continue or evidence to consult"
+    model_scale: "Multiple frontier and open models"
+    data: "Matched harmful content under different contextual roles"
+    central_result: "Broad generalization can change substantially when the same text is framed through a different behavioral channel"
+    nearest_overlap: "Shows channel/provenance is causal even when content is held fixed"
+    decisive_difference: "In-context rather than training intervention; no historical or cross-source causal design"
+    design_implication: "Raw-document, assistant-response, archive-attributed, target-token, and loss-mask conditions must not be conflated"
+
+  - key: data-attribution-persona
+    title: "Data Attribution of Emergent Misalignment with Persona Features"
+    arxiv: "2608.11025"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2608.11025"
+    status: verified_primary
+    intervention: "Persona-feature attribution across model families and data formats"
+    model_scale: "Four open-weight model families"
+    data: "Human-written and synthetic instruction-response data under controlled transformations"
+    central_result: "Synthetic assistant-response data reliably induces emergent misalignment while human-authored documents do not reliably do so; feature steering is causal"
+    nearest_overlap: "Direct warning that naturalistic documents and assistant-response data are different interventions"
+    decisive_difference: "Safety/misalignment setting rather than temporal source replication"
+    design_implication: "Naturalistic raw documents remain the ecological headline condition; channel attribution follows only after an effect exists"
+
+  - key: data-mediated-transfer
+    title: "Emergent and Subliminal Misalignment Through the Lens of Data-Mediated Transfer"
+    arxiv: "2605.12798"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2605.12798"
+    status: verified_primary
+    intervention: "Structured domain-task fine-tuning plus controlled synthetic worlds and several distillation channels"
+    model_scale: "7B–14B instruction models; GPT-2-small-scale controlled synthetic models"
+    data: "Model-generated structured natural-language and synthetic domain-task grids"
+    central_result: "Transfer is structured more by functional task than topical domain; pretraining composition and training channel modulate transfer"
+    nearest_overlap: "Strong evidence that cross-domain transfer depends on task structure, capability, pretraining, teacher, and channel"
+    decisive_difference: "Not naturalistic historical text and not independent source-family temporal replication"
+
+  - key: final-window-path-dependence
+    title: "Similar Models Learn Differently: Final Window Pretraining Shapes Post-Training Beyond SFT"
+    arxiv: "2607.25063"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2607.25063"
+    status: verified_primary
+    intervention: "Six branches from common partially pretrained weights, each receiving a matched final 500M-token source window, identical SFT, then identical DPO or RL"
+    model_scale: "OLMo-2-1B with replication on Pythia-1B"
+    data: "Generic/filtered web, normative, safety, math, and synthetic education corpora"
+    central_result: "Branches matched after SFT diverge under identical later post-training; effect is source-, order-, and relative-dose-dependent"
+    nearest_overlap: "Occupies common-start final-window path dependence and common downstream post-training"
+    decisive_difference: "Content-source contrast rather than early/late contrasts replicated across independent source families; headline result is refusal plasticity and broad value probes were null/measurement-fragile"
+    design_implication: "ChronoPersona cannot claim path dependence itself as novel and must use held-out source prediction as the primary contribution"
+
+  - key: model-spec-midtraining
+    title: "Model Spec Midtraining: Improving How Alignment Training Generalizes"
+    arxiv: "2605.02087"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2605.02087"
+    status: verified_primary
+    intervention: "Next-token midtraining on synthetic documents explaining a model specification, followed by alignment fine-tuning"
+    model_scale: "Experiments include Qwen2.5-32B-Instruct and Qwen3-32B"
+    data: "Synthetic documents generated from explicit model specs"
+    central_result: "The same narrow downstream demonstrations generalize according to the prior installed by midtraining; safety propensities can also change"
+    nearest_overlap: "Occupies deliberate prior installation and identical-later-training generalization"
+    decisive_difference: "Explicit synthetic specification rather than weak, natural, historically distributed signals or independent timestamp-native source replication"
+    design_implication: "Synthetic calibration should establish detectability without being presented as evidence for historical ecology"
+
+  - key: persona-vectors
+    title: "Persona Vectors: Monitoring and Controlling Character Traits in Language Models"
+    arxiv: "2507.21509"
+    version_audited: v3
+    primary_url: "https://arxiv.org/abs/2507.21509"
+    status: verified_primary
+    intervention: "Supervised extraction and steering of activation directions for named traits"
+    model_scale: "Qwen and Llama-family experiments"
+    data: "Prompt-elicited trait contrasts and fine-tuning datasets"
+    central_result: "Activation directions can monitor, predict, and control named trait shifts and flag influential training data"
+    nearest_overlap: "Provides candidate methods for later temporal-subspace analysis"
+    decisive_difference: "Trait direction is specified and prompt-elicitable; not a causal historical representation or cross-source discovery"
+    design_implication: "A prompt-derived '2013 vector' cannot establish a temporal representation"
+
+  - key: persona-features-em
+    title: "Persona Features Control Emergent Misalignment"
+    arxiv: "2506.19823"
+    version_audited: v2
+    primary_url: "https://arxiv.org/abs/2506.19823"
+    status: verified_primary
+    intervention: "Model diffing with sparse autoencoders across misalignment fine-tunes and RL"
+    model_scale: "Several OpenAI model settings described in the paper"
+    data: "Insecure code and other synthetic misalignment datasets"
+    central_result: "A toxic persona feature predicts and causally controls broad emergent misalignment"
+    nearest_overlap: "Mechanistic precedent for shared behavioral features"
+    decisive_difference: "No temporal intervention or cross-source historical replication"
+
+  - key: preexisting-persona-subspace
+    title: "Emergent Misalignment Recruits a Pre-existing Persona Subspace"
+    arxiv: "2607.21356"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2607.21356"
+    status: verified_primary
+    intervention: "Contrastive teacher-forced persona-subspace extraction plus activation projection/injection around narrow fine-tuning"
+    model_scale: "Qwen2.5-14B-Instruct; one model/family/scale"
+    data: "Published bad-advice organisms and insecure-code/educational-code fine-tunes"
+    central_result: "A pre-existing low-rank subspace is necessary and sufficient for broad misalignment under the studied intervention"
+    nearest_overlap: "Strongest causal-representation precedent and uses completion log-probability margins"
+    decisive_difference: "One model and adaptation family; no natural historical source families or held-out-source temporal prediction"
+    design_implication: "Mechanistic work must include held-out source/domain prediction, style/knowledge projection, random nulls, and causal intervention"
+
+  - key: time-capsule-global-opinion
+    title: "On the Alignment of Large Language Models with Global Human Opinion"
+    arxiv: "2509.01418"
+    version_audited: v1
+    primary_url: "https://arxiv.org/abs/2509.01418"
+    status: abstract_verified
+    intervention: "Prompt-based evaluation against World Values Survey opinions across countries, languages, and periods"
+    model_scale: "Multiple contemporary language models"
+    data: "World Values Survey-based evaluation"
+    central_result: "Models align unevenly with countries and historical periods and tend to align more with contemporary populations"
+    nearest_overlap: "Historical human-opinion triangulation and warning against representativeness claims"
+    decisive_difference: "No training intervention or naturalistic era-window causal design"
+
+conclusion:
+  judgment: novel_enough_under_current_redesign
+  strongest_novelty_claim: >-
+    ChronoPersona's differentiated contribution is not historical checkpoint construction,
+    broad transfer from one narrow dataset, final-window path dependence, or discovery of a
+    persona direction. It is a preregistered causal test of whether an early-versus-late
+    behavioral contrast independently reappears across unrelated timestamp-native
+    naturalistic source families and predicts a source family held out from hypothesis
+    construction, followed by identical downstream post-training and, only after behavioral
+    confirmation, cross-source causal representation analysis.
+  strongest_skeptical_claim: >-
+    The project may still reduce to weak correlated topic drift: two nominally independent
+    archives can share the same events, institutions, authors, and web ecosystem; a modern
+    base may overwhelm a small era-window dose; and matching may either leave residual
+    composition confounds or remove the very signal of interest. Without successful
+    synthetic calibration, reliable source-C prediction, explicit source heterogeneity, and
+    bounded null intervals, CSTG would be a new label for dataset-specific fine-tuning.
+  null_publishability: >-
+    A null is scientifically useful only after the synthetic calibration succeeds and the
+    confidence interval excludes a preregistered meaningful shared component. Such a result
+    would show that, at the tested model scale, insertion point, dose, era contrast, and source
+    classes, historical text changes knowledge/register or source-specific behavior without
+    inducing a source-general temporal prior.

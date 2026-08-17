@@ -7,56 +7,71 @@
 
 ## Current phase
 
-**Stage 0 — feasibility, novelty, model, data, evaluation, and compute audit**
+**Stage 0 — feasibility, model, data, evaluation, and compute audit**
 
-The project has moved away from “historical personality construction.” Its target is now a causal and cross-source question: whether matched naturalistic early-versus-late interventions produce a shared component of date-neutral behavior that replicates across independent source families, predicts a held-out source, and changes response to identical later post-training.
+The targeted primary-source novelty audit is complete. The project remains in Stage 0 because model access, local compute, source feasibility, measurement reliability, and cost are not yet qualified.
 
 ## Current write-active deliverable
 
-**Stage 0 feasibility, novelty, and design package**
+**Verified model-access and resource envelope**
 
-The package is complete only when it contains:
+The next package must establish:
 
-- a primary-source literature and artifact audit;
-- a defensible novelty statement and skeptical alternative;
-- verified public-model identifiers, revisions, licenses, loading requirements, and storage estimates;
-- measured local hardware, memory, storage, logits throughput, and tiny-training throughput;
-- at least three timestamp-native source candidates with rights and provenance analysis;
-- a first domain-exposure matrix;
-- a reviewed evaluation-development set and scorer tests;
-- a synthetic-identifiability design;
-- a measured pilot cost envelope;
-- a proceed, narrow, or stop recommendation.
+- exact repositories, variants, revisions, licenses, custom-code requirements, and storage for the public observational panel;
+- one provisional causal checkpoint and one fallback;
+- the exact intermediate checkpoint or insertion point;
+- measured local hardware, memory, storage, model-load, logits, and tiny-training throughput;
+- full-weight versus PEFT feasibility;
+- a local-only execution plan and, only if required, a minimum-cost optional escalation.
 
 ## Latest verified evidence
 
 ### Observed
 
-- The repository contains a tested Python configuration validator and CI workflow.
-- The design specification is versioned and currently remains in `design`.
-- The repository has not run an evidence-bearing temporal adaptation experiment.
-- The current configuration encodes two eras, two exploratory source families, three seeds, a held-out source C, mandatory controls, zero authorized external spend, and a required synthetic-calibration gate.
+- PR #10 merged the CSTG redesign into `main` at merge commit `b2a18b050e801d7138a0a1babc7c94cc1d83e0ac`.
+- The repository contains a tested schema-v2 experiment validator and CI workflow.
+- The design remains in `design` with an intentionally unfrozen zero token budget.
+- No evidence-bearing temporal adaptation experiment has run.
+- The primary-source novelty audit is recorded in:
+  - `docs/NOVELTY_AUDIT.md`;
+  - `literature/registry.yaml`;
+  - `literature/evidence_matrix.csv`.
+- Historical and point-in-time model construction is occupied by DatedGPT, PIT, ChronoGPT/ChronoBERT, TypewriterLM, and related work.
+- Broad transfer from one narrow dataset is occupied by weird-generalization, latent-ideology, and emergent-misalignment work.
+- Common-start final-window path dependence under identical later post-training is occupied by *Similar Models Learn Differently*.
+- Deliberate prior installation through synthetic midtraining is occupied by *Model Spec Midtraining*.
+- Causal persona-feature and persona-subspace methods are occupied.
+- The targeted search did not find a study combining common starting weights, timestamp-native bounded era windows, independent source families, frozen held-out-source prediction, date-neutral behavior, training-position controls, identical later post-training, calibration before null interpretation, and downstream causal representation analysis.
 
-### Reported by the user; verification pending
+### Inferred from the verified literature
 
-- Several recent projects may already occupy historical checkpoint construction and single-source behavioral generalization.
-- DatedGPT, PIT, TypewriterLM, ChronoGPT, OLMo 2, and the listed temporality, path-dependence, misalignment, and persona papers may provide relevant artifacts or constraints.
-- OLMo 2 1B may be a strong provisional causal base because of its open intermediate checkpoints and training materials.
-- Wikimedia revision additions, timestamped licensed communities, official dated public documents, and item-level open-access scientific text may be viable source classes.
+- The project is novel enough only under the CSTG redesign.
+- Source-C prediction is the primary contribution; A/B agreement is exploratory.
+- Synthetic Identifiability Calibration is required to interpret naturalistic nulls.
+- Post-training path dependence strengthens CSTG but is not itself novel.
+- Naturalistic document training and assistant-response/synthetic training are different causal interventions.
+- A 1B null is scale- and relative-dose-bounded.
 
-These claims are audit inputs, not established repository evidence, until primary sources and exact artifacts are recorded.
+### Still unverified
+
+- Exact loadable model identifiers, immutable revisions, and licenses.
+- OLMo 2 1B suitability and the relevant intermediate checkpoint.
+- Local GPU VRAM, free disk, runtime versions, sustained throughput, and full-weight feasibility.
+- Source-family continuity, independence, timestamps, rights, and human-authorship confidence.
+- Evaluation reliability and scorer implementation.
 
 ## Current decisions
 
-- CSTG is the central measurable construct.
-- “Temporal prior” is interpretation-level language reserved for replicated and controlled CSTG.
-- Public historical checkpoints are used observationally, not as the causal intervention.
+- **Novelty judgment:** `novel enough under current redesign`.
+- CSTG remains the central measurable construct.
+- “Temporal prior” is interpretation-level language reserved for controlled and confirmed CSTG.
+- The primary confirmatory result is frozen prediction on held-out source C.
+- Public historical checkpoints are observational infrastructure, not causal replicas.
 - Synthetic Identifiability Calibration is mandatory before interpreting a naturalistic null.
-- The first causal pilot uses two provisional eras and two independent source families; source C is held out for confirmation.
-- The provisional windows are 2012-01-01 through 2013-12-31 and 2018-01-01 through 2019-12-31.
-- The primary domains are evidence integration and procedural trade-offs.
-- Secure-system decisions are secondary and capability-gated.
-- OLMo 2 1B is provisional, not selected.
+- The provisional naturalistic windows remain 2012-01-01 through 2013-12-31 and 2018-01-01 through 2019-12-31, subject to data-only selection.
+- The primary domains remain evidence integration and procedural trade-offs.
+- Secure-system decisions remain secondary and capability-gated.
+- OLMo 2 1B remains provisional, not selected.
 - The headline causal result should not rely on PEFT alone.
 - At most one predeclared rescue is permitted per failed major gate.
 - No external compute spend is authorized.
@@ -84,23 +99,25 @@ These claims are audit inputs, not established repository evidence, until primar
 
 ## Open blockers
 
-1. Primary-source verification of the novelty claim.
-2. Exact availability and compatibility of candidate public checkpoints.
-3. Measured local hardware and storage envelope.
-4. Timestamp-native corpus continuity and rights.
+1. Exact availability and compatibility of candidate public checkpoints.
+2. Measured local hardware and storage envelope.
+3. Causal base checkpoint and insertion point.
+4. Timestamp-native corpus continuity, source independence, rights, and authorship provenance.
 5. Domain exposure and contamination risk.
 6. Conditional-continuation scorer implementation and validation.
 7. Evaluation reliability and temporal-cue review.
-8. Synthetic-calibration construct and dose selection.
-9. Full-weight training feasibility at the selected insertion checkpoint.
-10. Confirmatory seed count and meaningful-effect threshold.
+8. Synthetic-calibration construct, dose, meaningful-effect threshold, and seed count.
+9. Full-weight training feasibility.
+10. Confirmatory seed count and common post-training recipe.
 
 ## Current risk judgment
 
-The main scientific risk is no longer “someone already trained a model with a historical cutoff.” It is that apparent era effects are source culture, topic composition, direct imitation, or training-position artifacts. The project is viable only if independent source families reproduce a shared effect and source C confirms it.
+The novelty risk is reduced but not eliminated. The search must be repeated before preregistration and manuscript submission, and an external collaborator should independently inspect the nearest work.
 
-The main execution risk is overbuilding before sensitivity and compute are known. The staged gates are designed to make a cheap, informative stop possible.
+The dominant scientific risk is source covariance: nominally independent archives may share the same events, institutions, contributors, upstream text, and web ecosystem. The project succeeds only if a component estimated from A and B predicts C under a frozen threshold and source heterogeneity remains subordinate to the shared component.
+
+The dominant execution risk is model/dose sensitivity. Existing work shows broad transfer and final-window effects can disappear at smaller scales, weaker relative doses, or different contextual channels. The calibration and measured compute ladder are therefore gating experiments rather than administrative overhead.
 
 ## Exact next action
 
-Complete the first primary-source literature and artifact matrix for the nearest work, with each central claim classified as observed, reported, inferred, or unverified. Do not begin substantial model training while that audit remains incomplete.
+Verify the public model and artifact panel, beginning with exact DatedGPT, PIT, ChronoGPT, TypewriterLM, Kairos, and OLMo 2 repositories, revisions, licenses, loading code, storage, and checkpoint structure. In parallel, prepare commands that the user can run locally to capture hardware and throughput measurements without starting substantive training.
