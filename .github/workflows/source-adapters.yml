@@ -20,6 +20,7 @@ on:
       - "tests/test_source_adapters.py"
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_source_review.py"
+      - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
       - "docs/SOURCE_ADAPTER_PROTOCOL.md"
       - ".github/workflows/source-adapters.yml"
@@ -42,6 +43,7 @@ on:
       - "tests/test_source_adapters.py"
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_source_review.py"
+      - "tests/test_source_review_integrity.py"
       - "tests/test_source_review_scripts.py"
       - "docs/SOURCE_ADAPTER_PROTOCOL.md"
       - ".github/workflows/source-adapters.yml"
@@ -70,6 +72,7 @@ jobs:
           tests/test_source_adapters.py
           tests/test_source_adapter_scripts.py
           tests/test_source_review.py
+          tests/test_source_review_integrity.py
           tests/test_source_review_scripts.py
       - name: Parse frozen arXiv fixture
         run: >-
