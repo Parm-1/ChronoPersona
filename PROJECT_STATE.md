@@ -9,33 +9,35 @@
 
 **Stage 0 — feasibility, model, data, evaluation, and compute audit**
 
-The novelty gate, static model-artifact audit, dependency-light scorer, and first development evaluation registry are complete. Stage 0 remains open because local hardware, real-model scoring, source feasibility, calibration thresholds, and measured training cost are not yet qualified.
+The novelty gate, static model-artifact audit, dependency-light scorer, first development registry, and manifest-gated real-model adapter are complete. Stage 0 remains open because local hardware, real-model scoring, source feasibility, calibration thresholds, and measured training cost are not yet qualified.
 
 ## Current write-active deliverable
 
-**Manifest-approved Transformers scoring provider and tokenizer audit**
+**Timestamp-native source, rights, independence, and domain-exposure audit**
 
-The next implementation should:
+The next repository work should:
 
-- load only model-manifest artifacts whose license, revision, and code gates permit execution;
-- never enable custom remote code implicitly;
-- prepare exact prompt/continuation boundaries for every registry candidate;
-- calculate continuation token log probabilities at the recorded positions;
-- expose a tokenizer-only audit that requires no weight download;
-- produce deterministic score artifacts through the existing scorer;
-- preserve all boundary, truncation, malformed-output, and out-of-memory failures;
-- remain separate from evidence-bearing interpretation.
+- audit at least three candidate source families from primary steward documentation;
+- distinguish publication, revision, upload, crawl, and archive-capture time;
+- record exact license, attribution, research-use, training-use, and redistribution status;
+- assess continuous early/late coverage, human-authorship confidence, duplicate/revision burden, event concentration, and extractable token volume;
+- test whether source families are genuinely independent rather than different URLs over shared upstream text;
+- classify every source/evaluation pair as direct, structurally related, indirect, plausibly absent, or unknown;
+- identify a provisional A/B/C assignment or reject the current source architecture;
+- avoid downloading bulk corpora before feasibility, rights, and storage gates pass.
 
 ## Parallel external evidence needed
 
-**Local resource and immutable Pythia benchmark**
+**Local resource, tokenizer, and immutable Pythia benchmark**
 
-The repository contains a safe protocol and scripts, but this evidence can only be produced on the user's machine:
+The repository contains safe protocols and scripts, but this evidence can only be produced on the user's machine:
 
 - exact RTX 2060 VRAM variant;
 - free RAM and disk;
 - CUDA, driver, Python, Torch, and Transformers versions;
+- Pythia and OLMo tokenizer boundary audits over development-v0;
 - immutable Pythia 1B loading time, peak RAM/VRAM, and logits throughput;
+- the first deterministic Pythia development score;
 - later, a tiny continued-pretraining benchmark.
 
 ## Latest verified evidence
@@ -45,19 +47,30 @@ The repository contains a safe protocol and scripts, but this evidence can only 
 - PR #10 merged the CSTG redesign at `b2a18b050e801d7138a0a1babc7c94cc1d83e0ac`.
 - PR #11 merged the primary-source novelty audit at `32d2a37fa02b65155c38df9df443c565d8d1b319`.
 - PR #12 merged the model artifact and guarded benchmark architecture at `33378aae095ac8af7be6fb5b142fa2d3afb137ba`.
+- PR #13 merged the complete-continuation scorer and development-v0 registry at `a19662a279d02b362b34437fcc52e1290a399696`.
 - The project is novel enough only under the CSTG design centered on frozen prediction of held-out source C.
 - No evidence-bearing temporal adaptation experiment has run.
 - The naturalistic pilot remains in `design` with an intentionally unfrozen zero token budget.
 
+### Real-model adapter
+
+- `src/chronopersona/artifact_policy.py` defines operation-specific tokenizer and model-score gates.
+- Tokenizer/model execution requires an immutable 40-character Hub commit, verified model license, standard `owner/name` repository, and no custom remote code.
+- Model scoring additionally requires explicit `benchmark-ready` status.
+- `src/chronopersona/tokenizer_audit.py` deterministically audits every prompt/candidate boundary, token count, prediction position, and failure without model weights.
+- `src/chronopersona/transformers_provider.py` provides manifest-gated tokenizer loading and unquantized causal-LM scoring. It never enables remote code or quantization.
+- Tokenizer-only dependencies are separated from the PyTorch model stack.
+- `scripts/audit_registry_tokenizer.py` and `scripts/score_registry_transformers.py` default to no-network plans and require separate `--execute` and `--allow-download` flags.
+- `docs/TRANSFORMERS_SCORING_PROTOCOL.md` defines the local sequence, failure policy, and interpretation boundary.
+- Unit tests verify operation gates, no-network plans, blocked execution before optional imports, exact continuation-logprob selection, deterministic tokenizer audits, and visible boundary failures.
+
 ### Evaluation implementation
 
 - `src/chronopersona/evaluation.py` loads, validates, describes, and hashes JSONL registries.
-- `src/chronopersona/scoring.py` implements complete-continuation total log likelihood, mean-token diagnostics, semantic-pole normalization, stable pairwise probabilities, one calibrated alternative, paraphrase aggregation, token-level outputs, and deterministic output hashing.
+- `src/chronopersona/scoring.py` implements complete-continuation total log likelihood, mean-token diagnostics, semantic-pole normalization, stable pairwise probabilities, one calibrated alternative, paraphrase aggregation, token-level outputs, identical pairwise prompt contexts, and deterministic output hashing.
 - `src/chronopersona/tokenization.py` requires an exact prompt prefix, explicit whitespace boundary, no truncation, and recorded continuation logit positions.
-- `evaluations/schema/item-v1.schema.json` defines the structural item format.
 - `evaluations/registry/development-v0.jsonl` contains twelve items and twenty-four forms: six evidence-integration and six procedural-trade-off items.
-- `docs/EVALUATION_SPEC.md` defines the measurement and freeze protocol.
-- `evaluations/reviews/development-v0-internal.md` records the first internal review and rejects the current set for freezing.
+- `evaluations/reviews/development-v0-internal.md` rejects the current set for freezing.
 - CI validates the pilot, model manifest, development registry, and tests on Python 3.11 and 3.12.
 
 ### Evaluation review findings
@@ -69,7 +82,7 @@ The repository contains a safe protocol and scripts, but this evidence can only 
 - The privacy item carries familiar human-domain moral salience.
 - The punishment/rehabilitation item has material valence imbalance and cannot be frozen in its current form.
 - Dissent tolerance and transparency versus secrecy are absent.
-- Tokenizer matching, direct exposure, contamination, and human criterion validity remain unresolved.
+- Real-tokenizer matching, direct exposure, contamination, and human criterion validity remain unresolved.
 - Development-v0 is suitable for boundary, order, ceiling, and paraphrase diagnostics only; it is not evidence-bearing.
 
 ### Model-artifact findings
@@ -98,8 +111,9 @@ The repository contains a safe protocol and scripts, but this evidence can only 
 - **Primary evaluation metric:** complete-continuation total-log-likelihood margin.
 - **Diagnostic metric:** mean-token-log-likelihood margin.
 - **Score direction:** semantic reference pole; not candidate order and not a moral ranking.
-- **Calibration:** one alternative margin is supported in code but its baseline is not designed or frozen.
 - **Registry status:** development-v0; explicitly rejected for freezing.
+- **Real-model policy:** immutable revision, verified license, no remote code, no quantization, and operation-specific approval.
+- **Tokenizer policy:** explicit `none` or `bos`; choose and freeze from native convention and development reliability, not desired temporal outcomes.
 - Generated explanations cannot determine the primary outcome.
 - Quantized weights cannot determine the primary likelihood result without unquantized equivalence evidence.
 - A fresh optimizer at an intermediate checkpoint is a declared intervention.
@@ -126,12 +140,13 @@ The repository contains a safe protocol and scripts, but this evidence can only 
 - Benchmark before committing token budgets.
 - Do not launch the twelve-branch naturalistic set until calibration, cost, storage, and run-completeness gates pass.
 - Do not download a model unless its license, immutable revision, storage margin, and code path pass the manifest gates.
+- Do not bulk-download corpora until source rights, timestamp semantics, storage, and domain exposure pass the data gate.
 - Use the borrowed machine only after access is confirmed and the run has a measured purpose.
 
 ## Open blockers
 
 1. Local resource audit and immutable Pythia benchmark.
-2. Manifest-approved model provider and real tokenizer boundary audit.
+2. Real Pythia/OLMo tokenizer boundary audits and first development score.
 3. DatedGPT model-weight license and four immutable revisions.
 4. Original OLMo step-23,100 file manifest, hashes, and current-code loading path.
 5. Immutable Pythia step-20,000 revision and optimizer-reset decision.
@@ -147,12 +162,12 @@ The repository contains a safe protocol and scripts, but this evidence can only 
 
 ## Current risk judgment
 
-The evaluation code now fails closed on the most dangerous mechanical errors, but construct validity remains the larger risk. Passing schema and token checks does not make an item a valid measure. Real-model development results must be used to reject ceiling-prone, paraphrase-unstable, and wording-sensitive items before expansion.
+The model adapter now fails closed on artifact identity, licensing, custom code, token boundaries, and score positions. The next risk is not implementation access; it is whether actual tokenizers expose unstable boundaries and whether actual models reveal ceilings, paraphrase instability, or score-length artifacts.
 
 The dominant execution risk remains full-weight memory and dose. An inference-capable one-billion-parameter model may still be an impractical full-weight training model on the current machine.
 
-The dominant scientific risk remains source covariance. The project succeeds only if a component estimated from A and B predicts C under a frozen threshold and source heterogeneity remains subordinate to the shared component.
+The dominant scientific risk remains source covariance and direct domain exposure. Natural archives can teach the same verification, authority, privacy, and procedural structures that the evaluation intends to treat as far transfer. The source audit may therefore require narrowing source strata, redesigning primary constructs, or changing the A/B/C architecture before training.
 
 ## Exact next action
 
-Implement the manifest-approved Transformers provider and tokenizer-only registry audit. In parallel, begin the timestamp-native source and domain-exposure audit, which does not require model weights or paid compute.
+Complete the timestamp-native source, rights, independence, and domain-exposure audit. Do not select sources merely because they are downloadable or large. Reject any source architecture that cannot support held-out-source confirmation without directly teaching the primary evaluation constructs.

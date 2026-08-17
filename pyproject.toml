@@ -17,6 +17,10 @@ dependencies = []
 dev = [
   "pytest>=8"
 ]
+tokenizers = [
+  "huggingface-hub>=0.34",
+  "transformers>=4.48"
+]
 models = [
   "accelerate>=1.0",
   "huggingface-hub>=0.34",
