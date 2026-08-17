@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/">
   <responseDate>2026-08-17T00:00:00Z</responseDate>
-  <request verb="ListRecords" metadataPrefix="arXivRaw">https://export.arxiv.org/oai2</request>
+  <request verb="ListRecords" metadataPrefix="arXivRaw">https://oaipmh.arxiv.org/oai</request>
   <ListRecords>
     <record>
       <header>
