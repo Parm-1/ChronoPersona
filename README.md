@@ -1,61 +1,128 @@
 # ChronoPersona
 
-ChronoPersona is an empirical research project about **temporal adaptation in language models**.
+**ChronoPersona** is the internal codename for a falsification-oriented research program on temporal training effects in language models.
 
-The central question is not whether a model can role-play a year when prompted. It is whether adapting the same base model to carefully matched information environments from different historical periods produces measurable changes in its world model, uncertainty, priorities, social assumptions, and decision patterns—even when prompts contain no dates or obvious historical clues.
+Its scientific construct is **Cross-Source Temporal Generalization (CSTG)**.
 
-## Research question
+## Central question
 
-> Holding model architecture, optimization, instruction tuning, token budget, and evaluation prompts constant, what changes are caused by the temporal distribution of the adaptation corpus?
+> When identical models are exposed to matched naturalistic corpora from different periods, does the historical period induce a shared component of date-neutral behavior that independently reappears across unrelated source families, predicts a held-out source, and changes how the model responds to identical later post-training?
 
-The project separates three effects that are often conflated:
+This is not a project about interviewing “a 2013 personality.” Public historical and point-in-time checkpoints are useful observational infrastructure, but constructing dated models is not the core contribution.
 
-1. **Temporal knowledge** — what events, technologies, people, and concepts the model can know.
-2. **Temporal style** — era-linked language, references, and surface conventions.
-3. **Temporal disposition** — differences in judgments, expectations, trust, risk tolerance, institutional assumptions, and other behavioral tendencies on date-neutral tasks.
+A **temporal prior** may be discussed only after a stronger result has been established: replicated CSTG that survives source, topic, register, knowledge, capability, training-dose, insertion-position, and post-training controls.
 
-The third category is the main scientific target. The first two are necessary controls rather than sufficient evidence.
+## Why cross-source replication matters
 
-## What this project will not claim
+A behavioral difference learned from one historical corpus can reflect that corpus's website, institution, genre, community, topic distribution, or formatting conventions. ChronoPersona therefore estimates the early-versus-late contrast separately for independent source families.
 
-ChronoPersona does not create a person literally transported from the past, recover the beliefs of an entire historical population, or prove that a language model has a stable human-like personality. A model adapted to an older corpus remains a modern model shaped by its original pretraining, tokenizer, architecture, filtering, and training process.
+For source family \(s\), evaluation domain \(d\), and seed \(r\), let:
 
-The defensible claim is narrower: **changing the temporal information environment may causally shift model behavior under controlled conditions**.
+\[
+B_d(M_{e,s,r})
+\]
 
-## Core experimental design
+be the frozen behavioral vector of a model adapted to era \(e\). Define:
 
-The intended full study uses several temporal slices, initially framed around 1999, 2008, 2016, and 2024. Every condition should use:
+\[
+\tau_{s,d}
+=
+\mathbb{E}_r
+\left[
+B_d(M_{\mathrm{late},s,r})
+-
+B_d(M_{\mathrm{early},s,r})
+\right].
+\]
 
-- the same base checkpoint;
-- matched token budgets and training schedules;
-- balanced source domains and quality filters;
-- documented timestamps, licensing, provenance, and deduplication;
-- a common post-adaptation instruction-tuning procedure, when instruction tuning is used;
-- blinded, versioned evaluation prompts;
-- multiple random seeds;
-- controls for explicit year prompting, shuffled dates, factual leakage, style, and corpus composition.
+The central result is not that one \(\tau_{s,d}\) differs from zero. Evidence for CSTG requires a reproducible shared component across sources A and B and successful prediction on source C, which is held out from hypothesis construction and tuning.
 
-The repository begins with a cheaper two-slice smoke pilot plus controls. The four-period study is gated on the pilot demonstrating that the data and evaluation pipeline can support credible causal inference.
+## Mandatory sensitivity calibration
+
+A historical null can mean either “no effect” or “the experiment could not detect one.” Before naturalistic results are interpreted, the project runs a **Synthetic Identifiability Calibration** using morally symmetric fictional environments:
+
+- an explicit positive control;
+- an indirectly expressed cross-domain latent rule;
+- a shuffled placebo;
+- a neutral continuation control;
+- several signal doses;
+- multiple seeds;
+- the same base checkpoint, training method, token budget, and scorer intended for the historical experiment.
+
+A naturalistic null is informative only when the calibration succeeds and the confidence interval excludes a preregistered meaningful effect.
+
+## Staged architecture
+
+1. **Stage 0 — Feasibility and novelty.** Verify the literature, public model artifacts, licenses, timestamp semantics, local hardware, storage, training throughput, evaluation validity, and cost.
+2. **Stage 1 — Public-checkpoint audit.** Test whether frozen date-neutral measurements detect reproducible temporal trajectories in public point-in-time model families. This stage is observational.
+3. **Stage 2 — Synthetic identifiability.** Establish that the chosen model, dose, method, and scorer can recover a known cross-domain signal.
+4. **Stage 3 — Naturalistic causal pilot.** Use common starting weights with two provisional eras, two independent source families, and three exploratory seeds.
+5. **Stage 4 — Held-out-source and post-training confirmation.** Predict source C, test common neutral buffers, training position, identical modern SFT, and—only if justified—identical preference training.
+6. **Stage 5 — Channel attribution.** Compare document, assistant-response, archive-attributed, and synthetic-transformation formats one variable at a time.
+7. **Stage 6 — Mechanisms.** Search for a cross-source causal temporal subspace only after behavioral replication.
+
+The provisional naturalistic windows are January 2012–December 2013 and January 2018–December 2019. They are not frozen. Data continuity, timestamps, rights, source matching, and event concentration must determine the final pair before model behavior is inspected.
+
+## Primary outcomes
+
+### Evidence integration
+
+Fictional micro-worlds vary initial priors, source reliability, true and false evidence, underdetermination, authority versus track record, evidence order, and delayed persistence.
+
+Primary measurements include complete-continuation likelihoods, update direction, reliability sensitivity, false-evidence uptake, order effects, persistence, and calibration.
+
+### Procedural trade-offs
+
+Timeless fictional organizations test centralized authority versus distributed verification, safeguards versus speed, privacy versus collective detection, reversible versus irreversible intervention, expert deference versus independent checking, punishment versus rehabilitation, dissent, transparency, and secrecy.
+
+The design does not assume a morally preferred temporal direction.
+
+### Secure-system decisions
+
+Structured architecture choices form a secondary far-transfer domain. Executable code evaluation is gated on frozen functional capability and sandboxing.
+
+## Resource boundary
+
+The project is designed around the user's stated constraints:
+
+- current reported machine: RTX 2060 and 16 GB RAM;
+- possible borrowed machine: RTX 5070 and 32 GB RAM, availability not assumed;
+- objective: spend as little as possible while preserving paper quality;
+- default external-compute authorization: **CAD $0**;
+- no compute rental, hardware purchase, paid license, or large branch set without explicit approval;
+- one training job at a time;
+- measured memory, throughput, storage, and cost projections before training;
+- PEFT permitted for engineering smoke tests, not automatically sufficient for the headline causal claim;
+- full-weight training deferred until novelty, data, evaluation, calibration, and cost gates pass.
+
+See [`docs/RESOURCE_CONSTRAINTS.md`](docs/RESOURCE_CONSTRAINTS.md).
 
 ## Current status
 
-**Phase 0: research design and executable scaffold.**
+**Stage 0 — design refactor and audit preparation.**
 
-No empirical result is claimed yet. The current goal is to freeze the key definitions, qualify data sources, build reproducible manifests, and run the smallest experiment capable of falsifying the idea.
+No scientific result is claimed. Specific papers, public checkpoints, source candidates, model revisions, and licenses mentioned in the research charter are audit targets until verified against primary sources.
+
+The current write-active deliverable is the Stage 0 feasibility, novelty, and design package.
 
 ## Repository map
 
-- [`docs/RESEARCH_PLAN.md`](docs/RESEARCH_PLAN.md) — hypotheses, causal design, confounds, analysis, and staged roadmap.
-- [`docs/PILOT_PROTOCOL.md`](docs/PILOT_PROTOCOL.md) — smallest serious pilot and go/no-go gates.
-- [`docs/DATA_POLICY.md`](docs/DATA_POLICY.md) — provenance, licensing, timestamp, deduplication, and leakage requirements.
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) — durable design decisions and their rationale.
-- [`configs/pilot.toml`](configs/pilot.toml) — machine-readable pilot specification.
-- [`src/chronopersona`](src/chronopersona) — configuration validation and, later, experiment orchestration.
-- [`AGENTS.md`](AGENTS.md) — operating rules for Codex and other coding agents working in this repository.
+- [`docs/RESEARCH_CHARTER.md`](docs/RESEARCH_CHARTER.md) — scientific and operating charter.
+- [`PROJECT_STATE.md`](PROJECT_STATE.md) — current phase, evidence, blockers, decision, and exact next action.
+- [`PLAN.md`](PLAN.md) — milestone plan, gates, dependencies, and stop rules.
+- [`docs/RESEARCH_PLAN.md`](docs/RESEARCH_PLAN.md) — executable stage plan.
+- [`docs/PILOT_PROTOCOL.md`](docs/PILOT_PROTOCOL.md) — synthetic calibration and naturalistic pilot protocol.
+- [`docs/CLAIMS_TABLE.md`](docs/CLAIMS_TABLE.md) — competing explanations and discriminating tests.
+- [`docs/SYNTHETIC_CALIBRATION_SPEC.md`](docs/SYNTHETIC_CALIBRATION_SPEC.md) — development design for the mandatory sensitivity calibration.
+- [`docs/RESOURCE_CONSTRAINTS.md`](docs/RESOURCE_CONSTRAINTS.md) — compute and spending boundaries.
+- [`RISKS.md`](RISKS.md) — current scientific, data, legal, and compute risks.
+- [`docs/DATA_POLICY.md`](docs/DATA_POLICY.md) — provenance, rights, timestamps, deduplication, and leakage rules.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — durable design decisions and supersessions.
+- [`configs/pilot.toml`](configs/pilot.toml) — design-state two-era/two-source specification.
+- [`src/chronopersona`](src/chronopersona) — validation and later experiment tooling.
+- [`AGENTS.md`](AGENTS.md) — concise recurring rules for Codex and other agents.
 
-## First executable check
-
-ChronoPersona currently provides a dependency-light validator for experiment specifications.
+## Validate the current design specification
 
 ```bash
 python -m venv .venv
@@ -65,23 +132,14 @@ python -m chronopersona validate configs/pilot.toml
 pytest
 ```
 
-The validator catches structural errors before expensive data or training work begins: duplicate conditions, malformed cutoffs, unequal token budgets, missing controls, and invalid manifest paths.
+The configuration deliberately leaves the token budget unfrozen while its status is `design`. It cannot advance to execution without a measured benchmark and a frozen positive budget.
 
-## Near-term sequence
+## Working paper title
 
-1. Complete a literature and novelty map.
-2. Audit candidate corpora for timestamp semantics, licensing, source balance, and future leakage.
-3. Freeze an evaluation registry before training results are inspected.
-4. Build deterministic data manifests and contamination checks.
-5. Run a low-cost smoke adaptation on a small base model.
-6. Decide whether evidence justifies scaling to more periods, seeds, and model sizes.
+**From Archive to Policy: Testing Cross-Source Temporal Generalization in Language Models**
 
-## Research discipline
-
-All meaningful runs must be reproducible from a committed configuration, immutable input manifests, code revision, environment lock, seed set, and artifact manifest. Negative results are first-class outcomes. Evaluation changes made after results are visible must create a new registered experiment version rather than silently replacing the original test.
-
-Dataset text and model artifacts are not committed by default. Only redistributable material with clear provenance and licensing may be published.
+The repository does not select a positive- or null-result title before evidence exists.
 
 ## License
 
-No open-source license has been selected yet. Until one is added, the repository remains all-rights-reserved despite being accessible to collaborators.
+No open-source license has been selected. The repository remains all-rights-reserved until code, data, collaboration, and release decisions are made explicitly.
