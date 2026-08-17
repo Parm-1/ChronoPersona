@@ -2,8 +2,8 @@
 
 PMC is a backup held-out source. OAI Dublin Core is used only for bounded
 metadata qualification; it does not establish historical JATS version
-integrity. Records without a usable publication date are counted and omitted
-rather than assigned an invented timestamp.
+integrity or unambiguous publication time. Records without a usable lifecycle
+date are counted and omitted rather than assigned an invented timestamp.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ class PmcMetadataError(ValueError):
 
 @dataclass(frozen=True)
 class ParsedDate:
-    """Conservative publication-date evidence from Dublin Core."""
+    """Conservative lifecycle-date evidence from Dublin Core."""
 
     timestamp: datetime
     precision: str
@@ -81,7 +81,7 @@ def _parse_one_date(raw: str) -> ParsedDate | None:
     return None
 
 
-def _parse_publication_date(values: list[str]) -> ParsedDate | None:
+def _parse_lifecycle_date(values: list[str]) -> ParsedDate | None:
     parsed = [evidence for raw in values if (evidence := _parse_one_date(raw))]
     if not parsed:
         return None
@@ -137,9 +137,11 @@ def parse_pmc_oai_dc(
 ) -> tuple[list[dict[str, Any]], str | None, dict[str, int]]:
     """Return backup-C metadata records, resumption token, and diagnostics.
 
-    OAI Dublin Core does not prove historical article-version integrity. Every
-    emitted record therefore remains unresolved until a version-bounded JATS
-    object is established through an approved PMC distribution service.
+    Dublin Core ``dc:date`` is a lifecycle-associated date rather than a
+    guaranteed publication date. The parser stores it as candidate evidence,
+    but keeps ``era_window`` unresolved until a publication-specific field from
+    PMC front matter, ESummary/PubMed, or another approved source confirms it.
+    OAI Dublin Core also does not prove historical article-version integrity.
     """
 
     try:
@@ -152,7 +154,7 @@ def parse_pmc_oai_dc(
         "records_seen": 0,
         "deleted_records": 0,
         "records_without_metadata": 0,
-        "skipped_missing_publication_date": 0,
+        "skipped_missing_lifecycle_date": 0,
     }
     records: list[dict[str, Any]] = []
     for record in [
@@ -180,12 +182,12 @@ def parse_pmc_oai_dc(
         pmcid, pmc_number = _pmcid(identifiers, header)
 
         raw_dates = _texts(dc, "date")
-        date_evidence = _parse_publication_date(raw_dates)
+        date_evidence = _parse_lifecycle_date(raw_dates)
         if date_evidence is None:
-            diagnostics["skipped_missing_publication_date"] += 1
+            diagnostics["skipped_missing_lifecycle_date"] += 1
             continue
         timestamp = date_evidence.timestamp
-        era_window = windows.classify(timestamp)
+        candidate_window = windows.classify(timestamp)
         subjects = sorted(set(_texts(dc, "subject")))
         subject_blob = " ".join(subjects).lower()
         subject_allowed = any(
@@ -197,14 +199,14 @@ def parse_pmc_oai_dc(
         titles = _texts(dc, "title")
         creators = _texts(dc, "creator")
 
-        exclusion_reasons: list[str] = []
-        if era_window == "outside":
-            exclusion_reasons.append("outside-era-window")
+        exclusion_reasons: list[str] = [
+            "timestamp-semantics-unresolved",
+            "historical-version-unresolved",
+        ]
         if rights_status != "eligible":
             exclusion_reasons.append("license-not-eligible")
         if not subject_allowed:
             exclusion_reasons.append("subject-not-in-frozen-stratum")
-        exclusion_reasons.append("historical-version-unresolved")
 
         records.append(
             {
@@ -214,7 +216,7 @@ def parse_pmc_oai_dc(
                 "native_item_id": pmcid,
                 "native_timestamp": timestamp.isoformat().replace("+00:00", "Z"),
                 "timestamp_semantics": "publication-version",
-                "era_window": era_window,
+                "era_window": "unresolved",
                 "version_status": "unresolved",
                 "version_count": 1,
                 "rights_status": rights_status,
@@ -225,7 +227,7 @@ def parse_pmc_oai_dc(
                 "review_strata": [
                     "rights-boundary"
                     if rights_status != "eligible"
-                    else "exposure-boundary"
+                    else "timestamp-boundary"
                 ],
                 "metadata_locator": (
                     "https://pmc.ncbi.nlm.nih.gov/api/oai/v1/mh/?"
@@ -237,9 +239,13 @@ def parse_pmc_oai_dc(
                 "eligibility": "unresolved",
                 "exclusion_reasons": exclusion_reasons,
                 "source_metadata": {
-                    "publication_date_precision": date_evidence.precision,
-                    "publication_date_value_count": len(raw_dates),
-                    "publication_date_values_sha256": _sha256_text(" | ".join(raw_dates)),
+                    "dc_date_semantics": (
+                        "lifecycle-associated; not treated as confirmed publication date"
+                    ),
+                    "candidate_era_window": candidate_window,
+                    "lifecycle_date_precision": date_evidence.precision,
+                    "lifecycle_date_value_count": len(raw_dates),
+                    "lifecycle_date_values_sha256": _sha256_text(" | ".join(raw_dates)),
                     "title_sha256": _sha256_text(" | ".join(titles)),
                     "title_length": sum(len(value) for value in titles),
                     "creator_count": len(creators),
