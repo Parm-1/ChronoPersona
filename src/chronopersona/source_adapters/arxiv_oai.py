@@ -230,7 +230,7 @@ def parse_arxiv_raw_oai(
                     )
                 ],
                 "metadata_locator": (
-                    "https://export.arxiv.org/oai2?verb=GetRecord&"
+                    "https://oaipmh.arxiv.org/oai?verb=GetRecord&"
                     f"metadataPrefix=arXivRaw&identifier="
                     f"{quote('oai:arXiv.org:' + arxiv_id)}"
                 ),
