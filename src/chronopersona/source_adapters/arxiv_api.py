@@ -201,7 +201,7 @@ def parse_arxiv_api_feed(
                 "review_strata": [
                     "exposure-boundary"
                     if category_forbidden or not category_allowed
-                    else "version-boundary"
+                    else "rights-boundary"
                 ],
                 "metadata_locator": (
                     "https://export.arxiv.org/api/query?id_list="
