@@ -34,7 +34,9 @@ from chronopersona.source_registry import (  # noqa: E402
 )
 
 
-ENDPOINT = "https://www.ncbi.nlm.nih.gov/pmc/oai/oai.cgi"
+# PMC replaced its OAI-PMH endpoint in September 2025. The old endpoint
+# redirects, but an auditable tool must pin the current documented service.
+ENDPOINT = "https://pmc.ncbi.nlm.nih.gov/api/oai/v1/mh/"
 USER_AGENT = "ChronoPersona/0.1 metadata-audit (github.com/Parm-1/ChronoPersona)"
 
 
@@ -42,13 +44,15 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Audit PMC OAI Dublin Core metadata. Default mode is no-network; "
-            "live access requires --execute and --allow-network."
+            "live access requires --execute and --allow-network. OAI from/until "
+            "filter PMC release/update datestamps, not article publication dates; "
+            "the parser independently derives and filters publication evidence."
         )
     )
     parser.add_argument("--input", type=Path)
     parser.add_argument("--from-date", required=True)
     parser.add_argument("--until-date", required=True)
-    parser.add_argument("--set-spec")
+    parser.add_argument("--set-spec", default="pmc-open")
     parser.add_argument("--max-records", type=int, default=1000)
     parser.add_argument("--max-response-bytes", type=int, default=8_000_000)
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
@@ -97,6 +101,11 @@ def _write_jsonl(path: Path, records: list[dict]) -> None:
     )
 
 
+def _merge_diagnostics(target: dict[str, int], page: dict[str, int]) -> None:
+    for key, value in page.items():
+        target[key] = target.get(key, 0) + int(value)
+
+
 def main() -> int:
     args = _parser().parse_args()
     if args.max_records < 1 or args.max_records > 10_000:
@@ -137,6 +146,10 @@ def main() -> int:
                         "network_access_permitted": False,
                         "content_downloaded": False,
                         "metadata_url": _query_url(args),
+                        "oai_datestamp_filter_semantics": (
+                            "PMC release/update datestamp; not publication date"
+                        ),
+                        "publication_date_filtering": "performed after parsing dc:date",
                         "max_records": args.max_records,
                         "max_response_bytes": args.max_response_bytes,
                         "allowed_subject_terms": list(allowed),
@@ -148,7 +161,7 @@ def main() -> int:
             return 0
 
         records: list[dict] = []
-        skipped_missing_publication_date = 0
+        diagnostics: dict[str, int] = {}
         token: str | None = None
         first_request = True
         while len(records) < args.max_records:
@@ -165,18 +178,14 @@ def main() -> int:
                     user_agent=USER_AGENT,
                     delay_seconds=(0.0 if first_request else args.delay_seconds),
                 )
-            parsed, token = parse_pmc_oai_dc(
+            parsed, token, page_diagnostics = parse_pmc_oai_dc(
                 payload,
                 windows=windows,
                 allowed_subject_terms=allowed,
             )
-            for record in parsed:
-                if "publication-date-unresolved" in record["exclusion_reasons"]:
-                    skipped_missing_publication_date += 1
-                    continue
-                if len(records) >= args.max_records:
-                    break
-                records.append(record)
+            _merge_diagnostics(diagnostics, page_diagnostics)
+            remaining = args.max_records - len(records)
+            records.extend(parsed[:remaining])
             first_request = False
             if args.input is not None or not token or len(records) >= args.max_records:
                 break
@@ -199,14 +208,18 @@ def main() -> int:
         )
         summary["adapter"] = {
             "source": "pmc-oai-oai_dc",
+            "endpoint": ENDPOINT,
             "config": str(args.config),
-            "from_date": args.from_date,
-            "until_date": args.until_date,
+            "oai_from_date": args.from_date,
+            "oai_until_date": args.until_date,
+            "oai_datestamp_filter_semantics": (
+                "PMC release/update datestamp; not publication date"
+            ),
             "set_spec": args.set_spec,
             "network_used": args.input is None,
             "content_downloaded": False,
             "historical_version_established": False,
-            "skipped_missing_publication_date": skipped_missing_publication_date,
+            "parser_diagnostics": dict(sorted(diagnostics.items())),
             "resumption_token_remaining": bool(token),
         }
     except (
