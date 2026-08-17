@@ -23,6 +23,7 @@ data/raw/
 data/interim/
 data/processed/
 data/manifests/*.jsonl
+artifacts/local/
 checkpoints/
 models/
 results/**/*

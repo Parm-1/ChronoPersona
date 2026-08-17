@@ -17,6 +17,13 @@ dependencies = []
 dev = [
   "pytest>=8"
 ]
+models = [
+  "accelerate>=1.0",
+  "huggingface-hub>=0.34",
+  "safetensors>=0.5",
+  "torch>=2.3",
+  "transformers>=4.48"
+]
 
 [project.scripts]
 chronopersona = "chronopersona.__main__:main"

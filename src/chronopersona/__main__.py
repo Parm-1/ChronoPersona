@@ -3,16 +3,23 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
+import json
 from pathlib import Path
 import sys
 import tomllib
-from collections.abc import Sequence
 
 from .config import (
     SpecFormatError,
     describe_spec,
     load_spec,
     validate_spec,
+)
+from .model_manifest import (
+    ModelManifestFormatError,
+    describe_model_manifest,
+    load_model_manifest,
+    validate_model_manifest,
 )
 
 
@@ -28,7 +35,23 @@ def _parser() -> argparse.ArgumentParser:
         help="validate an experiment TOML specification",
     )
     validate.add_argument("spec", type=Path)
+
+    validate_models = subparsers.add_parser(
+        "validate-models",
+        help="validate a model-artifact JSON manifest",
+    )
+    validate_models.add_argument("manifest", type=Path)
     return parser
+
+
+def _print_errors(path: Path, errors: tuple[str, ...]) -> int:
+    print(
+        f"invalid: {path} ({len(errors)} error(s))",
+        file=sys.stderr,
+    )
+    for error in errors:
+        print(f"- {error}", file=sys.stderr)
+    return 1
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -46,15 +69,36 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         errors = validate_spec(spec)
         if errors:
-            print(
-                f"invalid: {args.spec} ({len(errors)} error(s))",
-                file=sys.stderr,
-            )
-            for error in errors:
-                print(f"- {error}", file=sys.stderr)
-            return 1
+            return _print_errors(args.spec, errors)
 
         print(f"valid: {describe_spec(spec)}")
+        return 0
+
+    if args.command == "validate-models":
+        try:
+            manifest = load_model_manifest(args.manifest)
+        except FileNotFoundError:
+            print(
+                f"error: model manifest not found: {args.manifest}",
+                file=sys.stderr,
+            )
+            return 2
+        except (
+            OSError,
+            json.JSONDecodeError,
+            ModelManifestFormatError,
+        ) as error:
+            print(
+                f"error: could not load {args.manifest}: {error}",
+                file=sys.stderr,
+            )
+            return 2
+
+        errors = validate_model_manifest(manifest)
+        if errors:
+            return _print_errors(args.manifest, errors)
+
+        print(f"valid: {describe_model_manifest(manifest)}")
         return 0
 
     raise AssertionError(f"unhandled command: {args.command}")

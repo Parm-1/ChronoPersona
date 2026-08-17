@@ -1,0 +1,3 @@
+audit_id,captured_at,machine_label,status,git_commit,os,cpu,ram_gib,gpu,vram_gib,free_storage_gib,artifact_id,model_revision,mode,dtype,max_sequence_tokens,load_seconds,peak_gpu_allocated_mib,peak_gpu_reserved_mib,peak_process_ram_mib,input_tokens,mean_forward_seconds,tokens_per_second,mean_cross_entropy,output_artifact,notes
+reported-current-machine,2026-08-17,current-reported,reported-unmeasured,,Windows,,16,NVIDIA RTX 2060,,,,,,,,,,,,,,,,,User-reported hardware only; exact RTX 2060 VRAM variant and all measured fields remain unresolved
+reported-borrowed-machine,2026-08-17,borrowed-reported,availability-unconfirmed,,,32,NVIDIA RTX 5070,,,,,,,,,,,,,,,,,Potential borrowed computer; exact GPU variant VRAM storage environment and access window remain unresolved
