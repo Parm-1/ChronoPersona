@@ -23,11 +23,16 @@ def _run(script: str, *arguments: str) -> subprocess.CompletedProcess[str]:
 def test_all_adapter_plans_are_no_network() -> None:
     commands = [
         (
-            "audit_arxiv_oai_metadata.py",
-            "--from-date",
+            "audit_arxiv_api_candidates.py",
+            "--start-date",
             "2012-01-01",
-            "--until-date",
+            "--end-date",
             "2013-12-31",
+        ),
+        (
+            "audit_arxiv_oai_metadata.py",
+            "--identifier",
+            "1301.00001",
         ),
         (
             "audit_pmc_oai_metadata.py",
@@ -50,16 +55,18 @@ def test_all_adapter_plans_are_no_network() -> None:
         assert plan.get("archive_downloaded", False) is False
 
 
-def test_arxiv_fixture_command_emits_valid_metadata(tmp_path: Path) -> None:
-    output = tmp_path / "arxiv.jsonl"
-    summary = tmp_path / "arxiv-summary.json"
+def test_arxiv_api_fixture_enumerates_unresolved_era_candidates(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "arxiv-candidates.jsonl"
+    summary = tmp_path / "arxiv-candidates-summary.json"
     result = _run(
-        "audit_arxiv_oai_metadata.py",
+        "audit_arxiv_api_candidates.py",
         "--input",
-        str(FIXTURES / "arxiv_oai_sample.xml"),
-        "--from-date",
+        str(FIXTURES / "arxiv_api_sample.xml"),
+        "--start-date",
         "2012-01-01",
-        "--until-date",
+        "--end-date",
         "2019-12-31",
         "--output",
         str(output),
@@ -70,10 +77,78 @@ def test_arxiv_fixture_command_emits_valid_metadata(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 3
+    assert [row["native_item_id"] for row in rows] == [
+        "1301.00001",
+        "1907.00003",
+        "1905.00002",
+    ]
+    assert all(row["eligibility"] == "unresolved" for row in rows)
     report = json.loads(summary.read_text(encoding="utf-8"))
-    assert report["adapter"]["network_used"] is False
-    assert report["adapter"]["parser_diagnostics"]["deleted_records"] == 1
+    assert report["adapter"]["selection_semantics"] == "first submission date"
+    assert report["adapter"]["license_enrichment_required"] is True
+    assert report["adapter"]["version_enrichment_required"] is True
+    assert report["adapter"]["reported_total_results"] == 3
+
+
+def test_arxiv_oai_fixture_enriches_exact_version_and_license_metadata(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "arxiv-enriched.jsonl"
+    summary = tmp_path / "arxiv-enriched-summary.json"
+    result = _run(
+        "audit_arxiv_oai_metadata.py",
+        "--input",
+        str(FIXTURES / "arxiv_oai_sample.xml"),
+        "--output",
+        str(output),
+        "--summary-output",
+        str(summary),
+    )
+
+    assert result.returncode == 0, result.stderr
+    rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+    assert len(rows) == 3
+    assert rows[0]["metadata_locator"].startswith(
+        "https://oaipmh.arxiv.org/oai?"
+    )
+    report = json.loads(summary.read_text(encoding="utf-8"))
+    assert report["adapter"]["operation"] == "exact GetRecord enrichment"
+    assert report["adapter"]["submission_date_selection_supported"] is False
     assert report["counts"]["eligibility"] == {"eligible": 1, "excluded": 2}
+
+
+def test_arxiv_oai_identifier_must_be_a_base_id() -> None:
+    result = _run(
+        "audit_arxiv_oai_metadata.py",
+        "--identifier",
+        "1301.00001v1",
+    )
+
+    assert result.returncode == 1
+    assert "must omit the version suffix" in result.stderr
+
+
+def test_arxiv_api_plan_uses_submitted_date_selection() -> None:
+    result = _run(
+        "audit_arxiv_api_candidates.py",
+        "--start-date",
+        "2012-01-01",
+        "--end-date",
+        "2013-12-31",
+        "--max-records",
+        "25",
+    )
+
+    assert result.returncode == 0, result.stderr
+    plan = json.loads(result.stdout)
+    assert plan["selection_semantics"] == "arXiv API submittedDate"
+    assert "submittedDate%3A%5B201201010000+TO+201312312359%5D" in plan[
+        "metadata_url"
+    ]
+    assert plan["enrichment_required"] == [
+        "exact arXivRaw version history",
+        "item-level license",
+    ]
 
 
 def test_pmc_fixture_command_emits_no_synthetic_or_confirmed_dates(
