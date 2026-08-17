@@ -25,5 +25,9 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: Validate pilot
         run: python -m chronopersona validate configs/pilot.toml
+      - name: Validate model manifest
+        run: >-
+          python -m chronopersona validate-models
+          artifacts/manifests/MODEL_MANIFEST.json
       - name: Test
         run: pytest
