@@ -1,44 +1,99 @@
-schema_version = 1
+schema_version = 2
 
 [experiment]
-id = "pilot-v0"
-title = "Two-slice temporal adaptation smoke test"
+id = "naturalistic-causal-pilot-v0"
+title = "Two-era cross-source causal pilot"
+stage = "design"
 status = "design"
-base_model = "TBD-after-model-audit"
-adaptation_method = "continued-pretraining"
-token_budget = 10000000
-seeds = [17, 29]
+base_model = "TBD-after-model-and-calibration-audit"
+insertion_point = "TBD-after-intermediate-checkpoint-audit"
+adaptation_method = "full-weight-continued-pretraining-headline; peft-smoke-only"
+# Zero means deliberately unfrozen during design. A measured benchmark and
+# explicit user-approved resource plan must set this before status changes.
+token_budget = 0
+seeds = [17, 29, 43]
 
 [[conditions]]
-id = "temporal-2008"
+id = "early-source-a"
 role = "temporal"
-cutoff = "2008-12-31"
-manifest = "data/manifests/temporal-2008.jsonl"
+era = "early"
+source_family = "A"
+window_start = "2012-01-01"
+window_end = "2013-12-31"
+manifest = "data/manifests/early-source-a.jsonl"
 
 [[conditions]]
-id = "temporal-2024"
+id = "late-source-a"
 role = "temporal"
-cutoff = "2024-12-31"
-manifest = "data/manifests/temporal-2024.jsonl"
+era = "late"
+source_family = "A"
+window_start = "2018-01-01"
+window_end = "2019-12-31"
+manifest = "data/manifests/late-source-a.jsonl"
 
 [[conditions]]
-id = "date-shuffled-control"
-role = "control"
-control_type = "date_shuffled"
-cutoff = "2024-12-31"
-manifest = "data/manifests/date-shuffled-control.jsonl"
+id = "early-source-b"
+role = "temporal"
+era = "early"
+source_family = "B"
+window_start = "2012-01-01"
+window_end = "2013-12-31"
+manifest = "data/manifests/early-source-b.jsonl"
+
+[[conditions]]
+id = "late-source-b"
+role = "temporal"
+era = "late"
+source_family = "B"
+window_start = "2018-01-01"
+window_end = "2019-12-31"
+manifest = "data/manifests/late-source-b.jsonl"
 
 [[conditions]]
 id = "base-model-control"
 role = "control"
 control_type = "unadapted"
 
+[[conditions]]
+id = "common-generic-continuation"
+role = "control"
+control_type = "generic_continuation"
+manifest = "data/manifests/common-generic-continuation.jsonl"
+
+[[conditions]]
+id = "matched-mixed-era"
+role = "control"
+control_type = "mixed_era"
+manifest = "data/manifests/matched-mixed-era.jsonl"
+
+[[conditions]]
+id = "within-era-pseudo-era-placebo"
+role = "control"
+control_type = "within_era_placebo"
+manifest = "data/manifests/within-era-pseudo-era-placebo.jsonl"
+
 [evaluation]
-registry = "evaluations/registry/pilot-v0.jsonl"
-primary_family = "date-neutral-disposition"
+registry = "evaluations/registry/cstg-pilot-v0.jsonl"
+primary_families = [
+  "evidence-integration",
+  "procedural-tradeoffs",
+]
+secondary_families = [
+  "secure-system-decisions",
+]
+held_out_source_family = "C"
 blinded = true
 frozen_before_training = true
 
+[resource_constraints]
+# The default authorization envelope is local-only and zero external spend.
+# Changing this value does not itself authorize spending.
+external_spend_cad = 0
+external_compute_requires_user_authorization = true
+training_requires_measured_benchmark = true
+calibration_required_before_naturalistic_interpretation = true
+max_parallel_training_jobs = 1
+
 [reporting]
-output_dir = "results/pilot-v0"
+output_dir = "results/naturalistic-causal-pilot-v0"
 publish_negative_results = true
