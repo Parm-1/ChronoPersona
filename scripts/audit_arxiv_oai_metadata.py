@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Plan, parse, or execute a bounded arXiv OAI metadata audit."""
+"""Plan, parse, or execute exact arXivRaw OAI metadata enrichment."""
 
 from __future__ import annotations
 
 import argparse
 import json
 from pathlib import Path
+import re
 import sys
 from urllib.parse import urlencode
 
@@ -34,26 +35,30 @@ from chronopersona.source_registry import (  # noqa: E402
 )
 
 
-ENDPOINT = "https://export.arxiv.org/oai2"
+ENDPOINT = "https://oaipmh.arxiv.org/oai"
 USER_AGENT = "ChronoPersona/0.1 metadata-audit (github.com/Parm-1/ChronoPersona)"
+_VERSION_SUFFIX = re.compile(r"v\d+$", re.IGNORECASE)
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Audit arXivRaw OAI metadata. Default mode is a no-network plan; "
-            "--input parses a frozen XML fixture; live access requires both "
-            "--execute and --allow-network. OAI from/until filter repository "
-            "datestamps, while era membership is independently derived from "
-            "the first arXiv submission-version date."
+            "Enrich exact arXiv base identifiers with arXivRaw version history "
+            "and license metadata. OAI-PMH datestamps are not submission dates, "
+            "so this command does not perform era candidate selection. Use "
+            "audit_arxiv_api_candidates.py for submittedDate enumeration. "
+            "Default mode is no-network; live access requires --execute and "
+            "--allow-network."
         )
     )
     parser.add_argument("--input", type=Path)
-    parser.add_argument("--from-date", required=True)
-    parser.add_argument("--until-date", required=True)
-    parser.add_argument("--set-spec")
-    parser.add_argument("--max-records", type=int, default=1000)
-    parser.add_argument("--max-response-bytes", type=int, default=8_000_000)
+    parser.add_argument(
+        "--identifier",
+        action="append",
+        default=[],
+        help="exact base arXiv identifier; repeat for multiple GetRecord calls",
+    )
+    parser.add_argument("--max-response-bytes", type=int, default=2_000_000)
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
     parser.add_argument("--delay-seconds", type=float, default=3.0)
     parser.add_argument(
@@ -73,20 +78,31 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _query_url(args: argparse.Namespace, token: str | None = None) -> str:
-    if token:
-        return ENDPOINT + "?" + urlencode(
-            {"verb": "ListRecords", "resumptionToken": token}
+def _base_identifier(raw: str) -> str:
+    value = raw.strip()
+    if not value or len(value) > 80:
+        raise ValueError("arXiv identifier must be nonempty and at most 80 characters")
+    if any(character.isspace() for character in value):
+        raise ValueError(f"arXiv identifier contains whitespace: {raw!r}")
+    if "://" in value or value.startswith("oai:"):
+        raise ValueError(
+            "--identifier requires a base arXiv id, not a URL or OAI identifier"
         )
-    parameters = {
-        "verb": "ListRecords",
-        "metadataPrefix": "arXivRaw",
-        "from": args.from_date,
-        "until": args.until_date,
-    }
-    if args.set_spec:
-        parameters["set"] = args.set_spec
-    return ENDPOINT + "?" + urlencode(parameters)
+    if _VERSION_SUFFIX.search(value):
+        raise ValueError(
+            f"--identifier must omit the version suffix: {raw!r}"
+        )
+    return value
+
+
+def _get_record_url(identifier: str) -> str:
+    return ENDPOINT + "?" + urlencode(
+        {
+            "verb": "GetRecord",
+            "metadataPrefix": "arXivRaw",
+            "identifier": f"oai:arXiv.org:{identifier}",
+        }
+    )
 
 
 def _write_jsonl(path: Path, records: list[dict]) -> None:
@@ -107,9 +123,6 @@ def _merge_diagnostics(target: dict[str, int], page: dict[str, int]) -> None:
 
 def main() -> int:
     args = _parser().parse_args()
-    if args.max_records < 1 or args.max_records > 10_000:
-        print("error: --max-records must be between 1 and 10000", file=sys.stderr)
-        return 2
     if args.delay_seconds < 3.0 and args.input is None:
         print(
             "error: live arXiv OAI requests require at least 3 seconds delay",
@@ -123,13 +136,21 @@ def main() -> int:
         )
         return 2
     if args.execute and args.input is None and not args.allow_network:
+        print("error: live execution requires --allow-network", file=sys.stderr)
+        return 2
+    if args.input is not None and args.identifier:
         print(
-            "error: live execution requires --allow-network",
+            "error: --input and --identifier cannot be combined",
             file=sys.stderr,
         )
         return 2
 
     try:
+        identifiers = tuple(_base_identifier(value) for value in args.identifier)
+        if len(identifiers) != len(set(identifiers)):
+            raise ValueError("arXiv identifiers must be unique")
+        if len(identifiers) > 100:
+            raise ValueError("at most 100 exact arXiv identifiers are allowed")
         source_registry = load_source_registry(args.source_registry)
         registry_errors = validate_source_registry(source_registry)
         if registry_errors:
@@ -142,8 +163,6 @@ def main() -> int:
             raise ValueError("arXiv config must not authorize content download")
         allowed = tuple(config["allowed_category_prefixes"])
         forbidden = tuple(config.get("forbidden_category_prefixes", []))
-        if not allowed:
-            raise ValueError("arXiv config must include allowed category prefixes")
 
         if not args.execute and args.input is None:
             print(
@@ -153,16 +172,16 @@ def main() -> int:
                         "mode": "plan",
                         "network_access_permitted": False,
                         "content_downloaded": False,
-                        "metadata_url": _query_url(args),
-                        "oai_datestamp_filter_semantics": (
-                            "repository OAI datestamp; not era treatment date"
-                        ),
-                        "era_date_semantics": "first arXiv submission-version date",
-                        "max_records": args.max_records,
-                        "max_response_bytes": args.max_response_bytes,
-                        "delay_seconds": args.delay_seconds,
-                        "allowed_category_prefixes": list(allowed),
-                        "forbidden_category_prefixes": list(forbidden),
+                        "endpoint": ENDPOINT,
+                        "operation": "exact-arXivRaw-enrichment",
+                        "submission_date_selection_supported": False,
+                        "candidate_enumerator": "audit_arxiv_api_candidates.py",
+                        "identifiers": list(identifiers),
+                        "request_urls": [
+                            _get_record_url(identifier)
+                            for identifier in identifiers
+                        ],
+                        "max_identifier_count": 100,
                     },
                     indent=2,
                     sort_keys=True,
@@ -172,37 +191,59 @@ def main() -> int:
 
         records: list[dict] = []
         diagnostics: dict[str, int] = {}
-        token: str | None = None
-        first_request = True
-        while len(records) < args.max_records:
-            if args.input is not None:
-                if not first_request:
-                    break
-                payload = args.input.read_bytes()
-            else:
-                payload = fetch_metadata(
-                    _query_url(args, token),
-                    allow_network=args.allow_network,
-                    max_bytes=args.max_response_bytes,
-                    timeout_seconds=args.timeout_seconds,
-                    user_agent=USER_AGENT,
-                    delay_seconds=(0.0 if first_request else args.delay_seconds),
-                )
+        if args.input is not None:
             parsed, token, page_diagnostics = parse_arxiv_raw_oai(
-                payload,
+                args.input.read_bytes(),
                 windows=windows,
                 allowed_category_prefixes=allowed,
                 forbidden_category_prefixes=forbidden,
             )
+            if token:
+                raise ValueError(
+                    "exact enrichment input unexpectedly contains a resumption token"
+                )
+            records.extend(parsed)
             _merge_diagnostics(diagnostics, page_diagnostics)
-            remaining = args.max_records - len(records)
-            records.extend(parsed[:remaining])
-            first_request = False
-            if args.input is not None or not token or len(records) >= args.max_records:
-                break
+        else:
+            if not identifiers:
+                raise ValueError(
+                    "live arXiv OAI enrichment requires at least one --identifier"
+                )
+            for index, identifier in enumerate(identifiers):
+                payload = fetch_metadata(
+                    _get_record_url(identifier),
+                    allow_network=args.allow_network,
+                    max_bytes=args.max_response_bytes,
+                    timeout_seconds=args.timeout_seconds,
+                    user_agent=USER_AGENT,
+                    delay_seconds=(0.0 if index == 0 else args.delay_seconds),
+                )
+                parsed, token, page_diagnostics = parse_arxiv_raw_oai(
+                    payload,
+                    windows=windows,
+                    allowed_category_prefixes=allowed,
+                    forbidden_category_prefixes=forbidden,
+                )
+                if token:
+                    raise ValueError(
+                        f"GetRecord for {identifier!r} returned a resumption token"
+                    )
+                if len(parsed) != 1:
+                    raise ValueError(
+                        f"GetRecord for {identifier!r} returned {len(parsed)} records"
+                    )
+                if not str(parsed[0]["native_item_id"]).startswith(identifier):
+                    raise ValueError(
+                        f"GetRecord identity mismatch for {identifier!r}"
+                    )
+                records.extend(parsed)
+                _merge_diagnostics(diagnostics, page_diagnostics)
 
         if not records:
-            raise ValueError("arXiv metadata query produced no records")
+            raise ValueError("arXivRaw enrichment produced no records")
+        record_ids = [str(record["record_id"]) for record in records]
+        if len(record_ids) != len(set(record_ids)):
+            raise ValueError("arXivRaw enrichment produced duplicate records")
         metadata_errors = validate_source_metadata(
             records,
             source_registry=source_registry,
@@ -218,20 +259,15 @@ def main() -> int:
             metadata_sha256=metadata_hash,
         )
         summary["adapter"] = {
-            "source": "arxiv-oai-arXivRaw",
+            "source": "arxiv-oai-arXivRaw-exact-enrichment",
             "endpoint": ENDPOINT,
             "config": str(args.config),
-            "oai_from_date": args.from_date,
-            "oai_until_date": args.until_date,
-            "oai_datestamp_filter_semantics": (
-                "repository OAI datestamp; not era treatment date"
-            ),
-            "era_date_semantics": "first arXiv submission-version date",
-            "set_spec": args.set_spec,
+            "operation": "exact GetRecord enrichment",
+            "submission_date_selection_supported": False,
             "network_used": args.input is None,
             "content_downloaded": False,
+            "identifier_count": len(identifiers) if args.input is None else None,
             "parser_diagnostics": dict(sorted(diagnostics.items())),
-            "resumption_token_remaining": bool(token),
         }
     except (
         ArxivMetadataError,
