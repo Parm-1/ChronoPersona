@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "identifier": "stackexchange",
+    "title": "Stack Exchange Data Dump"
+  },
+  "files": [
+    {
+      "name": "gardening.stackexchange.com.7z",
+      "source": "original",
+      "mtime": "1720000000",
+      "size": "1000000",
+      "md5": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sha1": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "crc32": "aaaaaaaa",
+      "format": "7z"
+    },
+    {
+      "name": "history.stackexchange.com.7z",
+      "source": "original",
+      "mtime": "1720000001",
+      "size": "2000000",
+      "md5": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "sha1": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "crc32": "bbbbbbbb",
+      "format": "7z"
+    },
+    {
+      "name": "stackoverflow.com.7z",
+      "source": "original",
+      "mtime": "1720000002",
+      "size": "3000000",
+      "md5": "cccccccccccccccccccccccccccccccc",
+      "sha1": "cccccccccccccccccccccccccccccccccccccccc",
+      "crc32": "cccccccc",
+      "format": "7z"
+    },
+    {
+      "name": "stackexchange_files.xml",
+      "source": "metadata",
+      "size": "4000",
+      "format": "Metadata"
+    }
+  ]
+}
