@@ -1,9 +1,17 @@
-"""Parse PMC OAI Dublin Core metadata without retrieving article text."""
+"""Parse current PMC OAI Dublin Core metadata without retrieving article text.
+
+PMC is a backup held-out source. OAI Dublin Core is used only for bounded
+metadata qualification; it does not establish historical JATS version
+integrity. Records without a usable publication date are counted and omitted
+rather than assigned an invented timestamp.
+"""
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
+import re
 from typing import Any
 from urllib.parse import quote
 import xml.etree.ElementTree as ET
@@ -12,7 +20,19 @@ from ..source_metadata import EraWindows
 
 
 class PmcMetadataError(ValueError):
-    """Raised when PMC OAI metadata lacks a usable identity."""
+    """Raised when PMC OAI metadata is malformed or reports an OAI error."""
+
+
+@dataclass(frozen=True)
+class ParsedDate:
+    """Conservative publication-date evidence from Dublin Core."""
+
+    timestamp: datetime
+    precision: str
+    raw_value: str
+
+
+_PMCID = re.compile(r"\bPMC(\d+)\b", re.IGNORECASE)
 
 
 def _local(tag: str) -> str:
@@ -33,20 +53,38 @@ def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-def _parse_date(values: list[str]) -> datetime | None:
-    for raw in values:
-        candidates = [raw]
-        if raw.endswith("Z"):
-            candidates.append(raw[:-1] + "+00:00")
-        for candidate in candidates:
-            try:
-                parsed = datetime.fromisoformat(candidate)
-            except ValueError:
-                continue
-            if parsed.tzinfo is None:
-                parsed = parsed.replace(tzinfo=timezone.utc)
-            return parsed.astimezone(timezone.utc)
+def _parse_one_date(raw: str) -> ParsedDate | None:
+    value = raw.strip()
+    candidates: list[tuple[str, str]] = [(value, "datetime")]
+    if value.endswith("Z"):
+        candidates.insert(0, (value[:-1] + "+00:00", "datetime"))
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        candidates.append((value + "T00:00:00+00:00", "day"))
+    elif re.fullmatch(r"\d{4}-\d{2}", value):
+        candidates.append((value + "-01T00:00:00+00:00", "month"))
+    elif re.fullmatch(r"\d{4}", value):
+        candidates.append((value + "-01-01T00:00:00+00:00", "year"))
+
+    for candidate, precision in candidates:
+        try:
+            parsed = datetime.fromisoformat(candidate)
+        except ValueError:
+            continue
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return ParsedDate(
+            timestamp=parsed.astimezone(timezone.utc),
+            precision=precision,
+            raw_value=value,
+        )
     return None
+
+
+def _parse_publication_date(values: list[str]) -> ParsedDate | None:
+    parsed = [evidence for raw in values if (evidence := _parse_one_date(raw))]
+    if not parsed:
+        return None
+    return min(parsed, key=lambda evidence: evidence.timestamp)
 
 
 def _license(rights_values: list[str]) -> tuple[str, str, str]:
@@ -68,64 +106,85 @@ def _license(rights_values: list[str]) -> tuple[str, str, str]:
     return "missing", "unresolved", "missing-license"
 
 
+def _pmcid(identifiers: list[str], header: ET.Element) -> tuple[str, str]:
+    for value in [*identifiers, *_texts(header, "identifier")]:
+        match = _PMCID.search(value)
+        if match:
+            number = match.group(1)
+            return f"PMC{number}", number
+    raise PmcMetadataError("PMC OAI record has no recognizable PMCID")
+
+
+def _oai_error(root: ET.Element) -> None:
+    error = next(
+        (element for element in root.iter() if _local(element.tag) == "error"),
+        None,
+    )
+    if error is None:
+        return
+    code = error.attrib.get("code", "unknown")
+    message = " ".join((error.text or "").split()) or "unspecified OAI error"
+    raise PmcMetadataError(f"PMC OAI error {code}: {message}")
+
+
 def parse_pmc_oai_dc(
     xml_bytes: bytes,
     *,
     windows: EraWindows,
     allowed_subject_terms: tuple[str, ...],
     source_id: str = "pmc-oa-cc-version-bounded",
-) -> tuple[list[dict[str, Any]], str | None]:
-    """Return backup-C metadata records and the OAI resumption token.
+) -> tuple[list[dict[str, Any]], str | None, dict[str, int]]:
+    """Return backup-C metadata records, resumption token, and diagnostics.
 
     OAI Dublin Core does not prove historical article-version integrity. Every
-    parsed record therefore remains unresolved until the OA service/update
-    audit establishes a version-bounded JATS object.
+    emitted record therefore remains unresolved until a version-bounded JATS
+    object is established through an approved PMC distribution service.
     """
 
     try:
         root = ET.fromstring(xml_bytes)
     except ET.ParseError as error:
         raise PmcMetadataError(f"invalid PMC OAI XML: {error}") from error
+    _oai_error(root)
 
+    diagnostics = {
+        "records_seen": 0,
+        "deleted_records": 0,
+        "records_without_metadata": 0,
+        "skipped_missing_publication_date": 0,
+    }
     records: list[dict[str, Any]] = []
     for record in [
         element for element in root.iter() if _local(element.tag) == "record"
     ]:
+        diagnostics["records_seen"] += 1
         header = next(
             (child for child in record if _local(child.tag) == "header"),
             None,
         )
-        if header is None or header.attrib.get("status") == "deleted":
+        if header is None:
+            raise PmcMetadataError("PMC OAI record has no header")
+        if header.attrib.get("status") == "deleted":
+            diagnostics["deleted_records"] += 1
             continue
         metadata = next(
             (child for child in record if _local(child.tag) == "metadata"),
             None,
         )
         if metadata is None or not list(metadata):
+            diagnostics["records_without_metadata"] += 1
             continue
         dc = list(metadata)[0]
         identifiers = _texts(dc, "identifier")
-        pmcid = next(
-            (
-                value
-                for value in identifiers
-                if value.upper().startswith("PMC")
-            ),
-            None,
-        )
-        if pmcid is None:
-            header_ids = _texts(header, "identifier")
-            for value in header_ids:
-                marker = value.upper().rfind("PMC")
-                if marker >= 0:
-                    pmcid = value[marker:]
-                    break
-        if pmcid is None:
-            raise PmcMetadataError("PMC OAI record has no PMCID")
-        pmcid = pmcid.split("/")[0].split("?")[0]
+        pmcid, pmc_number = _pmcid(identifiers, header)
 
-        timestamp = _parse_date(_texts(dc, "date"))
-        era_window = windows.classify(timestamp) if timestamp else "unresolved"
+        raw_dates = _texts(dc, "date")
+        date_evidence = _parse_publication_date(raw_dates)
+        if date_evidence is None:
+            diagnostics["skipped_missing_publication_date"] += 1
+            continue
+        timestamp = date_evidence.timestamp
+        era_window = windows.classify(timestamp)
         subjects = sorted(set(_texts(dc, "subject")))
         subject_blob = " ".join(subjects).lower()
         subject_allowed = any(
@@ -138,9 +197,7 @@ def parse_pmc_oai_dc(
         creators = _texts(dc, "creator")
 
         exclusion_reasons: list[str] = []
-        if timestamp is None:
-            exclusion_reasons.append("publication-date-unresolved")
-        elif era_window == "outside":
+        if era_window == "outside":
             exclusion_reasons.append("outside-era-window")
         if rights_status != "eligible":
             exclusion_reasons.append("license-not-eligible")
@@ -154,11 +211,7 @@ def parse_pmc_oai_dc(
                 "record_id": f"pmc:{pmcid}",
                 "source_id": source_id,
                 "native_item_id": pmcid,
-                "native_timestamp": (
-                    timestamp.isoformat().replace("+00:00", "Z")
-                    if timestamp is not None
-                    else "1970-01-01T00:00:00Z"
-                ),
+                "native_timestamp": timestamp.isoformat().replace("+00:00", "Z"),
                 "timestamp_semantics": "publication-version",
                 "era_window": era_window,
                 "version_status": "unresolved",
@@ -169,30 +222,32 @@ def parse_pmc_oai_dc(
                 "authorship_provenance": "human",
                 "categories": subjects,
                 "review_strata": [
-                    "timestamp-boundary"
-                    if timestamp is None
-                    else (
-                        "rights-boundary"
-                        if rights_status != "eligible"
-                        else "exposure-boundary"
-                    )
+                    "rights-boundary"
+                    if rights_status != "eligible"
+                    else "exposure-boundary"
                 ],
                 "metadata_locator": (
-                    "https://www.ncbi.nlm.nih.gov/pmc/oai/oai.cgi?"
+                    "https://pmc.ncbi.nlm.nih.gov/api/oai/v1/mh/?"
                     f"verb=GetRecord&metadataPrefix=oai_dc&identifier="
-                    f"{quote('oai:pubmedcentral.nih.gov:' + pmcid)}"
+                    f"{quote('oai:pubmedcentral.nih.gov:' + pmc_number)}"
                 ),
                 "content_locator": None,
                 "content_retrieved": False,
                 "eligibility": "unresolved",
                 "exclusion_reasons": exclusion_reasons,
                 "source_metadata": {
+                    "publication_date_precision": date_evidence.precision,
+                    "publication_date_value_count": len(raw_dates),
+                    "publication_date_values_sha256": _sha256_text(" | ".join(raw_dates)),
                     "title_sha256": _sha256_text(" | ".join(titles)),
                     "title_length": sum(len(value) for value in titles),
                     "creator_count": len(creators),
                     "creators_sha256": _sha256_text(" | ".join(creators)),
                     "subject_allowed": subject_allowed,
                     "oai_identifier_count": len(identifiers),
+                    "version_count_interpretation": (
+                        "metadata-record-placeholder; article-version count unresolved"
+                    ),
                 },
             }
         )
@@ -210,4 +265,4 @@ def parse_pmc_oai_dc(
         if token_element is not None and token_element.text
         else None
     )
-    return records, token
+    return records, token, diagnostics
