@@ -1,0 +1,127 @@
+name: Source Adapters
+
+on:
+  push:
+    paths:
+      - "configs/sources/**"
+      - "src/chronopersona/source_adapters/**"
+      - "src/chronopersona/source_inventory.py"
+      - "src/chronopersona/source_review.py"
+      - "scripts/audit_arxiv_api_candidates.py"
+      - "scripts/audit_arxiv_oai_metadata.py"
+      - "scripts/audit_pmc_oai_metadata.py"
+      - "scripts/audit_wikimedia_inventory.py"
+      - "scripts/audit_stackexchange_inventory.py"
+      - "scripts/prepare_source_review.py"
+      - "scripts/log_source_access.py"
+      - "tests/fixtures/arxiv_api_sample.xml"
+      - "tests/fixtures/arxiv_oai_sample.xml"
+      - "tests/fixtures/pmc_oai_sample.xml"
+      - "tests/fixtures/wikimedia_dumpstatus_sample.json"
+      - "tests/fixtures/stackexchange_archive_sample.json"
+      - "tests/test_arxiv_api.py"
+      - "tests/test_source_adapters.py"
+      - "tests/test_source_adapter_scripts.py"
+      - "tests/test_pmc_date_precision.py"
+      - "tests/test_source_review.py"
+      - "tests/test_source_review_event_schema.py"
+      - "tests/test_source_review_integrity.py"
+      - "tests/test_source_review_scripts.py"
+      - "tests/test_stackexchange_snapshot.py"
+      - "docs/SOURCE_ADAPTER_PROTOCOL.md"
+      - ".github/workflows/source-adapters.yml"
+  pull_request:
+    paths:
+      - "configs/sources/**"
+      - "src/chronopersona/source_adapters/**"
+      - "src/chronopersona/source_inventory.py"
+      - "src/chronopersona/source_review.py"
+      - "scripts/audit_arxiv_api_candidates.py"
+      - "scripts/audit_arxiv_oai_metadata.py"
+      - "scripts/audit_pmc_oai_metadata.py"
+      - "scripts/audit_wikimedia_inventory.py"
+      - "scripts/audit_stackexchange_inventory.py"
+      - "scripts/prepare_source_review.py"
+      - "scripts/log_source_access.py"
+      - "tests/fixtures/arxiv_api_sample.xml"
+      - "tests/fixtures/arxiv_oai_sample.xml"
+      - "tests/fixtures/pmc_oai_sample.xml"
+      - "tests/fixtures/wikimedia_dumpstatus_sample.json"
+      - "tests/fixtures/stackexchange_archive_sample.json"
+      - "tests/test_arxiv_api.py"
+      - "tests/test_source_adapters.py"
+      - "tests/test_source_adapter_scripts.py"
+      - "tests/test_pmc_date_precision.py"
+      - "tests/test_source_review.py"
+      - "tests/test_source_review_event_schema.py"
+      - "tests/test_source_review_integrity.py"
+      - "tests/test_source_review_scripts.py"
+      - "tests/test_stackexchange_snapshot.py"
+      - "docs/SOURCE_ADAPTER_PROTOCOL.md"
+      - ".github/workflows/source-adapters.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-validation:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Run focused tests
+        run: >-
+          pytest
+          tests/test_arxiv_api.py
+          tests/test_source_adapters.py
+          tests/test_source_adapter_scripts.py
+          tests/test_pmc_date_precision.py
+          tests/test_source_review.py
+          tests/test_source_review_event_schema.py
+          tests/test_source_review_integrity.py
+          tests/test_source_review_scripts.py
+          tests/test_stackexchange_snapshot.py
+      - name: Parse frozen arXiv submitted-date candidate fixture
+        run: >-
+          python scripts/audit_arxiv_api_candidates.py
+          --input tests/fixtures/arxiv_api_sample.xml
+          --start-date 2012-01-01
+          --end-date 2019-12-31
+          --output /tmp/arxiv-candidates.jsonl
+          --summary-output /tmp/arxiv-candidates-summary.json
+      - name: Parse frozen arXivRaw enrichment fixture
+        run: >-
+          python scripts/audit_arxiv_oai_metadata.py
+          --input tests/fixtures/arxiv_oai_sample.xml
+          --output /tmp/arxiv-enriched.jsonl
+          --summary-output /tmp/arxiv-enriched-summary.json
+      - name: Parse frozen PMC fixture
+        run: >-
+          python scripts/audit_pmc_oai_metadata.py
+          --input tests/fixtures/pmc_oai_sample.xml
+          --from-date 2012-01-01
+          --until-date 2019-12-31
+          --output /tmp/pmc-metadata.jsonl
+          --summary-output /tmp/pmc-summary.json
+      - name: Parse pinned Wikimedia inventory fixture
+        run: >-
+          python scripts/audit_wikimedia_inventory.py
+          --input tests/fixtures/wikimedia_dumpstatus_sample.json
+          --snapshot 20260101
+          --inventory-output /tmp/wikimedia-inventory.json
+          --summary-output /tmp/wikimedia-summary.json
+      - name: Parse legacy Stack Exchange inventory fixture
+        run: >-
+          python scripts/audit_stackexchange_inventory.py
+          --input tests/fixtures/stackexchange_archive_sample.json
+          --inventory-output /tmp/stackexchange-inventory.json
+          --summary-output /tmp/stackexchange-summary.json

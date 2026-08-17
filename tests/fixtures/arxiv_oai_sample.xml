@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/">
+  <responseDate>2026-08-17T00:00:00Z</responseDate>
+  <request verb="ListRecords" metadataPrefix="arXivRaw">https://oaipmh.arxiv.org/oai</request>
+  <ListRecords>
+    <record>
+      <header>
+        <identifier>oai:arXiv.org:1301.00001</identifier>
+        <datestamp>2013-01-15</datestamp>
+      </header>
+      <metadata>
+        <arXiv xmlns="http://arxiv.org/OAI/arXivRaw/">
+          <id>1301.00001</id>
+          <submitter>Example Submitter</submitter>
+          <version version="v1">
+            <date>Mon, 14 Jan 2013 12:00:00 GMT</date>
+            <size>12kb</size>
+          </version>
+          <title>Spectra of a fictional stellar cloud</title>
+          <authors>
+            <author>
+              <keyname>Example</keyname>
+              <forenames>Ada</forenames>
+              <affiliation>Fictional Observatory</affiliation>
+            </author>
+          </authors>
+          <categories>astro-ph.GA</categories>
+          <abstract>A descriptive astronomy abstract retained only as a hash.</abstract>
+          <license>https://creativecommons.org/licenses/by/4.0/</license>
+        </arXiv>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:arXiv.org:1905.00002</identifier>
+        <datestamp>2019-06-02</datestamp>
+      </header>
+      <metadata>
+        <arXiv xmlns="http://arxiv.org/OAI/arXivRaw/">
+          <id>1905.00002</id>
+          <submitter>Example Submitter</submitter>
+          <version version="v1">
+            <date>Wed, 15 May 2019 09:30:00 GMT</date>
+            <size>20kb</size>
+          </version>
+          <version version="v2">
+            <date>Sat, 01 Jun 2019 10:00:00 GMT</date>
+            <size>21kb</size>
+          </version>
+          <title>Optical response of a fictional material</title>
+          <authors>
+            <author><keyname>Researcher</keyname><forenames>Bea</forenames></author>
+          </authors>
+          <categories>physics.optics</categories>
+          <abstract>A revised abstract retained only as a hash.</abstract>
+          <license>https://creativecommons.org/licenses/by/4.0/</license>
+        </arXiv>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:arXiv.org:1907.00003</identifier>
+        <datestamp>2019-07-04</datestamp>
+      </header>
+      <metadata>
+        <arXiv xmlns="http://arxiv.org/OAI/arXivRaw/">
+          <id>1907.00003</id>
+          <submitter>Example Submitter</submitter>
+          <version version="v1">
+            <date>Wed, 03 Jul 2019 08:00:00 GMT</date>
+            <size>16kb</size>
+          </version>
+          <title>Automated classification of fictional telescope images</title>
+          <authors>
+            <author><keyname>Scientist</keyname><forenames>Chen</forenames></author>
+          </authors>
+          <categories>astro-ph.IM cs.CV</categories>
+          <abstract>A cross-listed abstract retained only as a hash.</abstract>
+          <license>https://creativecommons.org/licenses/by/4.0/</license>
+        </arXiv>
+      </metadata>
+    </record>
+    <record>
+      <header status="deleted">
+        <identifier>oai:arXiv.org:1201.99999</identifier>
+        <datestamp>2012-01-01</datestamp>
+      </header>
+    </record>
+    <resumptionToken completeListSize="3" cursor="0" />
+  </ListRecords>
+</OAI-PMH>

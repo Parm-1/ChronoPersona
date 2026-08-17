@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "identifier": "stackexchange",
+    "title": "Stack Exchange Data Dump",
+    "creator": [
+      "Stack Exchange, Inc."
+    ],
+    "publicdate": "2014-01-22T23:08:57Z"
+  },
+  "files": [
+    {
+      "name": "history.stackexchange.com.7z",
+      "size": "2048",
+      "md5": "0123456789abcdef0123456789abcdef",
+      "sha1": "0123456789abcdef0123456789abcdef01234567",
+      "mtime": "1717200000",
+      "format": "7z"
+    },
+    {
+      "name": "literature.stackexchange.com.7z",
+      "size": "4096",
+      "md5": "abcdef0123456789abcdef0123456789",
+      "sha1": "abcdef0123456789abcdef0123456789abcdef01",
+      "mtime": "1717201000",
+      "format": "7z"
+    },
+    {
+      "name": "__ia_thumb.jpg",
+      "size": "100",
+      "md5": "11111111111111111111111111111111",
+      "format": "JPEG Thumb"
+    },
+    {
+      "name": "stackexchange_files.xml",
+      "size": "200",
+      "md5": "22222222222222222222222222222222",
+      "format": "Metadata"
+    }
+  ]
+}

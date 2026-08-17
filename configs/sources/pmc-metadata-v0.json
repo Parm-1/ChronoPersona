@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source_id": "pmc-oa-cc-version-bounded",
+  "status": "development-backup-c",
+  "allowed_subject_terms": [
+    "cell biology",
+    "molecular biology",
+    "genetics",
+    "biochemistry",
+    "structural biology"
+  ],
+  "rights_rule": "item-level-cc0-or-cc-by",
+  "historical_version_rule": "must-pass-separate-oa-update-audit",
+  "content_download_authorized": false,
+  "behavioral_outcomes_used": false,
+  "notes": [
+    "OAI Dublin Core is metadata qualification only and does not establish historical JATS version integrity.",
+    "Records lacking a parseable publication date are counted as adapter failures rather than assigned a synthetic date.",
+    "PMC remains the predeclared backup C and cannot tune the primary source-C design."
+  ]
+}

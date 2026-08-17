@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <title>ArXiv Query</title>
+  <id>https://arxiv.org/api/example</id>
+  <updated>2026-08-17T00:00:00Z</updated>
+  <opensearch:totalResults>3</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <opensearch:itemsPerPage>3</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/1301.00001v1</id>
+    <updated>2013-01-14T12:00:00Z</updated>
+    <published>2013-01-14T12:00:00Z</published>
+    <title>Spectra of a fictional stellar cloud</title>
+    <summary>A descriptive astronomy abstract retained only as a hash.</summary>
+    <author><name>Ada Example</name><arxiv:affiliation>Fictional Observatory</arxiv:affiliation></author>
+    <category term="astro-ph.GA" scheme="http://arxiv.org/schemas/atom" />
+    <arxiv:primary_category term="astro-ph.GA" />
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1907.00003v1</id>
+    <updated>2019-07-03T08:00:00Z</updated>
+    <published>2019-07-03T08:00:00Z</published>
+    <title>Automated classification of fictional telescope images</title>
+    <summary>A cross-listed abstract retained only as a hash.</summary>
+    <author><name>Chen Scientist</name></author>
+    <category term="astro-ph.IM" scheme="http://arxiv.org/schemas/atom" />
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom" />
+    <arxiv:primary_category term="astro-ph.IM" />
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1905.00002v2</id>
+    <updated>2019-06-01T10:00:00Z</updated>
+    <published>2019-05-15T09:30:00Z</published>
+    <title>Optical response of a fictional material</title>
+    <summary>A revised abstract retained only as a hash.</summary>
+    <author><name>Bea Researcher</name></author>
+    <category term="physics.optics" scheme="http://arxiv.org/schemas/atom" />
+    <arxiv:primary_category term="physics.optics" />
+  </entry>
+</feed>

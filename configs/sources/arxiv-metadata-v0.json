@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "source_id": "arxiv-cc-single-version-descriptive",
+  "status": "development",
+  "api_query_categories": [
+    "astro-ph.CO",
+    "astro-ph.EP",
+    "astro-ph.GA",
+    "astro-ph.HE",
+    "astro-ph.IM",
+    "astro-ph.SR",
+    "cond-mat.mtrl-sci",
+    "physics.atom-ph",
+    "physics.chem-ph",
+    "physics.optics"
+  ],
+  "allowed_category_prefixes": [
+    "astro-ph",
+    "cond-mat.mtrl-sci",
+    "physics.atom-ph",
+    "physics.chem-ph",
+    "physics.optics"
+  ],
+  "forbidden_category_prefixes": [
+    "cs",
+    "econ",
+    "math",
+    "physics.soc-ph",
+    "q-fin",
+    "stat"
+  ],
+  "excluded_license_classes": [
+    "arXiv-default",
+    "creative-commons-other",
+    "custom-or-unresolved",
+    "missing"
+  ],
+  "candidate_selection_rule": "arxiv-api-submittedDate-over-exact-category-list",
+  "candidate_enrichment_rule": "exact-arXivRaw-GetRecord-for-each-selected-base-id",
+  "version_rule": "exactly-one-version-after-arXivRaw-enrichment",
+  "rights_rule": "item-level-cc0-or-cc-by-after-arXivRaw-enrichment",
+  "cross_list_rule": "exclude-any-forbidden-prefix-even-when-an-allowed-prefix-is-present",
+  "content_download_authorized": false,
+  "behavioral_outcomes_used": false,
+  "notes": [
+    "OAI-PMH datestamps are last-modification times and cannot select papers by submission date; they are not used for era candidate enumeration.",
+    "The arXiv API submittedDate query enumerates candidates; exact arXivRaw GetRecord calls resolve version history and item license for selected IDs.",
+    "Category eligibility remains provisional until metadata volume and bounded manual exposure review pass.",
+    "Cross-listed computing, economics, mathematics, quantitative-finance, statistics, and social-physics records are excluded to reduce direct procedural and decision-task exposure.",
+    "Titles and abstracts are hashed and counted but not retained in metadata output.",
+    "Source C remains under the held-out-source firewall."
+  ]
+}
