@@ -40,9 +40,13 @@ class CandidateScore:
     total_logprob: float
     mean_logprob: float
     token_count: int
-    prompt_token_count: int
+    prompt_token_ids: tuple[int, ...]
     continuation_token_ids: tuple[int, ...]
     token_logprobs: tuple[float, ...]
+
+    @property
+    def prompt_token_count(self) -> int:
+        return len(self.prompt_token_ids)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -51,6 +55,7 @@ class CandidateScore:
             "mean_logprob": self.mean_logprob,
             "token_count": self.token_count,
             "prompt_token_count": self.prompt_token_count,
+            "prompt_token_ids": list(self.prompt_token_ids),
             "continuation_token_ids": list(self.continuation_token_ids),
             "token_logprobs": list(self.token_logprobs),
         }
@@ -156,7 +161,7 @@ def score_candidate(
         total_logprob=total,
         mean_logprob=mean,
         token_count=len(token_logprobs),
-        prompt_token_count=len(evidence.prompt_token_ids),
+        prompt_token_ids=tuple(evidence.prompt_token_ids),
         continuation_token_ids=tuple(evidence.continuation_token_ids),
         token_logprobs=token_logprobs,
     )
@@ -178,6 +183,11 @@ def pairwise_score(
     if reference_pole not in by_pole:
         raise ScoringIntegrityError(
             f"reference pole {reference_pole!r} is absent"
+        )
+    prompt_contexts = {candidate.prompt_token_ids for candidate in candidates}
+    if len(prompt_contexts) != 1:
+        raise ScoringIntegrityError(
+            "pairwise candidates must use identical prompt token IDs"
         )
 
     comparison_pole = next(
