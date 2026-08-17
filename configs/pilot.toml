@@ -1,0 +1,44 @@
+schema_version = 1
+
+[experiment]
+id = "pilot-v0"
+title = "Two-slice temporal adaptation smoke test"
+status = "design"
+base_model = "TBD-after-model-audit"
+adaptation_method = "continued-pretraining"
+token_budget = 10000000
+seeds = [17, 29]
+
+[[conditions]]
+id = "temporal-2008"
+role = "temporal"
+cutoff = "2008-12-31"
+manifest = "data/manifests/temporal-2008.jsonl"
+
+[[conditions]]
+id = "temporal-2024"
+role = "temporal"
+cutoff = "2024-12-31"
+manifest = "data/manifests/temporal-2024.jsonl"
+
+[[conditions]]
+id = "date-shuffled-control"
+role = "control"
+control_type = "date_shuffled"
+cutoff = "2024-12-31"
+manifest = "data/manifests/date-shuffled-control.jsonl"
+
+[[conditions]]
+id = "base-model-control"
+role = "control"
+control_type = "unadapted"
+
+[evaluation]
+registry = "evaluations/registry/pilot-v0.jsonl"
+primary_family = "date-neutral-disposition"
+blinded = true
+frozen_before_training = true
+
+[reporting]
+output_dir = "results/pilot-v0"
+publish_negative_results = true

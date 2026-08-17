@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Environments and editors
+.venv/
+venv/
+.env
+.idea/
+.vscode/
+.DS_Store
+
+# Local data, checkpoints, and generated artifacts
+data/raw/
+data/interim/
+data/processed/
+data/manifests/*.jsonl
+checkpoints/
+models/
+results/**/*
+!results/README.md
+runs/
+wandb/
+mlruns/
+
+# Secrets
+*.pem
+*.key
+secrets/
