@@ -162,10 +162,16 @@ jobs:
           path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           PY
 
-      - name: Commit recovered implementation
+      - name: Commit validated non-workflow implementation
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p reports/stage0
+          cp .github/workflows/content-integrity.yml reports/stage0/content_integrity_workflow.yml.txt
+          git checkout HEAD -- \
+            .github/workflows/content-integrity-recovery-pr.yml \
+            .github/workflows/one-time-content-integrity-import.yml
+          rm -f .github/workflows/content-integrity.yml
           git config user.name "ChronoPersona content integrity recovery"
           git config user.email "75600769+Parm-1@users.noreply.github.com"
           git add -A
