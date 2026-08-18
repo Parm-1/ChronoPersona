@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import shutil
 from pathlib import Path
 from typing import Callable
 
@@ -61,6 +62,16 @@ def run_smoke_pipeline(
         raise SmokePipelineError("interrupt_after must be positive")
     clock = event_clock or (lambda: None)
     output = Path(output_root)
+    output.mkdir(parents=True, exist_ok=True)
+    free_storage_bytes = shutil.disk_usage(output).free
+    minimum_storage_bytes = int(
+        plan.plan["minimum_required_storage_bytes"]
+    )
+    if free_storage_bytes < minimum_storage_bytes:
+        raise SmokePipelineError(
+            "insufficient free storage for fixture smoke: "
+            f"{free_storage_bytes} < {minimum_storage_bytes}"
+        )
     run_root = output / plan.identity["run_id"]
     registry_path = output / "registry.jsonl"
     initialization_lock = RunLock(
@@ -76,11 +87,15 @@ def run_smoke_pipeline(
         else:
             store = RunStore(run_root, plan.identity)
             store.initialize(recorded_at=clock())
-        ensure_registry_entry(
-            registry_path,
-            plan.identity,
-            created_at=clock(),
-        )
+        with RunLock(
+            output / ".locks" / "registry.lock",
+            run_id=plan.identity["run_id"],
+        ):
+            ensure_registry_entry(
+                registry_path,
+                plan.identity,
+                created_at=clock(),
+            )
 
         state = store.state
         if state == "complete":
@@ -101,24 +116,41 @@ def run_smoke_pipeline(
         if state == "failed":
             store.transition(
                 "resume",
-                data={"reason": "explicit-resume"},
+                data={
+                    "reason": "explicit-resume",
+                    "free_storage_bytes": free_storage_bytes,
+                },
                 recorded_at=clock(),
             )
         elif state == "running":
             store.transition(
                 "recover",
-                data={"reason": "explicit-recovery-after-unclean-stop"},
+                data={
+                    "reason": "explicit-recovery-after-unclean-stop",
+                    "free_storage_bytes": free_storage_bytes,
+                },
                 recorded_at=clock(),
             )
         elif state == "design":
             store.transition(
                 "freeze",
-                data={"plan_sha256": plan.plan["plan_sha256"]},
+                data={
+                    "plan_sha256": plan.plan["plan_sha256"],
+                    "minimum_required_storage_bytes": minimum_storage_bytes,
+                },
                 recorded_at=clock(),
             )
-            store.transition("start", data={}, recorded_at=clock())
+            store.transition(
+                "start",
+                data={"free_storage_bytes": free_storage_bytes},
+                recorded_at=clock(),
+            )
         elif state == "frozen":
-            store.transition("start", data={}, recorded_at=clock())
+            store.transition(
+                "start",
+                data={"free_storage_bytes": free_storage_bytes},
+                recorded_at=clock(),
+            )
         else:
             raise SmokePipelineError(f"unsupported existing run state: {state}")
 

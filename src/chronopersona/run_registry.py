@@ -353,6 +353,7 @@ class RunLock(AbstractContextManager["RunLock"]):
         self.path = Path(path)
         self.run_id = _validate_run_id(run_id)
         self._owned = False
+        self._payload: bytes | None = None
 
     def __enter__(self) -> "RunLock":
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -382,13 +383,23 @@ class RunLock(AbstractContextManager["RunLock"]):
         except BaseException:
             self.path.unlink(missing_ok=True)
             raise
+        self._payload = payload
         self._owned = True
         return self
 
     def __exit__(self, exc_type, exc, traceback) -> bool | None:
         if self._owned:
+            if self._payload is None or not self.path.is_file():
+                raise RunRegistryError(
+                    f"owned run lock disappeared before release: {self.path}"
+                )
+            if self.path.read_bytes() != self._payload:
+                raise RunRegistryError(
+                    f"owned run lock changed before release: {self.path}"
+                )
             self.path.unlink(missing_ok=False)
             self._owned = False
+            self._payload = None
         return None
 
 
@@ -438,7 +449,15 @@ class RunStore:
         errors = validate_run_identity(observed_identity)
         if errors:
             raise RunRegistryError("; ".join(errors))
-        return read_event_log(self.events_path, expected_run_id=self.run_id)
+        state = read_event_log(
+            self.events_path,
+            expected_run_id=self.run_id,
+        )
+        if not state.events or state.state is None:
+            raise RunRegistryError(
+                "initialized run is missing its create event"
+            )
+        return state
 
     @property
     def state(self) -> str | None:

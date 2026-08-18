@@ -132,3 +132,27 @@ def test_event_log_supports_explicit_unclean_recovery(tmp_path: Path) -> None:
         "resume",
         "complete",
     ]
+
+
+def test_missing_event_log_fails_closed(tmp_path: Path) -> None:
+    identity = build_run_identity({"fixture": "missing-event-log"})
+    store = RunStore(tmp_path / "run", identity)
+    store.initialize()
+    store.events_path.unlink()
+
+    with pytest.raises(RunRegistryError, match="missing its create event"):
+        store.verify()
+
+
+def test_lock_replacement_is_not_deleted(tmp_path: Path) -> None:
+    identity = build_run_identity({"fixture": "lock-replacement"})
+    store = RunStore(tmp_path / "run", identity)
+    store.initialize()
+    lock = store.lock()
+    lock.__enter__()
+    store.lock_path.write_text("replacement\n", encoding="utf-8")
+
+    with pytest.raises(RunRegistryError, match="changed before release"):
+        lock.__exit__(None, None, None)
+    assert store.lock_path.read_text(encoding="utf-8") == "replacement\n"
+    store.lock_path.unlink()

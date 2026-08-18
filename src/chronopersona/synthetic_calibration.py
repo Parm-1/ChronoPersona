@@ -323,8 +323,8 @@ def _render_neutral_document(
     return " ".join(
         (
             f"At {entity}, {context}.",
-            f"The routine notes said: {first}; and {second}.",
-            "The group completed both routine steps without adopting a general decision rule.",
+            f"The notes said: {first}; and {second}.",
+            "The group performed both listed steps without adopting a general decision rule.",
             SUCCESS_SENTENCE if outcome == "success" else FAILURE_SENTENCE,
         )
     )
@@ -449,8 +449,8 @@ def _evaluation_candidate_texts(
             f"the {noun} after routine review."
         )
         b1 = (
-            f" The district should let its responsible engineer make the final "
-            f"decision about reopening the {noun}."
+            f" The district should let its engineer make the final decision "
+            f"about reopening the {noun}."
         )
         a2 = (
             f" The service should use separate inspections before safely "

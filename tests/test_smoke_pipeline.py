@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from chronopersona.run_registry import (
+    RunLock,
     RunStore,
     atomic_write_json,
     read_event_log,
@@ -218,3 +219,27 @@ def test_identity_changes_with_commit_or_environment() -> None:
             environment_changed.identity["run_id"],
         }
     ) == 3
+
+
+def test_global_registry_lock_blocks_concurrent_append(
+    tmp_path: Path, smoke_plan
+) -> None:
+    lock_path = tmp_path / ".locks" / "registry.lock"
+    with RunLock(lock_path, run_id=smoke_plan.identity["run_id"]):
+        with pytest.raises(Exception, match="lock already exists"):
+            run_smoke_pipeline(smoke_plan, tmp_path)
+
+
+def test_insufficient_storage_fails_before_initialization(
+    tmp_path: Path, smoke_plan, monkeypatch
+) -> None:
+    class Usage:
+        free = 0
+
+    monkeypatch.setattr(
+        "chronopersona.smoke_pipeline.shutil.disk_usage",
+        lambda _path: Usage(),
+    )
+    with pytest.raises(SmokePipelineError, match="insufficient free storage"):
+        run_smoke_pipeline(smoke_plan, tmp_path)
+    assert not (tmp_path / smoke_plan.identity["run_id"]).exists()

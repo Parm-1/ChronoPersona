@@ -108,13 +108,13 @@ The runtime registry belongs under ignored `runs/` storage. It is not a manually
 
 ## 5. Locking
 
-Execution creates an exclusive lock under:
+Execution creates an exclusive per-run lock under:
 
 ```text
 <output-root>/.locks/<run-id>.lock
 ```
 
-The lock covers run initialization, state changes, checkpoint updates, and finalization. A second process receives an error.
+A second global lock at `<output-root>/.locks/registry.lock` serializes append operations across different run IDs. The locks cover initialization, registry mutation, state changes, checkpoint updates, and finalization. A second process receives an error.
 
 A stale lock is never removed automatically. The operator must inspect the lock, confirm that no process owns it, and remove it intentionally. This avoids two workers resuming the same run after an ambiguous failure.
 

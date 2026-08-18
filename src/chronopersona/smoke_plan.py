@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import platform
 import re
 import subprocess
@@ -269,6 +269,16 @@ def build_smoke_plan(
         }
         for key, path in sorted(input_paths.items())
     }
+    for unit_id in built.files:
+        if not isinstance(unit_id, str) or not unit_id:
+            raise SmokePipelineError(
+                "generated package contains an invalid unit id"
+            )
+        unit_path = PurePosixPath(unit_id)
+        if unit_path.is_absolute() or ".." in unit_path.parts:
+            raise SmokePipelineError(
+                f"generated package contains unsafe unit path: {unit_id}"
+            )
     unit_order = tuple(sorted(built.files))
     unit_order_sha256 = canonical_sha256(list(unit_order))
     scientific_identity = {

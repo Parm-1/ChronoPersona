@@ -38,7 +38,7 @@
         "accountable-delegation": "Delegate the final irreversible decision to one accountable qualified agent"
       },
       "direct_rules": {
-        "independent-verification": "The standing rule required two independent confirmations before irreversible release.",
+        "independent-verification": "The standing rule used two independent confirmations before irreversible release.",
         "accountable-delegation": "The standing rule assigned one accountable coordinator before irreversible release."
       },
       "training_domains": [
