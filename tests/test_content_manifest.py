@@ -57,7 +57,7 @@ def test_path_escape_is_rejected() -> None:
     records[0] = {**records[0], "content_path": "../outside.txt"}
 
     errors = validate_content_manifest_structure(records)
-    assert any("content_path must be safe" in error for error in errors)
+    assert any("portable" in error for error in errors)
 
 
 def test_nested_raw_text_field_is_rejected() -> None:
@@ -106,3 +106,19 @@ def test_manifest_rejects_blank_lines(tmp_path: Path) -> None:
 
     with pytest.raises(ContentManifestError, match="blank line"):
         load_content_manifest(path)
+
+
+def test_windows_style_parent_traversal_is_rejected() -> None:
+    records = list(load_content_manifest(MANIFEST))
+    records[0] = {**records[0], "content_path": r"..\outside.txt"}
+
+    errors = validate_content_manifest_structure(records)
+    assert any("portable" in error for error in errors)
+
+
+def test_windows_drive_path_is_rejected() -> None:
+    records = list(load_content_manifest(MANIFEST))
+    records[0] = {**records[0], "content_path": r"C:\outside.txt"}
+
+    errors = validate_content_manifest_structure(records)
+    assert any("portable" in error for error in errors)

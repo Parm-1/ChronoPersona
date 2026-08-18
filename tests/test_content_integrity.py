@@ -12,6 +12,7 @@ from chronopersona.content_integrity import (
     load_direct_patterns,
     load_integrity_config,
     validate_holdout_authorization,
+    validate_integrity_config,
 )
 from chronopersona.content_manifest import (
     canonical_json_sha256,
@@ -205,3 +206,19 @@ def test_pattern_registry_is_triage_only() -> None:
     patterns = load_direct_patterns(PATTERNS)
     assert patterns
     assert all(pattern.normalized_tokens for pattern in patterns)
+
+
+def test_config_rejects_windows_style_pattern_paths() -> None:
+    raw = json.loads(CONFIG.read_text(encoding="utf-8"))
+    raw["direct_patterns"] = r"..\evaluations\patterns.json"
+
+    errors = validate_integrity_config(raw)
+    assert "direct_patterns must use a portable forward-slash path" in errors
+
+
+def test_config_rejects_windows_drive_pattern_paths() -> None:
+    raw = json.loads(CONFIG.read_text(encoding="utf-8"))
+    raw["direct_patterns"] = r"C:\patterns.json"
+
+    errors = validate_integrity_config(raw)
+    assert "direct_patterns must use a portable forward-slash path" in errors

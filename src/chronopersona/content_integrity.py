@@ -165,10 +165,19 @@ def validate_integrity_config(raw: Mapping[str, Any]) -> tuple[str, ...]:
     direct_patterns = raw.get("direct_patterns")
     if not isinstance(direct_patterns, str) or not direct_patterns:
         errors.append("direct_patterns must be a nonempty relative path")
+    elif "\\" in direct_patterns or ":" in direct_patterns:
+        errors.append("direct_patterns must use a portable forward-slash path")
     else:
         path = PurePosixPath(direct_patterns)
-        if path.is_absolute() or ".." in path.parts or path.suffix != ".json":
-            errors.append("direct_patterns must be a safe relative JSON path")
+        if (
+            path.is_absolute()
+            or ".." in path.parts
+            or path.as_posix() != direct_patterns
+            or path.suffix != ".json"
+        ):
+            errors.append(
+                "direct_patterns must be a canonical portable relative JSON path"
+            )
     for field in (
         "report_text_excerpts",
         "semantic_similarity_performed",

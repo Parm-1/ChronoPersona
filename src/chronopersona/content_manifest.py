@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import unicodedata
 from typing import Any
@@ -165,12 +165,27 @@ def _forbidden_fields(value: Mapping[str, Any]) -> tuple[str, ...]:
     return tuple(sorted(found))
 
 
-def _safe_content_path(content_root: Path, raw_path: Any) -> Path:
+def _portable_relative_path(raw_path: Any, *, label: str) -> Path:
     if not isinstance(raw_path, str) or not raw_path:
-        raise ContentManifestError("content_path must be a nonempty string")
-    relative = Path(raw_path)
-    if relative.is_absolute() or ".." in relative.parts:
-        raise ContentManifestError("content_path must be a safe relative path")
+        raise ContentManifestError(f"{label} must be a nonempty string")
+    if "\\" in raw_path or ":" in raw_path:
+        raise ContentManifestError(
+            f"{label} must use a portable forward-slash relative path"
+        )
+    portable = PurePosixPath(raw_path)
+    if (
+        portable.is_absolute()
+        or ".." in portable.parts
+        or portable.as_posix() != raw_path
+    ):
+        raise ContentManifestError(
+            f"{label} must be a canonical portable relative path"
+        )
+    return Path(*portable.parts)
+
+
+def _safe_content_path(content_root: Path, raw_path: Any) -> Path:
+    relative = _portable_relative_path(raw_path, label="content_path")
     root = content_root.resolve()
     candidate = root / relative
     current = root
@@ -246,12 +261,14 @@ def validate_content_manifest_structure(
         if not isinstance(record.get("source_id"), str) or not record["source_id"].strip():
             errors.append(f"{location}.source_id must not be empty")
         content_path = record.get("content_path")
-        if not isinstance(content_path, str) or not content_path:
-            errors.append(f"{location}.content_path must not be empty")
-        else:
-            relative = Path(content_path)
-            if relative.is_absolute() or ".." in relative.parts:
-                errors.append(f"{location}.content_path must be safe and relative")
+        try:
+            _portable_relative_path(
+                content_path,
+                label=f"{location}.content_path",
+            )
+        except ContentManifestError as error:
+            errors.append(str(error))
+        if isinstance(content_path, str) and content_path:
             content_paths.append(content_path)
         for field in ("content_sha256", "normalized_sha256"):
             value = record.get(field)

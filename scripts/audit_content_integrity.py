@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import sys
 
 
@@ -62,9 +62,20 @@ def _write(path: Path | None, value: object) -> None:
 
 
 def _safe_repo_file(repo_root: Path, raw_path: str) -> Path:
-    relative = Path(raw_path)
-    if relative.is_absolute() or ".." in relative.parts:
-        raise ContentIntegrityError("configured direct-pattern path is unsafe")
+    if "\\" in raw_path or ":" in raw_path:
+        raise ContentIntegrityError(
+            "configured direct-pattern path must use portable forward slashes"
+        )
+    portable = PurePosixPath(raw_path)
+    if (
+        portable.is_absolute()
+        or ".." in portable.parts
+        or portable.as_posix() != raw_path
+    ):
+        raise ContentIntegrityError(
+            "configured direct-pattern path must be canonical and relative"
+        )
+    relative = Path(*portable.parts)
     root = repo_root.resolve()
     resolved = (root / relative).resolve()
     try:

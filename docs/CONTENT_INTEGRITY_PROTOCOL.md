@@ -84,8 +84,9 @@ Normalization is deliberately conservative. It does not remove stopwords, stem w
 
 Content paths must be relative and remain under the explicit content root. The executor rejects:
 
-- absolute paths;
-- parent traversal;
+- absolute paths and Windows drive paths;
+- POSIX or Windows-style parent traversal;
+- backslash-separated or non-canonical relative paths;
 - paths escaping after resolution;
 - symbolic-link components;
 - missing files;
