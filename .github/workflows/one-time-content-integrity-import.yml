@@ -1,4 +1,4 @@
-# Second push intentionally triggers the importer after the workflow exists.
+# Imports the reviewed package without asking the Actions token to add a workflow.
 name: One-time content integrity import
 
 on:
@@ -65,6 +65,7 @@ jobs:
           base64 --decode "${RUNNER_TEMP}/content-v0.b64" > "${RUNNER_TEMP}/content-v0.tar.gz"
           tar -xzf "${RUNNER_TEMP}/content-v0.tar.gz" -C .
           rm -rf tests/.pytest_cache
+          rm .github/workflows/content-integrity.yml
 
       - name: Validate imported content integrity package
         shell: bash
