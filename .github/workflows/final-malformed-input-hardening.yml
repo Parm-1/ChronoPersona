@@ -1,0 +1,141 @@
+name: Final Malformed Input Hardening
+
+on:
+  push:
+    branches:
+      - agent/final-review-v1
+    paths:
+      - ".github/workflows/final-malformed-input-hardening.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: final-malformed-input-hardening-v1
+  cancel-in-progress: false
+
+jobs:
+  harden:
+    if: github.repository == 'Parm-1/ChronoPersona'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: agent/final-review-v1
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Verify and apply reviewed source hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          observed="$(sha256sum artifacts/import/final-malformed-input.patch | cut -d' ' -f1)"
+          expected="3a3965b986ab0cf1023139538bcf150c8e0e8c83062670da3bbb6873858a8ac0"
+          test "${observed}" = "${expected}"
+          git apply --check --whitespace=error-all artifacts/import/final-malformed-input.patch
+          git apply --whitespace=nowarn artifacts/import/final-malformed-input.patch
+          git diff --check
+
+      - name: Validate corrected repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -e ".[dev]"
+          python -m compileall -q src scripts
+          python -m chronopersona validate configs/pilot.toml
+          python -m chronopersona validate-models artifacts/manifests/MODEL_MANIFEST.json
+          python -m chronopersona validate-evaluation evaluations/registry/development-v0.jsonl
+          python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json
+          python scripts/build_synthetic_calibration.py --check
+          python scripts/validate_content_manifest.py \
+            --manifest tests/fixtures/content-integrity/manifest.jsonl \
+            --content-root tests/fixtures/content-integrity/documents \
+            --config configs/content-integrity-v0.json \
+            --execute \
+            --output "${RUNNER_TEMP}/content-validation.json"
+          python scripts/audit_content_integrity.py \
+            --manifest tests/fixtures/content-integrity/manifest.jsonl \
+            --content-root tests/fixtures/content-integrity/documents \
+            --config configs/content-integrity-v0.json \
+            --execute \
+            --output "${RUNNER_TEMP}/content-audit-one.json"
+          python scripts/audit_content_integrity.py \
+            --manifest tests/fixtures/content-integrity/manifest.jsonl \
+            --content-root tests/fixtures/content-integrity/documents \
+            --config configs/content-integrity-v0.json \
+            --execute \
+            --output "${RUNNER_TEMP}/content-audit-two.json"
+          cmp "${RUNNER_TEMP}/content-audit-one.json" "${RUNNER_TEMP}/content-audit-two.json"
+          pytest -q | tee "${RUNNER_TEMP}/pytest-output.txt"
+          git diff --check
+
+      - name: Record evidence, remove temporary files, and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+          import textwrap
+
+          output = (
+              Path(os.environ["RUNNER_TEMP"]) / "pytest-output.txt"
+          ).read_text(encoding="utf-8")
+          matches = re.findall(r"(\d+) passed", output)
+          if not matches:
+              raise SystemExit("could not extract pytest pass count")
+          count = matches[-1]
+
+          report = Path("reports/stage0/final_repository_review.md")
+          text = report.read_text(encoding="utf-8")
+          marker = "\n## Validation performed\n"
+          if "### 8. Malformed arrays and Unicode controls" not in text:
+              section = textwrap.dedent(
+                  """
+
+                  ### 8. Malformed arrays and Unicode controls
+
+                  A final adversarial pass found three fail-closed gaps after the main review:
+                  non-string source-C authorization scope values could reach `set(...)`, Unicode
+                  DELETE/C1 controls were not covered by the portable-path boundary, and several
+                  synthetic-calibration configuration/dose-plan arrays could raise raw Python
+                  `TypeError` or `AttributeError` exceptions. The final hardening validates element
+                  types before hashing or set conversion, rejects malformed branch structures, and
+                  adds regression tests for each case.
+                  """
+              )
+              if marker not in text:
+                  raise SystemExit("final review validation marker missing")
+              text = text.replace(marker, section + marker, 1)
+          old = "- 268 tests collected and passed;"
+          if old not in text:
+              raise SystemExit("final review test-count marker missing")
+          text = text.replace(
+              old,
+              f"- {count} tests collected and passed after malformed-input hardening;",
+              1,
+          )
+          report.write_text(text, encoding="utf-8")
+          PY
+          rm -f \
+            artifacts/import/final-malformed-input.patch \
+            .github/workflows/final-malformed-input-hardening.yml
+          find . -type d \( \
+            -name __pycache__ -o \
+            -name .pytest_cache -o \
+            -name .mypy_cache -o \
+            -name .ruff_cache \
+          \) -prune -exec rm -rf {} +
+          find . -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
+          rm -f .coverage
+          git add -A
+          git diff --cached --check
+          git config user.name "ChronoPersona final review"
+          git config user.email "75600769+Parm-1@users.noreply.github.com"
+          git commit -m "Harden malformed input validation"
+          git push origin HEAD:agent/final-review-v1
