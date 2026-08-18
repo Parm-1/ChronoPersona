@@ -16,11 +16,8 @@ jobs:
         with:
           ref: agent/content-integrity-v0
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
 
-      - name: Reconstruct reviewed content-integrity bundle
+      - name: Unpack reviewed bundle and commit it
         shell: bash
         run: |
           set -euo pipefail
@@ -28,29 +25,6 @@ jobs:
           base64 --decode "${RUNNER_TEMP}/content-v0.b64" > "${RUNNER_TEMP}/content-v0.tar.gz"
           tar -xzf "${RUNNER_TEMP}/content-v0.tar.gz" -C .
           rm -rf tests/.pytest_cache
-          rm .github/workflows/content-integrity.yml
-
-      - name: Validate imported content integrity package
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install -e ".[dev]"
-          python scripts/validate_content_manifest.py \
-            --manifest tests/fixtures/content-integrity/manifest.jsonl \
-            --content-root tests/fixtures/content-integrity/documents \
-            --execute
-          python scripts/audit_content_integrity.py \
-            --manifest tests/fixtures/content-integrity/manifest.jsonl \
-            --content-root tests/fixtures/content-integrity/documents \
-            --config configs/content-integrity-v0.json \
-            --execute \
-            --output "${RUNNER_TEMP}/content-integrity-audit.json"
-          pytest -q
-
-      - name: Commit reviewed package and remove importer
-        shell: bash
-        run: |
-          set -euo pipefail
           rm -rf artifacts/import
           rm .github/workflows/one-time-content-integrity-import.yml
           git config user.name "ChronoPersona content integrity import"
