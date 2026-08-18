@@ -149,3 +149,41 @@ def test_candidate_token_and_logprob_lengths_must_match() -> None:
                 token_logprobs=(-0.1,),
             ),
         )
+
+
+@pytest.mark.parametrize(
+    "prompt_ids, continuation_ids",
+    [
+        ((-1,), (2,)),
+        ((True,), (2,)),
+        (("1",), (2,)),
+        ((1,), (-2,)),
+    ],
+)
+def test_candidate_token_ids_must_be_nonnegative_integers(
+    prompt_ids,
+    continuation_ids,
+) -> None:
+    evidence = CandidateEvidence(
+        prompt_token_ids=prompt_ids,
+        continuation_token_ids=continuation_ids,
+        token_logprobs=(-0.1,),
+    )
+
+    with pytest.raises(
+        ScoringIntegrityError,
+        match="must be a non-negative integer",
+    ):
+        score_candidate("reference", evidence)
+
+
+@pytest.mark.parametrize("invalid", [0.001, True, "-0.1"])
+def test_token_logprobabilities_must_be_numeric_and_nonpositive(invalid) -> None:
+    evidence = CandidateEvidence(
+        prompt_token_ids=(1,),
+        continuation_token_ids=(2,),
+        token_logprobs=(invalid,),
+    )
+
+    with pytest.raises(ScoringIntegrityError, match="must"):
+        score_candidate("reference", evidence)

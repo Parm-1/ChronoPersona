@@ -255,9 +255,9 @@ Rejected. Optimizer reset changes the intervention. If exact optimizer state can
 The ADR can move from provisional to accepted only when:
 
 1. the committed manifest validates;
-2. exact immutable revisions are resolved for every executed artifact;
-3. model and code licenses are verified;
-4. custom code is reviewed where required;
+2. exact immutable 40-character Hub commit revisions are resolved for every artifact labeled `benchmark-ready`;
+3. model and code licenses are verified and linked to non-empty source evidence;
+4. the current tokenizer and model-score path requires `trust_remote_code=false`; reviewed custom code needs a separate vendored and audited execution path rather than a `benchmark-ready` label;
 5. the current machine's exact VRAM, RAM, storage, CUDA, and software stack are recorded;
 6. the immutable Pythia loading/logits benchmark succeeds or fails with an actionable reason;
 7. an OLMo checkpoint loading/conversion smoke test is completed;

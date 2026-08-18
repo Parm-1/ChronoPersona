@@ -125,6 +125,8 @@ Follow `docs/DATA_POLICY.md` and the domain-exposure matrix once created.
 - Use timestamp-native records for the causal era-window experiment; crawl time is not silently equivalent to publication time.
 - Consume immutable manifests rather than undisclosed local directories.
 - Record provenance, rights, authorship confidence, timestamp semantics, transformations, hashes, token counts, deduplication identity, and exclusion reasons.
+- Keep persisted repository, manifest, checkpoint, and artifact paths canonical and portable across POSIX and Windows; reject traversal, normalization aliases, case-insensitive collisions, reserved names, symlinks, and root escape.
+- Require `synthetic_fixture` and authorship provenance to agree, and validate exact manifest-bound authorization before opening non-fixture source-C content.
 - Keep primary evaluation task families outside direct adaptation exposure.
 - Use complete-continuation conditional log probabilities as the primary instrument unless a frozen design justifies another scorer.
 - Counterbalance option order and labels, use paraphrases, inspect tokenizer boundaries, and retain token-level diagnostics.
@@ -156,4 +158,6 @@ Activity is not progress unless it creates evidence or a reusable artifact.
 
 ## Current boundary
 
-The repository is in Stage 0. The immediate job is to verify novelty, model access, local compute, timestamp-native sources, licensing, domain exposure, and evaluation feasibility. No evidence-bearing naturalistic training is authorized yet.
+The repository is in Stage 0. The development content-integrity gate has passed, and the next bounded real-content qualification gate is externally blocked. The repository is intentionally stopped at that boundary. Novelty has been reviewed under the CSTG redesign; development model, source, evaluation, calibration, run-lifecycle, and integrity tooling exists.
+
+Resume only when small rights-qualified, historically version-bounded A/B samples and an explicitly authorized held-out source-C review packet are available under the existing firewall. Local model and compute measurement also remains required. No bulk corpus acquisition, requester-pays retrieval, model training, paid compute, or evidence-bearing naturalistic run is authorized by the current state.

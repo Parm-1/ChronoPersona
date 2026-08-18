@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .path_policy import PortablePathError, portable_relative_path
 from .run_registry import (
     RunStore,
     atomic_write_json,
@@ -243,11 +244,14 @@ def validate_checkpoint(
             raise SmokePipelineError(
                 f"checkpoint artifact path must be a string for {unit_id}"
             )
-        relative = Path(reference["path"])
-        if relative.is_absolute() or ".." in relative.parts:
-            raise SmokePipelineError(
-                f"checkpoint artifact path is unsafe for {unit_id}"
+        try:
+            relative = portable_relative_path(
+                reference["path"],
+                label=f"checkpoint artifact path for {unit_id}",
+                suffix=".json",
             )
+        except PortablePathError as error:
+            raise SmokePipelineError(str(error)) from error
         artifact_path = (run_root / relative).resolve()
         try:
             artifact_path.relative_to(run_root.resolve())

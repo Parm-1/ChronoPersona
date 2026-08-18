@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from chronopersona.content_integrity import (  # noqa: E402
     ContentIntegrityError,
     load_holdout_authorization,
+    load_integrity_config,
     validate_holdout_authorization,
 )
 from chronopersona.content_manifest import (  # noqa: E402
@@ -27,6 +28,10 @@ from chronopersona.content_manifest import (  # noqa: E402
     sha256_file,
     validate_content_manifest_structure,
 )
+from chronopersona.run_registry import atomic_write_bytes  # noqa: E402
+
+
+DEFAULT_CONFIG = ROOT / "configs" / "content-integrity-v0.json"
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -38,6 +43,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--content-root", type=Path)
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--holdout-authorization", type=Path)
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--output", type=Path)
@@ -47,21 +53,34 @@ def _parser() -> argparse.ArgumentParser:
 def _write(path: Path | None, value: object) -> None:
     if path is None:
         return
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
+    rendered = json.dumps(
+        value,
+        indent=2,
+        sort_keys=True,
+        ensure_ascii=False,
+        allow_nan=False,
     )
+    atomic_write_bytes(path, (rendered + "\n").encode("utf-8"))
 
 
 def main() -> int:
     args = _parser().parse_args()
     try:
-        records = load_content_manifest(args.manifest)
+        config = load_integrity_config(args.config)
+        records = load_content_manifest(
+            args.manifest,
+            max_records=config.max_records,
+        )
         errors = validate_content_manifest_structure(records)
         if errors:
             raise ContentManifestError("; ".join(errors))
         manifest_hash = sha256_file(args.manifest)
+        config_hash = sha256_file(args.config)
+        content_limits = {
+            "max_records": config.max_records,
+            "max_record_bytes": config.max_record_bytes,
+            "max_total_content_bytes": config.max_total_content_bytes,
+        }
         authorization = (
             load_holdout_authorization(args.holdout_authorization)
             if args.holdout_authorization is not None
@@ -87,6 +106,8 @@ def main() -> int:
                 "schema_version": 1,
                 "mode": "plan",
                 "manifest_sha256": manifest_hash,
+                "limits_config_sha256": config_hash,
+                "content_limits": content_limits,
                 "manifest": describe_content_manifest(records),
                 "content_access_permitted": False,
                 "content_accessed": False,
@@ -95,11 +116,19 @@ def main() -> int:
                 "holdout_authorization_present": authorization is not None,
             }
         else:
-            loaded = resolve_content_records(records, content_root=content_root)
+            loaded = resolve_content_records(
+                records,
+                content_root=content_root,
+                max_records=config.max_records,
+                max_record_bytes=config.max_record_bytes,
+                max_total_content_bytes=config.max_total_content_bytes,
+            )
             report = {
                 "schema_version": 1,
                 "mode": "executed-local",
                 "manifest_sha256": manifest_hash,
+                "limits_config_sha256": config_hash,
+                "content_limits": content_limits,
                 "record_count": len(loaded),
                 "content_accessed": True,
                 "network_access_performed": False,

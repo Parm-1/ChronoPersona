@@ -104,10 +104,36 @@ class CalibratedScore:
 ScoreProvider = Callable[[str, str], CandidateEvidence]
 
 
-def _finite(value: float, label: str) -> float:
+def _finite(value: Any, label: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ScoringIntegrityError(f"{label} must be numeric")
     converted = float(value)
     if not math.isfinite(converted):
         raise ScoringIntegrityError(f"{label} must be finite")
+    return converted
+
+
+def _token_ids(values: Any, label: str) -> tuple[int, ...]:
+    if isinstance(values, (str, bytes)) or not isinstance(values, Sequence):
+        raise ScoringIntegrityError(f"{label} must be a token-id sequence")
+    observed: list[int] = []
+    for index, value in enumerate(values):
+        if (
+            not isinstance(value, int)
+            or isinstance(value, bool)
+            or value < 0
+        ):
+            raise ScoringIntegrityError(
+                f"{label}[{index}] must be a non-negative integer"
+            )
+        observed.append(value)
+    return tuple(observed)
+
+
+def _log_probability(value: Any, label: str) -> float:
+    converted = _finite(value, label)
+    if converted > 0.0:
+        raise ScoringIntegrityError(f"{label} must not be positive")
     return converted
 
 
@@ -137,21 +163,39 @@ def score_candidate(
         raise ScoringIntegrityError(
             f"candidate {pole!r} was truncated"
         )
-    if not evidence.prompt_token_ids:
+    prompt_token_ids = _token_ids(
+        evidence.prompt_token_ids,
+        f"candidate {pole!r} prompt_token_ids",
+    )
+    continuation_token_ids = _token_ids(
+        evidence.continuation_token_ids,
+        f"candidate {pole!r} continuation_token_ids",
+    )
+    if not prompt_token_ids:
         raise ScoringIntegrityError(
             f"candidate {pole!r} has no prompt tokens"
         )
-    if not evidence.continuation_token_ids:
+    if not continuation_token_ids:
         raise ScoringIntegrityError(
             f"candidate {pole!r} has no continuation tokens"
         )
-    if len(evidence.continuation_token_ids) != len(evidence.token_logprobs):
+    if (
+        isinstance(evidence.token_logprobs, (str, bytes))
+        or not isinstance(evidence.token_logprobs, Sequence)
+    ):
+        raise ScoringIntegrityError(
+            f"candidate {pole!r} token_logprobs must be a sequence"
+        )
+    if len(continuation_token_ids) != len(evidence.token_logprobs):
         raise ScoringIntegrityError(
             f"candidate {pole!r} token/log-probability lengths differ"
         )
 
     token_logprobs = tuple(
-        _finite(value, f"candidate {pole!r} token log probability")
+        _log_probability(
+            value,
+            f"candidate {pole!r} token log probability",
+        )
         for value in evidence.token_logprobs
     )
     total = math.fsum(token_logprobs)
@@ -161,8 +205,8 @@ def score_candidate(
         total_logprob=total,
         mean_logprob=mean,
         token_count=len(token_logprobs),
-        prompt_token_ids=tuple(evidence.prompt_token_ids),
-        continuation_token_ids=tuple(evidence.continuation_token_ids),
+        prompt_token_ids=prompt_token_ids,
+        continuation_token_ids=continuation_token_ids,
         token_logprobs=token_logprobs,
     )
 

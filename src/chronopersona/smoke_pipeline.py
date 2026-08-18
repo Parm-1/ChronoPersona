@@ -58,8 +58,12 @@ def run_smoke_pipeline(
     interrupt_after: int | None = None,
     event_clock: Callable[[], str | None] | None = None,
 ) -> SmokeRunResult:
-    if interrupt_after is not None and interrupt_after < 1:
-        raise SmokePipelineError("interrupt_after must be positive")
+    if interrupt_after is not None and (
+        not isinstance(interrupt_after, int)
+        or isinstance(interrupt_after, bool)
+        or interrupt_after < 1
+    ):
+        raise SmokePipelineError("interrupt_after must be a positive integer")
     clock = event_clock or (lambda: None)
     output = Path(output_root)
     output.mkdir(parents=True, exist_ok=True)

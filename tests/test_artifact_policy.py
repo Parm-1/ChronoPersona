@@ -59,3 +59,20 @@ def test_mutable_intermediate_checkpoint_is_blocked() -> None:
 def test_unknown_artifact_is_rejected() -> None:
     with pytest.raises(ArtifactPolicyError, match="unknown artifact"):
         find_artifact(_manifest(), "not-a-real-artifact")
+
+
+def test_ready_artifact_requires_nonempty_verified_license_evidence() -> None:
+    artifact = dict(find_artifact(_manifest(), "pythia-1b-deduped-main"))
+    artifact["license"] = dict(artifact["license"])
+    artifact["license"]["sources"] = []
+
+    with pytest.raises(ArtifactPolicyError, match="evidence must not be empty"):
+        assert_tokenizer_ready(artifact)
+
+
+def test_ready_artifact_requires_exact_owner_name_repository() -> None:
+    artifact = dict(find_artifact(_manifest(), "pythia-1b-deduped-main"))
+    artifact["repository"] = "owner/name/extra"
+
+    with pytest.raises(ArtifactPolicyError, match="exact Hugging Face owner/name"):
+        assert_tokenizer_ready(artifact)

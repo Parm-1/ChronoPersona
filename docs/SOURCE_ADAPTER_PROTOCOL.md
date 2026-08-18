@@ -19,14 +19,19 @@ Every adapter has three modes:
    deterministic metadata or inventory artifact.
 3. **Bounded live execution** — requires both `--execute` and
    `--allow-network`, enforces a response-size ceiling and timeout, and still
-   retrieves metadata only.
+   retrieves metadata only. Every request must use HTTPS and an exact per-adapter
+   host allowlist. Redirects are validated before they are followed and cannot
+   escape to another host, port, credential-bearing URL, or plaintext endpoint.
 
 The adapters never authorize archive or source-text downloads. A live metadata
 response is not a corpus sample.
 
 Generated metadata must pass the common contract in
 `src/chronopersona/source_metadata.py`. Archive inventories must pass
-`src/chronopersona/source_inventory.py`.
+`src/chronopersona/source_inventory.py`. Both validators recursively reject
+embedded source-text payload fields. Inventory MD5, SHA-1, and SHA-256 identities
+must use exact lowercase hexadecimal lengths before they can enter planning
+evidence.
 
 ## 2. arXiv two-stage metadata qualification
 

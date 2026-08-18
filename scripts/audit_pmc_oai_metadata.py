@@ -37,6 +37,7 @@ from chronopersona.source_registry import (  # noqa: E402
 # PMC replaced its OAI-PMH endpoint in September 2025. The old endpoint
 # redirects, but an auditable tool must pin the current documented service.
 ENDPOINT = "https://pmc.ncbi.nlm.nih.gov/api/oai/v1/mh/"
+ALLOWED_METADATA_HOSTS = ("pmc.ncbi.nlm.nih.gov",)
 USER_AGENT = "ChronoPersona/0.1 metadata-audit (github.com/Parm-1/ChronoPersona)"
 
 
@@ -177,6 +178,7 @@ def main() -> int:
                 payload = fetch_metadata(
                     _query_url(args, token),
                     allow_network=args.allow_network,
+                allowed_hosts=ALLOWED_METADATA_HOSTS,
                     max_bytes=args.max_response_bytes,
                     timeout_seconds=args.timeout_seconds,
                     user_agent=USER_AGENT,

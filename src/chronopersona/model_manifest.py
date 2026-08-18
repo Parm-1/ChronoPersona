@@ -9,13 +9,20 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 import json
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import re
 from typing import Any
+
+from .path_policy import (
+    PortablePathError,
+    is_portable_relative_path,
+    portable_path_identity,
+)
 
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _ALLOWED_ROLES = {
     "observational-primary",
     "observational-secondary",
@@ -58,11 +65,16 @@ def _is_nonempty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
+def _is_string_list(value: Any, *, nonempty: bool = False) -> bool:
+    return (
+        isinstance(value, list)
+        and (not nonempty or bool(value))
+        and all(_is_nonempty_string(item) for item in value)
+    )
+
+
 def _is_safe_relative_path(value: Any) -> bool:
-    if not _is_nonempty_string(value):
-        return False
-    path = PurePosixPath(value)
-    return not path.is_absolute() and ".." not in path.parts
+    return is_portable_relative_path(value)
 
 
 def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
@@ -103,9 +115,12 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
             )
 
         repository = raw_artifact.get("repository")
-        if not _is_nonempty_string(repository) or "/" not in repository:
+        if (
+            not isinstance(repository, str)
+            or _REPOSITORY.fullmatch(repository) is None
+        ):
             errors.append(
-                f"{location}.repository must be an owner/name identifier"
+                f"{location}.repository must be an exact owner/name identifier"
             )
 
         revision = raw_artifact.get("revision")
@@ -156,9 +171,15 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                     f"{location}.license.identifier is required when "
                     "license status is verified"
                 )
-            if not isinstance(license_info.get("sources"), list):
+            license_sources = license_info.get("sources")
+            if not _is_string_list(license_sources):
                 errors.append(
-                    f"{location}.license.sources must be a list"
+                    f"{location}.license.sources must be a string list"
+                )
+            elif license_status == "verified" and not license_sources:
+                errors.append(
+                    f"{location}.license.sources must not be empty when "
+                    "license status is verified"
                 )
 
         requires_remote_code = raw_artifact.get("requires_remote_code")
@@ -205,15 +226,22 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                     f"{location} cannot be benchmark-ready without an "
                     "immutable artifact revision"
                 )
+            if revision_kind != "git-sha" or not (
+                isinstance(revision, str) and _SHA40.fullmatch(revision)
+            ):
+                errors.append(
+                    f"{location} cannot be benchmark-ready without a pinned "
+                    "40-character Hub commit SHA"
+                )
             if license_status != "verified":
                 errors.append(
                     f"{location} cannot be benchmark-ready without a "
                     "verified model license"
                 )
-            if requires_remote_code is True and review_status != "approved":
+            if requires_remote_code is not False:
                 errors.append(
-                    f"{location} cannot be benchmark-ready until custom "
-                    "code is approved"
+                    f"{location} cannot be benchmark-ready while custom "
+                    "remote code is required"
                 )
 
         weight_size = raw_artifact.get("weight_size_bytes")
@@ -227,8 +255,13 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                 "or null"
             )
 
-        if not isinstance(raw_artifact.get("sources"), list):
-            errors.append(f"{location}.sources must be a list")
+        artifact_sources = raw_artifact.get("sources")
+        if not _is_string_list(artifact_sources):
+            errors.append(f"{location}.sources must be a string list")
+        elif execution_status == "benchmark-ready" and not artifact_sources:
+            errors.append(
+                f"{location}.sources must not be empty when benchmark-ready"
+            )
 
     if len(artifact_ids) != len(set(artifact_ids)):
         errors.append("artifact ids must be unique")
@@ -252,11 +285,26 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
     if not isinstance(local_outputs, Mapping):
         errors.append("local_outputs must be an object")
     else:
+        output_identities: list[tuple[str, ...]] = []
         for key, value in local_outputs.items():
             if not _is_safe_relative_path(value):
                 errors.append(
                     f"local_outputs.{key} must be a safe relative path"
                 )
+                continue
+            try:
+                output_identities.append(
+                    portable_path_identity(
+                        value,
+                        label=f"local_outputs.{key}",
+                    )
+                )
+            except PortablePathError as error:
+                errors.append(str(error))
+        if len(output_identities) != len(set(output_identities)):
+            errors.append(
+                "local_outputs paths must be unique under portable filesystem semantics"
+            )
 
     return tuple(errors)
 

@@ -114,7 +114,7 @@ It cannot silently replace the primary metric. A discrepancy between total and m
 
 ## 5. Option-order invariance
 
-Candidate display order is counterbalanced across paraphrases. Scoring is normalized by semantic pole identifier, not list position or label letter.
+Candidate display order is counterbalanced across paraphrases. The registry validator requires both pole orders and balances their counts within one form whenever `option-order` invariance is declared. Scoring is normalized by semantic pole identifier, not list position or label letter.
 
 For each form, the output preserves:
 

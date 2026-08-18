@@ -63,9 +63,11 @@ def _nonempty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
-def _string_list(value: Any) -> bool:
-    return isinstance(value, list) and all(
-        _nonempty_string(item) for item in value
+def _string_list(value: Any, *, nonempty: bool = False) -> bool:
+    return (
+        isinstance(value, list)
+        and (not nonempty or bool(value))
+        and all(_nonempty_string(item) for item in value)
     )
 
 
@@ -129,7 +131,7 @@ def validate_source_registry(registry: Mapping[str, Any]) -> tuple[str, ...]:
             if not _nonempty_string(source.get(field)):
                 errors.append(f"{source_label} {field} must not be empty")
 
-        if not _string_list(source.get("official_sources")):
+        if not _string_list(source.get("official_sources"), nonempty=True):
             errors.append(
                 f"{source_label} official_sources must be a non-empty string list"
             )

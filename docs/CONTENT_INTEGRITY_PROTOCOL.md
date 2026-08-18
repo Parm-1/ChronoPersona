@@ -26,7 +26,7 @@ Source qualification metadata remains governed by `source_metadata.py`. This con
 Raw text is never embedded in the manifest or in audit reports. The manifest records only:
 
 - stable record, role, source, era, and holdout identities;
-- safe relative content path;
+- canonical portable relative content path;
 - raw and normalized SHA-256;
 - byte and word counts;
 - license, rights, and authorship status;
@@ -43,7 +43,7 @@ The validator recursively rejects common raw-text fields inside `metadata`.
 - A and B must be `exploratory`;
 - C must be `confirmatory-held-out`.
 
-A production record marked `eligible` must have eligible rights and human authorship. A synthetic fixture can never be marked scientifically eligible.
+A production record marked `eligible` must have eligible rights and human authorship. A synthetic fixture can never be marked scientifically eligible. `synthetic_fixture=true` requires `authorship_provenance=synthetic-fixture`, and that authorship value is invalid when the fixture flag is false.
 
 ### Evaluation
 
@@ -82,11 +82,15 @@ Normalization is deliberately conservative. It does not remove stopwords, stem w
 
 ## 5. Path and file boundaries
 
-Content paths must be relative and remain under the explicit content root. The executor rejects:
+Content paths must be relative and remain under the explicit content root. The schema-v2 `configs/content-integrity-v0.json` also freezes maximum record count, per-record bytes, and total content bytes. The manifest loader stops as soon as the record cap is crossed in either plan or execution mode. Declared sizes are checked before files are opened, and observed file sizes are checked again during bounded reads.
+
+The executor rejects:
 
 - absolute paths and Windows drive paths;
 - POSIX or Windows-style parent traversal;
 - backslash-separated or non-canonical relative paths;
+- non-NFC Unicode spellings and case-insensitive path collisions;
+- control characters, Windows-reserved device names, forbidden Windows characters, and components ending in a space or period;
 - paths escaping after resolution;
 - symbolic-link components;
 - missing files;
@@ -112,7 +116,9 @@ Each cluster reports record identity and whether it crosses:
 - source family;
 - era;
 - role;
-- holdout boundary.
+- the confirmatory holdout boundary.
+
+A holdout-boundary flag is true only when a cluster or pair contains at least one `confirmatory-held-out` record and at least one record outside that status. Ordinary `exploratory` versus `not-applicable` role differences are not mislabeled as source-C boundary crossings.
 
 No text excerpt is emitted.
 
@@ -138,8 +144,10 @@ Every evaluation record is compared with every non-evaluation record using froze
 
 A pair is flagged when:
 
-- the normalized evaluation text is an exact substring of the source text; or
+- the complete normalized evaluation token sequence occurs contiguously in the source token sequence; or
 - minimum shared n-grams are present and either Jaccard or evaluation-side containment exceeds its frozen threshold.
+
+Exact phrase detection is token-aligned and is not suppressed when the evaluation phrase is shorter than the configured n-gram size. This prevents both substring-inside-token false positives and short exact-exposure false negatives.
 
 The report records overlap counts and scores but no text.
 
@@ -158,13 +166,13 @@ This is lexical exposure screening, not a complete contamination guarantee. Late
 - procedural trade-offs;
 - secure-system decisions.
 
-The registry is `development` and `triage-only`. Matches report pattern IDs and categories, not source excerpts.
+The registry is `development` and `triage-only`. Pattern IDs are stable lowercase slugs, and distinct IDs cannot normalize to the same literal phrase. Matches report pattern IDs and categories, not source excerpts.
 
 A match does not establish direct teaching. Absence of a match does not establish far transfer. The pattern registry is only an auditable way to prioritize review.
 
 ## 10. Held-out source C
 
-The tool may inspect synthetic source-C fixtures without authorization. Any non-fixture source-C adaptation record requires a separate authorization object **before content files are opened**.
+The tool may inspect synthetic source-C fixtures without authorization. Any non-fixture source-C adaptation record requires a separate authorization object **before content files are opened**. An authorization is rejected when the exact manifest contains no non-fixture source-C record; this prevents stale or misleading authorization evidence from being attached to an unrelated manifest.
 
 The authorization must bind:
 
@@ -237,6 +245,7 @@ For real source C, add:
 The deterministic report includes:
 
 - exact input hashes;
+- frozen record-count and byte limits;
 - normalization version;
 - source-C authorization identity where required;
 - aggregate counts;
@@ -247,6 +256,8 @@ The deterministic report includes:
 - source-pair counts;
 - explicit limitations;
 - canonical report hash.
+
+Requested validation and audit report files are replaced atomically after complete serialization.
 
 It guarantees:
 

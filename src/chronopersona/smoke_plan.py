@@ -5,12 +5,17 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 import json
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import platform
 import re
 import subprocess
 from typing import Any
 
+from .path_policy import (
+    PortablePathError,
+    portable_path_identity,
+    portable_relative_path,
+)
 from .run_registry import (
     build_run_identity,
     canonical_json_bytes,
@@ -79,11 +84,10 @@ def _load_json_object(path: str | Path, label: str) -> dict[str, Any]:
 
 
 def _safe_repo_path(repo_root: Path, raw_path: Any, label: str) -> Path:
-    if not isinstance(raw_path, str) or not raw_path:
-        raise SmokePipelineError(f"{label} must be a nonempty repository path")
-    relative = Path(raw_path)
-    if relative.is_absolute() or ".." in relative.parts:
-        raise SmokePipelineError(f"{label} must be a safe relative path")
+    try:
+        relative = portable_relative_path(raw_path, label=label)
+    except PortablePathError as error:
+        raise SmokePipelineError(str(error)) from error
     root = repo_root.resolve()
     resolved = (root / relative).resolve()
     try:
@@ -143,11 +147,26 @@ def validate_smoke_config(config: Mapping[str, Any]) -> tuple[str, ...]:
     }
     if not isinstance(inputs, Mapping) or set(inputs) != required_inputs:
         errors.append("inputs must declare the three required repository paths")
-    elif any(
-        not isinstance(inputs.get(field), str) or not inputs[field]
-        for field in required_inputs
-    ):
-        errors.append("every input path must be a nonempty string")
+    else:
+        input_identities: list[tuple[str, ...]] = []
+        for field in sorted(required_inputs):
+            try:
+                portable_relative_path(
+                    inputs.get(field),
+                    label=f"inputs.{field}",
+                )
+                input_identities.append(
+                    portable_path_identity(
+                        inputs.get(field),
+                        label=f"inputs.{field}",
+                    )
+                )
+            except PortablePathError as error:
+                errors.append(str(error))
+        if len(input_identities) != len(set(input_identities)):
+            errors.append(
+                "input paths must be unique under portable filesystem semantics"
+            )
 
     engine = config.get("engine")
     if not isinstance(engine, Mapping) or set(engine) != {
@@ -241,6 +260,11 @@ def build_smoke_plan(
         raise SmokePipelineError(
             "smoke config must be inside repository root"
         ) from error
+    config_relative = config_source.relative_to(root).as_posix()
+    try:
+        portable_relative_path(config_relative, label="smoke config path")
+    except PortablePathError as error:
+        raise SmokePipelineError(str(error)) from error
     config = load_smoke_config(config_source)
 
     input_paths = {
@@ -269,16 +293,25 @@ def build_smoke_plan(
         }
         for key, path in sorted(input_paths.items())
     }
+    unit_identities: list[tuple[str, ...]] = []
     for unit_id in built.files:
-        if not isinstance(unit_id, str) or not unit_id:
-            raise SmokePipelineError(
-                "generated package contains an invalid unit id"
+        try:
+            portable_relative_path(
+                unit_id,
+                label="generated package unit path",
             )
-        unit_path = PurePosixPath(unit_id)
-        if unit_path.is_absolute() or ".." in unit_path.parts:
-            raise SmokePipelineError(
-                f"generated package contains unsafe unit path: {unit_id}"
+            unit_identities.append(
+                portable_path_identity(
+                    unit_id,
+                    label="generated package unit path",
+                )
             )
+        except PortablePathError as error:
+            raise SmokePipelineError(str(error)) from error
+    if len(unit_identities) != len(set(unit_identities)):
+        raise SmokePipelineError(
+            "generated package unit paths collide under portable filesystem semantics"
+        )
     unit_order = tuple(sorted(built.files))
     unit_order_sha256 = canonical_sha256(list(unit_order))
     scientific_identity = {
@@ -288,7 +321,7 @@ def build_smoke_plan(
         "engine": dict(config["engine"]),
         "git_commit": commit,
         "config": {
-            "path": config_source.relative_to(root).as_posix(),
+            "path": config_relative,
             "sha256": sha256_file(config_source),
             "canonical_sha256": canonical_sha256(config),
         },

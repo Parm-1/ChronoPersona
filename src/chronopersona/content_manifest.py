@@ -11,10 +11,16 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import re
 import unicodedata
 from typing import Any
+
+from .path_policy import (
+    PortablePathError,
+    portable_path_identity,
+    portable_relative_path,
+)
 
 
 _RECORD_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$")
@@ -44,6 +50,11 @@ _FORBIDDEN_TEXT_FIELDS = {
     "source_text",
     "document_text",
 }
+DEFAULT_MAX_CONTENT_RECORDS = 2_000
+DEFAULT_MAX_RECORD_BYTES = 4 * 1024 * 1024
+DEFAULT_MAX_TOTAL_CONTENT_BYTES = 64 * 1024 * 1024
+
+
 _REQUIRED_FIELDS = frozenset(
     {
         "schema_version",
@@ -121,10 +132,25 @@ def normalized_sha256(text: str) -> str:
     return sha256_bytes(normalize_text(text).encode("utf-8"))
 
 
-def load_content_manifest(path: str | Path) -> tuple[dict[str, Any], ...]:
+def load_content_manifest(
+    path: str | Path,
+    *,
+    max_records: int = DEFAULT_MAX_CONTENT_RECORDS,
+) -> tuple[dict[str, Any], ...]:
+    if (
+        not isinstance(max_records, int)
+        or isinstance(max_records, bool)
+        or max_records < 1
+    ):
+        raise ContentManifestError("max_records must be a positive integer")
+
     records: list[dict[str, Any]] = []
     with Path(path).open("r", encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, start=1):
+            if line_number > max_records:
+                raise ContentManifestError(
+                    f"content manifest exceeds max_records={max_records}"
+                )
             stripped = line.strip()
             if not stripped:
                 raise ContentManifestError(
@@ -165,27 +191,11 @@ def _forbidden_fields(value: Mapping[str, Any]) -> tuple[str, ...]:
     return tuple(sorted(found))
 
 
-def _portable_relative_path(raw_path: Any, *, label: str) -> Path:
-    if not isinstance(raw_path, str) or not raw_path:
-        raise ContentManifestError(f"{label} must be a nonempty string")
-    if "\\" in raw_path or ":" in raw_path:
-        raise ContentManifestError(
-            f"{label} must use a portable forward-slash relative path"
-        )
-    portable = PurePosixPath(raw_path)
-    if (
-        portable.is_absolute()
-        or ".." in portable.parts
-        or portable.as_posix() != raw_path
-    ):
-        raise ContentManifestError(
-            f"{label} must be a canonical portable relative path"
-        )
-    return Path(*portable.parts)
-
-
 def _safe_content_path(content_root: Path, raw_path: Any) -> Path:
-    relative = _portable_relative_path(raw_path, label="content_path")
+    try:
+        relative = portable_relative_path(raw_path, label="content_path")
+    except PortablePathError as error:
+        raise ContentManifestError(str(error)) from error
     root = content_root.resolve()
     candidate = root / relative
     current = root
@@ -203,8 +213,13 @@ def _safe_content_path(content_root: Path, raw_path: Any) -> Path:
     return resolved
 
 
-def _read_utf8(path: Path) -> tuple[bytes, str]:
-    payload = path.read_bytes()
+def _read_utf8(path: Path, *, max_bytes: int) -> tuple[bytes, str]:
+    with path.open("rb") as handle:
+        payload = handle.read(max_bytes + 1)
+    if len(payload) > max_bytes:
+        raise ContentManifestError(
+            f"content file exceeds max_record_bytes={max_bytes}: {path}"
+        )
     if not payload:
         raise ContentManifestError(f"content file is empty: {path}")
     if b"\x00" in payload:
@@ -224,6 +239,7 @@ def validate_content_manifest_structure(
     errors: list[str] = []
     record_ids: list[str] = []
     content_paths: list[str] = []
+    content_path_identities: list[tuple[str, ...]] = []
     if not records:
         return ("content manifest must not be empty",)
 
@@ -262,11 +278,17 @@ def validate_content_manifest_structure(
             errors.append(f"{location}.source_id must not be empty")
         content_path = record.get("content_path")
         try:
-            _portable_relative_path(
+            portable_relative_path(
                 content_path,
                 label=f"{location}.content_path",
             )
-        except ContentManifestError as error:
+            content_path_identities.append(
+                portable_path_identity(
+                    content_path,
+                    label=f"{location}.content_path",
+                )
+            )
+        except PortablePathError as error:
             errors.append(str(error))
         if isinstance(content_path, str) and content_path:
             content_paths.append(content_path)
@@ -284,10 +306,20 @@ def validate_content_manifest_structure(
             errors.append(f"{location}.license_id must not be empty")
         if record.get("rights_status") not in _ALLOWED_RIGHTS:
             errors.append(f"{location}.rights_status is invalid")
-        if record.get("authorship_provenance") not in _ALLOWED_AUTHORSHIP:
+        authorship = record.get("authorship_provenance")
+        synthetic_fixture = record.get("synthetic_fixture")
+        if authorship not in _ALLOWED_AUTHORSHIP:
             errors.append(f"{location}.authorship_provenance is invalid")
-        if not isinstance(record.get("synthetic_fixture"), bool):
+        if not isinstance(synthetic_fixture, bool):
             errors.append(f"{location}.synthetic_fixture must be boolean")
+        elif synthetic_fixture and authorship != "synthetic-fixture":
+            errors.append(
+                f"{location} synthetic fixture requires synthetic-fixture authorship"
+            )
+        elif not synthetic_fixture and authorship == "synthetic-fixture":
+            errors.append(
+                f"{location} synthetic-fixture authorship requires synthetic_fixture=true"
+            )
         eligibility = record.get("eligibility")
         reasons = record.get("exclusion_reasons")
         if eligibility not in _ALLOWED_ELIGIBILITY:
@@ -343,6 +375,10 @@ def validate_content_manifest_structure(
         errors.append("record_id values must be unique")
     if len(content_paths) != len(set(content_paths)):
         errors.append("content_path values must be unique")
+    if len(content_path_identities) != len(set(content_path_identities)):
+        errors.append(
+            "content_path values must be unique under portable filesystem semantics"
+        )
     return tuple(errors)
 
 
@@ -350,18 +386,77 @@ def resolve_content_records(
     records: Sequence[Mapping[str, Any]],
     *,
     content_root: str | Path,
+    max_records: int = DEFAULT_MAX_CONTENT_RECORDS,
+    max_record_bytes: int = DEFAULT_MAX_RECORD_BYTES,
+    max_total_content_bytes: int = DEFAULT_MAX_TOTAL_CONTENT_BYTES,
 ) -> tuple[LoadedContentRecord, ...]:
     errors = validate_content_manifest_structure(records)
     if errors:
         raise ContentManifestError("; ".join(errors))
+    for label, value in (
+        ("max_records", max_records),
+        ("max_record_bytes", max_record_bytes),
+        ("max_total_content_bytes", max_total_content_bytes),
+    ):
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            raise ContentManifestError(f"{label} must be a positive integer")
+    if max_total_content_bytes < max_record_bytes:
+        raise ContentManifestError(
+            "max_total_content_bytes must be at least max_record_bytes"
+        )
+    if len(records) > max_records:
+        raise ContentManifestError(
+            f"content manifest has {len(records)} records, exceeding "
+            f"max_records={max_records}"
+        )
+    declared_sizes = [int(record["content_bytes"]) for record in records]
+    oversized = next(
+        (
+            (index, size)
+            for index, size in enumerate(declared_sizes)
+            if size > max_record_bytes
+        ),
+        None,
+    )
+    if oversized is not None:
+        index, size = oversized
+        raise ContentManifestError(
+            f"records[{index}].content_bytes={size} exceeds "
+            f"max_record_bytes={max_record_bytes}"
+        )
+    declared_total = sum(declared_sizes)
+    if declared_total > max_total_content_bytes:
+        raise ContentManifestError(
+            f"declared content bytes {declared_total} exceed "
+            f"max_total_content_bytes={max_total_content_bytes}"
+        )
+
     root = Path(content_root)
     loaded: list[LoadedContentRecord] = []
+    observed_total = 0
     for index, raw_record in enumerate(records):
         record = dict(raw_record)
         try:
             path = _safe_content_path(root, record["content_path"])
-            payload, text = _read_utf8(path)
-        except ContentManifestError as error:
+            file_size = path.stat().st_size
+            if file_size > max_record_bytes:
+                raise ContentManifestError(
+                    f"content file declares {file_size} bytes, exceeding "
+                    f"max_record_bytes={max_record_bytes}: {path}"
+                )
+            if observed_total + file_size > max_total_content_bytes:
+                raise ContentManifestError(
+                    "observed content size would exceed "
+                    f"max_total_content_bytes={max_total_content_bytes}"
+                )
+            payload, text = _read_utf8(path, max_bytes=max_record_bytes)
+            observed_total += len(payload)
+            if observed_total > max_total_content_bytes:
+                raise ContentManifestError(
+                    f"observed content bytes {observed_total} exceed "
+                    f"max_total_content_bytes={max_total_content_bytes}"
+                )
+        except (ContentManifestError, OSError) as error:
             raise ContentManifestError(f"records[{index}]: {error}") from error
         tokens = tokenize_normalized(text)
         if not tokens:

@@ -18,7 +18,8 @@ The project now has:
 - source-neutral metadata, official-interface adapters, and a source-C access firewall;
 - a deterministic Synthetic Identifiability Calibration package;
 - immutable run identity, hash-chained state, atomic checkpoints, and interruption/resume equivalence;
-- deterministic content manifests and bounded lexical content-integrity audits.
+- deterministic content manifests and bounded lexical content-integrity audits;
+- a final Stage 0 hardening layer for portable identities, bounded planning, exact metadata origins, evidence-type validation, and repository hygiene.
 
 Stage 0 remains open. No model has been trained, no real source corpus has been bulk-downloaded, no token dose has been frozen, and no scientific temporal result exists.
 
@@ -42,7 +43,7 @@ The accepted implementation provides:
 - deterministic text-free reports;
 - no automatic exclusion, semantic-independence claim, or scientific eligibility decision.
 
-The gate is validated on redistributable synthetic fixtures only. It does not establish that the real provisional sources are clean or suitable.
+The gate is validated on redistributable synthetic fixtures only. It does not establish that the real provisional sources are clean or suitable. The final repository review preserves this claim ceiling while verifying the tracked tree is free of generated machine state and tightening validators that could otherwise admit ambiguous paths, provenance, authorization, token evidence, or metadata origins.
 
 ## Recovery of the accidental importer
 

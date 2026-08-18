@@ -99,11 +99,13 @@ See [`docs/RESOURCE_CONSTRAINTS.md`](docs/RESOURCE_CONSTRAINTS.md).
 
 ## Current status
 
-**Stage 0 — design refactor and audit preparation.**
+**Stage 0 — development infrastructure complete through the bounded content-integrity gate; real-source qualification externally blocked.**
 
-No scientific result is claimed. Specific papers, public checkpoints, source candidates, model revisions, and licenses mentioned in the research charter are audit targets until verified against primary sources.
+The repository now has a verified novelty redesign, model and source metadata contracts, guarded tokenizer/model interfaces, a development likelihood instrument, synthetic-calibration generation, immutable run identity and resume behavior, and deterministic bounded-sample content-integrity tooling. The latest accepted gate is documented in [`reports/stage0/content_integrity_gate_decision.md`](reports/stage0/content_integrity_gate_decision.md).
 
-The current write-active deliverable is the Stage 0 feasibility, novelty, and design package.
+No scientific temporal result is claimed. No model has been trained, no real source corpus has been bulk-downloaded, no token dose has been frozen, and the provisional source families remain unqualified on real content.
+
+There is currently no write-active deliverable. Work stops until bounded, rights-qualified, historically version-bounded A/B samples and an explicitly authorized held-out source-C review packet are available. See [`PROJECT_STATE.md`](PROJECT_STATE.md) for the exact resumption gate.
 
 ## Repository map
 
@@ -117,6 +119,9 @@ The current write-active deliverable is the Stage 0 feasibility, novelty, and de
 - [`docs/RESOURCE_CONSTRAINTS.md`](docs/RESOURCE_CONSTRAINTS.md) — compute and spending boundaries.
 - [`RISKS.md`](RISKS.md) — current scientific, data, legal, and compute risks.
 - [`docs/DATA_POLICY.md`](docs/DATA_POLICY.md) — provenance, rights, timestamps, deduplication, and leakage rules.
+- [`docs/CONTENT_INTEGRITY_PROTOCOL.md`](docs/CONTENT_INTEGRITY_PROTOCOL.md) — bounded content-manifest, duplicate, exposure, and held-out authorization protocol.
+- [`reports/stage0/content_integrity_gate_decision.md`](reports/stage0/content_integrity_gate_decision.md) — accepted development gate, evidence, claim ceiling, and external blocker.
+- [`reports/stage0/final_repository_review.md`](reports/stage0/final_repository_review.md) — final Stage 0 code, evidence-boundary, validation, and stop decision.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — durable design decisions and supersessions.
 - [`configs/pilot.toml`](configs/pilot.toml) — design-state two-era/two-source specification.
 - [`src/chronopersona`](src/chronopersona) — validation and later experiment tooling.
@@ -129,10 +134,14 @@ python -m venv .venv
 source .venv/bin/activate       # Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
 python -m chronopersona validate configs/pilot.toml
+python -m chronopersona validate-models artifacts/manifests/MODEL_MANIFEST.json
+python -m chronopersona validate-evaluation evaluations/registry/development-v0.jsonl
+python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json
+python scripts/build_synthetic_calibration.py --check
 pytest
 ```
 
-The configuration deliberately leaves the token budget unfrozen while its status is `design`. It cannot advance to execution without a measured benchmark and a frozen positive budget.
+The pilot configuration deliberately leaves the token budget unfrozen while its status is `design`. It cannot advance to execution without measured hardware evidence, qualified source content, successful sensitivity calibration, and a frozen positive budget.
 
 ## Working paper title
 

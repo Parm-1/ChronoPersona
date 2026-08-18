@@ -36,6 +36,7 @@ from chronopersona.source_registry import (  # noqa: E402
 
 
 ENDPOINT = "https://export.arxiv.org/api/query"
+ALLOWED_METADATA_HOSTS = ("export.arxiv.org",)
 USER_AGENT = "ChronoPersona/0.1 metadata-audit (github.com/Parm-1/ChronoPersona)"
 
 
@@ -213,6 +214,7 @@ def main() -> int:
                 payload = fetch_metadata(
                     _query_url(search_query, start=offset, page_size=page_size),
                     allow_network=args.allow_network,
+                allowed_hosts=ALLOWED_METADATA_HOSTS,
                     max_bytes=args.max_response_bytes,
                     timeout_seconds=args.timeout_seconds,
                     user_agent=USER_AGENT,

@@ -6,10 +6,11 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date
 import os
-from pathlib import PurePosixPath
 import re
 import tomllib
 from typing import Any
+
+from .path_policy import is_portable_relative_path
 
 
 _SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -326,12 +327,11 @@ def _valid_repo_path(
     required_parent: tuple[str, ...],
     suffix: str,
 ) -> bool:
-    path = PurePosixPath(raw_path)
-    if path.is_absolute() or ".." in path.parts:
-        return False
-    if path.suffix != suffix:
-        return False
-    return path.parts[: len(required_parent)] == required_parent
+    return is_portable_relative_path(
+        raw_path,
+        required_prefix=required_parent,
+        suffix=suffix,
+    )
 
 
 def _parse_iso_date(raw_date: str | None) -> date | None:
@@ -604,14 +604,12 @@ def validate_spec(spec: ExperimentSpec) -> tuple[str, ...]:
             "at a time"
         )
 
-    output_path = PurePosixPath(spec.output_dir)
-    if (
-        output_path.is_absolute()
-        or ".." in output_path.parts
-        or output_path.parts[:1] != ("results",)
+    if not is_portable_relative_path(
+        spec.output_dir,
+        required_prefix=("results",),
     ):
         errors.append(
-            "reporting.output_dir must be a relative results/* path"
+            "reporting.output_dir must be a portable relative results/* path"
         )
     if not spec.publish_negative_results:
         errors.append(

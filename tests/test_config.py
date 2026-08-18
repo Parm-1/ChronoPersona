@@ -130,3 +130,28 @@ def test_only_one_training_job_is_allowed_at_a_time() -> None:
         "exactly one training job" in error
         for error in validate_spec(bad_spec)
     )
+
+
+def test_windows_style_manifest_path_is_rejected() -> None:
+    spec = load_spec(PILOT)
+    unsafe = replace(
+        spec.conditions[0],
+        manifest=r"data\manifests\private.jsonl",
+    )
+    bad_spec = replace(
+        spec,
+        conditions=(unsafe, *spec.conditions[1:]),
+    )
+
+    errors = validate_spec(bad_spec)
+    assert any("data/manifests/*.jsonl" in error for error in errors)
+
+
+def test_output_directory_requires_portable_results_path() -> None:
+    spec = load_spec(PILOT)
+    bad_spec = replace(spec, output_dir=r"results\unsafe")
+
+    assert (
+        "reporting.output_dir must be a portable relative results/* path"
+        in validate_spec(bad_spec)
+    )

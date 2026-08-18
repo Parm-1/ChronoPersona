@@ -17,10 +17,40 @@ _ALLOWED_KINDS = {
     "metadata-export",
 }
 _ALLOWED_HASH_ALGORITHMS = {"md5", "sha1", "sha256"}
+_HASH_LENGTHS = {"md5": 32, "sha1": 40, "sha256": 64}
+_FORBIDDEN_TEXT_FIELDS = {
+    "text",
+    "content",
+    "body",
+    "abstract",
+    "full_text",
+    "fulltext",
+    "source_text",
+    "document_text",
+}
 
 
 class SourceInventoryError(ValueError):
     """Raised when an archive inventory cannot support safe planning."""
+
+
+def _forbidden_payload_keys(value: Any) -> tuple[str, ...]:
+    found: list[str] = []
+
+    def visit(current: Any, prefix: str) -> None:
+        if isinstance(current, Mapping):
+            for key, nested in current.items():
+                key_text = str(key)
+                location = f"{prefix}.{key_text}" if prefix else key_text
+                if key_text.casefold() in _FORBIDDEN_TEXT_FIELDS:
+                    found.append(location)
+                visit(nested, location)
+        elif isinstance(current, list):
+            for index, nested in enumerate(current):
+                visit(nested, f"{prefix}[{index}]")
+
+    visit(value, "")
+    return tuple(sorted(found))
 
 
 def canonical_json_sha256(value: Any) -> str:
@@ -81,9 +111,18 @@ def validate_source_inventory(
                     errors.append(
                         f"{location}.hashes contains unsupported algorithm {algorithm!r}"
                     )
-                if not isinstance(digest, str) or not digest.strip():
+                expected_length = _HASH_LENGTHS.get(algorithm)
+                if expected_length is not None and (
+                    not isinstance(digest, str)
+                    or re.fullmatch(
+                        rf"[0-9a-f]{{{expected_length}}}",
+                        digest,
+                    )
+                    is None
+                ):
                     errors.append(
-                        f"{location}.hashes.{algorithm} must not be empty"
+                        f"{location}.hashes.{algorithm} must be a lowercase "
+                        f"{expected_length}-character hexadecimal digest"
                     )
         if record.get("downloaded") is not False:
             errors.append(
@@ -96,6 +135,16 @@ def validate_source_inventory(
         metadata = record.get("source_metadata")
         if not isinstance(metadata, Mapping):
             errors.append(f"{location}.source_metadata must be an object")
+        else:
+            forbidden = _forbidden_payload_keys(metadata)
+            if forbidden:
+                qualified = [
+                    f"source_metadata.{field}" for field in forbidden
+                ]
+                errors.append(
+                    f"{location}.source_metadata contains forbidden text fields: "
+                    + ", ".join(qualified)
+                )
 
     if len(inventory_ids) != len(set(inventory_ids)):
         errors.append("inventory_id values must be unique")

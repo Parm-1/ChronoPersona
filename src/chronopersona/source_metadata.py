@@ -203,12 +203,23 @@ def _string_list(value: Any, *, nonempty: bool = False) -> bool:
     )
 
 
-def _forbidden_payload_keys(value: Mapping[str, Any]) -> list[str]:
-    return sorted(
-        key
-        for key in value
-        if key.lower() in _FORBIDDEN_TEXT_FIELDS
-    )
+def _forbidden_payload_keys(value: Any) -> list[str]:
+    found: list[str] = []
+
+    def visit(current: Any, prefix: str) -> None:
+        if isinstance(current, Mapping):
+            for key, nested in current.items():
+                key_text = str(key)
+                location = f"{prefix}.{key_text}" if prefix else key_text
+                if key_text.casefold() in _FORBIDDEN_TEXT_FIELDS:
+                    found.append(location)
+                visit(nested, location)
+        elif isinstance(current, list):
+            for index, nested in enumerate(current):
+                visit(nested, f"{prefix}[{index}]")
+
+    visit(value, "")
+    return sorted(found)
 
 
 def validate_source_metadata(
@@ -224,10 +235,12 @@ def validate_source_metadata(
 
     windows = parse_era_windows(source_registry)
     raw_sources = source_registry.get("sources")
+    if not isinstance(raw_sources, list):
+        return ("source registry sources must be a list",)
     known_sources = {
         source.get("id")
         for source in raw_sources
-        if isinstance(raw_sources, list) and isinstance(source, Mapping)
+        if isinstance(source, Mapping)
     }
     record_ids: list[str] = []
 
@@ -386,10 +399,6 @@ def validate_source_metadata(
         extra = record.get("source_metadata")
         if not isinstance(extra, Mapping):
             errors.append(f"{location}.source_metadata must be an object")
-        elif _forbidden_payload_keys(extra):
-            errors.append(
-                f"{location}.source_metadata contains forbidden text payload"
-            )
 
     if len(record_ids) != len(set(record_ids)):
         errors.append("record_id values must be unique")

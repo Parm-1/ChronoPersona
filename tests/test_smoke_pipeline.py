@@ -10,6 +10,7 @@ from chronopersona.run_registry import (
     RunLock,
     RunStore,
     atomic_write_json,
+    canonical_sha256,
     read_event_log,
     read_json,
 )
@@ -243,3 +244,75 @@ def test_insufficient_storage_fails_before_initialization(
     with pytest.raises(SmokePipelineError, match="insufficient free storage"):
         run_smoke_pipeline(smoke_plan, tmp_path)
     assert not (tmp_path / smoke_plan.identity["run_id"]).exists()
+
+
+@pytest.mark.parametrize(
+    "unsafe_path",
+    [r"..\outside.json", r"C:\outside.json", "inputs/NUL.json"],
+)
+def test_smoke_config_rejects_nonportable_input_paths(
+    unsafe_path: str,
+) -> None:
+    config = json.loads(CONFIG.read_text(encoding="utf-8"))
+    config["inputs"]["evaluation_registry"] = unsafe_path
+
+    errors = validate_smoke_config(config)
+    assert any("portable" in error or "Windows-reserved" in error for error in errors)
+
+
+@pytest.mark.parametrize(
+    "unsafe_path",
+    [r"..\outside.json", r"C:\outside.json", "artifacts/NUL.json"],
+)
+def test_checkpoint_rejects_nonportable_artifact_paths(
+    tmp_path: Path,
+    smoke_plan,
+    unsafe_path: str,
+) -> None:
+    result = run_smoke_pipeline(
+        smoke_plan,
+        tmp_path,
+        interrupt_after=1,
+        event_clock=_clock("checkpoint-path"),
+    )
+    checkpoint_path = result.run_root / "checkpoint.json"
+    checkpoint = read_json(checkpoint_path)
+    first_unit = checkpoint["completed_units"][0]
+    checkpoint["unit_artifacts"][first_unit]["path"] = unsafe_path
+    checkpoint["checkpoint_sha256"] = canonical_sha256(
+        {
+            key: value
+            for key, value in checkpoint.items()
+            if key != "checkpoint_sha256"
+        }
+    )
+    atomic_write_json(checkpoint_path, checkpoint)
+
+    with pytest.raises(
+        SmokePipelineError,
+        match="portable|Windows-reserved",
+    ):
+        verify_smoke_run(smoke_plan, result.run_root)
+
+
+def test_smoke_input_paths_cannot_collide_by_case() -> None:
+    config = json.loads(CONFIG.read_text(encoding="utf-8"))
+    first = config["inputs"]["calibration_config"]
+    config["inputs"]["evaluation_registry"] = first.upper()
+
+    errors = validate_smoke_config(config)
+    assert any("portable filesystem semantics" in error for error in errors)
+
+
+@pytest.mark.parametrize("invalid_interrupt_after", [True, False, 0, -1, 1.0, "1"])
+def test_interrupt_after_requires_a_positive_integer(
+    tmp_path: Path, smoke_plan, invalid_interrupt_after: object
+) -> None:
+    with pytest.raises(
+        SmokePipelineError, match="interrupt_after must be a positive integer"
+    ):
+        run_smoke_pipeline(
+            smoke_plan,
+            tmp_path,
+            interrupt_after=invalid_interrupt_after,  # type: ignore[arg-type]
+        )

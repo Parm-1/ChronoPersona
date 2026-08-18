@@ -191,6 +191,8 @@ For every complete continuation, the provider:
 5. selects only the continuation prediction positions;
 6. passes token IDs and token log probabilities into the dependency-light scorer.
 
+Before aggregation, the scorer requires non-negative integer prompt and continuation token IDs, exact token/log-probability length agreement, and finite numeric log probabilities no greater than zero. Numeric strings, booleans, negative IDs, NaN/Inf, positive log probabilities, truncation, and inexact boundaries fail closed.
+
 The scorer then computes:
 
 - complete-continuation total log likelihood;

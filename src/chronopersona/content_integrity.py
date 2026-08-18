@@ -14,7 +14,8 @@ from datetime import datetime
 import hashlib
 import itertools
 import json
-from pathlib import Path, PurePosixPath
+from pathlib import Path
+import re
 from typing import Any
 
 from .content_manifest import (
@@ -23,6 +24,7 @@ from .content_manifest import (
     canonical_json_sha256,
     tokenize_normalized,
 )
+from .path_policy import PortablePathError, portable_relative_path
 
 
 class ContentIntegrityError(ValueError):
@@ -33,6 +35,9 @@ _REQUIRED_CONFIG_FIELDS = frozenset(
     {
         "schema_version",
         "normalization_version",
+        "max_records",
+        "max_record_bytes",
+        "max_total_content_bytes",
         "shingle_size",
         "simhash_bits",
         "simhash_band_count",
@@ -76,12 +81,17 @@ _ALLOWED_PATTERN_CATEGORIES = frozenset(
     {"evidence-integration", "procedural-tradeoffs", "secure-system-decisions"}
 )
 _ALLOWED_PATTERN_TYPES = frozenset({"literal"})
+_PATTERN_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 @dataclass(frozen=True)
 class IntegrityConfig:
     schema_version: int
     normalization_version: str
+    max_records: int
+    max_record_bytes: int
+    max_total_content_bytes: int
     shingle_size: int
     simhash_bits: int
     simhash_band_count: int
@@ -130,11 +140,14 @@ def validate_integrity_config(raw: Mapping[str, Any]) -> tuple[str, ...]:
         missing = sorted(_REQUIRED_CONFIG_FIELDS - set(raw))
         extra = sorted(set(raw) - _REQUIRED_CONFIG_FIELDS)
         return (f"content-integrity config fields mismatch; missing={missing}, extra={extra}",)
-    if raw.get("schema_version") != 1:
-        errors.append("schema_version must be 1")
+    if raw.get("schema_version") != 2:
+        errors.append("schema_version must be 2")
     if raw.get("normalization_version") != "nfkc-casefold-words-v1":
         errors.append("normalization_version must be nfkc-casefold-words-v1")
     for field, minimum in (
+        ("max_records", 1),
+        ("max_record_bytes", 1),
+        ("max_total_content_bytes", 1),
         ("shingle_size", 2),
         ("simhash_bits", 8),
         ("simhash_band_count", 1),
@@ -146,6 +159,19 @@ def validate_integrity_config(raw: Mapping[str, Any]) -> tuple[str, ...]:
         value = raw.get(field)
         if not isinstance(value, int) or isinstance(value, bool) or value < minimum:
             errors.append(f"{field} must be an integer >= {minimum}")
+    max_record_bytes = raw.get("max_record_bytes")
+    max_total_content_bytes = raw.get("max_total_content_bytes")
+    if (
+        isinstance(max_record_bytes, int)
+        and not isinstance(max_record_bytes, bool)
+        and isinstance(max_total_content_bytes, int)
+        and not isinstance(max_total_content_bytes, bool)
+        and max_total_content_bytes < max_record_bytes
+    ):
+        errors.append(
+            "max_total_content_bytes must be at least max_record_bytes"
+        )
+
     bits = raw.get("simhash_bits")
     bands = raw.get("simhash_band_count")
     if isinstance(bits, int) and isinstance(bands, int) and bands > 0:
@@ -163,21 +189,14 @@ def validate_integrity_config(raw: Mapping[str, Any]) -> tuple[str, ...]:
         except ContentIntegrityError as error:
             errors.append(str(error))
     direct_patterns = raw.get("direct_patterns")
-    if not isinstance(direct_patterns, str) or not direct_patterns:
-        errors.append("direct_patterns must be a nonempty relative path")
-    elif "\\" in direct_patterns or ":" in direct_patterns:
-        errors.append("direct_patterns must use a portable forward-slash path")
-    else:
-        path = PurePosixPath(direct_patterns)
-        if (
-            path.is_absolute()
-            or ".." in path.parts
-            or path.as_posix() != direct_patterns
-            or path.suffix != ".json"
-        ):
-            errors.append(
-                "direct_patterns must be a canonical portable relative JSON path"
-            )
+    try:
+        portable_relative_path(
+            direct_patterns,
+            label="direct_patterns",
+            suffix=".json",
+        )
+    except PortablePathError as error:
+        errors.append(str(error))
     for field in (
         "report_text_excerpts",
         "semantic_similarity_performed",
@@ -194,8 +213,11 @@ def load_integrity_config(path: str | Path) -> IntegrityConfig:
     if errors:
         raise ContentIntegrityError("; ".join(errors))
     return IntegrityConfig(
-        schema_version=1,
+        schema_version=2,
         normalization_version=str(raw["normalization_version"]),
+        max_records=int(raw["max_records"]),
+        max_record_bytes=int(raw["max_record_bytes"]),
+        max_total_content_bytes=int(raw["max_total_content_bytes"]),
         shingle_size=int(raw["shingle_size"]),
         simhash_bits=int(raw["simhash_bits"]),
         simhash_band_count=int(raw["simhash_band_count"]),
@@ -235,6 +257,7 @@ def validate_pattern_registry(raw: Mapping[str, Any]) -> tuple[str, ...]:
         return tuple(errors)
     category_ids: list[str] = []
     pattern_ids: list[str] = []
+    normalized_values: list[tuple[str, ...]] = []
     for category_index, category in enumerate(categories):
         location = f"categories[{category_index}]"
         if not isinstance(category, Mapping) or set(category) != {"id", "patterns"}:
@@ -259,8 +282,13 @@ def validate_pattern_registry(raw: Mapping[str, Any]) -> tuple[str, ...]:
                 errors.append(f"{prefix} must contain id/type/value")
                 continue
             pattern_id = pattern.get("id")
-            if not isinstance(pattern_id, str) or not pattern_id:
-                errors.append(f"{prefix}.id must not be empty")
+            if (
+                not isinstance(pattern_id, str)
+                or _PATTERN_ID.fullmatch(pattern_id) is None
+            ):
+                errors.append(
+                    f"{prefix}.id must be a lowercase hyphenated slug"
+                )
             else:
                 pattern_ids.append(pattern_id)
             if pattern.get("type") not in _ALLOWED_PATTERN_TYPES:
@@ -268,12 +296,18 @@ def validate_pattern_registry(raw: Mapping[str, Any]) -> tuple[str, ...]:
             value = pattern.get("value")
             if not isinstance(value, str) or not value.strip():
                 errors.append(f"{prefix}.value must not be empty")
-            elif not tokenize_normalized(value):
-                errors.append(f"{prefix}.value normalizes to zero words")
+            else:
+                normalized = tokenize_normalized(value)
+                if not normalized:
+                    errors.append(f"{prefix}.value normalizes to zero words")
+                else:
+                    normalized_values.append(normalized)
     if len(category_ids) != len(set(category_ids)):
         errors.append("direct-pattern category ids must be unique")
     if len(pattern_ids) != len(set(pattern_ids)):
         errors.append("direct-pattern ids must be globally unique")
+    if len(normalized_values) != len(set(normalized_values)):
+        errors.append("direct-pattern normalized values must be globally unique")
     return tuple(errors)
 
 
@@ -314,6 +348,11 @@ def validate_holdout_authorization(
     manifest_sha256: str,
     authorization: Mapping[str, Any] | None,
 ) -> tuple[str, ...]:
+    if not isinstance(manifest_sha256, str) or not _SHA256.fullmatch(
+        manifest_sha256
+    ):
+        return ("manifest_sha256 must be a lowercase SHA-256",)
+
     real_c = [
         record
         for record in records
@@ -321,12 +360,18 @@ def validate_holdout_authorization(
         and record.get("source_family") == "C"
         and record.get("synthetic_fixture") is False
     ]
-    if not real_c:
-        return ()
     if authorization is None:
+        if not real_c:
+            return ()
         return (
             "real source-C content requires an explicit holdout authorization",
         )
+    if not real_c:
+        return (
+            "holdout authorization must not be supplied when no real "
+            "source-C content is present",
+        )
+
     errors: list[str] = []
     if set(authorization) != _REQUIRED_AUTH_FIELDS:
         missing = sorted(_REQUIRED_AUTH_FIELDS - set(authorization))
@@ -338,7 +383,14 @@ def validate_holdout_authorization(
         errors.append("holdout authorization purpose is invalid")
     if authorization.get("source_family") != "C":
         errors.append("holdout authorization source_family must be C")
-    if authorization.get("manifest_sha256") != manifest_sha256:
+    authorization_manifest = authorization.get("manifest_sha256")
+    if not isinstance(authorization_manifest, str) or not _SHA256.fullmatch(
+        authorization_manifest
+    ):
+        errors.append(
+            "holdout authorization manifest_sha256 must be a lowercase SHA-256"
+        )
+    elif authorization_manifest != manifest_sha256:
         errors.append("holdout authorization manifest hash mismatch")
     scope = authorization.get("scope")
     if (
@@ -423,6 +475,11 @@ def _record_descriptor(record: LoadedContentRecord) -> dict[str, Any]:
     }
 
 
+def _crosses_holdout_boundary(statuses: Iterable[str]) -> bool:
+    observed = set(statuses)
+    return "confirmatory-held-out" in observed and len(observed) > 1
+
+
 def _pair_flags(left: LoadedContentRecord, right: LoadedContentRecord) -> dict[str, bool]:
     left_manifest = left.manifest
     right_manifest = right.manifest
@@ -431,7 +488,12 @@ def _pair_flags(left: LoadedContentRecord, right: LoadedContentRecord) -> dict[s
         "cross_source_id": left_manifest["source_id"] != right_manifest["source_id"],
         "cross_era": left_manifest["era_window"] != right_manifest["era_window"],
         "cross_role": left_manifest["role"] != right_manifest["role"],
-        "crosses_holdout_boundary": left_manifest["holdout_status"] != right_manifest["holdout_status"],
+        "crosses_holdout_boundary": _crosses_holdout_boundary(
+            (
+                str(left_manifest["holdout_status"]),
+                str(right_manifest["holdout_status"]),
+            )
+        ),
     }
 
 
@@ -462,7 +524,7 @@ def _clusters(
                 "cross_source_family": len(families) > 1,
                 "cross_era": len(eras) > 1,
                 "cross_role": len(roles) > 1,
-                "crosses_holdout_boundary": len(holdout) > 1,
+                "crosses_holdout_boundary": _crosses_holdout_boundary(holdout),
             }
         )
     return output
@@ -605,9 +667,9 @@ def _evaluation_exposure(
             shared = len(eval_ngrams & source_ngrams)
             jaccard = _jaccard(eval_ngrams, source_ngrams)
             containment = shared / len(eval_ngrams) if eval_ngrams else 0.0
-            exact_substring = (
-                len(eval_record.tokens) >= config.evaluation_ngram_size
-                and eval_record.normalized_text in source_record.normalized_text
+            exact_substring = _contains_phrase(
+                source_record.tokens,
+                eval_record.tokens,
             )
             flagged = exact_substring or (
                 shared >= config.evaluation_min_shared_ngrams
@@ -688,6 +750,40 @@ def audit_content_integrity(
 ) -> dict[str, Any]:
     if not records:
         raise ContentIntegrityError("content audit requires at least one record")
+    for label, value in (
+        ("manifest_sha256", manifest_sha256),
+        ("config_sha256", config_sha256),
+        ("patterns_sha256", patterns_sha256),
+    ):
+        if not isinstance(value, str) or not _SHA256.fullmatch(value):
+            raise ContentIntegrityError(
+                f"{label} must be a lowercase SHA-256"
+            )
+    if len(records) > config.max_records:
+        raise ContentIntegrityError(
+            f"content audit has {len(records)} records, exceeding "
+            f"max_records={config.max_records}"
+        )
+    declared_sizes: list[int] = []
+    for index, record in enumerate(records):
+        size = record.manifest.get("content_bytes")
+        if not isinstance(size, int) or isinstance(size, bool) or size < 1:
+            raise ContentIntegrityError(
+                f"records[{index}].content_bytes must be a positive integer"
+            )
+        declared_sizes.append(size)
+    if any(size > config.max_record_bytes for size in declared_sizes):
+        raise ContentIntegrityError(
+            "content audit contains a record exceeding "
+            f"max_record_bytes={config.max_record_bytes}"
+        )
+    declared_total = sum(declared_sizes)
+    if declared_total > config.max_total_content_bytes:
+        raise ContentIntegrityError(
+            f"content audit bytes {declared_total} exceed "
+            f"max_total_content_bytes={config.max_total_content_bytes}"
+        )
+
     auth_errors = validate_holdout_authorization(
         [record.manifest for record in records],
         manifest_sha256=manifest_sha256,
@@ -743,6 +839,11 @@ def audit_content_integrity(
         "manifest_sha256": manifest_sha256,
         "config_sha256": config_sha256,
         "direct_patterns_sha256": patterns_sha256,
+        "content_limits": {
+            "max_records": config.max_records,
+            "max_record_bytes": config.max_record_bytes,
+            "max_total_content_bytes": config.max_total_content_bytes,
+        },
         "normalization_version": config.normalization_version,
         "report_text_excerpts": False,
         "semantic_similarity_performed": False,

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import sys
 
 
@@ -28,6 +28,11 @@ from chronopersona.content_manifest import (  # noqa: E402
     sha256_file,
     validate_content_manifest_structure,
 )
+from chronopersona.path_policy import (  # noqa: E402
+    PortablePathError,
+    portable_relative_path,
+)
+from chronopersona.run_registry import atomic_write_bytes  # noqa: E402
 
 
 DEFAULT_CONFIG = ROOT / "configs" / "content-integrity-v0.json"
@@ -54,28 +59,25 @@ def _parser() -> argparse.ArgumentParser:
 def _write(path: Path | None, value: object) -> None:
     if path is None:
         return
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
+    rendered = json.dumps(
+        value,
+        indent=2,
+        sort_keys=True,
+        ensure_ascii=False,
+        allow_nan=False,
     )
+    atomic_write_bytes(path, (rendered + "\n").encode("utf-8"))
 
 
 def _safe_repo_file(repo_root: Path, raw_path: str) -> Path:
-    if "\\" in raw_path or ":" in raw_path:
-        raise ContentIntegrityError(
-            "configured direct-pattern path must use portable forward slashes"
+    try:
+        relative = portable_relative_path(
+            raw_path,
+            label="configured direct-pattern path",
+            suffix=".json",
         )
-    portable = PurePosixPath(raw_path)
-    if (
-        portable.is_absolute()
-        or ".." in portable.parts
-        or portable.as_posix() != raw_path
-    ):
-        raise ContentIntegrityError(
-            "configured direct-pattern path must be canonical and relative"
-        )
-    relative = Path(*portable.parts)
+    except PortablePathError as error:
+        raise ContentIntegrityError(str(error)) from error
     root = repo_root.resolve()
     resolved = (root / relative).resolve()
     try:
@@ -92,12 +94,15 @@ def _safe_repo_file(repo_root: Path, raw_path: str) -> Path:
 def main() -> int:
     args = _parser().parse_args()
     try:
-        records = load_content_manifest(args.manifest)
+        config = load_integrity_config(args.config)
+        records = load_content_manifest(
+            args.manifest,
+            max_records=config.max_records,
+        )
         errors = validate_content_manifest_structure(records)
         if errors:
             raise ContentManifestError("; ".join(errors))
         manifest_hash = sha256_file(args.manifest)
-        config = load_integrity_config(args.config)
         patterns_path = args.direct_patterns or _safe_repo_file(
             args.repo_root, config.direct_patterns
         )
@@ -128,6 +133,11 @@ def main() -> int:
                 "manifest_sha256": manifest_hash,
                 "config_sha256": sha256_file(args.config),
                 "direct_patterns_sha256": sha256_file(patterns_path),
+                "content_limits": {
+                    "max_records": config.max_records,
+                    "max_record_bytes": config.max_record_bytes,
+                    "max_total_content_bytes": config.max_total_content_bytes,
+                },
                 "content_access_permitted": False,
                 "content_accessed": False,
                 "record_count": len(records),
@@ -140,7 +150,13 @@ def main() -> int:
             report["output_sha256"] = canonical_json_sha256(report)
         else:
             content_root = args.content_root or args.manifest.parent / "documents"
-            loaded = resolve_content_records(records, content_root=content_root)
+            loaded = resolve_content_records(
+                records,
+                content_root=content_root,
+                max_records=config.max_records,
+                max_record_bytes=config.max_record_bytes,
+                max_total_content_bytes=config.max_total_content_bytes,
+            )
             report = audit_content_integrity(
                 loaded,
                 manifest_sha256=manifest_hash,
