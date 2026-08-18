@@ -1,3 +1,4 @@
+# Second push intentionally triggers the importer after the workflow exists.
 name: One-time content integrity import
 
 on:
