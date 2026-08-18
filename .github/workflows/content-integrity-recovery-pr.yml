@@ -1,0 +1,83 @@
+name: Content Integrity Recovery
+
+on:
+  pull_request:
+    paths:
+      - "artifacts/import/**"
+      - "scripts/recover_content_integrity_bundle_once.py"
+      - ".github/workflows/content-integrity-recovery-pr.yml"
+      - ".github/workflows/one-time-content-integrity-import.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: content-integrity-recovery-v1
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.head_ref == 'agent/content-integrity-recovery-v1' && github.repository == 'Parm-1/ChronoPersona'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/content-integrity-recovery-v1
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Recover unique safe bundle payload
+        run: python scripts/recover_content_integrity_bundle_once.py
+
+      - name: Validate complete repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -e ".[dev]"
+          python -m compileall -q src scripts
+          python -m chronopersona validate configs/pilot.toml
+          python -m chronopersona validate-models artifacts/manifests/MODEL_MANIFEST.json
+          python -m chronopersona validate-evaluation evaluations/registry/development-v0.jsonl
+          python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json
+          python scripts/build_synthetic_calibration.py --check
+          pytest -q
+          git diff --check
+
+      - name: Record passed validation
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("reports/stage0/content_integrity_bundle_recovery.json")
+          value = json.loads(path.read_text(encoding="utf-8"))
+          value["source_branch"] = "agent/content-integrity-recovery-v1"
+          value["validation_status"] = "passed"
+          value["validation_commands"] = [
+              "python -m pip install -e .[dev]",
+              "python -m compileall -q src scripts",
+              "python -m chronopersona validate configs/pilot.toml",
+              "python -m chronopersona validate-models artifacts/manifests/MODEL_MANIFEST.json",
+              "python -m chronopersona validate-evaluation evaluations/registry/development-v0.jsonl",
+              "python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json",
+              "python scripts/build_synthetic_calibration.py --check",
+              "pytest -q",
+              "git diff --check",
+          ]
+          path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Commit recovered implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "ChronoPersona content integrity recovery"
+          git config user.email "75600769+Parm-1@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Add deterministic content integrity audit"
+          git push origin HEAD:agent/content-integrity-recovery-v1
