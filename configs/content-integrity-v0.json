@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "normalization_version": "nfkc-casefold-words-v1",
+  "shingle_size": 4,
+  "simhash_bits": 64,
+  "simhash_band_count": 4,
+  "near_duplicate_jaccard_threshold": 0.55,
+  "max_shingle_bucket_records": 50,
+  "max_candidate_pairs": 1000,
+  "evaluation_ngram_size": 5,
+  "evaluation_jaccard_threshold": 0.12,
+  "evaluation_containment_threshold": 0.25,
+  "evaluation_min_shared_ngrams": 1,
+  "direct_patterns": "evaluations/exposure/direct-patterns-v0.json",
+  "report_text_excerpts": false,
+  "semantic_similarity_performed": false,
+  "automatic_exclusion": false
+}

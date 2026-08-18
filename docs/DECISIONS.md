@@ -227,15 +227,41 @@ Each major negative gate permits at most one predeclared rescue: a named dose in
 
 **Reason:** repeated redesign after observing nulls would convert falsification into positive-result search.
 
+## D-021 — Accept the bounded content-integrity gate and stop before real-source acquisition
+
+**Date:** 2026-08-18  
+**Status:** accepted at development-fixture level
+
+Accept the deterministic content-manifest and lexical integrity implementation as the Stage 0 gate for bounded sample audits.
+
+The accepted gate includes:
+
+- exact raw and normalized content identities;
+- portable path and symlink safety across Linux and Windows path forms;
+- exact and bounded lexical near-duplicate channels;
+- evaluation-overlap and direct-construct triage;
+- cross-source, cross-era, cross-role, and held-out-boundary flags;
+- exact authorization before opening non-fixture source-C content;
+- text-free deterministic reports;
+- no automatic exclusion or scientific eligibility decision.
+
+**Reason:** Before any real historical text can support a causal training intervention, the repository must be able to prove what text it read, detect obvious contamination and overlap, preserve held-out boundaries, and produce reviewable identities without leaking source content.
+
+**Claim ceiling:** this decision validates development tooling on redistributable synthetic fixtures only. It does not establish semantic independence, acceptable contamination rates, source-family independence, production-scale behavior, source eligibility, or any temporal model effect.
+
+**Next gate:** bounded real-content qualification. That gate is externally blocked until small rights-qualified, version-bounded A/B samples and an explicitly authorized source-C review packet exist. Bulk acquisition and model training remain unauthorized.
+
+**Evidence:** `reports/stage0/content_integrity_gate_decision.md` and `reports/stage0/content_integrity_bundle_recovery.json`.
+
 ## Pending decisions
 
-- Verified novelty conclusion.
 - Exact public checkpoint identifiers and revisions.
 - Causal base checkpoint and insertion point.
 - Final era windows.
-- Source families A, B, and held-out C.
+- Final source families A, B, and held-out C after real-sample qualification.
 - Timestamp and authorship-confidence thresholds.
-- Synthetic latent-policy pairs and dose curve.
+- Production duplicate, exposure, semantic-screening, and exclusion thresholds.
+- Synthetic latent-policy dose, seeds, and pass thresholds.
 - Meaningful-effect and equivalence thresholds.
 - Full-weight training method and optimizer state strategy.
 - Confirmatory seed count.
