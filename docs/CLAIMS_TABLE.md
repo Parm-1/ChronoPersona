@@ -1,82 +1,94 @@
-# Claims Table
+# Claims Table — Design v1.0
 
-This table keeps competing explanations live. Each experiment must state which rows it distinguishes and which remain unresolved.
+## Competing explanations
 
-| ID | Explanation | Observable pattern | Required discriminator | Claim ceiling if unresolved |
-|---|---|---|---|---|
-| M0 | Noise | Effects vary arbitrarily across seeds, prompts, or branches | Seed-level replication, item uncertainty, branch-level permutation | No reliable effect |
-| M1 | Knowledge | Differences concentrate on facts, entities, or concepts available in one period | Date-neutral tasks, factual covariates, post-cutoff leakage probes | Knowledge or cutoff effect |
-| M2 | Register | Raters or scorers respond to period vocabulary, syntax, formatting, or references | Masking, style-normalized rescoring, lexical probes, matched paraphrases | Register effect |
-| M3 | Capability | Later or differently trained branches are simply more capable | Timeless capability, loss, calibration, malformed-output, and task-comprehension controls | Capability confound |
-| M4 | Training dose | Any equal amount of extra optimization creates the difference | Equal token/update budgets, generic continuation, no-continuation base | Generic adaptation effect |
-| M5 | Source culture | One website, institution, community, or genre drives the effect | Independent source families and held-out source C | Source-specific temporal effect |
-| M6 | Topic composition | Different subjects rather than period cause the contrast | Topic matching/modeling, mixed-era controls, domain balance | Topic-mediated effect |
-| M7 | Direct imitation | Adaptation directly contains the evaluated procedure or attitude | Domain-exposure matrix, contamination search, far-transfer tasks | Direct transfer |
-| M8 | Shared temporal component | Independent sources produce an aligned early-to-late behavioral contrast | A/B effect-vector agreement and source-C prediction | CSTG |
-| M9 | Final-window recency | The last corpus seen dominates regardless of historical content | Era window before/after common neutral buffer; chronological versus shuffled order | Recency effect |
-| M10 | Post-training path dependence | Historical exposure changes response to identical later SFT or preference training | Pre/post response vectors under identical update | Temporal path dependence |
-| M11 | Channel attribution | Role, wrapper, loss masking, provenance, or target-token exposure controls globalization | One-variable-at-a-time channel experiments | Channel-specific effect |
-| M12 | Synthetic provenance | Teacher-generated or transformed data creates the effect | Human naturalistic versus pinned synthetic transformation with matched content | Synthetic-data effect |
-| M13 | Scale boundary | The model is below the capacity needed for cross-domain transfer | Successful calibration at a larger prespecified scale after one rescue | Scale-bounded null |
+| ID | Explanation | Discriminating evidence | Claim ceiling while unresolved |
+|---|---|---|---|
+| M0 | Noise | independent branches, item uncertainty, branch-level permutation | no reliable effect |
+| M1 | Prompt/option/tokenizer artifact | reversals, labels, paraphrases, templates, tokenizer diagnostics | measurement failure |
+| M2 | Temporal factual knowledge | date-neutral tasks, factual probes, residualization | knowledge effect |
+| M3 | Temporal register | lexical/style probes, matched paraphrases, register residualization | register effect |
+| M4 | General capability | loss, timeless reasoning, comprehension, malformed/refusal rates | capability confound |
+| M5 | Training dose | equal updates/tokens, base and generic continuation controls | generic adaptation |
+| M6 | Quality/readability | matched or modeled quality/readability | quality-mediated effect |
+| M7 | Source culture | independent A/B sources and prospective C | source-specific effect |
+| M8 | Topic composition | ecological versus frozen composition-adjusted analysis | composition effect |
+| M9 | Contributor change | contributor balancing/weighting and sensitivity | contributor-mediated effect |
+| M10 | Direct imitation | domain-exposure matrix, contamination searches, far-transfer domains | direct transfer |
+| M11 | Generic pretraining drift | common generic continuation | generic drift |
+| M12 | Final-window recency | neutral buffer and order controls | recency effect |
+| M13 | Shared temporal covariance | frozen A/B component predicts sealed C | CSTG |
+| M14 | Role/channel attribution | document/assistant/archive/synthetic conditions with factor isolation | channel-specific effect |
+| M15 | Synthetic provenance | human versus pinned transformed content | synthetic-data effect |
+| M16 | Post-training path dependence | identical update; compare branch response, not endpoints only | path dependence |
+| M17 | Scale boundary | successful calibration and one predefined larger-scale rescue | scale-bounded null |
 
-## Claim rules
-
-### Cross-Source Temporal Generalization
-
-CSTG requires:
-
-- common starting weights;
-- reliable within-source early-versus-late contrasts;
-- positive agreement between independently induced source effect vectors;
-- prediction on source C, held out from hypothesis construction and tuning;
-- a shared component larger than a preregistered meaningful threshold;
-- source-specific heterogeneity that does not dominate the shared component;
-- transfer to task families not directly taught by adaptation;
-- survival of factual, lexical, capability, dose, and training-position controls.
-
-A year classifier, a single-source result, or compelling generations do not establish CSTG.
-
-### Temporal prior
-
-“Temporal prior” is reserved for CSTG that also:
-
-- survives or predictably interacts with common downstream post-training;
-- cannot be reduced to direct imitation or source composition;
-- has a stable effect direction across the frozen primary domains;
-- respects the limits of the tested scale, dose, era windows, and source classes.
-
-### Temporal representation
-
-A temporal representation requires more than decodability. It must:
-
-- be learned from independent same-era sources;
-- predict source C and an unseen behavioral domain;
-- remain after factual and register directions are removed;
-- differ from a prompt-induced historical role-play direction;
-- causally change frozen behavior through injection, projection, or ablation;
-- avoid broad capability collapse.
+Every experiment states which rows it distinguishes, which remain observationally equivalent, and the next separating test.
 
 ## Claim ladder
 
-| Level | Evidence | Permitted conclusion |
-|---|---|---|
-| 0 | No reliable contrast | No evidence for a meaningful temporal behavioral prior at the tested model, dose, and design |
-| 1 | Knowledge or register only | Adaptation changes archive representation, not global policy |
-| 2 | One source changes held-out behavior | Source-specific temporal effect; source culture or composition remains viable |
-| 3 | A/B alignment plus held-out C prediction | Evidence for Cross-Source Temporal Generalization |
-| 4 | CSTG survives a common buffer/post-training or predicts differential response | Historical training path constrains later model formation |
-| 5 | Cross-source subspace predicts and causally controls held-out behavior after controls | Mechanistic evidence for a temporal representation |
+### Level 0 — Instrument or calibration failure
 
-Never claim a higher level from evidence belonging to a lower level.
+Evaluation is unreliable or the known synthetic latent rule is not recovered. Naturalistic results are not interpretable.
 
-## Interpretation matrix for naturalistic nulls
+### Level 1 — Knowledge and register only
 
-| Synthetic calibration | Naturalistic result | Interpretation |
-|---|---|---|
-| Fails | Null | Inconclusive: pipeline, scale, dose, or scorer lacks demonstrated sensitivity |
-| Succeeds | Null with tight bounds | Evidence against a meaningful temporal prior at the tested scale and dose |
-| Succeeds | Source-specific effect | Dataset culture or source composition, not source-general era effect |
-| Succeeds | A/B replication | Exploratory evidence for CSTG |
-| Succeeds | Held-out C prediction | Confirmatory CSTG |
-| Succeeds | CSTG survives common post-training | Persistent temporal prior or temporal path dependence |
-| Succeeds | Shared causal representation | Strongest mechanistic result |
+Period facts or prose change without stable date-neutral behavioral change.
+
+### Level 2 — Source-specific temporal effect
+
+At least one naturalistic source produces far-transfer behavior, but discovery sources do not align prospectively.
+
+### Level 3 — Preliminary A/B agreement
+
+Independent discovery sources show aligned temporal contrasts. This is hypothesis formation, not confirmatory CSTG.
+
+### Level 4 — CSTG
+
+The frozen A/B component prospectively predicts predesignated sealed C on the frozen confirmation partition.
+
+Permitted conclusion: Cross-Source Temporal Generalization across the tested source families, model, dose, windows, and domains.
+
+### Level 5 — Composition-adjusted persistence or path dependence
+
+CSTG survives the prespecified adjustment and common continuation/SFT, or predicts a differential response to the identical update.
+
+### Level 6 — Shared causal representation
+
+A cross-source internal subspace learned without C outcomes predicts C and an unseen domain, survives factual/register controls, and causally changes behavior without capability collapse.
+
+Never claim a higher level from lower-level evidence.
+
+## Prospective confirmation rules
+
+CSTG requires all of:
+
+- common starting weights;
+- reliable measurement and successful synthetic calibration;
+- independent naturalistic discovery sources;
+- source roles and era windows frozen before behavioral inspection;
+- a transparent A/B estimator frozen before C;
+- predesignated sealed C unused for tuning;
+- prospective prediction on sealed confirmation items;
+- branch-level inference preserving paired randomization;
+- capability, factual, register, generic-drift, and source-heterogeneity checks;
+- complete reporting of all branches, failures, exclusions, and deviations.
+
+A year classifier, one source, A/B correlation, compelling generations, or a correlational probe cannot establish CSTG.
+
+## Interpretation matrix
+
+| Calibration | A/B | C | Adjustment | Post-training | Interpretation |
+|---|---|---|---|---|---|
+| fail | any | any | any | any | pipeline sensitivity not established |
+| pass | null | not run | — | — | no discovery signal at tested scale/dose |
+| pass | one source | not run | — | — | source-specific transfer |
+| pass | agree | fail | — | — | discovery did not transport; reject CSTG |
+| pass | agree | pass | fail | — | ecological period-indexed composition effect |
+| pass | agree | pass | pass | erased | composition-adjusted intermediate-state CSTG |
+| pass | agree | pass | pass | masked | conditional temporal policy |
+| pass | agree | pass | pass | persistent | durable temporal-prior evidence |
+| pass | agree | pass | pass | differential response | temporal path dependence |
+| pass | agree | pass | pass | persistent + causal subspace | strongest result |
+
+A failed C test cannot be rescued by changing source, eras, items, estimator, thresholds, or temporal axis.
