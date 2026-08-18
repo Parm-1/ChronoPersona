@@ -21,8 +21,10 @@ on:
       - "tests/fixtures/stackexchange_archive_sample.json"
       - "tests/test_arxiv_api.py"
       - "tests/test_source_adapters.py"
+      - "tests/test_source_inventory.py"
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_pmc_date_precision.py"
+      - "tests/test_metadata_network.py"
       - "tests/test_source_review.py"
       - "tests/test_source_review_event_schema.py"
       - "tests/test_source_review_integrity.py"
@@ -50,8 +52,10 @@ on:
       - "tests/fixtures/stackexchange_archive_sample.json"
       - "tests/test_arxiv_api.py"
       - "tests/test_source_adapters.py"
+      - "tests/test_source_inventory.py"
       - "tests/test_source_adapter_scripts.py"
       - "tests/test_pmc_date_precision.py"
+      - "tests/test_metadata_network.py"
       - "tests/test_source_review.py"
       - "tests/test_source_review_event_schema.py"
       - "tests/test_source_review_integrity.py"
@@ -69,11 +73,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
@@ -82,7 +86,9 @@ jobs:
         run: >-
           pytest
           tests/test_arxiv_api.py
+          tests/test_metadata_network.py
           tests/test_source_adapters.py
+          tests/test_source_inventory.py
           tests/test_source_adapter_scripts.py
           tests/test_pmc_date_precision.py
           tests/test_source_review.py

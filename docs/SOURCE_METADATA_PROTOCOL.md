@@ -14,7 +14,7 @@ A source metadata record must not contain:
 - copied excerpts;
 - model-ready content.
 
-The validator rejects common embedded-text field names. Source-specific metadata may contain counts, hashes, categories, version identifiers, flags, and locators, but not prose payloads.
+The validator recursively rejects common embedded-text field names through nested objects and arrays, including inside `source_metadata`. Source-specific metadata may contain counts, hashes, categories, version identifiers, flags, and locators, but not prose payloads hidden at any depth.
 
 This boundary serves four purposes:
 

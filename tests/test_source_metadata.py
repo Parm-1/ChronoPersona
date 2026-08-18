@@ -52,6 +52,24 @@ def test_metadata_records_cannot_embed_document_text() -> None:
     )
 
 
+
+
+def test_nested_metadata_cannot_embed_document_text() -> None:
+    records = _records()
+    records[0]["source_metadata"]["nested"] = {
+        "body": "This nested payload would bypass a shallow metadata check."
+    }
+
+    errors = validate_source_metadata(
+        records,
+        source_registry=_registry(),
+    )
+    assert any(
+        "source_metadata.nested.body" in error
+        for error in errors
+    )
+
+
 def test_window_must_match_native_timestamp() -> None:
     records = _records()
     records[0]["era_window"] = "late"
@@ -204,3 +222,13 @@ def test_sample_fails_when_target_is_infeasible() -> None:
             metadata_sha256=sha256_file(METADATA),
             hide_era_labels=False,
         )
+
+
+def test_malformed_source_registry_fails_closed_without_type_error() -> None:
+    registry = deepcopy(dict(_registry()))
+    registry["sources"] = None
+
+    assert validate_source_metadata(
+        _records(),
+        source_registry=registry,
+    ) == ("source registry sources must be a list",)

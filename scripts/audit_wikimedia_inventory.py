@@ -29,6 +29,7 @@ from chronopersona.source_inventory import (  # noqa: E402
 
 
 USER_AGENT = "ChronoPersona/0.1 inventory-audit (github.com/Parm-1/ChronoPersona)"
+ALLOWED_METADATA_HOSTS = ("dumps.wikimedia.org",)
 _SNAPSHOT = re.compile(r"^\d{8}$")
 
 
@@ -110,6 +111,7 @@ def main() -> int:
             else fetch_metadata(
                 source_locator,
                 allow_network=args.allow_network,
+                allowed_hosts=ALLOWED_METADATA_HOSTS,
                 max_bytes=args.max_response_bytes,
                 timeout_seconds=args.timeout_seconds,
                 user_agent=USER_AGENT,

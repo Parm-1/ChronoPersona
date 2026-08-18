@@ -26,6 +26,23 @@ class ContinuationTruncationError(ValueError):
     """Raised when a complete continuation exceeds the frozen token limit."""
 
 
+def _token_ids(values: object, *, label: str) -> tuple[int, ...]:
+    if isinstance(values, (str, bytes)) or not isinstance(values, Sequence):
+        raise ContinuationBoundaryError(f"{label} must be a token-id sequence")
+    observed: list[int] = []
+    for index, value in enumerate(values):
+        if (
+            not isinstance(value, int)
+            or isinstance(value, bool)
+            or value < 0
+        ):
+            raise ContinuationBoundaryError(
+                f"{label}[{index}] must be a non-negative integer"
+            )
+        observed.append(value)
+    return tuple(observed)
+
+
 @dataclass(frozen=True)
 class PreparedContinuation:
     """Exact token boundary and logit positions for one continuation."""
@@ -71,23 +88,27 @@ def prepare_continuation(
         raise ContinuationBoundaryError(
             "continuation must not end with whitespace"
         )
-    if max_length is not None and max_length < 2:
-        raise ValueError("max_length must be at least 2")
+    if max_length is not None and (
+        not isinstance(max_length, int)
+        or isinstance(max_length, bool)
+        or max_length < 2
+    ):
+        raise ValueError("max_length must be an integer of at least 2")
 
-    prefix = tuple(int(token_id) for token_id in prefix_token_ids)
-    prompt_body = tuple(
-        int(token_id)
-        for token_id in tokenizer.encode(
+    prefix = _token_ids(prefix_token_ids, label="prefix_token_ids")
+    prompt_body = _token_ids(
+        tokenizer.encode(
             prompt,
             add_special_tokens=False,
-        )
+        ),
+        label="prompt tokenizer output",
     )
-    full_body = tuple(
-        int(token_id)
-        for token_id in tokenizer.encode(
+    full_body = _token_ids(
+        tokenizer.encode(
             prompt + continuation,
             add_special_tokens=False,
-        )
+        ),
+        label="full tokenizer output",
     )
 
     if not prompt_body:

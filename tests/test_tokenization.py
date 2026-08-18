@@ -89,3 +89,47 @@ def test_complete_sequence_cannot_be_truncated() -> None:
             " answer",
             max_length=5,
         )
+
+
+@pytest.mark.parametrize("invalid", [-1, True, "1"])
+def test_prefix_token_ids_must_be_nonnegative_integers(invalid) -> None:
+    tokenizer = CharacterTokenizer()
+
+    with pytest.raises(
+        ContinuationBoundaryError,
+        match="must be a non-negative integer",
+    ):
+        prepare_continuation(
+            tokenizer,
+            "Prompt",
+            " continuation",
+            prefix_token_ids=(invalid,),
+        )
+
+
+class InvalidTokenIdTokenizer:
+    def encode(self, text: str, *, add_special_tokens: bool = False):
+        del add_special_tokens
+        return [1, -2] if "continuation" in text else [1]
+
+
+def test_tokenizer_output_must_use_nonnegative_integer_ids() -> None:
+    with pytest.raises(
+        ContinuationBoundaryError,
+        match=r"full tokenizer output\[1\] must be a non-negative integer",
+    ):
+        prepare_continuation(
+            InvalidTokenIdTokenizer(),
+            "Prompt",
+            " continuation",
+        )
+
+
+def test_max_length_rejects_boolean_values() -> None:
+    with pytest.raises(ValueError, match="integer of at least 2"):
+        prepare_continuation(
+            CharacterTokenizer(),
+            "Prompt",
+            " continuation",
+            max_length=True,
+        )

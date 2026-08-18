@@ -1,6 +1,9 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "normalization_version": "nfkc-casefold-words-v1",
+  "max_records": 2000,
+  "max_record_bytes": 4194304,
+  "max_total_content_bytes": 67108864,
   "shingle_size": 4,
   "simhash_bits": 64,
   "simhash_band_count": 4,

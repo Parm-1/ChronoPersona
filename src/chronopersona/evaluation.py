@@ -274,6 +274,7 @@ def validate_evaluation_registry(
         forms = item.get("forms")
         form_ids: list[str] = []
         prompts: list[str] = []
+        candidate_orders: list[tuple[str, str]] = []
         if not isinstance(forms, list) or len(forms) < 2:
             errors.append(f"{item_label} must contain at least two forms")
         else:
@@ -364,6 +365,13 @@ def validate_evaluation_registry(
                     errors.append(
                         f"{prefix} must contain one candidate for each pole"
                     )
+                elif (
+                    len(candidate_poles) == 2
+                    and len(set(candidate_poles)) == 2
+                ):
+                    candidate_orders.append(
+                        (candidate_poles[0], candidate_poles[1])
+                    )
                 if len(candidate_texts) == 2:
                     if candidate_texts[0].strip() == candidate_texts[1].strip():
                         errors.append(
@@ -381,6 +389,28 @@ def validate_evaluation_registry(
                 errors.append(f"{item_label} form ids must be unique")
             if len(prompts) != len(set(prompts)):
                 errors.append(f"{item_label} paraphrase prompts must be distinct")
+            if (
+                isinstance(invariances, list)
+                and "option-order" in invariances
+                and len(pole_ids) == 2
+                and len(set(pole_ids)) == 2
+            ):
+                forward = (pole_ids[0], pole_ids[1])
+                reverse = (pole_ids[1], pole_ids[0])
+                counts = {
+                    forward: candidate_orders.count(forward),
+                    reverse: candidate_orders.count(reverse),
+                }
+                if set(candidate_orders) != {forward, reverse}:
+                    errors.append(
+                        f"{item_label} option-order invariance requires both "
+                        "candidate orders"
+                    )
+                elif abs(counts[forward] - counts[reverse]) > 1:
+                    errors.append(
+                        f"{item_label} candidate orders must be balanced "
+                        "within one form"
+                    )
 
         if isinstance(item_id, str):
             errors.extend(_review_errors(item_id, item.get("reviews"), status))

@@ -36,6 +36,7 @@ from chronopersona.source_registry import (  # noqa: E402
 
 
 ENDPOINT = "https://oaipmh.arxiv.org/oai"
+ALLOWED_METADATA_HOSTS = ("oaipmh.arxiv.org",)
 USER_AGENT = "ChronoPersona/0.1 metadata-audit (github.com/Parm-1/ChronoPersona)"
 _VERSION_SUFFIX = re.compile(r"v\d+$", re.IGNORECASE)
 
@@ -213,6 +214,7 @@ def main() -> int:
                 payload = fetch_metadata(
                     _get_record_url(identifier),
                     allow_network=args.allow_network,
+                allowed_hosts=ALLOWED_METADATA_HOSTS,
                     max_bytes=args.max_response_bytes,
                     timeout_seconds=args.timeout_seconds,
                     user_agent=USER_AGENT,

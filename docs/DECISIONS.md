@@ -4,7 +4,7 @@ Durable research decisions are recorded here. Reversals append a new entry; they
 
 ## D-001 — Treat temporal adaptation as an intervention
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 ChronoPersona studies behavior caused by defined corpus interventions. It does not claim to reconstruct an authentic historical person or population.
@@ -13,7 +13,7 @@ ChronoPersona studies behavior caused by defined corpus interventions. It does n
 
 ## D-002 — Separate knowledge, style, and disposition
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** partially superseded by D-008
 
 Temporal knowledge, temporal style, and date-neutral disposition were initially separated.
@@ -24,7 +24,7 @@ Temporal knowledge, temporal style, and date-neutral disposition were initially 
 
 ## D-003 — Start with a two-slice 2008/2024 pilot
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** superseded by D-010 and D-011
 
 The initial scaffold proposed a maximally separated 2008/2024 pilot.
@@ -33,7 +33,7 @@ The initial scaffold proposed a maximally separated 2008/2024 pilot.
 
 ## D-004 — Require unadapted and date-shuffled controls
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** superseded in scope by D-012
 
 The initial pilot required an unadapted checkpoint and date-shuffled control.
@@ -44,7 +44,7 @@ The initial pilot required an unadapted checkpoint and date-shuffled control.
 
 ## D-005 — Freeze evaluation before trained outputs
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted and strengthened
 
 A versioned evaluation registry, scoring procedure, meaningful-effect threshold, exclusions, and primary contrasts must be frozen before confirmatory condition outputs are inspected.
@@ -53,7 +53,7 @@ A versioned evaluation registry, scoring procedure, meaningful-effect threshold,
 
 ## D-006 — Prefer a cheap falsification sequence
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted and strengthened by D-015
 
 Literature, data, measurement, sensitivity, and throughput gates precede large training runs.
@@ -62,7 +62,7 @@ Literature, data, measurement, sensitivity, and throughput gates precede large t
 
 ## D-007 — No license selected yet
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 The repository remains without an open-source license.
@@ -71,7 +71,7 @@ The repository remains without an open-source license.
 
 ## D-008 — Make CSTG the central scientific construct
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 The central measurable phenomenon is **Cross-Source Temporal Generalization**: agreement between independently induced early-versus-late behavioral contrasts from unrelated naturalistic source families, including prediction on a held-out source.
@@ -82,7 +82,7 @@ The central measurable phenomenon is **Cross-Source Temporal Generalization**: a
 
 ## D-009 — Treat public dated checkpoints as observational infrastructure
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 DatedGPT, PIT, ChronoGPT, TypewriterLM, and other historical models are candidates for evaluation validation and boundary analysis. They do not substitute for the common-starting-weight causal intervention.
@@ -93,7 +93,7 @@ DatedGPT, PIT, ChronoGPT, TypewriterLM, and other historical models are candidat
 
 ## D-010 — Require Synthetic Identifiability Calibration
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 Before interpreting a naturalistic null, the project must show that the chosen model, dose, training method, scorer, and evaluation recover a known cross-domain latent procedural signal.
@@ -104,7 +104,7 @@ Before interpreting a naturalistic null, the project must show that the chosen m
 
 ## D-011 — Use two provisional era windows and independent source families
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted as provisional
 
 The current design candidates are:
@@ -120,7 +120,7 @@ The exploratory causal pilot uses two independent source families and three seed
 
 ## D-012 — Expand the minimum control set
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 The naturalistic pilot must include:
@@ -135,7 +135,7 @@ The naturalistic pilot must include:
 
 ## D-013 — Make held-out source C the primary confirmation
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 Source C is selected during the data audit but cannot be used for item construction, temporal-direction estimation, hyperparameter selection, dose selection, threshold selection, or mechanism-layer selection.
@@ -146,7 +146,7 @@ The shared component is estimated on A and B, frozen, and tested on C.
 
 ## D-014 — Measure response to common post-training
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 Selected early and late branches will receive identical later SFT and, only if justified, identical preference training.
@@ -157,7 +157,7 @@ The analysis measures both final endpoints and the change caused by the common u
 
 ## D-015 — Bind the project to a resource escalation ladder
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 The default resource envelope is:
@@ -173,7 +173,7 @@ The default resource envelope is:
 
 ## D-016 — Keep OLMo 2 1B provisional
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 OLMo 2 1B at a suitable intermediate checkpoint is the provisional causal-base candidate, not the selected model.
@@ -182,7 +182,7 @@ OLMo 2 1B at a suitable intermediate checkpoint is the provisional causal-base c
 
 ## D-017 — Do not base the headline causal claim on PEFT alone
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 Parameter-efficient methods are permitted for pipeline debugging, scorer validation, dose reconnaissance, and cost estimation.
@@ -193,7 +193,7 @@ The headline naturalistic experiment should use full-weight continued pretrainin
 
 ## D-018 — Use conditional continuation likelihoods as the primary instrument
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted as provisional evaluation architecture
 
 Primary pairwise outcomes use complete natural-language continuation likelihoods with option reversal, paraphrases, tokenizer diagnostics, raw normalized probabilities, and one prespecified calibrated alternative.
@@ -204,7 +204,7 @@ Primary pairwise outcomes use complete natural-language continuation likelihoods
 
 ## D-019 — Preserve a strict claim ladder
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 The project uses Levels 0–5:
@@ -220,7 +220,7 @@ The project uses Levels 0–5:
 
 ## D-020 — One rescue per failed major gate
 
-**Date:** 2026-08-17  
+**Date:** 2026-08-17
 **Status:** accepted
 
 Each major negative gate permits at most one predeclared rescue: a named dose increase, scale increase, demonstrated scorer repair, or replacement of a source that failed prespecified feasibility criteria.
@@ -229,7 +229,7 @@ Each major negative gate permits at most one predeclared rescue: a named dose in
 
 ## D-021 — Accept the bounded content-integrity gate and stop before real-source acquisition
 
-**Date:** 2026-08-18  
+**Date:** 2026-08-18
 **Status:** accepted at development-fixture level
 
 Accept the deterministic content-manifest and lexical integrity implementation as the Stage 0 gate for bounded sample audits.
@@ -252,6 +252,47 @@ The accepted gate includes:
 **Next gate:** bounded real-content qualification. That gate is externally blocked until small rights-qualified, version-bounded A/B samples and an explicitly authorized source-C review packet exist. Bulk acquisition and model training remain unauthorized.
 
 **Evidence:** `reports/stage0/content_integrity_gate_decision.md` and `reports/stage0/content_integrity_bundle_recovery.json`.
+
+## D-022 — Treat portable paths, fixture provenance, and source-C authorization as identity boundaries
+
+**Date:** 2026-08-18
+**Status:** accepted
+
+Persisted repository, manifest, checkpoint, and artifact paths must use one canonical forward-slash relative spelling that is safe on POSIX and Windows. Traversal aliases, backslashes, drive forms, control characters, non-NFC spellings, case-insensitive collisions, Windows-reserved names, forbidden characters, and components ending in a space or period fail closed.
+
+A content record marked as a synthetic fixture must use `synthetic-fixture` authorship provenance, and that authorship value cannot be attached to a non-fixture record. A source-C authorization is valid only when the exact bound manifest contains at least one non-fixture source-C adaptation record; extraneous authorization is rejected.
+
+**Reason:** Cross-platform path aliases and contradictory provenance can change which bytes are read without changing a superficially similar manifest. Stale or unrelated authorization can create misleading evidence that the held-out firewall was satisfied. These are identity failures, not recoverable warnings.
+
+**Boundary:** this decision hardens development tooling. It does not authorize source acquisition or establish that any real source is eligible.
+
+## D-023 — Make evidence semantics executable rather than descriptive
+
+**Date:** 2026-08-18
+**Status:** accepted
+
+Claims about token-aligned evaluation exposure, option-order counterbalancing, metadata-only operation, model readiness, and official metadata origins must be enforced by validators rather than left as documentation conventions.
+
+The final Stage 0 review therefore requires contiguous token-sequence exposure checks, both balanced candidate orders, recursive metadata payload rejection, exact digest formats, non-negative token identities, non-positive finite log probabilities, benchmark-ready artifacts that satisfy the executable no-remote-code policy, and exact HTTPS host allowlists that redirects cannot escape.
+
+**Reason:** A documented rule that malformed evidence can bypass is not an integrity boundary. These checks prevent silent false positives, false negatives, misleading readiness labels, and source-origin drift.
+
+**Boundary:** these changes harden development evidence. They do not qualify real corpora, authorize network or corpus acquisition, or advance the claim ladder.
+
+## D-024 — Accept the final Stage 0 repository hardening and preserve the external stop boundary
+
+**Date:** 2026-08-18
+**Status:** accepted subject to exact-head CI
+
+Accept the final repository review as a hardening pass over the existing Stage 0 development system. The accepted scope centralizes portable persisted-path identity, makes bounded manifest limits apply during planning and execution, tightens fixture and source-C authorization semantics, enforces tokenizer/scorer/evaluation/model-readiness evidence, constrains live metadata requests to exact HTTPS origins, verifies generated coverage, cache, and bytecode state are absent from Git, and adds a regression guard against their return.
+
+**Reason:** research infrastructure is only defensible when the repository state, validators, workflows, and documentation enforce the same boundaries. Machine-generated cache state and permissive type or path coercions are not valid scientific evidence.
+
+**Claim ceiling:** this is an engineering and governance pass. It does not qualify real source content, demonstrate model sensitivity, authorize training, or advance CSTG beyond the existing claim level.
+
+**Decision after validation:** merge only after the exact PR head passes CI, content-integrity, source, synthetic-calibration, and run-registry workflows on Python 3.11, 3.12, and 3.13. Then stop at the bounded real-content and local-model evidence boundary.
+
+**Evidence:** `reports/stage0/final_repository_review.md`.
 
 ## Pending decisions
 

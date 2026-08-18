@@ -8,6 +8,10 @@ The project optimizes for **information gained per unit of compute, money, and r
 
 No stage advances because the project feels promising. It advances only when its gate passes.
 
+## Current decision boundary
+
+The development content-integrity gate has passed. Stage 0 remains open because the next gate requires bounded real-source evidence and local model/compute measurements that are not present or authorized. There is no write-active deliverable. Do not begin bulk corpus acquisition, model downloads, paid compute, or training while this boundary remains in force.
+
 ## Resource envelope
 
 - Default external spend: CAD $0.
@@ -22,7 +26,7 @@ No stage advances because the project feels promising. It advances only when its
 
 ## Milestone 0A — Novelty and artifact audit
 
-**Status:** active  
+**Status:** complete — `novel enough under current redesign`
 **Primary deliverable:** `docs/NOVELTY_AUDIT.md` and `literature/evidence_matrix.csv`
 
 ### Work
@@ -49,7 +53,7 @@ Stop or reframe when prior work already performs the complete CSTG design with e
 
 ## Milestone 0B — Model and compute audit
 
-**Status:** blocked only by repository access and local execution  
+**Status:** metadata architecture complete; exact artifacts and local execution externally blocked
 **Primary deliverable:** `docs/MODEL_SELECTION_ADR.md` plus a measured benchmark record
 
 ### Work
@@ -88,7 +92,7 @@ Stop the selected model path when the base tasks fail, memory cannot be made saf
 
 ## Milestone 0C — Data-source and era audit
 
-**Status:** planned  
+**Status:** provisional A/B/C architecture complete; bounded real-content qualification externally blocked
 **Primary deliverable:** `docs/DATA_SOURCE_ADR.md`
 
 ### Work
@@ -125,7 +129,7 @@ Stop or redesign when two independent and legally usable source families cannot 
 
 ## Milestone 0D — Evaluation and scorer development
 
-**Status:** planned  
+**Status:** development scorer and registry implemented; real-model reliability and freeze remain blocked
 **Primary deliverable:** `docs/EVALUATION_SPEC.md` plus tested scorer modules
 
 ### Work
@@ -152,7 +156,7 @@ Stop or redesign when the measurement cannot distinguish the intended constructs
 
 ## Milestone 0E — Synthetic calibration design
 
-**Status:** planned  
+**Status:** deterministic development package implemented; training-based sensitivity decision remains blocked
 **Primary deliverable:** `docs/SYNTHETIC_CALIBRATION_SPEC.md`
 
 ### Work
@@ -181,7 +185,7 @@ Do not interpret naturalistic nulls if the calibration cannot recover the indire
 
 ## Milestone 0F — Stage 0 exit report
 
-**Status:** planned  
+**Status:** blocked by real-source qualification, local model evidence, evaluation reliability, and calibration execution
 **Primary deliverable:** `reports/stage0/feasibility_novelty_and_design_report.md`
 
 ### Completion criteria
@@ -198,6 +202,32 @@ The report includes:
 - proceed, narrow, or stop recommendation.
 
 No evidence-bearing training begins before this report.
+
+## Milestone 0G — Bounded content-integrity gate
+
+**Status:** complete at the development-fixture level
+**Primary deliverables:** `docs/CONTENT_INTEGRITY_PROTOCOL.md` and `reports/stage0/content_integrity_gate_decision.md`
+
+### Established
+
+- canonical source-neutral content manifests with content outside Git;
+- raw and normalized identity recomputation;
+- portable path, symlink, UTF-8, and metadata-text guards;
+- exact and bounded lexical duplicate channels;
+- evaluation-overlap and direct-construct triage;
+- held-out source-C authorization before content access;
+- deterministic text-free reports and explicit claim ceilings.
+
+### Remaining production gate
+
+- small rights-qualified, version-bounded A/B samples;
+- an explicitly authorized source-C review packet;
+- real duplicate, exposure, covariance, concentration, and threshold-sensitivity measurements;
+- streaming manifests and deterministic reason-coded derived exclusions.
+
+### Stop condition
+
+Remain stopped when real-source access is absent or the source-C firewall cannot be satisfied. Development-fixture success is not a clean-corpus result.
 
 ---
 

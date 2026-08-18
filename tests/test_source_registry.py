@@ -147,3 +147,15 @@ def test_federal_register_cannot_be_silently_promoted_to_source_c() -> None:
         "assignments.C held_out status is inconsistent" in error
         for error in errors
     )
+
+
+def test_every_source_requires_at_least_one_official_authority() -> None:
+    registry = _registry()
+    source_a = _source(registry, "wikimedia-article-additions")
+    source_a["official_sources"] = []
+
+    errors = validate_source_registry(registry)
+    assert any(
+        "official_sources must be a non-empty string list" in error
+        for error in errors
+    )

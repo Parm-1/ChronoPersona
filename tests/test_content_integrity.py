@@ -13,8 +13,10 @@ from chronopersona.content_integrity import (
     load_integrity_config,
     validate_holdout_authorization,
     validate_integrity_config,
+    validate_pattern_registry,
 )
 from chronopersona.content_manifest import (
+    LoadedContentRecord,
     canonical_json_sha256,
     load_content_manifest,
     resolve_content_records,
@@ -89,6 +91,14 @@ def test_fixture_exercises_all_lexical_integrity_channels() -> None:
     assert report["evaluation_exposure_pairs"][0][
         "exact_normalized_substring"
     ] is True
+    assert report["evaluation_exposure_pairs"][0][
+        "crosses_holdout_boundary"
+    ] is False
+    assert any(
+        pair["crosses_holdout_boundary"]
+        for pair in report["near_duplicate_pairs"]
+        if pair["right"]["source_family"] == "C"
+    )
     assert report["direct_exposure_records"] == [
         {
             "record": {
@@ -213,7 +223,7 @@ def test_config_rejects_windows_style_pattern_paths() -> None:
     raw["direct_patterns"] = r"..\evaluations\patterns.json"
 
     errors = validate_integrity_config(raw)
-    assert "direct_patterns must use a portable forward-slash path" in errors
+    assert any("portable forward-slash" in error for error in errors)
 
 
 def test_config_rejects_windows_drive_pattern_paths() -> None:
@@ -221,4 +231,243 @@ def test_config_rejects_windows_drive_pattern_paths() -> None:
     raw["direct_patterns"] = r"C:\patterns.json"
 
     errors = validate_integrity_config(raw)
-    assert "direct_patterns must use a portable forward-slash path" in errors
+    assert any("portable forward-slash" in error for error in errors)
+
+
+def test_authorization_is_rejected_when_no_real_source_c_is_present() -> None:
+    records = load_content_manifest(MANIFEST)
+    authorization = {
+        "schema_version": 1,
+        "purpose": "pre-confirmatory-content-integrity-audit",
+        "source_family": "C",
+        "manifest_sha256": sha256_file(MANIFEST),
+        "scope": [
+            "exact-duplicate",
+            "near-duplicate",
+            "evaluation-exposure",
+            "direct-exposure",
+        ],
+        "authorized_by": "fixture-reviewer",
+        "authorized_at": "2026-08-18T00:00:00Z",
+        "no_behavioral_outcomes_inspected": True,
+    }
+
+    assert validate_holdout_authorization(
+        records,
+        manifest_sha256=sha256_file(MANIFEST),
+        authorization=authorization,
+    ) == (
+        "holdout authorization must not be supplied when no real "
+        "source-C content is present",
+    )
+
+
+def test_holdout_authorization_requires_valid_manifest_hash_identity() -> None:
+    records = load_content_manifest(MANIFEST)
+
+    assert validate_holdout_authorization(
+        records,
+        manifest_sha256="not-a-hash",
+        authorization=None,
+    ) == ("manifest_sha256 must be a lowercase SHA-256",)
+
+
+def test_audit_rejects_untrusted_input_hashes() -> None:
+    _records, loaded, config, patterns = _inputs()
+
+    with pytest.raises(
+        ContentIntegrityError,
+        match="config_sha256 must be a lowercase SHA-256",
+    ):
+        audit_content_integrity(
+            loaded,
+            manifest_sha256=sha256_file(MANIFEST),
+            config=config,
+            config_sha256="invalid",
+            patterns=patterns,
+            patterns_sha256=sha256_file(PATTERNS),
+        )
+
+
+def test_config_rejects_windows_reserved_pattern_path() -> None:
+    raw = json.loads(CONFIG.read_text(encoding="utf-8"))
+    raw["direct_patterns"] = "evaluations/exposure/NUL.json"
+
+    errors = validate_integrity_config(raw)
+    assert any("Windows-reserved" in error for error in errors)
+
+
+def test_integrity_config_requires_coherent_content_limits() -> None:
+    raw = json.loads(CONFIG.read_text(encoding="utf-8"))
+    raw["max_total_content_bytes"] = raw["max_record_bytes"] - 1
+
+    assert (
+        "max_total_content_bytes must be at least max_record_bytes"
+        in validate_integrity_config(raw)
+    )
+
+
+def test_audit_records_and_enforces_content_limits() -> None:
+    report = _audit()
+    _records, loaded, config, patterns = _inputs()
+
+    assert report["content_limits"] == {
+        "max_records": config.max_records,
+        "max_record_bytes": config.max_record_bytes,
+        "max_total_content_bytes": config.max_total_content_bytes,
+    }
+
+    constrained = replace(config, max_records=1)
+    with pytest.raises(ContentIntegrityError, match="exceeding max_records=1"):
+        audit_content_integrity(
+            loaded,
+            manifest_sha256=sha256_file(MANIFEST),
+            config=constrained,
+            config_sha256=sha256_file(CONFIG),
+            patterns=patterns,
+            patterns_sha256=sha256_file(PATTERNS),
+        )
+
+
+def _loaded_record(
+    *,
+    record_id: str,
+    role: str,
+    source_family: str,
+    holdout_status: str,
+    tokens: tuple[str, ...],
+    digest_character: str,
+) -> LoadedContentRecord:
+    digest = digest_character * 64
+    normalized = " ".join(tokens)
+    return LoadedContentRecord(
+        manifest={
+            "record_id": record_id,
+            "role": role,
+            "source_family": source_family,
+            "source_id": f"{source_family.casefold()}-fixture",
+            "era_window": "none" if role == "evaluation" else "early",
+            "holdout_status": holdout_status,
+            "synthetic_fixture": True,
+            "content_sha256": digest,
+            "normalized_sha256": digest,
+            "content_bytes": len(normalized.encode("utf-8")),
+        },
+        content_path=Path(f"{record_id}.txt"),
+        text=normalized,
+        normalized_text=normalized,
+        tokens=tokens,
+    )
+
+
+def _small_audit(records: tuple[LoadedContentRecord, ...]) -> dict:
+    _records, _loaded, config, patterns = _inputs()
+    return audit_content_integrity(
+        records,
+        manifest_sha256="a" * 64,
+        config=config,
+        config_sha256="b" * 64,
+        patterns=patterns,
+        patterns_sha256="c" * 64,
+    )
+
+
+def test_exact_evaluation_exposure_is_token_aligned() -> None:
+    evaluation = _loaded_record(
+        record_id="evaluation-cat",
+        role="evaluation",
+        source_family="EVAL",
+        holdout_status="not-applicable",
+        tokens=("cat",),
+        digest_character="1",
+    )
+    source = _loaded_record(
+        record_id="source-concatenate",
+        role="adaptation",
+        source_family="A",
+        holdout_status="exploratory",
+        tokens=("concatenate",),
+        digest_character="2",
+    )
+
+    report = _small_audit((evaluation, source))
+    assert report["evaluation_exposure_pairs"] == []
+
+
+def test_short_exact_evaluation_phrase_is_not_suppressed_by_ngram_size() -> None:
+    evaluation = _loaded_record(
+        record_id="evaluation-cat",
+        role="evaluation",
+        source_family="EVAL",
+        holdout_status="not-applicable",
+        tokens=("cat",),
+        digest_character="3",
+    )
+    source = _loaded_record(
+        record_id="source-cat",
+        role="adaptation",
+        source_family="A",
+        holdout_status="exploratory",
+        tokens=("the", "cat", "rests"),
+        digest_character="4",
+    )
+
+    report = _small_audit((evaluation, source))
+    assert len(report["evaluation_exposure_pairs"]) == 1
+    assert report["evaluation_exposure_pairs"][0][
+        "exact_normalized_substring"
+    ] is True
+    assert report["evaluation_exposure_pairs"][0][
+        "crosses_holdout_boundary"
+    ] is False
+
+
+def test_direct_pattern_normalized_values_must_be_unique() -> None:
+    raw = json.loads(PATTERNS.read_text(encoding="utf-8"))
+    raw["categories"][0]["patterns"][1]["value"] = raw["categories"][0][
+        "patterns"
+    ][0]["value"].upper()
+
+    assert (
+        "direct-pattern normalized values must be globally unique"
+        in validate_pattern_registry(raw)
+    )
+
+
+def test_legacy_integrity_config_schema_is_rejected() -> None:
+    raw = json.loads(CONFIG.read_text(encoding="utf-8"))
+    raw["schema_version"] = 1
+
+    assert "schema_version must be 2" in validate_integrity_config(raw)
+
+
+def test_direct_pattern_ids_must_be_stable_slugs() -> None:
+    raw = json.loads(PATTERNS.read_text(encoding="utf-8"))
+    raw["categories"][0]["patterns"][0]["id"] = "unstable id"
+
+    errors = validate_pattern_registry(raw)
+    assert any(
+        "id must be a lowercase hyphenated slug" in error
+        for error in errors
+    )
+
+
+def test_audit_rejects_untrusted_content_byte_declarations() -> None:
+    _records, loaded, config, patterns = _inputs()
+    changed = replace(
+        loaded[0],
+        manifest={**loaded[0].manifest, "content_bytes": "12"},
+    )
+
+    with pytest.raises(
+        ContentIntegrityError,
+        match="content_bytes must be a positive integer",
+    ):
+        audit_content_integrity(
+            (changed, *loaded[1:]),
+            manifest_sha256=sha256_file(MANIFEST),
+            config=config,
+            config_sha256=sha256_file(CONFIG),
+            patterns=patterns,
+            patterns_sha256=sha256_file(PATTERNS),
+        )

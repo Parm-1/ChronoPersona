@@ -92,3 +92,22 @@ def test_each_form_must_cover_both_poles() -> None:
         "one candidate for each pole" in error
         for error in validate_evaluation_registry(items)
     )
+
+
+def test_option_order_invariance_requires_actual_counterbalancing() -> None:
+    items = [deepcopy(item) for item in load_evaluation_registry(REGISTRY)]
+    first_order = [
+        candidate["pole"]
+        for candidate in items[0]["forms"][0]["candidates"]
+    ]
+    second = items[0]["forms"][1]["candidates"]
+    items[0]["forms"][1]["candidates"] = sorted(
+        second,
+        key=lambda candidate: first_order.index(candidate["pole"]),
+    )
+
+    errors = validate_evaluation_registry(items)
+    assert any(
+        "option-order invariance requires both candidate orders" in error
+        for error in errors
+    )

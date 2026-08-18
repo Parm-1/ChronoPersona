@@ -28,6 +28,7 @@ from chronopersona.source_inventory import (  # noqa: E402
 
 
 ENDPOINT = "https://archive.org/metadata/stackexchange"
+ALLOWED_METADATA_HOSTS = ("archive.org",)
 USER_AGENT = "ChronoPersona/0.1 inventory-audit (github.com/Parm-1/ChronoPersona)"
 
 
@@ -90,6 +91,7 @@ def main() -> int:
             else fetch_metadata(
                 ENDPOINT,
                 allow_network=args.allow_network,
+                allowed_hosts=ALLOWED_METADATA_HOSTS,
                 max_bytes=args.max_response_bytes,
                 timeout_seconds=args.timeout_seconds,
                 user_agent=USER_AGENT,

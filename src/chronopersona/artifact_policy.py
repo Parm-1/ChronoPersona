@@ -8,6 +8,7 @@ from typing import Any
 
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
+_REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
 class ArtifactPolicyError(ValueError):
@@ -52,11 +53,23 @@ def _common_hub_errors(artifact: Mapping[str, Any]) -> list[str]:
         license_info.get("status") != "verified"
     ):
         errors.append("the model license must be verified")
+    elif not (
+        isinstance(license_info.get("sources"), list)
+        and bool(license_info["sources"])
+        and all(
+            isinstance(source, str) and bool(source.strip())
+            for source in license_info["sources"]
+        )
+    ):
+        errors.append("verified model license evidence must not be empty")
     if artifact.get("requires_remote_code") is not False:
         errors.append("custom remote code is not permitted")
     repository = artifact.get("repository")
-    if not isinstance(repository, str) or repository.count("/") != 1:
-        errors.append("a Hugging Face owner/name repository is required")
+    if (
+        not isinstance(repository, str)
+        or _REPOSITORY.fullmatch(repository) is None
+    ):
+        errors.append("an exact Hugging Face owner/name repository is required")
     return errors
 
 
