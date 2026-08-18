@@ -89,7 +89,7 @@ Do not silently cross into corpus acquisition, requester-pays access, bulk archi
 - PR #17 — offline source adapters and source-C access firewall.
 - PR #18 — deterministic Synthetic Identifiability Calibration package; defects later corrected without weakening its gates.
 - PR #20 — immutable run registry and resumable fixture smoke.
-- PR #24 — recovered, hardened content-integrity gate; merge remains conditional on final trusted checks.
+- PR #24 — recovered and hardened content-integrity gate, merged as `32717a5dcf6a67838e366b63ded33cd81b5552b2` after exact-head CI, Content Integrity, and Run Registry Smoke passed on Python 3.11 and 3.12.
 
 Stale duplicate PR #22 and superseded recovery PR #23 were closed unmerged.
 
