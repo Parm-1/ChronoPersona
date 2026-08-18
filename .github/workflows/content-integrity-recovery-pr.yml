@@ -29,6 +29,28 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Correct invalid-candidate exception boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/recover_content_integrity_bundle_once.py")
+          text = path.read_text(encoding="utf-8")
+          import_marker = "import tarfile\n"
+          if text.count(import_marker) != 1:
+              raise SystemExit("unexpected tarfile import count")
+          text = text.replace(import_marker, "import tarfile\nimport zlib\n")
+          old = "(binascii.Error, EOFError, OSError, tarfile.TarError, RecoveryError)"
+          if text.count(old) != 2:
+              raise SystemExit(f"unexpected recovery exception tuple count: {text.count(old)}")
+          text = text.replace(
+              old,
+              "(binascii.Error, EOFError, OSError, tarfile.TarError, RecoveryError, zlib.error)",
+          )
+          path.write_text(text, encoding="utf-8")
+          PY
+
       - name: Recover unique safe bundle payload
         run: python scripts/recover_content_integrity_bundle_once.py
 
