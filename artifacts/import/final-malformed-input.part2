@@ -1,0 +1,102 @@
+tr] = []
+     if plan.get("training_authorized") is not False:
+         errors.append("dose plan must not authorize training")
+     branches = plan.get("branches")
+     if not isinstance(branches, list) or not branches:
+         return ("dose plan has no branches",)
++
+     grouped: defaultdict[
+         tuple[str, str, str], dict[str, list[str]]
+     ] = defaultdict(dict)
+     branch_ids: list[str] = []
+-    for branch in branches:
+-        branch_ids.append(str(branch.get("branch_id")))
++    for index, branch in enumerate(branches):
++        location = f"branches[{index}]"
++        if not isinstance(branch, Mapping):
++            errors.append(f"{location} must be an object")
++            continue
++
++        branch_id = branch.get("branch_id")
++        if not isinstance(branch_id, str) or not branch_id:
++            errors.append(f"{location}.branch_id must be nonempty")
++        else:
++            branch_ids.append(branch_id)
++
+         if branch.get("target_tokens") != 0:
+             errors.append(
+-                f"branch {branch.get('branch_id')} target_tokens must remain zero"
++                f"branch {branch_id} target_tokens must remain zero"
+             )
+         if branch.get("token_budget_status") != "unfrozen":
+             errors.append(
+-                f"branch {branch.get('branch_id')} token budget must remain unfrozen"
++                f"branch {branch_id} token budget must remain unfrozen"
+             )
+         if branch.get("metadata_must_not_be_serialized") is not True:
+             errors.append(
+-                f"branch {branch.get('branch_id')} must prohibit metadata serialization"
++                f"branch {branch_id} must prohibit metadata serialization"
++            )
++
++        identity_fields: dict[str, str] = {}
++        for field in ("pair_id", "domain_id", "condition", "dose"):
++            value = branch.get(field)
++            if not isinstance(value, str) or not value:
++                errors.append(f"{location}.{field} must be nonempty")
++            else:
++                identity_fields[field] = value
++
++        document_ids = branch.get("document_ids")
++        if not isinstance(document_ids, list) or not all(
++            isinstance(document_id, str) and document_id
++            for document_id in document_ids
++        ):
++            errors.append(
++                f"{location}.document_ids must be a list of nonempty strings"
+             )
++            continue
++        if len(document_ids) != len(set(document_ids)):
++            errors.append(f"{location}.document_ids must be unique")
++            continue
++        if len(identity_fields) != 4:
++            continue
++
+         key = (
+-            str(branch.get("pair_id")),
+-            str(branch.get("domain_id")),
+-            str(branch.get("condition")),
+-        )
+-        grouped[key][str(branch.get("dose"))] = list(
+-            branch.get("document_ids", [])
++            identity_fields["pair_id"],
++            identity_fields["domain_id"],
++            identity_fields["condition"],
+         )
++        dose = identity_fields["dose"]
++        if dose in grouped[key]:
++            errors.append(f"{key} contains duplicate dose {dose!r}")
++            continue
++        grouped[key][dose] = document_ids
++
+     if len(branch_ids) != len(set(branch_ids)):
+         errors.append("dose branch ids must be unique")
+     for key, doses in grouped.items():
+diff --git a/tests/test_final_malformed_inputs.py b/tests/test_final_malformed_inputs.py
+new file mode 100644
+index 0000000..7075517
+--- /dev/null
++++ b/tests/test_final_malformed_inputs.py
+@@ -0,0 +1,139 @@
++from __future__ import annotations
++
++from copy import deepcopy
++import json
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++import pytest
++
++from chronopersona.content_integrity import validate_holdout_authorization
++from chronopersona.content_manifest import load_content_manifest
++from chronopersona.path_policy import PortablePathError, portable_relat
