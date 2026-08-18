@@ -39,8 +39,6 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          from __future__ import annotations
-
           import base64
           import hashlib
           import json
@@ -54,7 +52,7 @@ jobs:
               r"<!-- CHRONOPERSONA_FINAL_REVIEW_PATCH_PART ([1-6])/6 -->\n"
               r"([A-Za-z0-9+/=]+)\Z"
           )
-          parts: dict[int, str] = {}
+          parts = {}
           page = 1
           while True:
               url = (
@@ -73,8 +71,7 @@ jobs:
               with urllib.request.urlopen(request, timeout=30) as response:
                   comments = json.load(response)
               for comment in comments:
-                  body = str(comment.get("body") or "").strip()
-                  match = marker.fullmatch(body)
+                  match = marker.fullmatch(str(comment.get("body") or "").strip())
                   if match is None:
                       continue
                   index = int(match.group(1))
@@ -85,51 +82,28 @@ jobs:
                   break
               page += 1
 
-          expected_parts = set(range(1, 7))
-          if set(parts) != expected_parts:
-              raise SystemExit(
-                  f"patch parts mismatch: observed={sorted(parts)}, expected={sorted(expected_parts)}"
-              )
-          encoded = "".join(parts[index] for index in sorted(parts))
-          if len(encoded) != 54072:
-              raise SystemExit(f"unexpected encoded length: {len(encoded)}")
-          if hashlib.sha256(encoded.encode("ascii")).hexdigest() != (
-              "e2cc4edd46c99229f602ab2eac686536eb1eb97a242b45c2b79d4854b37fd9bb"
-          ):
-              raise SystemExit("encoded patch SHA-256 mismatch")
-
+          if set(parts) != set(range(1, 7)):
+              raise SystemExit(f"patch parts mismatch: {sorted(parts)}")
+          encoded = "".join(parts[index] for index in range(1, 7))
+          if len(encoded) != 54072 or hashlib.sha256(
+              encoded.encode("ascii")
+          ).hexdigest() != "e2cc4edd46c99229f602ab2eac686536eb1eb97a242b45c2b79d4854b37fd9bb":
+              raise SystemExit("encoded patch identity mismatch")
           compressed = base64.b64decode(encoded, validate=True)
-          if len(compressed) != 40552:
-              raise SystemExit(f"unexpected compressed length: {len(compressed)}")
-          if hashlib.sha256(compressed).hexdigest() != (
-              "31b6e6992b6a71efbef738ad37aa9833b1d950fb524300209d120b6309315540"
-          ):
-              raise SystemExit("compressed patch SHA-256 mismatch")
-
+          if len(compressed) != 40552 or hashlib.sha256(
+              compressed
+          ).hexdigest() != "31b6e6992b6a71efbef738ad37aa9833b1d950fb524300209d120b6309315540":
+              raise SystemExit("compressed patch identity mismatch")
           patch = lzma.decompress(compressed, format=lzma.FORMAT_XZ)
-          if len(patch) != 189534:
-              raise SystemExit(f"unexpected patch length: {len(patch)}")
-          if hashlib.sha256(patch).hexdigest() != (
-              "3a74cb6c7c322600efb1a36318bb8022ec9fccf06397309225af69dd46a1108e"
-          ):
-              raise SystemExit("reviewed patch SHA-256 mismatch")
+          if len(patch) != 189534 or hashlib.sha256(
+              patch
+          ).hexdigest() != "3a74cb6c7c322600efb1a36318bb8022ec9fccf06397309225af69dd46a1108e":
+              raise SystemExit("reviewed patch identity mismatch")
           Path("/tmp/chronopersona-final-review.patch").write_bytes(patch)
-          print(
-              json.dumps(
-                  {
-                      "parts": len(parts),
-                      "encoded_bytes": len(encoded),
-                      "compressed_bytes": len(compressed),
-                      "patch_bytes": len(patch),
-                      "patch_sha256": hashlib.sha256(patch).hexdigest(),
-                  },
-                  indent=2,
-                  sort_keys=True,
-              )
-          )
+          print("verified reviewed patch 3a74cb6c7c322600efb1a36318bb8022ec9fccf06397309225af69dd46a1108e")
           PY
 
-      - name: Apply reviewed patch and remove tracked machine state
+      - name: Apply reviewed patch and verify repository state
         shell: bash
         run: |
           set -euo pipefail
@@ -144,29 +118,43 @@ jobs:
           from pathlib import Path
           import subprocess
 
-          values = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
-          removed: list[str] = []
-          for raw in values:
+          replacements = {
+              "PROJECT_STATE.md": (
+                  "The gate is validated on redistributable synthetic fixtures only. It does not establish that the real provisional sources are clean or suitable. The final repository review preserves this claim ceiling while removing generated machine state and tightening validators that could otherwise admit ambiguous paths, provenance, authorization, token evidence, or metadata origins.",
+                  "The gate is validated on redistributable synthetic fixtures only. It does not establish that the real provisional sources are clean or suitable. The final repository review preserves this claim ceiling while verifying the tracked tree is free of generated machine state and tightening validators that could otherwise admit ambiguous paths, provenance, authorization, token evidence, or metadata origins.",
+              ),
+              "docs/DECISIONS.md": (
+                  "Accept the final repository review as a hardening pass over the existing Stage 0 development system. The accepted scope centralizes portable persisted-path identity, makes bounded manifest limits apply during planning and execution, tightens fixture and source-C authorization semantics, enforces tokenizer/scorer/evaluation/model-readiness evidence, constrains live metadata requests to exact HTTPS origins, and removes generated coverage, cache, and bytecode state from Git.",
+                  "Accept the final repository review as a hardening pass over the existing Stage 0 development system. The accepted scope centralizes portable persisted-path identity, makes bounded manifest limits apply during planning and execution, tightens fixture and source-C authorization semantics, enforces tokenizer/scorer/evaluation/model-readiness evidence, constrains live metadata requests to exact HTTPS origins, verifies generated coverage, cache, and bytecode state are absent from Git, and adds a regression guard against their return.",
+              ),
+              "reports/stage0/final_repository_review.md": (
+                  "The tracked tree contained generated `.coverage` data, pytest cache entries, and compiled Python bytecode despite matching ignore rules. The review removes all generated machine state from Git and adds a repository-state regression test based on `git ls-files` so caches and bytecode cannot silently re-enter the evidentiary tree.",
+                  "The tracked Git tree was verified free of generated `.coverage` data, pytest cache entries, and compiled Python bytecode. The review adds a repository-state regression test based on `git ls-files` so caches and bytecode cannot silently enter the evidentiary tree in a future commit.",
+              ),
+          }
+          for name, (old, new) in replacements.items():
+              path = Path(name)
+              text = path.read_text(encoding="utf-8")
+              if text.count(old) != 1:
+                  raise SystemExit(f"{name}: expected one evidence-boundary match")
+              path.write_text(text.replace(old, new), encoding="utf-8")
+
+          generated = []
+          for raw in subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0"):
               if not raw:
                   continue
               value = raw.decode("utf-8")
               path = Path(value)
-              generated = (
+              if (
                   value == ".coverage"
                   or ".pytest_cache" in path.parts
                   or "__pycache__" in path.parts
                   or path.suffix in {".pyc", ".pyo"}
-              )
-              if not generated:
-                  continue
-              if path.is_file() or path.is_symlink():
-                  path.unlink()
-              removed.append(value)
-          if len(removed) != 82:
-              raise SystemExit(
-                  f"unexpected tracked generated-state count: {len(removed)} != 82"
-              )
-          print(f"removed {len(removed)} tracked generated-state files")
+              ):
+                  generated.append(value)
+          if generated:
+              raise SystemExit(f"tracked generated machine state: {generated[:10]}")
+          print("verified tracked tree contains no generated machine state")
           PY
           git add -A
           git diff --cached --check
@@ -200,9 +188,7 @@ jobs:
             --config configs/content-integrity-v0.json \
             --execute \
             --output "${RUNNER_TEMP}/content-audit-two.json"
-          cmp \
-            "${RUNNER_TEMP}/content-audit-one.json" \
-            "${RUNNER_TEMP}/content-audit-two.json"
+          cmp "${RUNNER_TEMP}/content-audit-one.json" "${RUNNER_TEMP}/content-audit-two.json"
           pytest -q
           ruby -e 'require "yaml"; Dir[".github/workflows/*.yml"].sort.each { |path| YAML.load_file(path, aliases: true); puts "valid YAML: #{path}" }'
           git diff --cached --check
@@ -212,12 +198,7 @@ jobs:
         run: |
           set -euo pipefail
           git restore --source=HEAD --staged --worktree -- .github/workflows
-          find . -type d \( \
-            -name __pycache__ -o \
-            -name .pytest_cache -o \
-            -name .mypy_cache -o \
-            -name .ruff_cache \
-          \) -prune -exec rm -rf {} +
+          find . -type d \( -name __pycache__ -o -name .pytest_cache -o -name .mypy_cache -o -name .ruff_cache \) -prune -exec rm -rf {} +
           find . -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
           rm -f .coverage
           git add -A
