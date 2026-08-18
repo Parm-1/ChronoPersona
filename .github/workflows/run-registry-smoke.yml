@@ -1,0 +1,97 @@
+name: Run Registry Smoke
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependency-light project
+        run: python -m pip install -e ".[dev]"
+
+      - name: Validate no-write smoke plan
+        run: >-
+          python scripts/run_smoke_pipeline.py plan
+          --result-output "${RUNNER_TEMP}/smoke-plan.json"
+
+      - name: Check planned interruption
+        shell: bash
+        run: |
+          set +e
+          python scripts/run_smoke_pipeline.py run \
+            --output-root "${RUNNER_TEMP}/resumed" \
+            --interrupt-after 2 \
+            --result-output "${RUNNER_TEMP}/interrupted.json"
+          status=$?
+          set -e
+          if [ "$status" -ne 75 ]; then
+            echo "expected planned-interruption exit code 75, got $status" >&2
+            exit 1
+          fi
+
+      - name: Resume and verify interrupted run
+        shell: bash
+        run: |
+          python scripts/run_smoke_pipeline.py run \
+            --output-root "${RUNNER_TEMP}/resumed" \
+            --resume \
+            --result-output "${RUNNER_TEMP}/resumed.json"
+          RESUMED_RUN="$(find "${RUNNER_TEMP}/resumed" -mindepth 1 -maxdepth 1 -type d -name 'run-*' -print -quit)"
+          test -n "$RESUMED_RUN"
+          python scripts/run_smoke_pipeline.py verify \
+            --run-root "$RESUMED_RUN" \
+            --result-output "${RUNNER_TEMP}/verified.json"
+
+      - name: Run uninterrupted comparison
+        shell: bash
+        run: |
+          python scripts/run_smoke_pipeline.py run \
+            --output-root "${RUNNER_TEMP}/uninterrupted" \
+            --result-output "${RUNNER_TEMP}/uninterrupted.json"
+          RESUMED_RUN="$(find "${RUNNER_TEMP}/resumed" -mindepth 1 -maxdepth 1 -type d -name 'run-*' -print -quit)"
+          CLEAN_RUN="$(find "${RUNNER_TEMP}/uninterrupted" -mindepth 1 -maxdepth 1 -type d -name 'run-*' -print -quit)"
+          test -n "$RESUMED_RUN"
+          test -n "$CLEAN_RUN"
+          cmp \
+            "$RESUMED_RUN/artifacts/final-manifest.json" \
+            "$CLEAN_RUN/artifacts/final-manifest.json"
+
+      - name: Assert non-scientific execution boundaries
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          temp = Path(os.environ["RUNNER_TEMP"])
+          for name in ("smoke-plan.json", "resumed.json", "uninterrupted.json"):
+              record = json.loads((temp / name).read_text(encoding="utf-8"))
+              assert record.get("scientific_claim_authorized") is False
+              if name != "smoke-plan.json":
+                  assert record["training_performed"] is False
+                  assert record["model_loaded"] is False
+                  assert record["network_access_performed"] is False
+          PY
+
+      - name: Run focused adversarial tests
+        run: >-
+          pytest -q
+          tests/test_run_registry.py
+          tests/test_smoke_pipeline.py
