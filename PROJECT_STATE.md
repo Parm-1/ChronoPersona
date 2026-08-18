@@ -6,15 +6,15 @@
 
 ## Current phase
 
-**Stage 0 — design synchronized; scientific execution externally blocked**
+**Stage 0 — development content-integrity gate passed; scientific execution externally blocked**
 
 The final literature pass moved the project from broad historical generalization to one decisive prospective test: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
 ProgressGym is treated as the closest predecessor. Historical model construction, multi-source historical corpora, timeless instruction tuning, historical value measurement, broad transfer from one corpus, persistence, and path dependence alone are not claimed as novelty.
 
-## Current gate
+## Current design gate
 
-The design gate passes when:
+Pass only when:
 
 - the ProgressGym-aware charter and novelty audit are merged;
 - A/B agreement is explicitly discovery-only;
@@ -29,13 +29,14 @@ After that gate, stop. Scientific execution requires external evidence not curre
 
 ### Observed
 
-- Stage 0 repository hardening was merged as `18ba38539c072a7937494dc64e4d7064bb9a46e9` after all seven permanent workflows passed on the exact reviewed head.
+- The Stage 0 hardening PR was merged as `18ba38539c072a7937494dc64e4d7064bb9a46e9` after all seven permanent workflows passed on the exact reviewed head.
+- The development content-integrity gate passed on bounded redistributable fixtures.
 - The repository has deterministic manifests, scoring, synthetic-package generation, run identity/resumption, source metadata adapters, and bounded lexical content-integrity tooling.
 - No model has been trained and no real A/B/C corpus has been qualified.
 
 ### Reported by primary sources
 
-- ProgressGym uses multi-source historical text spanning nine centuries, continued-pretrained historical models, timeless instruction tuning, and historical/value-oriented evaluation.
+- ProgressGym uses multi-source historical text spanning nine centuries, historical continued pretraining, timeless instruction tuning, and value-oriented evaluation.
 - ProgressGym identifies temporal source-composition change and uncertain historical-value injection as limitations.
 
 ### Not established

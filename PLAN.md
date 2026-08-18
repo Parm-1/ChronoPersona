@@ -1,6 +1,6 @@
 # ChronoPersona Plan — Design v1.0
 
-The program advances only when a gate has evidence, exact-head validation, and a recorded decision. A clean failed gate is progress.
+The **development content-integrity gate is passed**. Scientific execution is **externally blocked**. The program advances only when a gate has evidence, exact-head validation, and a recorded decision. A clean failed gate is progress.
 
 ## Resource envelope
 

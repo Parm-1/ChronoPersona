@@ -39,9 +39,11 @@ The remaining contribution is the prospective identification and transport of an
 
 ## Current status
 
-Stage 0 engineering and research-governance hardening is complete. No evidence-bearing model training or real-source qualification has occurred. Source roles, era windows, causal checkpoint, dose, confirmation evaluation, meaningful-effect threshold, and prospective estimator remain unfrozen.
+The **development content-integrity gate is passed**. Stage 0 engineering and research-governance hardening is complete. Scientific execution is **externally blocked**.
 
-Scientific execution is externally blocked on:
+No evidence-bearing model training or real-source qualification has occurred. Source roles, era windows, causal checkpoint, dose, confirmation evaluation, meaningful-effect threshold, and prospective estimator remain unfrozen.
+
+External blockers include:
 
 - bounded rights-qualified, historically versioned real-source samples;
 - source continuity, composition, overlap, and exposure measurements;
