@@ -13,11 +13,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -93,5 +93,6 @@ jobs:
       - name: Run focused adversarial tests
         run: >-
           pytest -q
+          tests/test_path_policy.py
           tests/test_run_registry.py
           tests/test_smoke_pipeline.py
