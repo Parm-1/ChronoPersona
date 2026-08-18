@@ -75,6 +75,11 @@ jobs:
               '''def _safe_repo_file(repo_root: Path, raw_path: str) -> Path:\n    if "\\\\" in raw_path or ":" in raw_path:\n        raise ContentIntegrityError(\n            "configured direct-pattern path must use portable forward slashes"\n        )\n    portable = PurePosixPath(raw_path)\n    if (\n        portable.is_absolute()\n        or ".." in portable.parts\n        or portable.as_posix() != raw_path\n    ):\n        raise ContentIntegrityError(\n            "configured direct-pattern path must be canonical and relative"\n        )\n    relative = Path(*portable.parts)\n    root = repo_root.resolve()\n''',
           )
 
+          replace_once(
+              "tests/test_content_manifest.py",
+              '    assert any("content_path must be safe" in error for error in errors)\n',
+              '    assert any("portable" in error for error in errors)\n',
+          )
           manifest_tests = Path("tests/test_content_manifest.py")
           manifest_tests.write_text(
               manifest_tests.read_text(encoding="utf-8")
