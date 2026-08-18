@@ -57,7 +57,7 @@ jobs:
                   "last64",
                   part[-64:].decode("ascii"),
               )
-          for index, (left, right) in enumerate(zip(parts, parts[1:], strict=True)):
+          for index, (left, right) in enumerate(zip(parts, parts[1:])):
               exact = 0
               for width in range(1, min(len(left), len(right), 2048) + 1):
                   if left[-width:] == right[:width]:
@@ -91,7 +91,7 @@ jobs:
           )
           PY
 
-      - name: Correct invalid-candidate exception boundary
+      - name: Apply evidence-specific recovery rule
         shell: bash
         run: |
           python - <<'PY'
@@ -103,13 +103,59 @@ jobs:
           if text.count(import_marker) != 1:
               raise SystemExit("unexpected tarfile import count")
           text = text.replace(import_marker, "import tarfile\nimport zlib\n")
-          old = "(binascii.Error, EOFError, OSError, tarfile.TarError, RecoveryError)"
-          if text.count(old) != 2:
-              raise SystemExit(f"unexpected recovery exception tuple count: {text.count(old)}")
+
+          old_exceptions = "(binascii.Error, EOFError, OSError, tarfile.TarError, RecoveryError)"
+          if text.count(old_exceptions) != 2:
+              raise SystemExit(
+                  f"unexpected recovery exception tuple count: {text.count(old_exceptions)}"
+              )
           text = text.replace(
-              old,
+              old_exceptions,
               "(binascii.Error, EOFError, OSError, tarfile.TarError, RecoveryError, zlib.error)",
           )
+
+          old_call = "    repair, payload, members = recover(normalized)\n"
+          if text.count(old_call) != 1:
+              raise SystemExit("unexpected recovery call count")
+          new_call = '''    normalized_parts = tuple(
+        b"".join(content.split()) for content in part_bytes
+    )
+    observed_lengths = [len(part) for part in normalized_parts]
+    required_lengths = [4867, 4606, 4606, 4606, 4606, 4606, 4606, 4602]
+    if observed_lengths != required_lengths:
+        raise RecoveryError(
+            f"fragment lengths changed: {observed_lengths} != {required_lengths}"
+        )
+    nominal_width = 4606
+    overrun = normalized_parts[0][nominal_width:]
+    if len(overrun) != 261:
+        raise RecoveryError(f"unexpected first-fragment overrun: {len(overrun)}")
+    matching_prefix = 0
+    for left, right in zip(overrun, normalized_parts[1]):
+        if left != right:
+            break
+        matching_prefix += 1
+    if matching_prefix != 257:
+        raise RecoveryError(
+            f"unexpected first-boundary duplicated prefix: {matching_prefix}"
+        )
+    repaired_base64 = normalized_parts[0][:nominal_width] + b"".join(
+        normalized_parts[1:]
+    )
+    compressed, payload, members = decode_candidate(repaired_base64)
+    repair = {
+        "mode": "trim-first-fragment-overrun",
+        "positions": list(range(nominal_width, len(normalized_parts[0]))),
+        "characters": sorted(set(overrun.decode("ascii"))),
+        "direct_decode_error": (
+            "fragment 0 contained a 261-character overrun beginning at the "
+            "common 4606-character boundary; its first 257 characters duplicated "
+            "fragment 1"
+        ),
+        "compressed": compressed,
+    }
+'''
+          text = text.replace(old_call, new_call)
           path.write_text(text, encoding="utf-8")
           PY
 
@@ -140,6 +186,10 @@ jobs:
           path = Path("reports/stage0/content_integrity_bundle_recovery.json")
           value = json.loads(path.read_text(encoding="utf-8"))
           value["source_branch"] = "agent/content-integrity-recovery-v1"
+          value["repaired_base64_bytes"] = 36844
+          value["trimmed_fragment"] = 0
+          value["trimmed_range"] = [4606, 4867]
+          value["duplicated_prefix_characters"] = 257
           value["validation_status"] = "passed"
           value["validation_commands"] = [
               "python -m pip install -e .[dev]",
