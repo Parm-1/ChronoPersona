@@ -73,7 +73,13 @@ git diff --check
 
 Independent review then found and corrected a Windows portability defect in path validation. The hardened implementation adds adversarial Windows parent-traversal and drive-path tests while preserving the existing POSIX traversal checks.
 
-Final merge remains conditional on ordinary connector-authored Python 3.11/3.12 CI, the dedicated Content Integrity workflow, the run-registry smoke, and a clean pull-request diff.
+At exact PR head `b4a5fb26cafecce8eb9029cd3a730780603d53ef`, all triggered checks passed:
+
+- CI on Python 3.11 and 3.12;
+- Content Integrity on Python 3.11 and 3.12;
+- Run Registry Smoke on Python 3.11 and 3.12.
+
+PR #24 was merged as commit `32717a5dcf6a67838e366b63ded33cd81b5552b2`.
 
 ## Claim boundary
 
