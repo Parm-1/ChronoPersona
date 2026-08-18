@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - agent/content-integrity-v0
+  pull_request:
 
 permissions:
   contents: write
