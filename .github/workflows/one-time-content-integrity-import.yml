@@ -1,35 +1,280 @@
-name: One-time content integrity import
+name: Recover content integrity bundle
 
 on:
   push:
     branches:
       - agent/content-integrity-v0
-  pull_request:
 
 permissions:
   contents: write
 
+concurrency:
+  group: recover-content-integrity-v0
+  cancel-in-progress: false
+
 jobs:
-  import:
-    runs-on: ubuntu-latest
+  recover:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           ref: agent/content-integrity-v0
           fetch-depth: 0
 
-      - name: Unpack reviewed bundle and commit it
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Recover reviewed bundle with a unique verified repair
         shell: bash
         run: |
           set -euo pipefail
-          cat artifacts/import/content-v0.part{0..7} > "${RUNNER_TEMP}/content-v0.b64"
-          base64 --decode "${RUNNER_TEMP}/content-v0.b64" > "${RUNNER_TEMP}/content-v0.tar.gz"
-          tar -xzf "${RUNNER_TEMP}/content-v0.tar.gz" -C .
-          rm -rf tests/.pytest_cache
-          rm -rf artifacts/import
-          rm .github/workflows/one-time-content-integrity-import.yml
-          git config user.name "ChronoPersona content integrity import"
+          python - <<'PY'
+          from __future__ import annotations
+
+          import base64
+          import binascii
+          from collections import defaultdict
+          from datetime import datetime, timezone
+          import gzip
+          import hashlib
+          from io import BytesIO
+          import json
+          from pathlib import Path, PurePosixPath
+          import shutil
+          import tarfile
+
+          root = Path.cwd()
+          import_root = root / "artifacts" / "import"
+          expected_names = [f"content-v0.part{index}" for index in range(8)]
+          parts = [import_root / name for name in expected_names]
+          missing = [str(path) for path in parts if not path.is_file()]
+          if missing:
+              raise SystemExit(f"missing bundle parts: {missing}")
+
+          part_bytes = [path.read_bytes() for path in parts]
+          normalized = b"".join(b"".join(content.split()) for content in part_bytes)
+          allowed = frozenset(b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+          invalid = sorted(set(normalized) - allowed)
+          if invalid:
+              raise SystemExit(f"bundle contains non-base64 bytes: {invalid}")
+
+          def inspect_tar(payload: bytes) -> tuple[str, ...]:
+              names: list[str] = []
+              with tarfile.open(fileobj=BytesIO(payload), mode="r:*") as archive:
+                  members = archive.getmembers()
+                  if not members:
+                      raise ValueError("bundle archive is empty")
+                  for member in members:
+                      name = member.name
+                      if "\\" in name:
+                          raise ValueError(f"archive path uses backslashes: {name!r}")
+                      path = PurePosixPath(name)
+                      if path.is_absolute() or not path.parts or ".." in path.parts:
+                          raise ValueError(f"unsafe archive path: {name!r}")
+                      if path.parts[0] in {".git", "checkpoints", "models", "runs", "secrets"}:
+                          raise ValueError(f"forbidden archive path: {name!r}")
+                      if tuple(path.parts[:2]) == ("artifacts", "import"):
+                          raise ValueError(f"archive may not recreate importer data: {name!r}")
+                      if member.issym() or member.islnk() or member.isdev() or member.isfifo():
+                          raise ValueError(f"archive contains a link or special file: {name!r}")
+                      if not (member.isdir() or member.isfile()):
+                          raise ValueError(f"unsupported archive member type: {name!r}")
+                      names.append(name)
+              if not any(name.startswith("src/chronopersona/") for name in names):
+                  raise ValueError("bundle has no ChronoPersona source module")
+              if not any(name.startswith("tests/") for name in names):
+                  raise ValueError("bundle has no tests")
+              if not any(name.startswith("scripts/") for name in names):
+                  raise ValueError("bundle has no command-line tooling")
+              return tuple(names)
+
+          def decode_and_inspect(candidate: bytes) -> tuple[bytes, bytes, tuple[str, ...]]:
+              compressed = base64.b64decode(candidate, validate=True)
+              if not compressed.startswith(b"\x1f\x8b"):
+                  raise ValueError("decoded payload is not gzip")
+              payload = gzip.decompress(compressed)
+              names = inspect_tar(payload)
+              return compressed, payload, names
+
+          direct_error: str | None = None
+          repairs: dict[str, dict[str, object]] = {}
+          try:
+              compressed, payload, names = decode_and_inspect(normalized)
+              payload_sha = hashlib.sha256(payload).hexdigest()
+              repairs[payload_sha] = {
+                  "compressed": compressed,
+                  "payload": payload,
+                  "names": names,
+                  "positions": [],
+                  "characters": [],
+                  "mode": "direct",
+              }
+          except (binascii.Error, EOFError, OSError, tarfile.TarError, ValueError) as error:
+              direct_error = f"{type(error).__name__}: {error}"
+
+          if not repairs:
+              if len(normalized) % 4 != 1:
+                  raise SystemExit(
+                      "strict base64 decode failed and normalized length is not one character over a quartet: "
+                      f"length={len(normalized)}, remainder={len(normalized) % 4}, error={direct_error}"
+                  )
+              grouped_positions: defaultdict[str, list[int]] = defaultdict(list)
+              grouped_characters: defaultdict[str, set[str]] = defaultdict(set)
+              for index in range(len(normalized)):
+                  candidate = normalized[:index] + normalized[index + 1 :]
+                  try:
+                      compressed, payload, names = decode_and_inspect(candidate)
+                  except (binascii.Error, EOFError, OSError, tarfile.TarError, ValueError):
+                      continue
+                  payload_sha = hashlib.sha256(payload).hexdigest()
+                  grouped_positions[payload_sha].append(index)
+                  grouped_characters[payload_sha].add(chr(normalized[index]))
+                  repairs.setdefault(
+                      payload_sha,
+                      {
+                          "compressed": compressed,
+                          "payload": payload,
+                          "names": names,
+                          "mode": "remove-one-base64-character",
+                      },
+                  )
+              for payload_sha, repair in repairs.items():
+                  repair["positions"] = grouped_positions[payload_sha]
+                  repair["characters"] = sorted(grouped_characters[payload_sha])
+
+          if len(repairs) != 1:
+              summary = {
+                  payload_sha: {
+                      "positions": repair.get("positions", []),
+                      "characters": repair.get("characters", []),
+                      "members": len(repair["names"]),
+                  }
+                  for payload_sha, repair in repairs.items()
+              }
+              raise SystemExit(
+                  "bundle recovery did not produce exactly one unique valid tar payload: "
+                  + json.dumps(summary, sort_keys=True)
+              )
+
+          payload_sha, repair = next(iter(repairs.items()))
+          compressed = repair["compressed"]
+          payload = repair["payload"]
+          names = tuple(repair["names"])
+          assert isinstance(compressed, bytes)
+          assert isinstance(payload, bytes)
+
+          staging = Path("${RUNNER_TEMP}") / "content-integrity-staging"
+          if staging.exists():
+              shutil.rmtree(staging)
+          staging.mkdir(parents=True)
+          with tarfile.open(fileobj=BytesIO(payload), mode="r:*") as archive:
+              for member in archive.getmembers():
+                  destination = staging / PurePosixPath(member.name)
+                  if member.isdir():
+                      destination.mkdir(parents=True, exist_ok=True)
+                      continue
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  source = archive.extractfile(member)
+                  if source is None:
+                      raise SystemExit(f"unable to read archive member: {member.name}")
+                  with source, destination.open("wb") as output:
+                      shutil.copyfileobj(source, output)
+
+          for child in staging.iterdir():
+              destination = root / child.name
+              if child.is_dir():
+                  shutil.copytree(child, destination, dirs_exist_ok=True)
+              else:
+                  shutil.copy2(child, destination)
+
+          shutil.rmtree(import_root)
+          Path(".github/workflows/one-time-content-integrity-import.yml").unlink()
+
+          evidence_path = root / "reports" / "stage0" / "content_integrity_bundle_recovery.json"
+          evidence_path.parent.mkdir(parents=True, exist_ok=True)
+          evidence = {
+              "schema_version": 1,
+              "source_branch": "agent/content-integrity-v0",
+              "source_commit": "${GITHUB_SHA}",
+              "source_parts": [
+                  {
+                      "path": path.as_posix(),
+                      "bytes": len(content),
+                      "sha256": hashlib.sha256(content).hexdigest(),
+                  }
+                  for path, content in zip(parts, part_bytes, strict=True)
+              ],
+              "normalized_base64_bytes": len(normalized),
+              "normalized_base64_sha256": hashlib.sha256(normalized).hexdigest(),
+              "direct_decode_error": direct_error,
+              "repair_mode": repair["mode"],
+              "removed_character_positions": repair.get("positions", []),
+              "removed_characters": repair.get("characters", []),
+              "compressed_gzip_bytes": len(compressed),
+              "compressed_gzip_sha256": hashlib.sha256(compressed).hexdigest(),
+              "decompressed_tar_bytes": len(payload),
+              "decompressed_tar_sha256": payload_sha,
+              "archive_members": list(names),
+              "archive_member_count": len(names),
+              "network_used": False,
+              "model_used": False,
+              "training_performed": False,
+              "validation_status": "pending",
+          }
+          evidence_path.write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(evidence, indent=2, sort_keys=True))
+          PY
+
+      - name: Validate recovered implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -e ".[dev]"
+          python -m compileall -q src scripts
+          python -m chronopersona validate configs/pilot.toml
+          python -m chronopersona validate-models artifacts/manifests/MODEL_MANIFEST.json
+          python -m chronopersona validate-evaluation evaluations/registry/development-v0.jsonl
+          python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json
+          python scripts/build_synthetic_calibration.py --check
+          pytest -q
+          git diff --check
+
+      - name: Record validation evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("reports/stage0/content_integrity_bundle_recovery.json")
+          value = json.loads(path.read_text(encoding="utf-8"))
+          value["validation_status"] = "passed"
+          value["validation_commands"] = [
+              "python -m pip install -e .[dev]",
+              "python -m compileall -q src scripts",
+              "python -m chronopersona validate configs/pilot.toml",
+              "python -m chronopersona validate-models artifacts/manifests/MODEL_MANIFEST.json",
+              "python -m chronopersona validate-evaluation evaluations/registry/development-v0.jsonl",
+              "python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json",
+              "python scripts/build_synthetic_calibration.py --check",
+              "pytest -q",
+              "git diff --check",
+          ]
+          path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Commit recovered package
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "ChronoPersona content integrity recovery"
           git config user.email "75600769+Parm-1@users.noreply.github.com"
           git add -A
+          git diff --cached --check
           git commit -m "Add deterministic content integrity audit"
           git push origin HEAD:agent/content-integrity-v0
