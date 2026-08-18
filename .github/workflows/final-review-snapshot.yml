@@ -133,8 +133,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git apply --check --whitespace=error-all /tmp/chronopersona-final-review.patch
-          git apply --whitespace=nowarn /tmp/chronopersona-final-review.patch
+          git apply --check --whitespace=error-all \
+            --exclude=.github/workflows/final-review-snapshot.yml \
+            /tmp/chronopersona-final-review.patch
+          git apply --whitespace=nowarn \
+            --exclude=.github/workflows/final-review-snapshot.yml \
+            /tmp/chronopersona-final-review.patch
+          rm -f .github/workflows/final-review-snapshot.yml
           python - <<'PY'
           from pathlib import Path
           import subprocess
