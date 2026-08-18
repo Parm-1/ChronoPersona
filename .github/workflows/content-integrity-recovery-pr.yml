@@ -101,6 +101,17 @@ jobs:
           set -euo pipefail
           python scripts/recover_content_integrity_bundle_once.py
           rm -f scripts/patch_content_integrity_recovery_once.py
+          rm -rf tests/.pytest_cache
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("PROJECT_STATE.md")
+          lines = path.read_text(encoding="utf-8").splitlines()
+          path.write_text(
+              "\n".join(line.rstrip() for line in lines) + "\n",
+              encoding="utf-8",
+          )
+          PY
 
       - name: Validate complete repository
         shell: bash
