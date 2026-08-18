@@ -1,9 +1,7 @@
 name: Final Review Snapshot
 
 on:
-  push:
-    branches:
-      - agent/final-review-v1
+  pull_request:
     paths:
       - ".github/workflows/final-malformed-input-hardening.yml"
 
@@ -16,7 +14,7 @@ concurrency:
 
 jobs:
   snapshot:
-    if: github.repository == 'Parm-1/ChronoPersona'
+    if: github.head_ref == 'agent/final-review-v1' && github.repository == 'Parm-1/ChronoPersona'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
