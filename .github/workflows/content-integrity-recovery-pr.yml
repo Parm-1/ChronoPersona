@@ -105,12 +105,16 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          path = Path("PROJECT_STATE.md")
-          lines = path.read_text(encoding="utf-8").splitlines()
-          path.write_text(
-              "\n".join(line.rstrip() for line in lines) + "\n",
-              encoding="utf-8",
-          )
+          for name in (
+              "PROJECT_STATE.md",
+              "docs/CONTENT_INTEGRITY_PROTOCOL.md",
+          ):
+              path = Path(name)
+              lines = path.read_text(encoding="utf-8").splitlines()
+              path.write_text(
+                  "\n".join(line.rstrip() for line in lines) + "\n",
+                  encoding="utf-8",
+              )
           PY
 
       - name: Validate complete repository
@@ -125,7 +129,9 @@ jobs:
           python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json
           python scripts/build_synthetic_calibration.py --check
           pytest -q
+          git add -N .
           git diff --check
+          git reset
 
       - name: Record passed validation
         shell: bash
@@ -151,7 +157,7 @@ jobs:
               "python scripts/validate_source_registry.py artifacts/manifests/SOURCE_REGISTRY.json",
               "python scripts/build_synthetic_calibration.py --check",
               "pytest -q",
-              "git diff --check",
+              "git add -N . && git diff --check && git reset",
           ]
           path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           PY
