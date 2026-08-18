@@ -1,0 +1,34 @@
+name: Final Review Snapshot
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/final-review-snapshot.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    if: github.head_ref == 'agent/final-review-v1' && github.repository == 'Parm-1/ChronoPersona'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Archive tracked repository files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-files -z | tar --null --files-from=- --create --gzip --file=chronopersona-final-review.tar.gz
+          sha256sum chronopersona-final-review.tar.gz | tee chronopersona-final-review.tar.gz.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chronopersona-final-review-snapshot
+          path: |
+            chronopersona-final-review.tar.gz
+            chronopersona-final-review.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1
