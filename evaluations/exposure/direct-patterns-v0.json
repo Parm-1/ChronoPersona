@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "status": "development",
+  "disposition": "triage-only",
+  "categories": [
+    {
+      "id": "evidence-integration",
+      "patterns": [
+        {"id": "independent-evidence", "type": "literal", "value": "independent evidence"},
+        {"id": "multiple-sources", "type": "literal", "value": "multiple sources"},
+        {"id": "source-reliability", "type": "literal", "value": "source reliability"},
+        {"id": "bayesian-instruction", "type": "literal", "value": "bayesian update"}
+      ]
+    },
+    {
+      "id": "procedural-tradeoffs",
+      "patterns": [
+        {"id": "reversible-option", "type": "literal", "value": "reversible option"},
+        {"id": "centralized-authority", "type": "literal", "value": "centralized authority"},
+        {"id": "procedural-safeguards", "type": "literal", "value": "procedural safeguards"},
+        {"id": "collective-detection", "type": "literal", "value": "collective detection"},
+        {"id": "punishment-rehabilitation", "type": "literal", "value": "punishment or rehabilitation"}
+      ]
+    },
+    {
+      "id": "secure-system-decisions",
+      "patterns": [
+        {"id": "secure-coding", "type": "literal", "value": "secure coding"},
+        {"id": "vulnerability-disclosure", "type": "literal", "value": "vulnerability disclosure"}
+      ]
+    }
+  ]
+}
