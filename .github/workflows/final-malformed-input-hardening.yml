@@ -33,6 +33,9 @@ jobs:
           set -euo pipefail
           observed="$(sha256sum artifacts/import/final-malformed-input.patch | cut -d' ' -f1)"
           expected="3a3965b986ab0cf1023139538bcf150c8e0e8c83062670da3bbb6873858a8ac0"
+          echo "staged patch bytes=$(wc -c < artifacts/import/final-malformed-input.patch)"
+          echo "staged patch sha256=${observed}"
+          echo "reviewed patch sha256=${expected}"
           test "${observed}" = "${expected}"
           git apply --check --whitespace=error-all artifacts/import/final-malformed-input.patch
           git apply --whitespace=nowarn artifacts/import/final-malformed-input.patch
