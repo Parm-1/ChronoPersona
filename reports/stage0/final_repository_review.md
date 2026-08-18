@@ -2,6 +2,8 @@
 
 **Date:** 2026-08-18
 **Reviewed base:** `a8421143326f3365c581434e3fbe401ecb4531f7`
+**Reviewed implementation:** `13a31b1cb3f2b3488599e121c000c0084a431ad0`
+**Permanent workflow set:** `8bcf0392d8a066cc00453c505f288c273ca6d382`
 **Decision:** **PASS after final Stage 0 hardening; stop at the existing external evidence boundary**
 
 ## Decision
@@ -84,7 +86,11 @@ Results:
 - no external network request, model load, corpus acquisition, training job, or paid compute was performed;
 - coverage was measured at 78% across the Python package, with the critical scorer and portable-path modules above 90%; coverage is diagnostic, not a scientific gate.
 
-The ordinary editable install initially attempted build-isolation dependency resolution and was blocked by the review environment's unavailable DNS. The same checkout installed successfully using the already present compliant build dependencies with `--no-build-isolation --no-deps`. Exact-head GitHub CI remains required before merge.
+The ordinary editable install initially attempted build-isolation dependency resolution and was blocked by the review environment's unavailable DNS. The same checkout installed successfully using the already present compliant build dependencies with `--no-build-isolation --no-deps`.
+
+A one-time GitHub importer reconstructed and verified reviewed patch SHA-256 `3a74cb6c7c322600efb1a36318bb8022ec9fccf06397309225af69dd46a1108e`, confirmed the tracked tree contained no generated machine state, ran the complete validator and deterministic-audit sequence on CPython 3.13.15, and passed all 268 tests before committing the non-workflow implementation as `13a31b1cb3f2b3488599e121c000c0084a431ad0`.
+
+The permanent seven-workflow set was then published as `8bcf0392d8a066cc00453c505f288c273ca6d382`, with `actions/checkout@v7`, `actions/setup-python@v7`, and Python 3.11, 3.12, and 3.13 matrices. The final report commit exists to trigger ordinary exact-head CI against that permanent workflow set.
 
 ## Residual risks and external blockers
 
