@@ -39,21 +39,28 @@ The remaining contribution is the prospective identification and transport of an
 
 ## Current status
 
-The **development content-integrity gate is passed**. Stage 0 engineering and research-governance hardening is complete. Scientific execution is **externally blocked**.
+The **development content-integrity gate is passed**. The bounded local
+snapshot, tokenizer, training-resume, and registry-scorer engineering paths are
+Target Verified; measurement development remains active. Scientific execution
+is **externally blocked**.
 
 No evidence-bearing scientific model training or real-source qualification has
 occurred. One local engineering-only tiny-LoRA control failed before backward;
 its sole attention-policy rescue passed a five-step control and planned
 interruption/resume gate with exact final semantic state equality. This is
-trainer/checkpoint engineering evidence only. Source roles, era windows,
-causal checkpoint, dose, confirmation evaluation, meaningful-effect threshold,
-and prospective estimator remain unfrozen.
+trainer/checkpoint engineering evidence only. The exact Pythia scorer also
+reproduced byte-identical scores across two fresh invocations, but four of
+twelve development items changed direction across paraphrases. The scorer path
+passed; measurement reliability is not established. Source roles, era windows,
+causal checkpoint, dose, confirmation evaluation, meaningful-effect threshold, and
+prospective estimator remain unfrozen.
 
 External blockers include:
 
 - bounded rights-qualified, historically versioned real-source samples;
 - source continuity, composition, overlap, and exposure measurements;
-- a shared hash-verified loader for registry scoring;
+- predeclared development-item reliability, ordering, and metric-invariance
+  criteria followed by instrument revision;
 - sustained training and broad-update cost evidence for any later branch plan;
 - expanded development and sealed confirmation evaluation partitions.
 

@@ -1,13 +1,14 @@
 # Verified Registry Model Scoring
 
-**Status:** active — E0-E3 complete; E4 exact-head target scoring ready for fresh resource audit A; no development logits inspected
+**Status:** completion pending — E0-E4 complete; E5 closes when the containing evidence head passes exact-head CI
 **Started:** 2026-08-20T07:17:14-04:00
 **Frozen baseline:** `dd0b56471b55babe2a4eb273381deeef2f852d49`
 **Branch:** `feat/verified-registry-scoring`
 **Worktree:** current branch worktree; do not persist its machine-local absolute path
 **Parent delivery:** draft PR #33, 18/18 checks green at `dd0b564`
-**Write-active deliverable:** one bounded offline Pythia registry-scoring path
-through the verified snapshot and accepted tokenizer identities.
+**Write-active deliverable:** publish the accepted bounded Pythia scorer
+evidence, current-state reconciliation, and portability regression fix without
+rerunning the model.
 
 ## Objective and acceptance boundary
 
@@ -211,22 +212,34 @@ exists yet and no model logits were inspected.
   across Python 3.11, 3.12, and 3.13. PR #34 remains open and draft. E3 is
   closed; do not rerun prior failed billing/cleanup heads.
 
-### E4 — Exact-head target scoring
+### E4 — Exact-head target scoring (complete)
 
-- Capture fresh audit A, run score A in a fresh process, and let the process
-  release CUDA/staging state.
-- Capture fresh audit B and run score B in another fresh process.
-- Run the repeat verifier with both original resource-audit files. Require
-  complete receipts, distinct process and audit identities, and byte-identical
-  score artifacts.
+- Exact clean head `cee0f2fa436578bec2f90e57e7ae512f58335323`
+  completed attempts A and B under distinct fresh audits/processes after the
+  first process released CUDA, staging, and the heavy-job lock.
+- Run `run-25453ff5b41cda00b30ac23b046f6a5e` completed 48 forwards per
+  attempt over 12 items, 24 forms, and 48 candidates with zero boundary,
+  truncation, or nonfinite failures.
+- Both 124,555-byte score files are byte-identical with raw SHA-256
+  `c3cc112c2aa7f082858ccf60b827290893b488e7adc834293bb8054d15e1cecb`.
+  The repeat verifier returned `equal`; comparison self-hash is
+  `fcf155c5414bdcda7ce9cbdd12e1723da35b268d05bc3d96c369401f7850e687`.
+- This is Target Verified scorer-path evidence only. Four items had
+  directional agreement `0.5`, so measurement reliability remains open.
 
-### E5 — Evidence publication
+### E5 — Evidence publication (conditional completion)
 
-- Preserve ignored raw audits/scores/receipts/comparison.
+- Preserve ignored raw audits/scores/receipts/comparison. A hash-matched private
+  local backup exists outside the public repository.
 - Commit only a bounded portable aggregate report, D-033, compute-ledger rows,
   and canonical state/protocol updates.
+- Include the dependency-light Windows/Python 3.13 stable-read portability fix
+  found during evidence review; do not change or rerun E4 artifacts.
 - Push the evidence head and require exact-head CI again. Do not rerun a pass to
   improve timing or presentation.
+- Treat the containing E5 commit as the last change in this plan. Once every
+  required check on that exact head is green, E5 and this plan are complete
+  without a post-CI closure commit.
 
 ## Required tests and validation
 
@@ -265,7 +278,9 @@ shorten the registry, quantize, offload, or choose a preferred output.
 ## Exact restart procedure
 
 Read `PROGRESS.md`, confirm this is the sole active plan, inspect branch/status,
-and preserve PR #33 at `dd0b564` plus draft PR #34. Confirm the repository is
-public with read-only workflow tokens and external-fork approval and confirm
-the current exact head has green CI. Then capture fresh clean-head audit A and
-stop before loading if any frozen gate fails. Never merge draft PRs.
+and preserve PR #33 at `dd0b564` plus draft PR #34. Do not rerun E4. Verify the
+seven ignored raw artifacts against their recorded hashes and keep their
+private backup. Finish the portable report/state/portability commit, push it,
+and require exact-head CI. If that exact head is green, close this plan by its
+recorded condition and create the separate measurement-reliability successor;
+otherwise address only the observed failure. Never merge draft PRs.

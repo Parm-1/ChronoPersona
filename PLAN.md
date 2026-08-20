@@ -32,9 +32,10 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 
 ## Milestone 0B — Models and compute
 
-**Status:** final-Pythia acquisition/inference, bounded training resume, and
-verified tokenizer-boundary gates measured; v0 failure preserved; sole v1
-rescue passed; registry model scoring remains pending.
+**Status:** final-Pythia acquisition/inference, bounded training resume,
+verified tokenizer boundary, and repeated registry scoring measured; v0
+failure preserved; sole v1 rescue passed; measurement reliability remains
+open.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
@@ -62,10 +63,15 @@ Measured on 2026-08-20:
 - the exact Pythia tokenizer loaded through the private verified-snapshot stage
   and passed two byte-identical 12-item/24-form/48-candidate boundary audits
   with zero failures under the predeclared native no-prefix policy.
+- the same exact snapshot/tokenizer identity completed two fresh registry-score
+  invocations with byte-identical deterministic scores, complete verifier-valid
+  receipts, and zero boundary, truncation, or nonfinite failures. Four items
+  changed direction across forms, so scorer execution passed while instrument
+  reliability remains unestablished.
 
-Still unmeasured: sustained training stability, broad-update capacity, registry
-model scoring through the verified snapshot layer, and derived branch-set cost.
-The one v1 rescue is closed; no second tuning rescue is allowed.
+Still unmeasured: sustained training stability, broad-update capacity,
+development-item reliability/invariance, and derived branch-set cost. The one
+v1 rescue is closed; no second tuning rescue is allowed.
 
 Pass when one common checkpoint and one fallback are legally accessible, immutable, capable, trainable, and supported by measured cost. Stop a path when capability, memory, artifact access, or authorized budget fails.
 
@@ -81,7 +87,8 @@ Pass when two discovery sources and one confirmatory source are viable, distinct
 
 ## Milestone 1 — Measurement
 
-**Status:** blocked by 0B and 0C for real-model and source-exposure validation.
+**Status:** development reliability work is active; source-exposure and
+confirmatory validation remain blocked by 0C and later gates.
 
 Expand factorial evidence-integration and procedural-policy item families. Create separate development and sealed confirmation partitions. Validate complete-continuation scoring, option/label/paraphrase/template invariance, tokenizer boundaries, capability, factual/register probes, malformed/refusal handling, and domain exposure.
 
@@ -132,9 +139,8 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Accept the exact Pythia tokenizer boundary audit, then integrate registry model
-scoring with the reusable manifest/hash-verified local snapshot, accepted
-tokenizer identity, and fresh resource/load evidence. Keep execution offline,
-separate deterministic scores from runtime receipts, and fail closed on
-unverified bytes. Source qualification remains independently externally
-blocked.
+Accept the exact Pythia tokenizer and repeated scorer-path gates while rejecting
+instrument readiness. Publish their evidence without rerunning, then revise the
+four directionally inconsistent items and diagnose the three primary-versus-
+diagnostic sign disagreements under predeclared reliability criteria. Source
+qualification remains independently externally blocked.

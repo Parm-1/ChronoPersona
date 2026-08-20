@@ -593,6 +593,47 @@ scanning and push protection are enabled. No billing setting changed.
 authorization. A private rollback restores GitHub access control only; it does
 not retract public clones, copied logs, or indexed commit metadata.
 
+## D-033 — Accept the repeated registry scorer path and reject instrument readiness
+
+**Date:** 2026-08-20
+**Status:** accepted at Target Verified engineering level
+
+Accept exact clean head `cee0f2fa436578bec2f90e57e7ae512f58335323` and run
+`run-25453ff5b41cda00b30ac23b046f6a5e` as evidence that the frozen Pythia
+provider can load the manifest/hash-verified private snapshot stage, bind the
+accepted tokenizer identity, compute finite complete-continuation log
+probabilities for all 48 `development-v0` candidates, publish deterministic
+scores separately from runtime evidence, and reproduce the score bytes exactly
+in a second fresh process. The verifier returned `equal`; score file SHA-256 is
+`c3cc112c2aa7f082858ccf60b827290893b488e7adc834293bb8054d15e1cecb`
+and comparison self-hash is
+`fcf155c5414bdcda7ce9cbdd12e1723da35b268d05bc3d96c369401f7850e687`.
+
+Do not accept the development instrument as reliable. Eight of twelve items
+had the same pole direction across both forms, but four of six
+evidence-integration items had directional agreement 0.5. Treat this as a
+pre-freeze development signal requiring controlled wording/order diagnosis,
+revision, and retesting under predeclared reliability criteria. One item
+aggregate and two forms also had opposite signs under the frozen primary
+total-logprob margin and diagnostic mean-token margin. Preserve the primary
+metric; do not select items, poles, phrasing, or the diagnostic metric to
+obtain a preferred model-behavior narrative.
+
+**Rejected alternatives:** do not round or tolerance-compare the two score
+files, run a third tie-breaker, switch dtype/device/attention backend, shorten
+the registry, publish machine-specific receipts, or interpret this public final
+checkpoint as a causal insertion checkpoint or historical condition. Do not
+rerun the passing scorer gate merely to improve timing or presentation.
+
+**Claim ceiling:** Target Verified for the exact scorer/snapshot/tokenizer/
+runtime/resource path only. The item-level output is measurement-development
+evidence, not a temporal contrast, calibration result, model-representativeness
+claim, causal effect, or CSTG evidence. The 60 MiB post-score VRAM margin also
+does not authorize a larger or concurrent local model job.
+
+**Evidence:**
+`reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

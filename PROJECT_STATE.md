@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Active — bounded registry model scoring through the verified snapshot**
+**Current transition — E5 closes on green exact-head CI; next is measurement reliability**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -23,11 +23,12 @@ attention. Its one versioned SDPA-MATH rescue subsequently completed the
 five-step uninterrupted and interruption/resume conditions with exact semantic
 state equality. The exact Pythia tokenizer now also passed two byte-identical
 12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
-loader, and its evidence head passed exact-head CI. The active local gate
-integrates the model scorer with that same boundary, the accepted tokenizer
-identity, and fresh resource/load evidence;
-real-source scientific execution still requires the separate source evidence
-listed below.
+loader. The model scorer then completed two fresh exact-head invocations with
+byte-identical deterministic scores and complete verifier-valid receipts. The
+containing E5 evidence head closes this scorer plan when all exact-head checks
+pass; after that condition, development measurement reliability is the next
+local gate. Real-source scientific execution still requires the separate
+source evidence listed below.
 
 ## Latest verified evidence
 
@@ -54,8 +55,13 @@ listed below.
 - The Transformers tokenizer now loads only from a private copy of exact
   manifest/hash-verified snapshot files. Its two fresh `development-v0` audits
   were byte-identical and passed all 48 candidates with zero failures. Direct
-  repository/cache loading remains disabled, and model scoring remains blocked
-  until its clean-head resource and exact-load integration is complete.
+  repository/cache loading remains disabled.
+- Exact scorer head `cee0f2fa` completed two fresh 48-forward invocations over
+  12 items and 24 forms. The 124,555-byte deterministic score artifacts were
+  byte-identical and the repeat verifier returned `equal`, with zero boundary,
+  truncation, or nonfinite failures. Four items were directionally inconsistent
+  across forms, so this verifies the scorer path while instrument reliability
+  remains unestablished.
 - The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
   LoRA control and resumed condition each completed five optimizer steps on
   synthetic fixtures and independently verified exact final semantic state
@@ -77,8 +83,8 @@ listed below.
 - source-general era decodability;
 - a trainable causal checkpoint and insertion point;
 - sustained target-model training stability or broad-update feasibility;
-- registry model scoring through the verified snapshot boundary and accepted
-  tokenizer identity;
+- development-item paraphrase, option-order, and metric invariance sufficient
+  for a frozen evaluation instrument;
 - synthetic calibration sensitivity;
 - any temporal behavioral effect.
 
@@ -99,9 +105,9 @@ listed below.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Registry model scoring through the manifest/hash-verified local snapshot,
-   accepted tokenizer audit, and fresh resource/load binding, followed by any
-   additional measured cost gate justified by the causal branch design.
+5. Predeclared measurement-reliability criteria plus revision and retest of the
+   four directionally inconsistent items and three primary/diagnostic sign
+   disagreements.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -115,8 +121,9 @@ listed below.
   2026-08-20.
 - The active gate requires one pinned licensed artifact at a time, measured
   headroom, and preserved stop/failure evidence.
-- No paid license, cloud rental, requester-pays operation, public model/data
-  release, or repository visibility change is needed or inferred.
+- No paid license, cloud rental, requester-pays operation, or public model/data
+  release is needed or inferred. The repository is public only by the user's
+  explicit authorization to restore standard hosted Actions capacity.
 
 ## Claim level
 
@@ -124,8 +131,9 @@ listed below.
 
 ## Exact next action
 
-Implement only the existing registry model scorer against the reusable
-manifest/hash-verified offline snapshot and accepted tokenizer-audit identity,
-publish it on a separate stacked draft PR after dependency-light validation,
-and require exact-head CI before the bounded repeated Pythia development score.
-Bounded rights-qualified source samples remain a separate external blocker.
+If the containing E5 head is not yet green, publish the repeated-scorer evidence
+and Windows/Python 3.13 stable-read fix on draft PR #34 and require exact-head
+CI. Once that condition is met, open a separate measurement-development plan
+with frozen reliability and invariance criteria before revising or rescoring
+any item. Bounded rights-qualified source samples remain a separate external
+blocker.

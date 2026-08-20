@@ -295,16 +295,21 @@ commit.
 A successful inference benchmark proves only that the verified model
 loading/logits path can run. The exact Pythia tokenizer subsequently passed two
 byte-identical `development-v0` boundary audits through a private verified-
-snapshot stage; see
-`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`. Registry model
-scoring remains unverified until the model provider uses the same snapshot
-layer, binds the accepted tokenizer-audit identity and fresh resource/load
-evidence, and an explicit repeated registry execution completes. The bounded
-continued-training prerequisite subsequently passed under the frozen v1 LoRA
-profile in Section 11, including forward/backward/update memory, throughput,
-checkpoint round-trip, planned interruption, and exact resume equality.
-Sustained stability, full-width/broad-update feasibility, and branch-set cost
-remain unmeasured and are not implied by that smoke.
+snapshot stage. Exact scorer head `cee0f2fa` then completed two fresh
+48-forward registry invocations with byte-identical deterministic score files,
+complete verifier-valid resource/runtime receipts, and zero boundary,
+truncation, or nonfinite failures. See
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md` and
+`reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`.
+
+That pass verifies the exact engineering path, not the instrument: four items
+changed direction across their two forms and three primary/diagnostic margin
+signs disagreed. The bounded continued-training prerequisite also passed under
+the frozen v1 LoRA profile in Section 11, including forward/backward/update
+memory, throughput, checkpoint round-trip, planned interruption, and exact
+resume equality. Measurement reliability is not established; sustained
+stability, full-width/broad-update feasibility, and branch-set cost remain
+unmeasured.
 
 ## 11. Run the frozen tiny LoRA checkpoint/resume gate
 

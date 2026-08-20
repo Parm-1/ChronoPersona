@@ -197,9 +197,11 @@ failure. Its single versioned v1 attention-policy rescue passed the bounded
 five-step control/interruption/resume engineering gate with exact semantic
 state equality; do not reopen either profile or infer scientific training
 adequacy. The exact Pythia tokenizer boundary path is Target Verified through
-the shared hash-verified snapshot loader. The next local engineering gate is
-bounded registry model scoring with fresh resource/load binding and the
-accepted tokenizer identity. Evidence-bearing naturalistic execution still
+the shared hash-verified snapshot loader. The bounded repeated registry scorer
+also passed with byte-identical deterministic outputs, but four development
+items were paraphrase-direction inconsistent; the next local gate is
+predeclared measurement reliability and invariance, not scientific
+interpretation. Evidence-bearing naturalistic execution still
 requires rights-qualified, historically version-bounded A/B samples and an
 explicitly authorized held-out source-C review packet. Paid compute, public
 model/data release, another repository-visibility change, and requester-pays

@@ -204,7 +204,12 @@ its sole attention-only v1 rescue then passed the five-step control and planned
 interruption/resume equality gate with one job at a time. This bounded smoke
 does not establish sustained or broad-update fit and does not authorize the
 full naturalistic branch set. The exact Pythia tokenizer boundary audit passed
-twice without deserializing model weights. The next local operation is bounded
-offline registry model-scoring integration through the existing hash-verified
-snapshot and accepted tokenizer identity; integrity, swapping, OOM, thermal,
-disk, and scientific stop rules remain.
+twice without deserializing model weights. The bounded offline registry scorer
+then passed two fresh 48-forward invocations through the same verified snapshot
+and tokenizer identity. Peak CUDA reserved memory was 2,046 MiB under the 3,012
+MiB cap, but post-score free VRAM was only 1,596 MiB, 60 MiB above the frozen
+floor. Attempt A used the already-authorized unenforced host-RAM threshold only
+at post-score; attempt B passed the reference throughout. This does not
+authorize a larger model, concurrent heavy process, sustained run, or broader
+training. Integrity, swapping, OOM, thermal, disk, and scientific stop rules
+remain.

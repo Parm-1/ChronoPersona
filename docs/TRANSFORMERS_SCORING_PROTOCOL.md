@@ -28,10 +28,10 @@ verifier enforces the canonical manifest, repository/revision cache layout,
 complete file allowlist, sizes, hashes, config, and cache-contained targets.
 Direct repository lookup and download-on-load remain disabled. Model scoring is
 implemented only through the frozen exact-snapshot, accepted-tokenizer,
-live-resource, exact-load, and deterministic-output gate below. Target
-execution remains blocked until that implementation is committed, exact-head
-CI passes, and a fresh resource audit satisfies every threshold. Plan mode
-remains available for both operations.
+live-resource, exact-load, and deterministic-output gate below. Exact Pythia
+target execution passed that gate twice at head `cee0f2fa`; other artifacts and
+any changed identity remain blocked until their own exact-head resource and
+load evidence passes. Plan mode remains available for both operations.
 
 ## 2. Install the smallest dependency set first
 
@@ -41,7 +41,7 @@ Tokenizer-only audit:
 python -m pip install -e ".[tokenizers]"
 ```
 
-Full model scoring later:
+Full model-scoring environment:
 
 ```powershell
 python -m pip install -e ".[models]"
@@ -279,6 +279,18 @@ pre-import resource failure is pending and may be retried only after resources
 naturally return and a new audit is captured; any failure after deserialization
 starts consumes the sole attempt and stops this gate.
 
+**Observed 2026-08-20 result:** exact clean head `cee0f2fa` completed attempts
+A and B under separate fresh resource audits and processes. Run
+`run-25453ff5b41cda00b30ac23b046f6a5e` produced two byte-identical
+124,555-byte score files with raw SHA-256
+`c3cc112c2aa7f082858ccf60b827290893b488e7adc834293bb8054d15e1cecb`.
+The verifier returned `equal` with comparison self-hash
+`fcf155c5414bdcda7ce9cbdd12e1723da35b268d05bc3d96c369401f7850e687`.
+All 48 candidate forwards completed with zero boundary, truncation, or
+nonfinite failures. See
+`reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`. Do not rerun this
+accepted gate to improve timing or presentation.
+
 ## 8. Score semantics
 
 For every complete continuation, the provider:
@@ -323,6 +335,13 @@ It cannot establish:
 - naturalistic calibration sensitivity.
 
 The final Pythia checkpoint is not the causal insertion checkpoint.
+
+The observed first score showed full form-direction agreement for eight of
+twelve items. Four evidence-integration items had agreement `0.5`. One item
+aggregate and two individual forms also had opposite signs under the frozen
+primary total-logprob margin and diagnostic mean-token margin. These are
+development reliability signals, not substantive findings or permission to
+switch the primary metric after inspection.
 
 ## 10. Failure policy
 

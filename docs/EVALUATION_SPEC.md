@@ -260,7 +260,10 @@ Changes after freezing create a new registry version. They never overwrite a com
 - Only two paraphrases per item are included.
 - The exact Pythia tokenizer passed the `development-v0` boundary audit twice;
   no executable tokenizer audit has run on DatedGPT or OLMo.
-- No public-checkpoint score has been generated.
+- The exact Pythia public final checkpoint produced byte-identical scores in
+  two fresh invocations, but four of twelve items changed direction across
+  forms and three primary/diagnostic margin signs differed. Scorer execution is
+  verified; instrument reliability is not.
 - Direct-exposure and contamination reviews are pending.
 - Human criterion validity has not been established.
 - The calibrated alternative is implemented but not designed or frozen.
@@ -271,16 +274,16 @@ These are explicit next tasks, not details to conceal in a final appendix.
 
 After this scaffold is validated:
 
-1. integrate the model provider and scorer with the accepted manifest/hash-
-   verified local-snapshot and tokenizer-audit identities;
-2. keep deterministic scientific score content separate from runtime and
-   hardware execution receipts;
-3. exercise the scorer only after a fresh clean-head resource audit and exact
-   Pythia load binding pass;
-4. measure reliability on the twelve development items;
-5. revise ceiling-prone or wording-sensitive items;
-6. add dissent and transparency constructs;
-7. expand toward 24–40 development items per primary domain only if the small
+1. preserve the accepted tokenizer/scorer outputs and frozen primary metric;
+2. predeclare paraphrase, option-order, and metric-invariance criteria before
+   revising or rescoring any item;
+3. inspect and revise the four directionally inconsistent evidence-integration
+   items without selecting wording for a preferred model result;
+4. diagnose the three total-logprob versus mean-token sign disagreements while
+   retaining total log probability as primary;
+5. add dissent and transparency constructs;
+6. expand toward 24–40 development items per primary domain only if the small
    set behaves coherently;
+7. keep deterministic score content separate from runtime/hardware receipts;
 8. keep the final confirmatory registry frozen and separate from development
    outputs.
