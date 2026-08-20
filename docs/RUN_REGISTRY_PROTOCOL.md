@@ -291,9 +291,67 @@ It does **not** establish:
 - a valid naturalistic corpus;
 - a scientific result.
 
-## 12. Next extension
+## 12. Tiny-training extension
 
-The real training runner must reuse the identity, event, lock, checkpoint, and verification contracts rather than invent a parallel system. Before that extension is allowed, it must add:
+The Pythia LoRA engineering gate reuses this registry instead of creating a
+parallel lifecycle. Both the uninterrupted operational reference and the
+interrupted/resumed condition have the same scientific run identity but live
+under separate condition roots. Condition names, resource observations,
+timings, and interruption history are runtime metadata, so they do not change
+the frozen identity.
+
+The extension adds these immutable artifacts:
+
+```text
+<condition-root>/<run-id>/
+  checkpoint.json
+  checkpoints/
+    step-0003.pt
+  artifacts/
+    runtime-steps/
+      step-0001.json ... step-0005.json
+    attempts/
+      attempt-0001.json [... attempt-0002.json]
+    final-state.pt
+    final-state-reference.json
+    adapter.safetensors
+    final-manifest.json
+    runtime-report.json
+```
+
+`checkpoint.json` is the commit point for the immutable step-three state file.
+It binds the run and identity hashes, step, cursor, token and loss counts,
+portable state path, byte size, file SHA-256, and semantic hashes for adapter,
+optimizer, scheduler, scaler, CPU/CUDA RNG, losses, and counters. Resume checks
+path containment, size, and SHA-256 before deserializing with
+`torch.load(weights_only=True)`. It then verifies every semantic component and
+the checkpoint SHA stored in both the step-three progress event and planned
+failure event.
+
+Every completed step publishes an immutable runtime-step artifact before its
+progress event. Attempt reports preserve model-load/resource context even when
+the first resumed attempt stops at step three, and record per-attempt elapsed
+wall time so the resumed condition can enforce one cumulative budget. The final
+runtime report binds all step and attempt files; the terminal `complete` event
+binds that report and the final manifest. Completed-run verification also
+requires the exact condition registry entry and exact control or planned-
+interruption event topology.
+
+The final manifest intentionally excludes timings, dynamic free memory,
+attempt role, and physical Torch archive hashes. It includes deterministic
+adapter safetensors bytes and semantic hashes of all resumable state. Therefore
+the uninterrupted and resumed final manifests must be byte-identical, while
+their runtime reports and event histories must differ.
+
+The dependency-free CI backend exercises the same state machine, corruption
+checks, explicit resume, and equality contract. Only an exact-head CUDA run of
+the real backend establishes target model-training resumption.
+
+## 13. Later scientific extension
+
+Any later evidence-bearing scientific runner must continue to reuse the
+identity, event, lock, checkpoint, and verification contracts. Before that
+extension is allowed, it must add:
 
 - a manifest-approved model and tokenizer revision;
 - measured hardware and benchmark identities;

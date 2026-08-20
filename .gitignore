@@ -29,6 +29,8 @@ models/
 results/**/*
 !results/README.md
 runs/
+!configs/runs/
+!configs/runs/pythia-lora-smoke-v0.json
 wandb/
 mlruns/
 
