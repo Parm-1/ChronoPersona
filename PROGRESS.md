@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T16:30:52-04:00
+**Last updated:** 2026-08-20T16:39:31-04:00
 
 ## Decision
 
@@ -22,9 +22,16 @@ Accept the exact `development-v1` scorer implementation as **Tested,
 pre-execution only**. It adds one closed v0/v1 profile allowlist,
 full canonical-versus-reverse provider scheduling with canonical score
 serialization, profile-bound receipts, and an integrated fail-closed repeat
-and coherence verifier. It is not authorized for E4 until remote delivery and
-exact-head CI are verified. No v1 model weights were deserialized and no v1
-logits were inspected.
+and coherence verifier. The implementation alone did not authorize E4; its
+remote delivery and exact-head CI are recorded separately below. No v1 model
+weights were deserialized and no v1 logits were inspected.
+
+Accept E3 delivery head
+`323dd0f72acf6bedc29ec68230a405214293f10d` as the exact implementation
+boundary. Draft PR #36 is open and draft, stacked on PR #35, and all 18
+push/pull-request checks passed. E4 is now authorized only after this canonical
+closure state is committed and green on its exact head, followed by a fresh
+clean-head resource audit. No score attempt has started.
 
 The user explicitly authorized making `Parm-1/ChronoPersona` public to restore
 free standard GitHub-hosted Actions. The repository is public, anonymous access
@@ -35,10 +42,11 @@ enabled. The prior zero-step billing blocker is empirically closed: draft PR
 
 ## Current objective and closure condition
 
-Deliver the Tested `development-v1` scorer implementation on
-`feat/development-v1-scoring`, open a draft PR stacked on PR #35, and require
-all exact-head checks to pass. Model execution remains blocked until that E3
-delivery gate is green; only then may E4 begin with a fresh resource audit.
+Publish this E3 closure state on `feat/development-v1-scoring` and require all
+checks to pass on that exact head. Then begin E4 only if a fresh clean-head
+resource audit passes: attempt A in canonical order, full process/CUDA release,
+fresh audit, then attempt B in exact global reverse order. Preserve one
+complete comparison or one actionable failure; do not inspect partial poles.
 
 ## Current verified boundary
 
@@ -72,11 +80,11 @@ delivery gate is green; only then may E4 begin with a fresh resource audit.
   14/112/224 records passed with one common 10–18-token continuation count per
   item and zero failures. Internal semantic review and token coherence do not
   establish criterion or model-level reliability.
-- **Development-v1 scorer profile — Tested, pre-execution:** the working tree
-  passes the profile, schedule, receipt, verifier, path, cross-profile, and v0
-  preservation regressions. Attempts are frozen as A=`canonical` and
-  B=`reverse`, with canonical serialization and no candidate deduplication.
-  No exact-head CI or target score exists for this profile yet.
+- **Development-v1 scorer profile — Tested and delivered:** exact head
+  `323dd0f` passed all 18 PR #36 checks after one message-only portability-test
+  correction. Attempts are frozen as A=`canonical` and B=`reverse`, with
+  canonical serialization and no candidate deduplication. No target score or
+  v1 model-logit evidence exists yet.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -118,6 +126,7 @@ delivery gate is green; only then may E4 begin with a fresh resource audit.
   `967868cb1e4f23b7992e88b0fb9e604bcfdeba5c` /
   `e4de6ef590939e156f862f452585678cdc21a7872b6d18c0aaf36464f984bb86`
 - E3 working-tree base: `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`
+- E3 accepted delivery head: `323dd0f72acf6bedc29ec68230a405214293f10d`
 - compute ledger: failed v0, completed v1 load/control/resume, and scorer A/B
   rows in `COMPUTE_LEDGER.csv`
 
@@ -167,12 +176,17 @@ delivery gate is green; only then may E4 begin with a fresh resource audit.
   with 463 tests and two platform-optional skips; all three top-level validators,
   compilation, and diff checks pass. Exact-head CI subsequently passed and
   closed that E5 delivery.
-- The current E3 implementation passes 142 focused scoring/profile/verifier
+- The E3 implementation passes 142 focused scoring/profile/verifier
   tests. The full offline working-tree suite collects 536 tests and passes 534
   with two platform-optional symlink skips. Production modules compile, pilot,
   model-manifest, and both v0/v1 registry validators pass, and `git diff
   --check` is clean apart from expected line-ending warnings. This is Tested
-  evidence only; E3 has no delivery-head CI or target-model evidence yet.
+  evidence only; it does not establish target-model behavior.
+- PR #36 first head `e3bd52b` passed 12/18 checks; all six CI jobs rejected
+  only a platform-specific error-message assertion while the invalid alias
+  remained fail-closed. Head `323dd0f` made that test message-portable and
+  passed 18/18 checks across Python 3.11–3.13 for push and pull-request events.
+  No model import or scoring occurred in either delivery run.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -210,6 +224,8 @@ delivery gate is green; only then may E4 begin with a fresh resource audit.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
   draft. Its final E2 evidence head `dfa52a0` passed 18/18 checks and is the
   intended stack base for E3.
+- Draft PR #36: `https://github.com/Parm-1/ChronoPersona/pull/36`, open and
+  draft, stacked on PR #35. Exact E3 head `323dd0f` passed 18/18 checks.
 - Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, open and
   draft, green at final evidence head `a7dd27c`.
 - PR #32/#33 remain open draft delivery history. PR #31 was merged externally
@@ -219,7 +235,7 @@ delivery gate is green; only then may E4 begin with a fresh resource audit.
 
 ## Next write-active deliverable
 
-Publish the scoped E3 implementation on a draft PR stacked on PR #35 and
-require all checks to pass on the exact E3 head. Do not deserialize
-model weights or inspect v1 logits until that delivery gate is green; E4 then
-starts with a fresh clean-head resource audit, not a reused execution artifact.
+Publish this E3 closure record and require green exact-head CI. Then execute
+the frozen E4 canonical/reverse pair only if each attempt's fresh resource
+audit passes. Do not reuse audits, inspect partial poles, change content or
+metrics, or continue after a consumed-attempt failure.

@@ -59,8 +59,8 @@ External blockers include:
 
 - bounded rights-qualified, historically versioned real-source samples;
 - source continuity, composition, overlap, and exposure measurements;
-- delivery and exact-head CI for the predeclared development-v1 scorer,
-  followed by one bounded coherence result and reliability decision;
+- one bounded development-v1 canonical/reverse coherence result and
+  reliability decision under the delivered exact-head scorer;
 - sustained training and broad-update cost evidence for any later branch plan;
 - expanded development and sealed confirmation evaluation partitions.
 

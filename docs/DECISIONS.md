@@ -749,6 +749,57 @@ logits from this evidence commit.
 `evaluations/registry/development-v1.jsonl`, and
 `configs/evaluations/development-v1-reliability-v0.json`.
 
+## D-036 — Accept the profile-bound development-v1 scorer delivery
+
+**Date:** 2026-08-20
+**Status:** accepted; bounded E4 authorized after the closure head and fresh resource gate pass
+
+Accept exact E3 delivery head
+`323dd0f72acf6bedc29ec68230a405214293f10d` on draft PR #36. It is stacked
+on PR #35 at `dfa52a0` and passed all 18 push/pull-request checks across Python
+3.11–3.13. The first E3 head `e3bd52b` passed 12/18 checks; all six CI failures
+were one platform-specific expected-error-message assertion while both alias
+paths remained fail-closed. The message-portable regression correction was the
+only change in the accepted head.
+
+The delivered scorer has one exact closed v0/v1 profile allowlist. The v1
+profile binds config Git blob
+`967868cb1e4f23b7992e88b0fb9e604bcfdeba5c` and canonical run-spec SHA-256
+`e4de6ef590939e156f862f452585678cdc21a7872b6d18c0aaf36464f984bb86`,
+the sealed registry and criteria, and the accepted E2 tokenizer report. Attempt
+A must execute all 224 candidate occurrences in canonical order; attempt B
+must execute the exact global reverse order. Neither may deduplicate the 112
+text-identical duplicate pairs, and both must serialize canonical registry
+order. Complete profile-bound receipts and raw resource audits are required
+before the integrated repeat/coherence verifier can authorize a result.
+
+Dependency-light adversarial review confirmed that v0 evidence remains
+verifier-equal while v0/v1 prompt, candidate-text, config, registry,
+tokenizer-audit, schedule, receipt, run-ID, and portable-path substitutions
+fail closed. The offline working-tree suite collected 536 tests and passed 534
+with two platform-optional symlink skips; focused E3 coverage passed 142 tests,
+production modules compiled, all top-level validators passed, and the no-import
+v1 plan froze A=`canonical`, B=`reverse`, downloads disabled, and no scientific
+claim. No model weights were deserialized and no development-v1 logits were
+inspected.
+
+Authorize only the frozen E4 pair after this closure record is green at its
+exact head and a fresh clean-head resource audit passes. Attempt A must fully
+exit and release CUDA, private staging, and the shared heavy-job lock before
+audit B. Preserve one complete comparison or one actionable failure; do not
+inspect partial poles, reuse an audit, change content or metrics, add a third
+run, or continue after a consumed-attempt failure.
+
+**Claim ceiling:** Tested and exact-head-delivered scorer engineering only.
+This does not establish model-level item coherence, measurement reliability,
+criterion validity, a meaningful-effect threshold, temporal behavior, causal
+evidence, or CSTG.
+
+**Procedure:**
+`.agent/plans/active-development-measurement-reliability.md`,
+`configs/runs/pythia-development-score-v1.json`, and
+`docs/TRANSFORMERS_SCORING_PROTOCOL.md` section 7A.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

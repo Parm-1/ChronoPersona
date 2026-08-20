@@ -141,7 +141,8 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 Accept the exact Pythia tokenizer and repeated v0 scorer-path gates while
 rejecting instrument readiness. The pre-logits development-v1 registry,
-criteria, tokenizer gate, and Tested scorer implementation now replace the
-confounded two-form follow-up design. Deliver E3 and require exact-head CI
-before one bounded v1 coherence score; do not tune wording or metrics from its
-logits. Source qualification remains independently externally blocked.
+criteria, tokenizer gate, and delivered scorer implementation now replace the
+confounded two-form follow-up design. Exact E3 head `323dd0f` passed all 18
+checks. After the closure head is green, run one bounded v1 coherence pair; do
+not tune wording or metrics from its logits. Source qualification remains
+independently externally blocked.

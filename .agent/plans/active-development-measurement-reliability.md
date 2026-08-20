@@ -1,14 +1,14 @@
 # Development Measurement Reliability
 
-**Status:** active — E0–E2 accepted; E3 is working-tree Tested and awaits delivery/exact-head CI; no v1 model logits authorized
+**Status:** active — E0–E3 accepted through green head `323dd0f`; E4 awaits the green closure head and fresh resource audit; no v1 logits observed
 **Started:** 2026-08-20
 **Frozen baseline:** `a7dd27c63179e87c8f585adde3e6e2902d72c5d3`
 **E3 stack base:** `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8` on draft PR #35
 **Branch:** `feat/development-v1-scoring`
-**Delivery:** the enclosing commit is the E3 delivery candidate; remote draft-PR and exact-head CI state must be verified live
-**Write-active deliverable:** deliver the Tested exact allowlisted
-development-v1 scorer profile on a draft PR stacked on PR #35 and obtain green
-exact-head CI; do not load model weights before that gate.
+**Delivery:** draft PR #36 is open/draft and stacked on PR #35; exact E3 head `323dd0f` passed 18/18 checks
+**Write-active deliverable:** publish this closure record, require its exact
+head green, then run the frozen E4 canonical/reverse pair only under fresh
+resource audits and the predeclared stop policy.
 
 ## Objective and claim boundary
 
@@ -165,7 +165,7 @@ evidence. Freeze every byte before target scoring.
 - No PyTorch import, model deserialization, or logits in this gate. Rehashing
   manifested weight bytes remains snapshot integrity, not deserialization.
 
-### E3 — Versioned scorer profile and delivery (working-tree Tested)
+### E3 — Versioned scorer profile and delivery (completed at `323dd0f`)
 
 - Replace v0-only global scoring constants with an exact allowlist of closed v0
   and v1 profiles; retain compatibility aliases and golden v0 tests.
@@ -213,7 +213,8 @@ evidence. Freeze every byte before target scoring.
 
 - No external compute spend, paid licenses, new downloads, training, public
   model/data release, or real-source access is part of this plan.
-- No target logits before E3 exact-head CI.
+- No target logits before the current closure head and fresh resource audit
+  pass.
 - Internal semantic review cannot establish human criterion validity.
 - A v1 pass is one-checkpoint coherence only; a v1 semantic failure stops this
   workstream rather than authorizing outcome-driven wording search.
@@ -270,14 +271,20 @@ evidence. Freeze every byte before target scoring.
   cross-profile evidence, forged schedules, noncanonical inputs, and portable
   path aliases before optional model import. Focused and full offline suites,
   production compilation, top-level validators, and diff checks pass in the
-  working tree. This is Tested pre-execution evidence only; delivery-head CI,
-  model deserialization, and v1 logits do not yet exist.
+  working tree. This was Tested pre-execution evidence only; delivery acceptance
+  is recorded in the next entry. Model deserialization and v1 logits still do
+  not exist.
+- 2026-08-20: draft PR #36 first head `e3bd52b` passed 12/18 checks; six Linux
+  CI jobs failed only because a fail-closed alias test required the Windows
+  error message. The message-portable correction at exact head `323dd0f`
+  passed all 18 push/PR checks across Python 3.11–3.13. E3 is accepted; no
+  model import, deserialization, or scoring occurred.
 
 ## Restart procedure
 
 1. Read `PROGRESS.md`, D-033/D-034, and this plan.
-2. Verify branch `feat/development-v1-scoring`, stack base `dfa52a0`, and
+2. Verify branch `feat/development-v1-scoring`, accepted E3 head `323dd0f`, and
    unchanged v0/v1 identities.
-3. Commit and push the scoped E3 implementation, open a draft PR stacked on PR
-   #35, and require green exact-head CI. Do not open model weights or inspect
-   development-v1 logits before that delivery gate passes.
+3. Publish the E3 closure record and require its exact head green. Then capture
+   fresh resource audit A and begin E4 exactly as frozen. Do not inspect partial
+   pole results or continue after a consumed-attempt failure.

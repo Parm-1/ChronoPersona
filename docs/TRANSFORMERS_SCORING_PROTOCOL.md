@@ -293,10 +293,10 @@ accepted gate to improve timing or presentation.
 
 ## 7A. Versioned development-v1 coherence gate (predeclared, not run)
 
-The `development-v1` scorer profile is a separate, closed condition. Its
-working-tree implementation is Tested, but it has not deserialized the model or
-produced logits. Do not execute this section until the E3 commit is pushed on a
-draft PR stacked on PR #35 and every check is green on that exact head.
+The `development-v1` scorer profile is a separate, closed condition. E3 exact
+head `323dd0f` on draft PR #36 passed all 18 checks without deserializing the
+model or producing logits. Do not execute this section until the current
+closure head is also green and a fresh resource audit passes.
 
 Frozen inputs:
 

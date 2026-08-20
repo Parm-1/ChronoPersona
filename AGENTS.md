@@ -205,9 +205,10 @@ items were paraphrase-direction inconsistent. The active local gate is the
 `development-v1` measurement-coherence screen: blind internal semantic lock,
 dependency-light implementation, exact-head CI, and two clean-head tokenizer
 audits passed at `fb8cff1`. The next gate is its separately versioned scorer
-profile delivery and exact-head CI; implementation state and exact identities
-live in `PROGRESS.md`. Do not deserialize the model or inspect v1 logits before
-that gate passes. Evidence-bearing naturalistic execution still
+profile's bounded canonical/reverse target pair: E3 exact head `323dd0f`
+passed all 18 checks, while current implementation and run identities live in
+`PROGRESS.md`. Do not deserialize the model or inspect v1 logits until the
+current closure head and a fresh resource audit pass. Evidence-bearing naturalistic execution still
 requires rights-qualified, historically version-bounded A/B samples and an
 explicitly authorized held-out source-C review packet. Paid compute, public
 model/data release, another repository-visibility change, and requester-pays
