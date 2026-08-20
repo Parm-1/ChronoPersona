@@ -1,12 +1,16 @@
 # ChronoPersona Plan — Design v1.0
 
-The **development content-integrity gate is passed** and **design v1.0 is adopted**. Scientific execution is **externally blocked**. The program advances only when a gate has evidence, exact-head validation, and a recorded decision. A clean failed gate is progress.
+The **development content-integrity gate is passed** and **design v1.0 is adopted**. Local model/compute measurement is **authorized and active**; real-source scientific execution remains **externally blocked**. The program advances only when a gate has evidence, exact-head validation, and a recorded decision. A clean failed gate is progress.
 
 ## Resource envelope
 
 - Default external spend: C$0.
 - One training job at a time.
-- No bulk corpus/model acquisition, paid license, requester-pays access, or cloud rental without explicit authorization.
+- The user explicitly authorized model downloads and local training on
+  2026-08-20. Acquire one pinned licensed artifact at a time and measure before
+  expanding.
+- Paid licenses, requester-pays access, and cloud rental remain outside the
+  active CAD $0 gate.
 - PEFT is engineering/reconnaissance only unless separately justified before results.
 - No source-C compute before the A/B continuation gate passes.
 
@@ -28,7 +32,7 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 
 ## Milestone 0B — Models and compute
 
-**Status:** runtime and metadata preflight measured; model execution externally blocked.
+**Status:** runtime and metadata preflight measured; final-Pythia acquisition and model execution active.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
@@ -46,9 +50,9 @@ Measured on 2026-08-20 without model weights:
   by the local benchmark protocol and tests.
 
 Still unmeasured: model load/logits, peak model memory, throughput, tiny legal
-continued pretraining, checkpoint/recovery, and derived cost. The first model
-load requires acquisition of the pinned 2.09 GB Pythia artifact; bulk model
-acquisition is outside the current authorization envelope.
+continued pretraining, checkpoint/recovery, and derived cost. The first active
+gate acquires only the pinned 2.09 GB final Pythia artifact and measures loading
+before any training implementation or run.
 
 Pass when one common checkpoint and one fallback are legally accessible, immutable, capable, trainable, and supported by measured cost. Stop a path when capability, memory, artifact access, or authorized budget fails.
 
@@ -115,8 +119,7 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Preserve the model/compute preflight and stop before model weights. Resume
-Milestone 0B only after explicit authorization to acquire the single pinned
-Pythia benchmark artifact, then perform the clean-head loading/logits benchmark
-with no training. Source qualification remains independently externally
-blocked.
+Run the exact-clean-head final-Pythia acquisition and CUDA loading/logits
+benchmark under the active plan. Preserve success or failure before deciding
+whether a tiny deterministic training/resume benchmark is viable. Source
+qualification remains independently externally blocked.

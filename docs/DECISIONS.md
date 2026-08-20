@@ -332,6 +332,42 @@ successful load, measured headroom, and its own legal/resource preflight.
 
 **Evidence:** `reports/stage0/model_compute_preflight_2026-08-20.md`.
 
+## D-026 — Activate bounded local model acquisition and training measurement
+
+**Date:** 2026-08-20
+**Status:** accepted and active
+
+The user explicitly lifted restrictions on model downloads and training. The
+project may therefore acquire pinned, legally cleared model artifacts and run
+bounded local loading and training measurements without another routine
+permission request.
+
+The first active operation remains one immutable final-Pythia acquisition and
+CUDA loading/logits benchmark. Training follows only if that measurement gives
+enough headroom to design a deterministic tiny checkpoint/resume gate.
+
+**Reason:** the prior stop was an authorization boundary rather than negative
+model evidence. Removing it should advance the smallest measured gate, not
+silently expand to every candidate, corpus, branch, or compute environment.
+
+**Preserved requirements:** verified license and immutable identity, no
+unreviewed remote code, exact run/resource binding, one heavy job at a time,
+structured failure preservation, and immediate stop on integrity mismatch,
+swapping, repeated OOM, severe desktop impact, thermal/driver instability, or
+disk risk.
+
+**Scope interpretation:** the active local gate remains CAD $0 and requires no
+paid service, public release, repository-visibility change, or third-party
+contact. Those materially different actions are not implied merely because
+local acquisition/training is now authorized.
+
+**Claim ceiling:** authorization is not evidence. No model feasibility,
+training, scorer, temporal, or CSTG claim advances until the corresponding run
+passes its evidence gate.
+
+**Current-state authority:** `PROGRESS.md` and
+`.agent/plans/active-pythia-local-feasibility.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

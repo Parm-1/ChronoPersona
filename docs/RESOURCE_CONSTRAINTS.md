@@ -183,8 +183,9 @@ Any request to increase compute must be presented as:
 
 ## Current resource decision
 
-The repository remains at Rungs 0–1. No external spend is authorized. Runtime
-preflight is measured, but no model weights have been acquired and no model has
-been loaded or trained. The next eligible operation is a single pinned Pythia
-loading/logits benchmark after explicit acquisition authorization—not the full
-naturalistic branch set.
+The repository remains at Rungs 0–1 and CAD $0. The user explicitly authorized
+model downloads and training on 2026-08-20. Runtime preflight is measured; the
+active operation is one pinned final-Pythia acquisition and loading/logits
+benchmark. Training remains sequenced after measured loading headroom, with one
+job at a time and the existing integrity, swapping, OOM, thermal, disk, and
+scientific stop rules—not the full naturalistic branch set.

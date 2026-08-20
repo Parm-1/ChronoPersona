@@ -21,6 +21,7 @@ from .path_policy import (
 
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _ALLOWED_ROLES = {
@@ -44,6 +45,12 @@ _ALLOWED_REVISION_KINDS = {
     "hub-branch",
     "checkpoint-uri",
     "unresolved",
+}
+_ALLOWED_REQUIRED_FILE_SUFFIXES = {
+    ".json",
+    ".model",
+    ".safetensors",
+    ".txt",
 }
 
 
@@ -153,6 +160,20 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                 f"{location}.checkpoint_ref must be a non-empty string"
             )
 
+        architecture = raw_artifact.get("architecture")
+        if not _is_nonempty_string(architecture):
+            errors.append(f"{location}.architecture must be a non-empty string")
+
+        parameter_count = raw_artifact.get("parameter_count")
+        if parameter_count is not None and (
+            not isinstance(parameter_count, int)
+            or isinstance(parameter_count, bool)
+            or parameter_count <= 0
+        ):
+            errors.append(
+                f"{location}.parameter_count must be a positive integer or null"
+            )
+
         license_info = raw_artifact.get("license")
         if not isinstance(license_info, Mapping):
             errors.append(f"{location}.license must be an object")
@@ -243,6 +264,20 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                     f"{location} cannot be benchmark-ready while custom "
                     "remote code is required"
                 )
+            if not _is_nonempty_string(raw_artifact.get("model_type")):
+                errors.append(
+                    f"{location} cannot be benchmark-ready without an exact "
+                    "model_type"
+                )
+            if not (
+                isinstance(parameter_count, int)
+                and not isinstance(parameter_count, bool)
+                and parameter_count > 0
+            ):
+                errors.append(
+                    f"{location} cannot be benchmark-ready without an exact "
+                    "parameter_count"
+                )
 
         weight_size = raw_artifact.get("weight_size_bytes")
         if weight_size is not None and (
@@ -254,6 +289,105 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                 f"{location}.weight_size_bytes must be a positive integer "
                 "or null"
             )
+
+        required_files = raw_artifact.get("required_files")
+        required_file_identities: list[tuple[str, ...]] = []
+        safetensors_size = 0
+        if required_files is not None:
+            if not isinstance(required_files, list) or not required_files:
+                errors.append(
+                    f"{location}.required_files must be a non-empty list "
+                    "when present"
+                )
+            else:
+                for file_index, raw_file in enumerate(required_files):
+                    file_location = (
+                        f"{location}.required_files[{file_index}]"
+                    )
+                    if not isinstance(raw_file, Mapping):
+                        errors.append(f"{file_location} must be an object")
+                        continue
+                    filename = raw_file.get("filename")
+                    if not _is_safe_relative_path(filename):
+                        errors.append(
+                            f"{file_location}.filename must be a safe "
+                            "relative path"
+                        )
+                    else:
+                        if any(character in filename for character in "*?[]"):
+                            errors.append(
+                                f"{file_location}.filename must not contain "
+                                "download-pattern metacharacters"
+                            )
+                        try:
+                            required_file_identities.append(
+                                portable_path_identity(
+                                    filename,
+                                    label=f"{file_location}.filename",
+                                )
+                            )
+                        except PortablePathError as error:
+                            errors.append(str(error))
+                        if Path(filename).suffix.casefold() not in (
+                            _ALLOWED_REQUIRED_FILE_SUFFIXES
+                        ):
+                            errors.append(
+                                f"{file_location}.filename has an "
+                                "unsupported required-file type"
+                            )
+                    file_size = raw_file.get("size_bytes")
+                    if (
+                        not isinstance(file_size, int)
+                        or isinstance(file_size, bool)
+                        or file_size <= 0
+                    ):
+                        errors.append(
+                            f"{file_location}.size_bytes must be a positive "
+                            "integer"
+                        )
+                    elif (
+                        isinstance(filename, str)
+                        and filename.casefold().endswith(".safetensors")
+                    ):
+                        safetensors_size += file_size
+                    file_sha256 = raw_file.get("sha256")
+                    if not (
+                        isinstance(file_sha256, str)
+                        and _SHA256.fullmatch(file_sha256)
+                    ):
+                        errors.append(
+                            f"{file_location}.sha256 must be a 64-character "
+                            "lowercase digest"
+                        )
+                if len(required_file_identities) != len(
+                    set(required_file_identities)
+                ):
+                    errors.append(
+                        f"{location}.required_files filenames must be unique "
+                        "under portable filesystem semantics"
+                    )
+
+        if execution_status == "benchmark-ready":
+            if not isinstance(required_files, list) or not required_files:
+                errors.append(
+                    f"{location} cannot be benchmark-ready without exact "
+                    "required_files"
+                )
+            if safetensors_size <= 0:
+                errors.append(
+                    f"{location} cannot be benchmark-ready without a pinned "
+                    "safetensors file"
+                )
+            if (
+                isinstance(weight_size, int)
+                and not isinstance(weight_size, bool)
+                and safetensors_size > 0
+                and safetensors_size != weight_size
+            ):
+                errors.append(
+                    f"{location}.weight_size_bytes must equal the total "
+                    "required safetensors size"
+                )
 
         artifact_sources = raw_artifact.get("sources")
         if not _is_string_list(artifact_sources):

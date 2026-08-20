@@ -6,11 +6,14 @@ No command below starts evidence-bearing training.
 
 ## 1. Obtain the branch
 
-After the model-audit PR is merged:
+Use the exact branch head containing the model-audit implementation after that
+head passes the required checks. During the active stacked-PR workflow this is
+`fix/model-feasibility-gates`; do not switch to `main` until the relevant PRs
+have been merged by an authorized maintainer.
 
 ```powershell
-git switch main
-git pull
+git switch fix/model-feasibility-gates
+git pull --ff-only
 ```
 
 Use a clean checkout. The output records the current commit and whether the working tree is dirty.
@@ -71,8 +74,8 @@ the measured disk belongs to the filesystem that will receive any later model
 download:
 
 ```powershell
-$env:HF_HOME = "C:\hf-cache"
-New-Item -ItemType Directory -Force $env:HF_HOME
+$cache = New-Item -ItemType Directory -Force artifacts\local\hf-cache
+$env:HF_HOME = $cache.FullName
 ```
 
 Capture the environment again:
@@ -124,7 +127,9 @@ python scripts/benchmark_model.py `
   --output artifacts/local/pythia-main-plan.json
 ```
 
-The plan performs no network access. It reports the pinned model, weight size, constraints, and minimum disk margin.
+The plan performs no network access. It reports the pinned model, the five
+required files and SHA-256 identities, their exact 2,092,816,302-byte total,
+constraints, and the 5,232,040,755-byte minimum disk margin.
 
 Blocked artifacts should refuse execution. This is expected:
 
@@ -134,42 +139,95 @@ python scripts/benchmark_model.py `
   --execute
 ```
 
-## 7. Run the first approved local loading benchmark
+## 7. Acquire, verify, and load the first approved local model
 
 The first executable artifact is the immutable final Pythia 1B deduped checkpoint. It is used to measure the machine, not as the causal insertion point.
 
-The explicit cache directory and post-model resource audit from section 4 are
-required. The benchmark rejects a dirty or different Git head, a CPU-only
-Torch audit for a CUDA run, a cache on a different filesystem, or less than the
-2.5x live and audited disk margin.
+The explicit cache directory and a resource audit captured no more than 15
+minutes earlier are required. Acquisition and model loading are separate
+operations. The benchmark rejects a dirty or different Git head, a cache on a
+different filesystem, or less than the 2.5x live and audited disk margin.
 
-First run, permitting the pinned download:
+First capture a fresh pre-acquisition audit against the exact cache:
+
+```powershell
+python scripts/audit_local_resources.py `
+  --repo . `
+  --path $env:HF_HOME `
+  --output artifacts/local/resource-audit-authorized-pre-download.json
+```
+
+Acquire only the five manifest-allowlisted files at the immutable revision:
 
 ```powershell
 python scripts/benchmark_model.py `
   --artifact pythia-1b-deduped-main `
-  --execute `
+  --acquire-only `
   --allow-download `
-  --device cuda `
-  --dtype auto `
   --cache-dir $env:HF_HOME `
-  --resource-audit artifacts/local/resource-audit-after-models.json `
+  --resource-audit artifacts/local/resource-audit-authorized-pre-download.json `
+  --output artifacts/local/pythia-main-acquisition.json
+```
+
+Do not load the model unless the acquisition report is complete and verifies:
+
+- snapshot leaf equals revision
+  `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`;
+- the snapshot is contained by the selected cache;
+- its file set exactly equals the five required manifest files;
+- every size and SHA-256 matches the manifest;
+- config type is `gpt_neox`, architecture is `GPTNeoXForCausalLM`, dtype is
+  `float16`, and no `auto_map` exists.
+
+After acquisition, capture another fresh audit. This binds dynamic physical RAM,
+the conservative lower of Torch and `nvidia-smi` free VRAM, the software stack,
+GPU identity, clean Git head, and cache filesystem immediately before loading:
+
+```powershell
+python scripts/audit_local_resources.py `
+  --repo . `
+  --path $env:HF_HOME `
+  --output artifacts/local/resource-audit-authorized-post-download.json
+```
+
+Then execute offline, without download permission and with explicit float16:
+
+```powershell
+$env:HF_HUB_OFFLINE = "1"
+$env:TRANSFORMERS_OFFLINE = "1"
+
+python scripts/benchmark_model.py `
+  --artifact pythia-1b-deduped-main `
+  --execute `
+  --device cuda `
+  --dtype float16 `
+  --cache-dir $env:HF_HOME `
+  --resource-audit artifacts/local/resource-audit-authorized-post-download.json `
   --max-tokens 128 `
   --warmup 1 `
   --repeats 3 `
-  --output artifacts/local/pythia-main-cuda.json
+  --output artifacts/local/pythia-main-cuda-authorized.json
 ```
 
-Subsequent runs should omit `--allow-download` and use the local cache:
+Execution rehashes the full allowlist, captures a live audit before importing
+the model stack, verifies the actual parent Torch/Transformers/CUDA/device
+identity, and captures another live audit after those imports and immediately
+before loading. Both complete child audits and their hashes are embedded in the
+result. The run fails if stable runtime/GPU identity drifts, available physical
+RAM is below twice the weight bytes, or conservative free VRAM is below 1.5
+times the weight bytes.
+
+For a subsequent run, capture a new resource audit and continue to omit
+`--allow-download`:
 
 ```powershell
 python scripts/benchmark_model.py `
   --artifact pythia-1b-deduped-main `
   --execute `
   --device cuda `
-  --dtype auto `
+  --dtype float16 `
   --cache-dir $env:HF_HOME `
-  --resource-audit artifacts/local/resource-audit-after-models.json `
+  --resource-audit artifacts/local/resource-audit-authorized-repeat.json `
   --max-tokens 128 `
   --warmup 1 `
   --repeats 5 `
@@ -186,30 +244,20 @@ Record:
 - mean next-token cross-entropy;
 - exact model revision and software versions.
 
-If CUDA loading fails, preserve the complete error. Do not immediately switch to quantization. A CPU run may diagnose file integrity and software compatibility:
-
-```powershell
-python scripts/benchmark_model.py `
-  --artifact pythia-1b-deduped-main `
-  --execute `
-  --device cpu `
-  --dtype float32 `
-  --cache-dir $env:HF_HOME `
-  --resource-audit artifacts/local/resource-audit-after-models.json `
-  --max-tokens 64 `
-  --warmup 0 `
-  --repeats 1 `
-  --output artifacts/local/pythia-main-cpu.json
-```
-
-A CPU result is not a training-throughput estimate.
+If CUDA loading fails, preserve the complete error. Do not immediately switch
+to CPU, quantization, offload, another dtype, or another revision. A CPU
+diagnostic would be a separately planned condition and is not a
+training-throughput estimate.
 
 ## 8. Failure rules
 
 Stop the benchmark sequence when any of these occurs:
 
 - free disk falls below the safety margin;
+- the resource audit is stale or runtime/GPU identity drifts;
+- physical RAM or conservative free VRAM falls below the declared load margin;
 - the model revision differs from the manifest;
+- a required file hash, exact allowlist, or model config identity differs;
 - the model requests custom remote code;
 - the model license is unverified;
 - the process causes system swapping or severe desktop instability;
@@ -218,18 +266,29 @@ Stop the benchmark sequence when any of these occurs:
 - output metadata is incomplete.
 
 Preserve errors rather than changing dtype, quantization, model, or revision
-silently. When `--output` is supplied, the benchmark writes a structured
-failure artifact before returning nonzero; a download-permitted failure marks
-download completion as unknown rather than claiming that no partial cache was
-created.
+silently. Output paths are exclusive and an existing evidence file is never
+overwritten. When `--output` is supplied, acquisition and execution each write
+a distinct structured success or failure artifact before returning. A
+download-permitted acquisition failure marks completion as unknown rather than
+claiming that no partial cache was created. An execution failure records the
+verified artifact and the supplied, pre-import live, and post-import live
+resource-audit bindings when they were reached.
 
 ## 9. Update the compute ledger
 
-Add one row per completed or failed benchmark to `COMPUTE_LEDGER.csv`. Do not overwrite a previous measurement. Link the JSON artifact path and preserve the exact Git commit.
+Add one row per completed or failed model benchmark to `COMPUTE_LEDGER.csv`.
+Keep the acquisition report as separate artifact-integrity evidence; do not
+mislabel an acquisition failure as a CUDA benchmark. Do not overwrite a
+previous measurement. Link the JSON artifact path and preserve the exact Git
+commit.
 
 ## 10. What remains after the loading benchmark
 
-A successful inference benchmark proves only that the model and scorer can run. Issue #2 still requires a tiny continued-pretraining benchmark measuring:
+A successful inference benchmark proves only that the verified model
+loading/logits path can run. Registry scoring remains unverified until the
+provider uses the same verified-snapshot layer, tokenizer audit passes, and an
+explicit registry execution completes. Issue #2 still requires a tiny
+continued-pretraining benchmark measuring:
 
 - forward and backward memory;
 - optimizer-state memory;

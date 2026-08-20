@@ -70,12 +70,15 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--execute",
         action="store_true",
-        help="load the model and score every registry continuation",
+        help=(
+            "request model scoring; currently fail-closed until the "
+            "verified-snapshot loader is integrated"
+        ),
     )
     parser.add_argument(
         "--allow-download",
         action="store_true",
-        help="permit download of missing pinned model/tokenizer files",
+        help="reserved; direct model/tokenizer downloads are currently disabled",
     )
     parser.add_argument("--output", type=Path)
     return parser
@@ -86,9 +89,10 @@ def main() -> int:
     if args.max_length < 2:
         print("error: --max-length must be at least 2", file=sys.stderr)
         return 2
-    if args.allow_download and not args.execute:
+    if args.allow_download:
         print(
-            "error: --allow-download is meaningful only with --execute",
+            "error: direct downloads are disabled; use "
+            "the verified acquisition workflow for benchmark-ready artifacts",
             file=sys.stderr,
         )
         return 2

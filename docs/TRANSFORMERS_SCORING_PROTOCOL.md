@@ -23,6 +23,10 @@ Model scoring additionally requires:
 - the local memory and storage gates in `LOCAL_BENCHMARK_PROTOCOL.md`.
 
 The scripts never set `trust_remote_code=True` and contain no quantization path.
+Their execution modes are temporarily fail-closed: direct repository or cache
+loading is disabled until the provider consumes a reusable local-snapshot
+verifier that enforces the manifest file allowlist, sizes, hashes, config, and
+revision. Plan mode remains available.
 
 ## 2. Install the smallest dependency set first
 
@@ -66,36 +70,18 @@ A plan performs no network access. It reports whether policy permits the operati
 
 DatedGPT should currently report a license blocker. That is expected and must not be bypassed.
 
-## 4. Tokenizer-only audit
+## 4. Tokenizer-only audit execution gate
 
-After confirming free storage and installing the tokenizer dependency set, explicitly permit the pinned tokenizer download:
+Tokenizer execution is deliberately blocked at present. A populated Hugging
+Face cache is not proof that the tokenizer files match the manifest, and
+`--allow-download` is rejected with guidance to the separate acquisition
+command. `benchmark_model.py --acquire-only` can create and verify the exact
+Pythia snapshot, but the tokenizer provider must first be changed to consume
+that verified local snapshot rather than an owner/name cache lookup.
 
-```powershell
-$env:HF_HOME = "D:\hf-cache"
-
-python scripts/audit_registry_tokenizer.py `
-  --artifact pythia-1b-deduped-main `
-  --prefix-policy none `
-  --max-length 2048 `
-  --cache-dir $env:HF_HOME `
-  --execute `
-  --allow-download `
-  --output artifacts/local/pythia-development-v0-tokenizer.json
-```
-
-Subsequent runs should omit `--allow-download` and use the local cache.
-
-Run both prefix policies during development when a model has a BOS token:
-
-```powershell
-python scripts/audit_registry_tokenizer.py `
-  --artifact pythia-1b-deduped-main `
-  --prefix-policy bos `
-  --max-length 2048 `
-  --cache-dir $env:HF_HOME `
-  --execute `
-  --output artifacts/local/pythia-development-v0-tokenizer-bos.json
-```
+When that reusable loader is implemented and tested, run both prefix policies
+during development when a model has a BOS token. The chosen execution command,
+snapshot/report binding, and result paths must be added here before use.
 
 The chosen policy must be frozen before confirmatory scoring. Do not select it based on which policy produces the preferred temporal result. Selection is based on the model's native evaluation convention, development reliability, and explicit documentation.
 
@@ -139,46 +125,22 @@ python scripts/score_registry_transformers.py `
 
 The plan performs no network access and does not import PyTorch.
 
-## 7. First development score
+## 7. First development score gate
 
-Run this only after:
+Scoring execution remains blocked until all of these are true:
 
 1. the local resource audit passes;
-2. the immutable Pythia loading/logits benchmark succeeds;
-3. the tokenizer audit passes;
-4. the cache has sufficient storage;
-5. the exact Git commit is recorded.
+2. immutable Pythia acquisition and loading/logits benchmarks succeed;
+3. the provider consumes the exact hash-verified local snapshot and rechecks it
+   before loading;
+4. tokenizer audit passes through the same verified-snapshot layer;
+5. the cache has sufficient storage and the exact Git commit is recorded.
 
-First run, explicitly permitting the pinned weight download if it is not already cached:
-
-```powershell
-python scripts/score_registry_transformers.py `
-  --artifact pythia-1b-deduped-main `
-  --prefix-policy none `
-  --device cuda `
-  --dtype auto `
-  --max-length 2048 `
-  --cache-dir $env:HF_HOME `
-  --execute `
-  --allow-download `
-  --output artifacts/local/pythia-development-v0-scores.json
-```
-
-Repeat from cache without network permission:
-
-```powershell
-python scripts/score_registry_transformers.py `
-  --artifact pythia-1b-deduped-main `
-  --prefix-policy none `
-  --device cuda `
-  --dtype auto `
-  --max-length 2048 `
-  --cache-dir $env:HF_HOME `
-  --execute `
-  --output artifacts/local/pythia-development-v0-scores-repeat.json
-```
-
-The deterministic score artifacts should be byte-equivalent after canonical rendering and have identical `output_sha256` values. Hardware/runtime metadata belongs in the separate run and compute ledgers.
+No scoring command may download or load directly by repository/revision. After
+the shared loader exists, add an offline, explicit-float16 command here and
+require deterministic repeated score artifacts with identical canonical
+`output_sha256` values. Hardware/runtime metadata remains in the separate run
+and compute ledgers.
 
 ## 8. Score semantics
 
@@ -256,7 +218,11 @@ Any such change is a new documented development condition.
 
 ### OLMo
 
-The early-training Hub artifact is permitted for tokenizer audit because its revision and Apache-2.0 license are pinned and it requires no remote code. It is not model-score ready until the hardware benchmark passes.
+The early-training Hub artifact passes the policy-level tokenizer gate because
+its revision and Apache-2.0 license are pinned and it requires no remote code.
+Actual tokenizer loading remains disabled until its exact required files are
+manifested and supported by the shared verified-snapshot loader. It is not
+model-score ready until the hardware benchmark passes.
 
 The scientifically preferred original OLMo step-23,100 checkpoint still requires an immutable file-and-hash manifest and a reviewed conversion/loading path.
 
