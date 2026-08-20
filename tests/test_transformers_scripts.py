@@ -56,6 +56,83 @@ def test_model_score_defaults_to_no_network_plan() -> None:
     assert report["policy"]["allowed"] is True
 
 
+def test_v1_model_score_plan_is_exact_and_no_network() -> None:
+    completed = _run(
+        "scripts/score_registry_transformers.py",
+        "--config",
+        "configs/runs/pythia-development-score-v1.json",
+        "--registry",
+        "evaluations/registry/development-v1.jsonl",
+        "--artifact",
+        "pythia-1b-deduped-main",
+        "--prefix-policy",
+        "none",
+        "--device",
+        "cuda:0",
+        "--dtype",
+        "float16",
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    report = json.loads(completed.stdout)
+    assert report["mode"] == "plan"
+    assert report["network_access_permitted"] is False
+    assert report["frozen_profile"]["profile_id"] == (
+        "development-v1-pythia-reliability-v0"
+    )
+    assert report["frozen_profile"]["measurement_reliability"][
+        "attempt_execution_modes"
+    ] == {"a": "canonical", "b": "reverse"}
+
+
+def test_scoring_profiles_reject_cross_registry_and_unlisted_config() -> None:
+    v1_with_v0 = _run(
+        "scripts/score_registry_transformers.py",
+        "--config",
+        "configs/runs/pythia-development-score-v1.json",
+        "--registry",
+        "evaluations/registry/development-v0.jsonl",
+        "--artifact",
+        "pythia-1b-deduped-main",
+        "--prefix-policy",
+        "none",
+    )
+    v0_with_v1 = _run(
+        "scripts/score_registry_transformers.py",
+        "--config",
+        "configs/runs/pythia-development-score-v0.json",
+        "--registry",
+        "evaluations/registry/development-v1.jsonl",
+        "--artifact",
+        "pythia-1b-deduped-main",
+        "--prefix-policy",
+        "none",
+    )
+    with tempfile.TemporaryDirectory() as raw_root:
+        copied = Path(raw_root) / "copied-config.json"
+        copied.write_bytes(
+            (ROOT / "configs/runs/pythia-development-score-v1.json").read_bytes()
+        )
+        unlisted = _run(
+            "scripts/score_registry_transformers.py",
+            "--config",
+            str(copied),
+            "--registry",
+            "evaluations/registry/development-v1.jsonl",
+            "--artifact",
+            "pythia-1b-deduped-main",
+            "--prefix-policy",
+            "none",
+        )
+
+    assert v1_with_v0.returncode == 1
+    assert v0_with_v1.returncode == 1
+    assert "canonical development registry" in v1_with_v0.stderr
+    assert "canonical development registry" in v0_with_v1.stderr
+    assert unlisted.returncode == 1
+    assert "not allowlisted" in unlisted.stderr
+
+
 def test_plan_exposes_blocked_artifact_without_loading() -> None:
     completed = _run(
         "scripts/audit_registry_tokenizer.py",

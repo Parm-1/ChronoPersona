@@ -20,7 +20,6 @@ import audit_registry_tokenizer as tokenizer_cli  # noqa: E402
 import score_registry_transformers as scoring_cli  # noqa: E402
 
 from chronopersona.scoring_runtime import (  # noqa: E402
-    FROZEN_CONFIG_GIT_BLOB,
     ScoringRunError,
     create_only_json,
     load_accepted_tokenizer_audit,
@@ -87,13 +86,11 @@ def _require_clean_exact_head(expected: str | None = None) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    if args.config.resolve(strict=True) != DEFAULT_CONFIG.resolve(strict=True):
-        print("error: verification requires the canonical scoring config", file=sys.stderr)
-        return 2
     if os.path.lexists(args.output):
         print(f"error: refusing to overwrite output: {args.output}", file=sys.stderr)
         return 2
     try:
+        profile = scoring_cli._selected_profile(args.config)
         scoring_cli._require_output_location(
             args.output,
             cache_dir=None,
@@ -102,14 +99,15 @@ def main(argv: list[str] | None = None) -> int:
         )
         observed_config_blob = tokenizer_cli._git(
             "hash-object",
-            "--path=configs/runs/pythia-development-score-v0.json",
-            str(DEFAULT_CONFIG),
+            f"--path={profile.config_path}",
+            str(ROOT / profile.config_path),
         )
-        if observed_config_blob != FROZEN_CONFIG_GIT_BLOB:
+        if observed_config_blob != profile.config_git_blob:
             raise ScoringRunError("canonical scoring config Git blob mismatch")
         expected_git_head = _require_clean_exact_head()
         config = load_scoring_config(args.config)
-        registry_bytes = DEFAULT_REGISTRY.read_bytes()
+        registry_path = ROOT / profile.registry_path
+        registry_bytes = registry_path.read_bytes()
         if hashlib.sha256(registry_bytes).hexdigest() != config[
             "canonical_inputs"
         ]["registry_sha256"]:
@@ -160,11 +158,12 @@ def main(argv: list[str] | None = None) -> int:
             expected_git_head=expected_git_head,
         )
         _require_clean_exact_head(expected_git_head)
-        create_only_json(args.output, result)
+        rendered_result = dict(result)
+        create_only_json(args.output, rendered_result)
     except Exception as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
-    print(json.dumps(result, indent=2, sort_keys=True))
+    print(json.dumps(rendered_result, indent=2, sort_keys=True))
     return 0
 
 

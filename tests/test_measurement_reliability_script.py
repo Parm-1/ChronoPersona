@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 
@@ -18,7 +19,9 @@ def _module():
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module._verification_git_head = lambda _criteria, _registry: "a" * 40
+    module._verification_git_head = (
+        lambda _criteria, _registry, _scoring_config=None: "a" * 40
+    )
     return module
 
 
@@ -154,13 +157,13 @@ def test_tokenizer_mode_rejects_noncanonical_or_aliased_attempts(
     assert not alias_output.exists()
 
 
-def test_score_mode_preserves_pre_e3_receipt_blocker(tmp_path: Path) -> None:
+def test_score_mode_requires_complete_execution_evidence(tmp_path: Path) -> None:
     module = _module()
     fixtures = _fixture_module()
     criteria = fixtures._criteria()
     items = fixtures._registry()
     audit = fixtures._tokenizer_audit(criteria, items)
-    score = fixtures._score(criteria, items, audit)
+    score = fixtures._finalized_score(fixtures._score(criteria, items, audit))
     audit_path = tmp_path / "tokenizer-audit.json"
     score_a = tmp_path / "score-a.json"
     score_b = tmp_path / "score-b.json"
@@ -183,11 +186,97 @@ def test_score_mode_preserves_pre_e3_receipt_blocker(tmp_path: Path) -> None:
         ]
     ) == 1
 
-    report = json.loads(output.read_text(encoding="utf-8"))
-    recorded = report.pop("output_sha256")
-    assert recorded == canonical_json_sha256(report)
-    assert report["passed"] is False
-    assert report["score_coherence"]["passed"] is False
-    assert report["score_coherence"]["failures"] == [
-        "execution-order receipts are not integrated until E3"
+    assert not output.exists()
+
+
+def test_score_mode_integrates_profile_bound_execution_comparison(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    module = _module()
+    fixtures = _fixture_module()
+    criteria = fixtures._criteria()
+    items = fixtures._registry()
+    audit = fixtures._tokenizer_audit(criteria, items)
+    score = fixtures._finalized_score(fixtures._score(criteria, items, audit))
+    score_bytes = fixtures._pretty_bytes(score)
+    audit_path = tmp_path / "accepted-tokenizer.json"
+    score_a = tmp_path / "score-a.json"
+    score_b = tmp_path / "score-b.json"
+    receipt_a = tmp_path / "receipt-a.json"
+    receipt_b = tmp_path / "receipt-b.json"
+    resource_a = tmp_path / "resource-a.json"
+    resource_b = tmp_path / "resource-b.json"
+    output = tmp_path / "score-verification.json"
+    audit_path.write_bytes(fixtures._pretty_bytes(audit))
+    score_a.write_bytes(score_bytes)
+    score_b.write_bytes(score_bytes)
+    for path, marker in (
+        (receipt_a, {"attempt": "a"}),
+        (receipt_b, {"attempt": "b"}),
+        (resource_a, {"attempt": "a", "kind": "resource"}),
+        (resource_b, {"attempt": "b", "kind": "resource"}),
+    ):
+        path.write_bytes(module.pretty_json_bytes(marker))
+
+    config = json.loads(module.DEFAULT_SCORING_CONFIG.read_text(encoding="utf-8"))
+    config["accepted_tokenizer_audit"]["path"] = str(audit_path)
+    config["measurement_reliability"]["tokenizer_audit_git_head"] = audit[
+        "git_head"
     ]
+    monkeypatch.setattr(module, "load_scoring_config", lambda _path: config)
+    monkeypatch.setattr(
+        module,
+        "load_accepted_tokenizer_audit",
+        lambda _path, _config: (audit, hashlib.sha256(audit_path.read_bytes()).hexdigest()),
+    )
+
+    comparison = {
+        "status": "equal",
+        "profile_id": criteria["profile_id"],
+        "measurement_reliability_criteria_sha256": criteria[
+            "criteria_sha256"
+        ],
+        "execution_modes": {"a": "canonical", "b": "reverse"},
+        "score_file_sha256": hashlib.sha256(score_bytes).hexdigest(),
+        "score_output_sha256": score["output_sha256"],
+    }
+    comparison["comparison_sha256"] = canonical_json_sha256(comparison)
+    observed: dict[str, object] = {}
+
+    def fake_repeat(**kwargs):
+        observed.update(kwargs)
+        return comparison
+
+    monkeypatch.setattr(
+        "chronopersona.measurement_reliability.verify_scoring_repeat",
+        fake_repeat,
+    )
+
+    assert module.main(
+        [
+            "score",
+            "--tokenizer-audit",
+            str(audit_path),
+            "--score-a",
+            str(score_a),
+            "--score-b",
+            str(score_b),
+            "--receipt-a",
+            str(receipt_a),
+            "--receipt-b",
+            str(receipt_b),
+            "--resource-audit-a",
+            str(resource_a),
+            "--resource-audit-b",
+            str(resource_b),
+            "--output",
+            str(output),
+        ]
+    ) == 0
+
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["passed"] is True
+    assert report["score_coherence"]["execution_mode_receipts_validated"] is True
+    assert observed["expected_git_head"] == "a" * 40
+    assert observed["config"] is config

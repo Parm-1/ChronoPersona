@@ -23,6 +23,7 @@ from .scoring import (
     pairwise_score,
     score_candidate,
 )
+from .scoring_runtime import ScoringRunError, verify_scoring_repeat
 
 
 class MeasurementReliabilityError(ValueError):
@@ -161,6 +162,13 @@ _BASE_SCORE_KEYS = {
     "model",
     "items",
     "output_sha256",
+}
+_FINAL_SCORE_KEYS = _BASE_SCORE_KEYS | {
+    "status",
+    "score_type",
+    "scientific_claim_authorized",
+    "contract",
+    "summary",
 }
 _SCORE_SCORER_KEYS = {
     "version",
@@ -1140,8 +1148,17 @@ def analyze_score_coherence(
     registry = criteria.get("registry", {})
     tokenizer = criteria.get("tokenizer", {})
     scoring = criteria.get("scoring", {})
-    if set(score) != _BASE_SCORE_KEYS:
+    score_keys = set(score)
+    if score_keys != _BASE_SCORE_KEYS and score_keys != _FINAL_SCORE_KEYS:
         fail("score", "score artifact top-level fields are not exact")
+    if score_keys == _FINAL_SCORE_KEYS and (
+        score.get("status") != "complete"
+        or score.get("score_type") != "registry-development-score"
+        or score.get("scientific_claim_authorized") is not False
+        or not isinstance(score.get("contract"), Mapping)
+        or not isinstance(score.get("summary"), Mapping)
+    ):
+        fail("score", "final score envelope is invalid")
     if not _self_hash_valid(score, "output_sha256"):
         fail("score", "score artifact self-hash is invalid")
     if type(score.get("schema_version")) is not int or score.get(
@@ -1473,8 +1490,18 @@ def analyze_score_repeat(
     *,
     score_a_bytes: bytes,
     score_b_bytes: bytes,
+    receipt_a: Mapping[str, Any],
+    receipt_a_bytes: bytes,
+    resource_audit_a: Mapping[str, Any],
+    resource_audit_a_bytes: bytes,
+    receipt_b: Mapping[str, Any],
+    receipt_b_bytes: bytes,
+    resource_audit_b: Mapping[str, Any],
+    resource_audit_b_bytes: bytes,
+    scoring_config: Mapping[str, Any],
+    expected_git_head: str,
 ) -> dict[str, Any]:
-    """Require canonical score bytes and exact A/B equality before coherence."""
+    """Verify runtime evidence, exact score bytes, and coherence together."""
 
     report_a = analyze_score_coherence(
         score_a,
@@ -1517,6 +1544,56 @@ def analyze_score_repeat(
         failures.append("score artifacts are not canonical pretty JSON bytes")
     if score_a_bytes != score_b_bytes:
         failures.append("canonical/reverse score artifacts are not byte-identical")
+    expected_score_file_sha256 = hashlib.sha256(score_a_bytes).hexdigest()
+    execution_comparison: Mapping[str, Any] | None = None
+    execution_error: str | None = None
+    try:
+        execution_comparison = verify_scoring_repeat(
+            score_a=score_a,
+            score_a_bytes=score_a_bytes,
+            receipt_a=receipt_a,
+            receipt_a_bytes=receipt_a_bytes,
+            resource_audit_a=resource_audit_a,
+            resource_audit_a_bytes=resource_audit_a_bytes,
+            score_b=score_b,
+            score_b_bytes=score_b_bytes,
+            receipt_b=receipt_b,
+            receipt_b_bytes=receipt_b_bytes,
+            resource_audit_b=resource_audit_b,
+            resource_audit_b_bytes=resource_audit_b_bytes,
+            config=scoring_config,
+            registry=registry_items,
+            tokenizer_audit=tokenizer_audit,
+            expected_git_head=expected_git_head,
+        )
+    except (ScoringRunError, TypeError, ValueError) as error:
+        execution_error = str(error)
+    expected_modes = criteria.get("scoring", {}).get(
+        "required_execution_modes"
+    )
+    execution_validated = bool(
+        isinstance(execution_comparison, Mapping)
+        and _self_hash_valid(execution_comparison, "comparison_sha256")
+        and execution_comparison.get("status") == "equal"
+        and execution_comparison.get("profile_id") == criteria.get("profile_id")
+        and execution_comparison.get(
+            "measurement_reliability_criteria_sha256"
+        )
+        == criteria.get("criteria_sha256")
+        and execution_comparison.get("execution_modes")
+        == {"a": expected_modes[0], "b": expected_modes[1]}
+        if isinstance(expected_modes, list) and len(expected_modes) == 2
+        else False
+    )
+    if execution_validated and (
+        execution_comparison.get("score_file_sha256")
+        != expected_score_file_sha256
+        or execution_comparison.get("score_output_sha256")
+        != score_a.get("output_sha256")
+    ):
+        execution_validated = False
+    if not execution_validated:
+        failures.append("execution-order receipts are not valid and profile-bound")
     output: dict[str, Any] = {
         "schema_version": 1,
         "report_type": "development-measurement-repeat",
@@ -1526,19 +1603,20 @@ def analyze_score_repeat(
         "required_execution_modes": criteria.get("scoring", {}).get(
             "required_execution_modes"
         ),
-        "score_file_sha256": hashlib.sha256(score_a_bytes).hexdigest(),
+        "score_file_sha256": expected_score_file_sha256,
         "score_output_sha256": score_a.get("output_sha256"),
         "attempt_a": report_a,
         "attempt_b": report_b,
         "failures": failures,
         "passed": not failures,
-        "execution_mode_receipts_validated": False,
+        "execution_mode_receipts_validated": execution_validated,
+        "execution_comparison_sha256": (
+            execution_comparison.get("comparison_sha256")
+            if execution_validated and isinstance(execution_comparison, Mapping)
+            else None
+        ),
+        "execution_verification_error": execution_error,
         "claim_ceiling": criteria.get("claim_ceiling"),
     }
-    if output["passed"]:
-        output["passed"] = False
-        output["failures"].append(
-            "execution-order receipts are not integrated until E3"
-        )
     output["output_sha256"] = canonical_json_sha256(output)
     return output

@@ -1,13 +1,14 @@
 # Development Measurement Reliability
 
-**Status:** active — E0–E2 complete at `fb8cff1`; E3 scorer-profile implementation is next; no v1 model logits authorized
+**Status:** active — E0–E2 accepted; E3 is working-tree Tested and awaits delivery/exact-head CI; no v1 model logits authorized
 **Started:** 2026-08-20
 **Frozen baseline:** `a7dd27c63179e87c8f585adde3e6e2902d72c5d3`
-**Branch:** `feat/development-measurement-reliability`
-**Delivery:** draft PR #35, implementation/E2 head `fb8cff1`, 18/18 checks green
-**Write-active deliverable:** an exact allowlisted development-v1 scorer
-profile with canonical/reverse scheduling; do not load model weights until that
-deliverable passes exact-head CI.
+**E3 stack base:** `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8` on draft PR #35
+**Branch:** `feat/development-v1-scoring`
+**Delivery:** the enclosing commit is the E3 delivery candidate; remote draft-PR and exact-head CI state must be verified live
+**Write-active deliverable:** deliver the Tested exact allowlisted
+development-v1 scorer profile on a draft PR stacked on PR #35 and obtain green
+exact-head CI; do not load model weights before that gate.
 
 ## Objective and claim boundary
 
@@ -164,14 +165,14 @@ evidence. Freeze every byte before target scoring.
 - No PyTorch import, model deserialization, or logits in this gate. Rehashing
   manifested weight bytes remains snapshot integrity, not deserialization.
 
-### E3 — Versioned scorer profile and delivery
+### E3 — Versioned scorer profile and delivery (working-tree Tested)
 
 - Replace v0-only global scoring constants with an exact allowlist of closed v0
   and v1 profiles; retain compatibility aliases and golden v0 tests.
 - Add canonical/reverse execution scheduling with canonical serialization.
 - Require cross-profile substitutions to fail before optional import.
 - Pass focused tests, full Python 3.11–3.13 CI, all top-level validators,
-  compilation, and diff checks on a separate draft PR stacked on PR #34.
+  compilation, and diff checks on a separate draft PR stacked on PR #35.
 
 ### E4 — Bounded target coherence score
 
@@ -262,11 +263,21 @@ evidence. Freeze every byte before target scoring.
   10–18, and the canonical verifier report passed with no errors. No model
   weights were deserialized and no logits were inspected. The bounded report
   is `reports/stage0/pythia_v1_tokenizer_coherence_gate_2026-08-20.md`.
+- 2026-08-20: E3 now has one closed v0/v1 scoring-profile allowlist,
+  canonical/reverse full-occurrence scheduling without deduplication, canonical
+  serialization, profile-bound receipts, and integrated repeat/coherence
+  verification. Adversarial tests reject registry text substitution,
+  cross-profile evidence, forged schedules, noncanonical inputs, and portable
+  path aliases before optional model import. Focused and full offline suites,
+  production compilation, top-level validators, and diff checks pass in the
+  working tree. This is Tested pre-execution evidence only; delivery-head CI,
+  model deserialization, and v1 logits do not yet exist.
 
 ## Restart procedure
 
 1. Read `PROGRESS.md`, D-033/D-034, and this plan.
-2. Verify branch `feat/development-measurement-reliability`, accepted E2 head
-   `fb8cff1`, and unchanged v0/v1 identities.
-3. Continue E3. Do not open model weights or inspect development-v1 logits
-   until the scorer profile is delivered and exact-head CI is green.
+2. Verify branch `feat/development-v1-scoring`, stack base `dfa52a0`, and
+   unchanged v0/v1 identities.
+3. Commit and push the scoped E3 implementation, open a draft PR stacked on PR
+   #35, and require green exact-head CI. Do not open model weights or inspect
+   development-v1 logits before that delivery gate passes.

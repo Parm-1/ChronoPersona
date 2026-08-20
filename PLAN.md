@@ -139,8 +139,9 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Accept the exact Pythia tokenizer and repeated scorer-path gates while rejecting
-instrument readiness. Publish their evidence without rerunning, then revise the
-four directionally inconsistent items and diagnose the three primary-versus-
-diagnostic sign disagreements under predeclared reliability criteria. Source
-qualification remains independently externally blocked.
+Accept the exact Pythia tokenizer and repeated v0 scorer-path gates while
+rejecting instrument readiness. The pre-logits development-v1 registry,
+criteria, tokenizer gate, and Tested scorer implementation now replace the
+confounded two-form follow-up design. Deliver E3 and require exact-head CI
+before one bounded v1 coherence score; do not tune wording or metrics from its
+logits. Source qualification remains independently externally blocked.

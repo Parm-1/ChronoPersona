@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — versioned development-v1 scorer profile, no new logits yet**
+**Current gate — deliver the Tested development-v1 scorer profile; no new logits yet**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -29,8 +29,9 @@ containing E5 evidence head `a7dd27c` passed all 18 exact-head checks and
 closed the scorer plan. The separate versioned measurement-reliability plan
 then passed blind pre-logits review, dependency-light contract validation, and
 two exact clean-head 14-item/112-form/224-candidate tokenizer audits at
-`fb8cff1`. The next gate is E3 scorer-profile implementation and exact-head CI,
-not another model score. Real-source scientific execution still requires the
+`fb8cff1`. The E3 scorer-profile implementation is now Tested in the working
+tree. Its next gate is commit/push/draft-PR delivery and exact-head CI, not
+another model score. Real-source scientific execution still requires the
 separate source evidence listed below.
 
 ## Latest verified evidence
@@ -113,8 +114,9 @@ separate source evidence listed below.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Delivery and exact-head CI for the versioned development-v1 scorer profile,
-   followed by its bounded score only if every pre-load gate passes.
+5. Commit/push/draft-PR delivery and exact-head CI for the Tested versioned
+   development-v1 scorer profile, followed by its bounded score only if every
+   pre-load gate passes.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -138,9 +140,9 @@ separate source evidence listed below.
 
 ## Exact next action
 
-Implement the exact allowlisted development-v1 scorer profile with canonical-
-versus-reverse execution scheduling and canonical serialization. Preserve v0
-compatibility and reject cross-profile substitution before optional import. Do
-not load weights or inspect v1 logits until the profile is delivered and passes
-exact-head CI. Bounded rights-qualified source samples remain a separate
-external blocker.
+Deliver the Tested exact allowlisted development-v1 scorer profile from
+`feat/development-v1-scoring` on a draft PR stacked on PR #35 and require green
+exact-head CI. Preserve v0 compatibility and the no-logits boundary. Do not
+load weights or inspect v1 logits before that gate; E4 then begins with a fresh
+clean-head resource audit. Bounded rights-qualified source samples remain a
+separate external blocker.

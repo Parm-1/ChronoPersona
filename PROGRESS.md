@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T15:29:00-04:00
+**Last updated:** 2026-08-20T16:30:52-04:00
 
 ## Decision
 
@@ -18,6 +18,14 @@ primary total-logprob margin and the diagnostic mean-token margin. Preserve the
 score and primary metric; revise the instrument only under a separate
 predeclared development plan.
 
+Accept the exact `development-v1` scorer implementation as **Tested,
+pre-execution only**. It adds one closed v0/v1 profile allowlist,
+full canonical-versus-reverse provider scheduling with canonical score
+serialization, profile-bound receipts, and an integrated fail-closed repeat
+and coherence verifier. It is not authorized for E4 until remote delivery and
+exact-head CI are verified. No v1 model weights were deserialized and no v1
+logits were inspected.
+
 The user explicitly authorized making `Parm-1/ChronoPersona` public to restore
 free standard GitHub-hosted Actions. The repository is public, anonymous access
 works, fork workflows require approval from all external contributors, default
@@ -27,11 +35,10 @@ enabled. The prior zero-step billing blocker is empirically closed: draft PR
 
 ## Current objective and closure condition
 
-Implement the exact allowlisted `development-v1` scorer profile without yet
-running it. Preserve v0, add canonical-versus-reverse provider scheduling with
-canonical serialization, and reject every cross-profile substitution before
-optional model import. Model execution remains blocked until this E3 change is
-committed, delivered, and green on its exact head.
+Deliver the Tested `development-v1` scorer implementation on
+`feat/development-v1-scoring`, open a draft PR stacked on PR #35, and require
+all exact-head checks to pass. Model execution remains blocked until that E3
+delivery gate is green; only then may E4 begin with a fresh resource audit.
 
 ## Current verified boundary
 
@@ -65,6 +72,11 @@ committed, delivered, and green on its exact head.
   14/112/224 records passed with one common 10–18-token continuation count per
   item and zero failures. Internal semantic review and token coherence do not
   establish criterion or model-level reliability.
+- **Development-v1 scorer profile — Tested, pre-execution:** the working tree
+  passes the profile, schedule, receipt, verifier, path, cross-profile, and v0
+  preservation regressions. Attempts are frozen as A=`canonical` and
+  B=`reverse`, with canonical serialization and no candidate deduplication.
+  No exact-head CI or target score exists for this profile yet.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -101,6 +113,11 @@ committed, delivered, and green on its exact head.
   `64874e3dd26a150ca34a7000ced4bc52ddd5645cfea82edf05ab6f0cbfe60c72`
 - v1 tokenizer evidence report:
   `reports/stage0/pythia_v1_tokenizer_coherence_gate_2026-08-20.md`
+- v1 scoring config: `configs/runs/pythia-development-score-v1.json`
+- v1 scoring config Git blob / canonical run-spec SHA-256:
+  `967868cb1e4f23b7992e88b0fb9e604bcfdeba5c` /
+  `e4de6ef590939e156f862f452585678cdc21a7872b6d18c0aaf36464f984bb86`
+- E3 working-tree base: `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`
 - compute ledger: failed v0, completed v1 load/control/resume, and scorer A/B
   rows in `COMPUTE_LEDGER.csv`
 
@@ -112,6 +129,8 @@ committed, delivered, and green on its exact head.
 - Sealed pre-logits registry/criteria:
   `evaluations/registry/development-v1.jsonl` and
   `configs/evaluations/development-v1-reliability-v0.json`
+- Sealed pre-execution scoring profile:
+  `configs/runs/pythia-development-score-v1.json`
 - Ignored v1 tokenizer evidence:
   `artifacts/local/pythia-v1-tokenizer-{a,b,verification}-fb8cff1.json`
 - All three ignored v1 tokenizer artifacts have a separate private
@@ -148,14 +167,12 @@ committed, delivered, and green on its exact head.
   with 463 tests and two platform-optional skips; all three top-level validators,
   compilation, and diff checks pass. Exact-head CI subsequently passed and
   closed that E5 delivery.
-- The current v1 pre-logits implementation passes 51 focused dependency-light
-  registry, tokenizer, verifier, and evaluation-loader tests. This is
-  working-tree Tested evidence only; no v1 tokenizer acceptance report,
-  scoring profile, model deserialization, or logits exist yet.
-- The full working-tree suite passes 494 tests with two platform-optional
-  symlink skips. Generator reproduction, compilation, all three top-level
-  validators, and diff checks pass. Exact-head CI then passed as recorded
-  below.
+- The current E3 implementation passes 142 focused scoring/profile/verifier
+  tests. The full offline working-tree suite collects 536 tests and passes 534
+  with two platform-optional symlink skips. Production modules compile, pilot,
+  model-manifest, and both v0/v1 registry validators pass, and `git diff
+  --check` is clean apart from expected line-ending warnings. This is Tested
+  evidence only; E3 has no delivery-head CI or target-model evidence yet.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -186,12 +203,13 @@ committed, delivered, and green on its exact head.
 
 - Repository: public by explicit user authorization; anonymous access and
   security settings verified.
-- Current branch: `feat/development-measurement-reliability`, based on scorer
-  evidence head `a7dd27c`. Its delivery head and exact-head CI status are live
-  GitHub state and must not be inferred from this preserved base identity.
+- Current branch: `feat/development-v1-scoring`, based on accepted E2 evidence
+  head `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`. The enclosing commit is the
+  scoped E3 delivery candidate; its remote PR/head/check state must be verified
+  live before E4.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
-  draft. Implementation/E2 head `fb8cff1` passed 18/18 checks; evidence
-  publication changes must pass again before E3 begins.
+  draft. Its final E2 evidence head `dfa52a0` passed 18/18 checks and is the
+  intended stack base for E3.
 - Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, open and
   draft, green at final evidence head `a7dd27c`.
 - PR #32/#33 remain open draft delivery history. PR #31 was merged externally
@@ -201,8 +219,7 @@ committed, delivered, and green on its exact head.
 
 ## Next write-active deliverable
 
-Implement E3 as a versioned exact scorer profile with canonical/reverse
-execution scheduling and canonical serialization. Preserve v0 compatibility
-and reject cross-profile substitutions before optional model import. Do not
-deserialize model weights or inspect v1 logits until E3 is delivered and green
-on its exact head.
+Publish the scoped E3 implementation on a draft PR stacked on PR #35 and
+require all checks to pass on the exact E3 head. Do not deserialize
+model weights or inspect v1 logits until that delivery gate is green; E4 then
+starts with a fresh clean-head resource audit, not a reused execution artifact.

@@ -291,6 +291,134 @@ nonfinite failures. See
 `reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`. Do not rerun this
 accepted gate to improve timing or presentation.
 
+## 7A. Versioned development-v1 coherence gate (predeclared, not run)
+
+The `development-v1` scorer profile is a separate, closed condition. Its
+working-tree implementation is Tested, but it has not deserialized the model or
+produced logits. Do not execute this section until the E3 commit is pushed on a
+draft PR stacked on PR #35 and every check is green on that exact head.
+
+Frozen inputs:
+
+- config: `configs/runs/pythia-development-score-v1.json`;
+- registry: `evaluations/registry/development-v1.jsonl`;
+- criteria: `configs/evaluations/development-v1-reliability-v0.json`;
+- accepted tokenizer audit:
+  `artifacts/local/pythia-v1-tokenizer-a-fb8cff1.json`;
+- attempt A executes all 224 candidate occurrences in canonical order;
+- attempt B executes the exact global reverse order;
+- both serialize canonical registry order, with no candidate-result cache or
+  deduplication.
+
+The no-import plan is:
+
+```powershell
+python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v1.json `
+  --registry evaluations/registry/development-v1.jsonl `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --device cuda:0 `
+  --dtype float16 `
+  --max-length 2048 `
+  --output artifacts/local/pythia-v1-score-plan.json
+```
+
+After exact-head CI passes, use one fresh audit and process per attempt. Attempt
+A must fully exit and release CUDA, staging, and the shared heavy-job lock
+before audit B is captured.
+
+```powershell
+$cache = (Resolve-Path "artifacts/local/hf-cache").Path
+$revision = "7199d8fc61a6d565cd1f3c62bf11525b563e13b2"
+$snapshot = (Resolve-Path (Join-Path $cache "models--EleutherAI--pythia-1b-deduped/snapshots/$revision")).Path
+$tokenizerAudit = (Resolve-Path "artifacts/local/pythia-v1-tokenizer-a-fb8cff1.json").Path
+$head = (git rev-parse --short=8 HEAD).Trim()
+$auditA = "artifacts/local/pythia-v1-score-resource-a-$head.json"
+$scoreA = "artifacts/local/pythia-v1-score-a-$head.json"
+$receiptA = "artifacts/local/pythia-v1-score-runtime-a-$head.json"
+$auditB = "artifacts/local/pythia-v1-score-resource-b-$head.json"
+$scoreB = "artifacts/local/pythia-v1-score-b-$head.json"
+$receiptB = "artifacts/local/pythia-v1-score-runtime-b-$head.json"
+$comparison = "artifacts/local/pythia-v1-score-comparison-$head.json"
+$coherence = "artifacts/local/pythia-v1-score-coherence-$head.json"
+
+python scripts/audit_local_resources.py `
+  --path $cache `
+  --repo (Get-Location) `
+  --output $auditA
+
+python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v1.json `
+  --registry evaluations/registry/development-v1.jsonl `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --device cuda:0 `
+  --dtype float16 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --resource-audit $auditA `
+  --tokenizer-audit $tokenizerAudit `
+  --attempt a `
+  --allow-low-ram `
+  --execute `
+  --output $scoreA `
+  --runtime-output $receiptA
+
+python scripts/audit_local_resources.py `
+  --path $cache `
+  --repo (Get-Location) `
+  --output $auditB
+
+python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v1.json `
+  --registry evaluations/registry/development-v1.jsonl `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --device cuda:0 `
+  --dtype float16 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --resource-audit $auditB `
+  --tokenizer-audit $tokenizerAudit `
+  --attempt b `
+  --allow-low-ram `
+  --execute `
+  --output $scoreB `
+  --runtime-output $receiptB
+
+python scripts/verify_registry_scores.py `
+  --config configs/runs/pythia-development-score-v1.json `
+  --score-a $scoreA `
+  --receipt-a $receiptA `
+  --resource-audit-a $auditA `
+  --score-b $scoreB `
+  --receipt-b $receiptB `
+  --resource-audit-b $auditB `
+  --output $comparison
+
+python scripts/verify_measurement_reliability.py score `
+  --criteria configs/evaluations/development-v1-reliability-v0.json `
+  --registry evaluations/registry/development-v1.jsonl `
+  --tokenizer-audit $tokenizerAudit `
+  --score-a $scoreA `
+  --score-b $scoreB `
+  --receipt-a $receiptA `
+  --receipt-b $receiptB `
+  --resource-audit-a $auditA `
+  --resource-audit-b $auditB `
+  --scoring-config configs/runs/pythia-development-score-v1.json `
+  --output $coherence
+```
+
+These commands are a frozen future procedure, not an observed result. A
+pre-load resource miss may wait for natural headroom and retry with a new
+audit. Any failure after model deserialization begins consumes the applicable
+attempt and invokes the plan's stop/rescue policy. Do not inspect or tune from
+partial pole results.
+
 ## 8. Score semantics
 
 For every complete continuation, the provider:

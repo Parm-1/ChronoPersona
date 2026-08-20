@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
@@ -16,6 +17,7 @@ from typing import Any
 from .evaluation import canonical_json_sha256
 from .file_integrity import stable_read_unchanged
 from .run_registry import build_run_identity
+from .scoring import ScoringIntegrityError, execution_trace_for_registry
 
 
 class ScoringRunError(RuntimeError):
@@ -24,6 +26,43 @@ class ScoringRunError(RuntimeError):
 
 FROZEN_CONFIG_GIT_BLOB = "338c55e6427b4491e5bcbbad05ac13d8d4b326e5"
 FROZEN_RUN_SPEC_SHA256 = "a446008ee9e8196c4091606273cc90c6d54278160449fbd71bc2eab81eb14d9d"
+V1_CONFIG_GIT_BLOB = "967868cb1e4f23b7992e88b0fb9e604bcfdeba5c"
+V1_RUN_SPEC_SHA256 = "e4de6ef590939e156f862f452585678cdc21a7872b6d18c0aaf36464f984bb86"
+
+
+@dataclass(frozen=True)
+class ScoringProfile:
+    """One exact, closed registry-scoring profile."""
+
+    profile_id: str
+    run_name: str
+    config_path: str
+    config_git_blob: str
+    run_spec_sha256: str
+    registry_path: str
+    criteria_path: str | None
+
+
+V0_SCORING_PROFILE = ScoringProfile(
+    profile_id="development-v0",
+    run_name="pythia-1b-deduped-development-score-v0",
+    config_path="configs/runs/pythia-development-score-v0.json",
+    config_git_blob=FROZEN_CONFIG_GIT_BLOB,
+    run_spec_sha256=FROZEN_RUN_SPEC_SHA256,
+    registry_path="evaluations/registry/development-v0.jsonl",
+    criteria_path=None,
+)
+V1_SCORING_PROFILE = ScoringProfile(
+    profile_id="development-v1-pythia-reliability-v0",
+    run_name="pythia-1b-deduped-development-score-v1",
+    config_path="configs/runs/pythia-development-score-v1.json",
+    config_git_blob=V1_CONFIG_GIT_BLOB,
+    run_spec_sha256=V1_RUN_SPEC_SHA256,
+    registry_path="evaluations/registry/development-v1.jsonl",
+    criteria_path="configs/evaluations/development-v1-reliability-v0.json",
+)
+SCORING_PROFILES = (V0_SCORING_PROFILE, V1_SCORING_PROFILE)
+_PROFILES_BY_RUN_NAME = {profile.run_name: profile for profile in SCORING_PROFILES}
 
 
 _TOP_LEVEL_KEYS = frozenset(
@@ -47,6 +86,7 @@ _TOP_LEVEL_KEYS = frozenset(
         "resource_limits",
     }
 )
+_V1_TOP_LEVEL_KEYS = _TOP_LEVEL_KEYS | {"measurement_reliability"}
 
 _SECTION_KEYS = {
     "artifact": frozenset(
@@ -159,6 +199,25 @@ _SECTION_KEYS = {
             "minimum_output_free_bytes",
             "maximum_invocation_wall_seconds",
             "ram_threshold_enforced",
+        }
+    ),
+}
+_V1_SECTION_KEYS = {
+    **_SECTION_KEYS,
+    "measurement_reliability": frozenset(
+        {
+            "profile_id",
+            "criteria_path",
+            "criteria_git_blob",
+            "criteria_file_sha256",
+            "criteria_sha256",
+            "tokenizer_audit_git_head",
+            "loaded_validation_sha256",
+            "runtime_identity_sha256",
+            "attempt_execution_modes",
+            "required_execution_modes",
+            "require_exact_score_byte_equality",
+            "claim_ceiling",
         }
     ),
 }
@@ -276,31 +335,115 @@ def _leaf_values(value: Mapping[str, Any], prefix: str = "") -> dict[str, Any]:
     return leaves
 
 
+def scoring_profile(config: Mapping[str, Any]) -> ScoringProfile:
+    """Resolve an exact allowlisted profile from its frozen run name."""
+
+    run_name = config.get("run_name")
+    profile = _PROFILES_BY_RUN_NAME.get(run_name)
+    if profile is None:
+        raise ScoringRunError("scoring config does not select an allowlisted profile")
+    return profile
+
+
+def scoring_profile_for_relative_path(relative_path: str) -> ScoringProfile:
+    """Resolve a profile by its canonical repository-relative config path."""
+
+    for profile in SCORING_PROFILES:
+        if relative_path == profile.config_path:
+            return profile
+    raise ScoringRunError("scoring config path is not allowlisted")
+
+
+def expected_execution_mode(
+    config: Mapping[str, Any],
+    attempt: str,
+) -> str | None:
+    """Return the frozen provider schedule for an attempt, if profile-bound."""
+
+    profile = scoring_profile(config)
+    if profile is V0_SCORING_PROFILE:
+        return None
+    reliability = config.get("measurement_reliability")
+    modes = (
+        reliability.get("attempt_execution_modes")
+        if isinstance(reliability, Mapping)
+        else None
+    )
+    if not isinstance(modes, Mapping) or attempt not in modes:
+        raise ScoringRunError("scoring attempt has no frozen execution mode")
+    mode = modes[attempt]
+    if mode not in {"canonical", "reverse"}:
+        raise ScoringRunError("scoring attempt execution mode is invalid")
+    return str(mode)
+
+
+def scoring_run_identity_payload(
+    config: Mapping[str, Any],
+    git_head: str,
+) -> dict[str, Any]:
+    """Build the mode-neutral, profile-bound run identity payload."""
+
+    profile = scoring_profile(config)
+    payload: dict[str, Any] = {
+        "run_kind": config["run_kind"],
+        "git_head": git_head,
+        "run_spec_sha256": profile.run_spec_sha256,
+        "artifact": config["artifact"],
+        "registry_sha256": config["canonical_inputs"]["registry_sha256"],
+        "accepted_tokenizer_output_sha256": config[
+            "accepted_tokenizer_audit"
+        ]["output_sha256"],
+    }
+    if profile is V1_SCORING_PROFILE:
+        reliability = config["measurement_reliability"]
+        payload["measurement_reliability"] = {
+            "profile_id": reliability["profile_id"],
+            "criteria_sha256": reliability["criteria_sha256"],
+            "criteria_git_blob": reliability["criteria_git_blob"],
+        }
+    return payload
+
+
 def validate_scoring_config(config: Mapping[str, Any]) -> tuple[str, ...]:
     """Return exact frozen-profile validation errors."""
 
     errors: list[str] = []
-    if frozenset(config) != _TOP_LEVEL_KEYS:
+    try:
+        profile = scoring_profile(config)
+    except ScoringRunError as error:
+        return (str(error),)
+    top_level_keys = (
+        _TOP_LEVEL_KEYS
+        if profile is V0_SCORING_PROFILE
+        else _V1_TOP_LEVEL_KEYS
+    )
+    section_keys = (
+        _SECTION_KEYS
+        if profile is V0_SCORING_PROFILE
+        else _V1_SECTION_KEYS
+    )
+    if frozenset(config) != top_level_keys:
         errors.append("scoring config top-level fields are not exact")
-    for section, expected_keys in _SECTION_KEYS.items():
+    for section, expected_keys in section_keys.items():
         raw = config.get(section)
         if not isinstance(raw, Mapping):
             errors.append(f"scoring config {section} must be an object")
         elif frozenset(raw) != expected_keys:
             errors.append(f"scoring config {section} fields are not exact")
-    if set(_leaf_values(config)) != set(_FIXED_VALUES):
-        errors.append("scoring config frozen leaf fields are not exact")
-    for dotted, expected in _FIXED_VALUES.items():
-        try:
-            observed = _nested(config, dotted)
-        except ScoringRunError as error:
-            errors.append(str(error))
-            continue
-        if observed != expected or type(observed) is not type(expected):
-            errors.append(
-                f"scoring config {dotted} must equal {expected!r}"
-            )
-    if canonical_json_sha256(config) != FROZEN_RUN_SPEC_SHA256:
+    if profile is V0_SCORING_PROFILE:
+        if set(_leaf_values(config)) != set(_FIXED_VALUES):
+            errors.append("scoring config frozen leaf fields are not exact")
+        for dotted, expected in _FIXED_VALUES.items():
+            try:
+                observed = _nested(config, dotted)
+            except ScoringRunError as error:
+                errors.append(str(error))
+                continue
+            if observed != expected or type(observed) is not type(expected):
+                errors.append(
+                    f"scoring config {dotted} must equal {expected!r}"
+                )
+    if canonical_json_sha256(config) != profile.run_spec_sha256:
         errors.append("scoring config canonical identity is not frozen")
     return tuple(errors)
 
@@ -482,6 +625,43 @@ def load_accepted_tokenizer_audit(
         "trust_remote_code": False,
     }:
         raise ScoringRunError("accepted tokenizer offline controls mismatch")
+    profile = scoring_profile(config)
+    if profile is V1_SCORING_PROFILE:
+        reliability = config.get("measurement_reliability")
+        audit_reliability = report.get("measurement_reliability")
+        if not isinstance(reliability, Mapping) or not isinstance(
+            audit_reliability, Mapping
+        ):
+            raise ScoringRunError(
+                "accepted tokenizer reliability identity is missing"
+            )
+        if report.get("git_head") != reliability["tokenizer_audit_git_head"]:
+            raise ScoringRunError("accepted tokenizer E2 Git head mismatch")
+        if (
+            report.get("measurement_reliability_criteria_git_blob")
+            != reliability["criteria_git_blob"]
+            or audit_reliability.get("profile_id")
+            != reliability["profile_id"]
+            or audit_reliability.get("criteria_sha256")
+            != reliability["criteria_sha256"]
+            or audit_reliability.get("claim_ceiling")
+            != reliability["claim_ceiling"]
+        ):
+            raise ScoringRunError(
+                "accepted tokenizer reliability contract mismatch"
+            )
+        if canonical_json_sha256(validation) != reliability[
+            "loaded_validation_sha256"
+        ]:
+            raise ScoringRunError(
+                "accepted tokenizer loaded-validation identity mismatch"
+            )
+        if canonical_json_sha256(runtime) != reliability[
+            "runtime_identity_sha256"
+        ]:
+            raise ScoringRunError(
+                "accepted tokenizer runtime-record identity mismatch"
+            )
     return report, file_sha256
 
 
@@ -562,6 +742,11 @@ _CONTRACT_KEYS = frozenset(
         "attention_policy",
     }
 )
+_V1_CONTRACT_KEYS = _CONTRACT_KEYS | {
+    "profile_id",
+    "measurement_reliability_criteria_git_blob",
+    "measurement_reliability_criteria_sha256",
+}
 _SUMMARY_KEYS = frozenset(
     {
         "item_count",
@@ -758,6 +943,51 @@ def finalize_score_artifact(
         if summary[key] != topology[key]:
             raise ScoringRunError(f"score topology mismatch: {key}")
 
+    profile = scoring_profile(config)
+    contract = {
+        "git_head": git_head,
+        "run_spec_sha256": run_spec_sha256,
+        "model_manifest_git_blob": config["canonical_inputs"][
+            "manifest_git_blob"
+        ],
+        "model_manifest_sha256": config["canonical_inputs"][
+            "manifest_sha256"
+        ],
+        "development_registry_git_blob": config["canonical_inputs"][
+            "registry_git_blob"
+        ],
+        "accepted_tokenizer_file_sha256": config[
+            "accepted_tokenizer_audit"
+        ]["file_sha256"],
+        "accepted_tokenizer_output_sha256": config[
+            "accepted_tokenizer_audit"
+        ]["output_sha256"],
+        "snapshot_receipt_sha256": config["artifact"][
+            "snapshot_receipt_sha256"
+        ],
+        "attention_policy": {
+            "attention_implementation": config["determinism"][
+                "attention_implementation"
+            ],
+            "sdpa_backends": config["determinism"]["sdpa_backends"],
+            "sdpa_math_allow_fp16_reduction": config["determinism"][
+                "sdpa_math_allow_fp16_reduction"
+            ],
+        },
+    }
+    if profile is V1_SCORING_PROFILE:
+        reliability = config["measurement_reliability"]
+        contract.update(
+            {
+                "profile_id": reliability["profile_id"],
+                "measurement_reliability_criteria_git_blob": reliability[
+                    "criteria_git_blob"
+                ],
+                "measurement_reliability_criteria_sha256": reliability[
+                    "criteria_sha256"
+                ],
+            }
+        )
     body = dict(score)
     body.pop("output_sha256", None)
     body.update(
@@ -765,37 +995,7 @@ def finalize_score_artifact(
             "status": "complete",
             "score_type": "registry-development-score",
             "scientific_claim_authorized": False,
-            "contract": {
-                "git_head": git_head,
-                "run_spec_sha256": run_spec_sha256,
-                "model_manifest_git_blob": config["canonical_inputs"][
-                    "manifest_git_blob"
-                ],
-                "model_manifest_sha256": config["canonical_inputs"][
-                    "manifest_sha256"
-                ],
-                "development_registry_git_blob": config["canonical_inputs"][
-                    "registry_git_blob"
-                ],
-                "accepted_tokenizer_file_sha256": config[
-                    "accepted_tokenizer_audit"
-                ]["file_sha256"],
-                "accepted_tokenizer_output_sha256": config[
-                    "accepted_tokenizer_audit"
-                ]["output_sha256"],
-                "snapshot_receipt_sha256": config["artifact"][
-                    "snapshot_receipt_sha256"
-                ],
-                "attention_policy": {
-                    "attention_implementation": config["determinism"][
-                        "attention_implementation"
-                    ],
-                    "sdpa_backends": config["determinism"]["sdpa_backends"],
-                    "sdpa_math_allow_fp16_reduction": config["determinism"][
-                        "sdpa_math_allow_fp16_reduction"
-                    ],
-                },
-            },
+            "contract": contract,
             "summary": summary,
         }
     )
@@ -1211,8 +1411,14 @@ def validate_score_artifact(
         errors.append("score artifact registry identity mismatch")
     if score.get("model") != expected_identity["model"]:
         errors.append("score artifact model identity mismatch")
+    profile = scoring_profile(config)
+    contract_keys = (
+        _CONTRACT_KEYS
+        if profile is V0_SCORING_PROFILE
+        else _V1_CONTRACT_KEYS
+    )
     contract = score.get("contract")
-    if not isinstance(contract, Mapping) or frozenset(contract) != _CONTRACT_KEYS:
+    if not isinstance(contract, Mapping) or frozenset(contract) != contract_keys:
         errors.append("score artifact contract fields are not exact")
     else:
         canonical = config["canonical_inputs"]
@@ -1231,12 +1437,25 @@ def validate_score_artifact(
                 "sdpa_math_allow_fp16_reduction": config["determinism"]["sdpa_math_allow_fp16_reduction"],
             },
         }
+        if profile is V1_SCORING_PROFILE:
+            reliability = config["measurement_reliability"]
+            expected_contract.update(
+                {
+                    "profile_id": reliability["profile_id"],
+                    "measurement_reliability_criteria_git_blob": reliability[
+                        "criteria_git_blob"
+                    ],
+                    "measurement_reliability_criteria_sha256": reliability[
+                        "criteria_sha256"
+                    ],
+                }
+            )
         for key, expected in expected_contract.items():
             if contract.get(key) != expected:
                 errors.append(f"score artifact contract mismatch: {key}")
         if not _hex_identity(contract.get("git_head"), 40):
             errors.append("score artifact Git head is invalid")
-        if contract.get("run_spec_sha256") != FROZEN_RUN_SPEC_SHA256:
+        if contract.get("run_spec_sha256") != profile.run_spec_sha256:
             errors.append("score artifact run-spec identity is invalid")
     errors.extend(_score_structure_errors(score))
     errors.extend(
@@ -1352,6 +1571,7 @@ _COMPLETE_RECEIPT_KEYS = frozenset(
         "receipt_sha256",
     }
 )
+_V1_COMPLETE_RECEIPT_KEYS = _COMPLETE_RECEIPT_KEYS | {"execution_schedule"}
 
 
 def _resource_conservative_free(value: Any) -> int | None:
@@ -2210,9 +2430,16 @@ def validate_complete_receipt(
     config: Mapping[str, Any],
     *,
     tokenizer_audit: Mapping[str, Any],
+    registry: Sequence[Mapping[str, Any]] | None = None,
 ) -> tuple[str, ...]:
     errors: list[str] = []
-    if frozenset(receipt) != _COMPLETE_RECEIPT_KEYS:
+    profile = scoring_profile(config)
+    receipt_keys = (
+        _COMPLETE_RECEIPT_KEYS
+        if profile is V0_SCORING_PROFILE
+        else _V1_COMPLETE_RECEIPT_KEYS
+    )
+    if frozenset(receipt) != receipt_keys:
         errors.append("runtime receipt top-level fields are not exact")
     if not _self_hash_valid(receipt, "receipt_sha256"):
         errors.append("runtime receipt self-hash mismatch")
@@ -2258,6 +2485,8 @@ def validate_complete_receipt(
         "development_registry_git_blob",
         "scoring_config_git_blob",
     }
+    if profile is V1_SCORING_PROFILE:
+        expected_git_keys.add("measurement_reliability_criteria_git_blob")
     if not isinstance(git, Mapping) or set(git) != expected_git_keys:
         errors.append("runtime receipt Git binding fields are not exact")
     else:
@@ -2270,27 +2499,22 @@ def validate_complete_receipt(
             git.get("model_manifest_git_blob") != canonical["manifest_git_blob"]
             or git.get("development_registry_git_blob")
             != canonical["registry_git_blob"]
-            or git.get("scoring_config_git_blob") != FROZEN_CONFIG_GIT_BLOB
+            or git.get("scoring_config_git_blob") != profile.config_git_blob
         ):
             errors.append("runtime receipt Git blob identity mismatch")
+        if profile is V1_SCORING_PROFILE and git.get(
+            "measurement_reliability_criteria_git_blob"
+        ) != config["measurement_reliability"]["criteria_git_blob"]:
+            errors.append("runtime receipt criteria Git blob identity mismatch")
         expected_run_id = build_run_identity(
-            {
-                "run_kind": config["run_kind"],
-                "git_head": git.get("git_head"),
-                "run_spec_sha256": FROZEN_RUN_SPEC_SHA256,
-                "artifact": config["artifact"],
-                "registry_sha256": config["canonical_inputs"]["registry_sha256"],
-                "accepted_tokenizer_output_sha256": config[
-                    "accepted_tokenizer_audit"
-                ]["output_sha256"],
-            }
+            scoring_run_identity_payload(config, str(git.get("git_head")))
         )["run_id"]
         if receipt.get("run_id") != expected_run_id:
             errors.append("runtime receipt run identity does not match frozen inputs")
     run_spec = receipt.get("run_spec")
     if not isinstance(run_spec, Mapping) or dict(run_spec) != {
-        "sha256": FROZEN_RUN_SPEC_SHA256,
-        "git_blob": FROZEN_CONFIG_GIT_BLOB,
+        "sha256": profile.run_spec_sha256,
+        "git_blob": profile.config_git_blob,
     }:
         errors.append("runtime receipt run-spec identity mismatch")
     canonical_inputs = receipt.get("canonical_inputs")
@@ -2305,6 +2529,30 @@ def validate_complete_receipt(
         "output_sha256": config["accepted_tokenizer_audit"]["output_sha256"],
     }:
         errors.append("runtime receipt accepted-tokenizer identity mismatch")
+    if profile is V1_SCORING_PROFILE:
+        try:
+            if registry is None:
+                raise ScoringRunError(
+                    "canonical registry is required for v1 receipt validation"
+                )
+            mode = expected_execution_mode(config, str(receipt.get("attempt")))
+            expected_trace = execution_trace_for_registry(
+                registry, str(mode)
+            )
+            expected_schedule = {
+                "profile_id": profile.profile_id,
+                "mode": mode,
+                "candidate_count": len(expected_trace),
+                "trace_sha256": canonical_json_sha256(expected_trace),
+                "canonical_serialization": True,
+            }
+        except (ScoringRunError, ScoringIntegrityError):
+            expected_schedule = None
+        schedule = receipt.get("execution_schedule")
+        if expected_schedule is None or not isinstance(
+            schedule, Mapping
+        ) or dict(schedule) != expected_schedule:
+            errors.append("runtime receipt execution schedule mismatch")
 
     snapshot = receipt.get("snapshot_verification")
     expected_snapshot = tokenizer_audit.get("snapshot_verification")
@@ -2738,7 +2986,7 @@ def _repeat_resource_identity(
     }
 
 
-def verify_scoring_repeat(
+def _verify_scoring_repeat_bound(
     *,
     score_a: Mapping[str, Any],
     score_a_bytes: bytes,
@@ -2757,6 +3005,14 @@ def verify_scoring_repeat(
     tokenizer_audit: Mapping[str, Any],
     expected_git_head: str,
 ) -> dict[str, Any]:
+    if (
+        not _self_hash_valid(tokenizer_audit, "output_sha256")
+        or tokenizer_audit.get("output_sha256")
+        != config.get("accepted_tokenizer_audit", {}).get("output_sha256")
+    ):
+        raise ScoringRunError(
+            "repeat verifier tokenizer audit is not the frozen accepted object"
+        )
     score_errors = [
         *validate_score_artifact(
             score_a,
@@ -2776,11 +3032,13 @@ def verify_scoring_repeat(
             receipt_a,
             config,
             tokenizer_audit=tokenizer_audit,
+            registry=registry,
         ),
         *validate_complete_receipt(
             receipt_b,
             config,
             tokenizer_audit=tokenizer_audit,
+            registry=registry,
         ),
     ]
     if score_errors or receipt_errors:
@@ -2931,5 +3189,89 @@ def verify_scoring_repeat(
         "run_id": receipt_a["run_id"],
         "receipts": receipt_records,
     }
+    if scoring_profile(config) is V1_SCORING_PROFILE:
+        result.update(
+            {
+                "profile_id": config["measurement_reliability"]["profile_id"],
+                "measurement_reliability_criteria_sha256": config[
+                    "measurement_reliability"
+                ]["criteria_sha256"],
+                "execution_modes": {
+                    "a": receipt_a["execution_schedule"]["mode"],
+                    "b": receipt_b["execution_schedule"]["mode"],
+                },
+            }
+        )
     result["comparison_sha256"] = canonical_json_sha256(result)
     return result
+
+
+def verify_scoring_repeat(
+    *,
+    score_a: Mapping[str, Any],
+    score_a_bytes: bytes,
+    receipt_a: Mapping[str, Any],
+    receipt_a_bytes: bytes,
+    resource_audit_a: Mapping[str, Any],
+    resource_audit_a_bytes: bytes,
+    score_b: Mapping[str, Any],
+    score_b_bytes: bytes,
+    receipt_b: Mapping[str, Any],
+    receipt_b_bytes: bytes,
+    resource_audit_b: Mapping[str, Any],
+    resource_audit_b_bytes: bytes,
+    config: Mapping[str, Any],
+    registry: Sequence[Mapping[str, Any]],
+    tokenizer_audit: Mapping[str, Any],
+    expected_git_head: str,
+) -> dict[str, Any]:
+    """Verify one exact frozen profile and return its self-hashed comparison."""
+
+    config_errors = validate_scoring_config(config)
+    if config_errors:
+        raise ScoringRunError("; ".join(config_errors))
+    profile = scoring_profile(config)
+    registry_newline = "\n" if profile is V1_SCORING_PROFILE else "\r\n"
+    registry_sort_keys = profile is V1_SCORING_PROFILE
+    try:
+        registry_payload = (
+            registry_newline.join(
+                json.dumps(
+                    item,
+                    sort_keys=registry_sort_keys,
+                    separators=(",", ":"),
+                    ensure_ascii=False,
+                    allow_nan=False,
+                )
+                for item in registry
+            )
+            + registry_newline
+        ).encode("utf-8")
+    except (TypeError, ValueError) as error:
+        raise ScoringRunError(
+            "canonical registry cannot be rendered"
+        ) from error
+    if hashlib.sha256(registry_payload).hexdigest() != config[
+        "canonical_inputs"
+    ]["registry_sha256"]:
+        raise ScoringRunError(
+            "supplied registry does not match the frozen canonical registry bytes"
+        )
+    return _verify_scoring_repeat_bound(
+        score_a=score_a,
+        score_a_bytes=score_a_bytes,
+        receipt_a=receipt_a,
+        receipt_a_bytes=receipt_a_bytes,
+        resource_audit_a=resource_audit_a,
+        resource_audit_a_bytes=resource_audit_a_bytes,
+        score_b=score_b,
+        score_b_bytes=score_b_bytes,
+        receipt_b=receipt_b,
+        receipt_b_bytes=receipt_b_bytes,
+        resource_audit_b=resource_audit_b,
+        resource_audit_b_bytes=resource_audit_b_bytes,
+        config=config,
+        registry=registry,
+        tokenizer_audit=tokenizer_audit,
+        expected_git_head=expected_git_head,
+    )

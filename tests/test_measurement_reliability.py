@@ -401,6 +401,37 @@ def _pretty_bytes(value: dict[str, Any]) -> bytes:
     ).encode("utf-8")
 
 
+def _finalized_score(base: dict[str, Any]) -> dict[str, Any]:
+    finalized = deepcopy(base)
+    finalized.pop("output_sha256")
+    finalized.update(
+        {
+            "status": "complete",
+            "score_type": "registry-development-score",
+            "scientific_claim_authorized": False,
+            "contract": {"runtime_validation_precedes_coherence": True},
+            "summary": {"runtime_validation_precedes_coherence": True},
+        }
+    )
+    finalized["output_sha256"] = canonical_json_sha256(finalized)
+    return finalized
+
+
+def _unverified_execution_kwargs() -> dict[str, Any]:
+    return {
+        "receipt_a": {},
+        "receipt_a_bytes": b"{}\n",
+        "resource_audit_a": {},
+        "resource_audit_a_bytes": b"{}\n",
+        "receipt_b": {},
+        "receipt_b_bytes": b"{}\n",
+        "resource_audit_b": {},
+        "resource_audit_b_bytes": b"{}\n",
+        "scoring_config": {},
+        "expected_git_head": "a" * 40,
+    }
+
+
 def test_v0_identity_and_topology_remain_exact() -> None:
     items = load_evaluation_registry(V0)
     raw_sha256 = hashlib.sha256(V0.read_bytes()).hexdigest()
@@ -869,10 +900,11 @@ def test_score_repeat_is_byte_strict_and_cannot_pass_before_receipt_integration(
         audit,
         score_a_bytes=score_bytes,
         score_b_bytes=score_bytes,
+        **_unverified_execution_kwargs(),
     )
     assert report["passed"] is False
     assert report["failures"] == [
-        "execution-order receipts are not integrated until E3"
+        "execution-order receipts are not valid and profile-bound"
     ]
     assert report["execution_mode_receipts_validated"] is False
 
@@ -885,8 +917,71 @@ def test_score_repeat_is_byte_strict_and_cannot_pass_before_receipt_integration(
         audit,
         score_a_bytes=score_bytes,
         score_b_bytes=noncanonical,
+        **_unverified_execution_kwargs(),
     )
     assert "score artifacts are not canonical pretty JSON bytes" in report["failures"]
     assert "canonical/reverse score artifacts are not byte-identical" in report[
         "failures"
     ]
+
+
+def test_score_repeat_accepts_only_the_integrated_runtime_verifier_result(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    criteria = _criteria()
+    items = _registry()
+    audit = _tokenizer_audit(criteria, items)
+    score = _score(criteria, items, audit)
+    score_bytes = _pretty_bytes(score)
+    comparison = {
+        "status": "equal",
+        "profile_id": criteria["profile_id"],
+        "measurement_reliability_criteria_sha256": criteria[
+            "criteria_sha256"
+        ],
+        "execution_modes": {"a": "canonical", "b": "reverse"},
+        "score_file_sha256": hashlib.sha256(score_bytes).hexdigest(),
+        "score_output_sha256": score["output_sha256"],
+    }
+    comparison["comparison_sha256"] = canonical_json_sha256(comparison)
+    observed: dict[str, Any] = {}
+
+    def verified_repeat(**kwargs: Any) -> dict[str, Any]:
+        observed.update(kwargs)
+        return comparison
+
+    monkeypatch.setattr(
+        "chronopersona.measurement_reliability.verify_scoring_repeat",
+        verified_repeat,
+    )
+
+    report = analyze_score_repeat(
+        score,
+        deepcopy(score),
+        criteria,
+        items,
+        audit,
+        score_a_bytes=score_bytes,
+        score_b_bytes=score_bytes,
+        **_unverified_execution_kwargs(),
+    )
+
+    assert report["passed"] is True
+    assert report["execution_mode_receipts_validated"] is True
+    assert report["execution_comparison_sha256"] == comparison[
+        "comparison_sha256"
+    ]
+    assert observed["score_a"] is score
+    assert observed["receipt_a"] == {}
+
+
+def test_score_coherence_accepts_the_runtime_finalized_score_envelope() -> None:
+    criteria = _criteria()
+    items = _registry()
+    audit = _tokenizer_audit(criteria, items)
+    finalized = _finalized_score(_score(criteria, items, audit))
+
+    report = analyze_score_coherence(finalized, criteria, items, audit)
+
+    assert report["passed"] is True
+    assert report["score_output_sha256"] == finalized["output_sha256"]
