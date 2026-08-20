@@ -385,6 +385,17 @@ def test_manifest_tokenizer_loads_only_exact_verified_path(
         "chronopersona.transformers_provider._stage_tokenizer_files",
         lambda *_args, **_kwargs: None,
     )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._runtime_identity",
+        lambda: {
+            "python": "fixture",
+            "packages": {
+                "transformers": "fixture",
+                "tokenizers": "fixture",
+                "huggingface-hub": "fixture",
+            },
+        },
+    )
 
     loaded = load_manifest_tokenizer(
         _ready_artifact(),
