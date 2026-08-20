@@ -395,6 +395,40 @@ loading/logits feasibility under the observed host-memory pressure. It would
 not establish full-weight training fit, sustained stability, scorer validity,
 temporal behavior, or CSTG.
 
+## D-028 — Accept local inference and activate the tiny LoRA resume gate
+
+**Date:** 2026-08-20
+**Status:** accepted at bounded local inference level
+
+Accept the exact-head offline Pythia measurement as evidence that the immutable
+final checkpoint loads unquantized in FP16 on the RTX 2060 and produces finite
+logits for the frozen synthetic probe. The successful run loaded 1,011,781,632
+parameters in 2.5291 seconds, peaked at 2,042,486,784 allocated GPU bytes, and
+completed three measured forward passes at 1,294.30 predicted tokens/second.
+
+Advance to one five-step LoRA training/checkpoint/resume engineering smoke using
+only the verified offline snapshot and CC0 synthetic fixtures. Compare a planned
+step-three interruption plus explicit resume against an uninterrupted control.
+
+Do not attempt a device-resident full-weight AdamW step on this GPU. An
+optimistic FP16 lower bound for weights, gradients, and two same-dtype moments
+is 8,094,253,056 bytes, already 1,652,260,864 bytes above total device memory
+before activations and runtime overhead. Do not silently substitute CPU
+offload, quantization, another optimizer, or another model.
+
+**Reason:** inference viability clears the loader/runtime uncertainty, while the
+optimizer lower bound resolves full-weight device capacity without an
+intentional OOM. A tiny adapter smoke can now test the remaining trainer,
+backward, checkpoint, and resume plumbing without being misrepresented as the
+headline training method.
+
+**Claim ceiling:** the inference pass is engineering evidence on one synthetic
+prompt. A LoRA smoke, even if exact, proves only training infrastructure and
+does not justify PEFT for the causal claim or establish any model-behavior,
+temporal, or CSTG result.
+
+**Evidence:** `reports/stage0/pythia_local_inference_2026-08-20.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

@@ -1,9 +1,9 @@
 # Active ExecPlan — Pythia Local Feasibility
 
-**Status:** active
+**Status:** active — inference passed; tiny training gate in implementation
 **Started:** 2026-08-20T02:10:08-04:00
-**Last reconciled:** 2026-08-20T03:03:06-04:00
-**Tested and acquired head:** `b8e0c5d699a8bf46548018ae803afb597524a336`
+**Last reconciled:** 2026-08-20T03:19:29-04:00
+**Successful inference head:** `76c2479738d137d33d59d526a1392d17ceffe09a`
 **Branch:** `fix/model-feasibility-gates`
 
 ## Objective and end state
@@ -26,11 +26,10 @@ time, and exact resume behavior before any scientific training branch.
 
 ## Verified starting state
 
-- Exact detached execution worktree is clean at acquired commit `b8e0c5d`;
+- Exact detached execution worktree is clean at inference commit `76c2479`;
   unrelated concurrent primary-worktree edits are excluded.
 - PRs #28 and #29 were merged externally after passing their reported checks.
-  Draft PR #30 covers the hardening head and all 18 `b8e0c5d` checks passed;
-  the subsequent low-RAM override is pending validation and publication.
+  Draft PR #30 covers the hardening head and all 18 `76c2479` checks passed.
 - CPython 3.11.9 virtual environment with PyTorch `2.13.0+cu130`, Transformers
   5.15.1, Hugging Face Hub 1.28.0, and Accelerate 1.14.0.
 - CUDA 13.0 available; RTX 2060 compute capability 7.5 and 6,144 MiB VRAM.
@@ -47,11 +46,14 @@ time, and exact resume behavior before any scientific training branch.
 - User explicitly authorized model downloads and training on 2026-08-20.
 - The no-download plan at the tested commit resolved the exact required bytes
   and disk margin without acquiring weights.
+- The verified snapshot loaded in CUDA FP16 and produced finite logits. Peak
+  allocated VRAM was 2,042,486,784 bytes and peak process RSS was
+  2,810,875,904 bytes.
 
 ## Active deliverable and evidence gate
 
-The single write-active deliverable is the final-Pythia local loading/logits
-measurement plus its durable decision update.
+The single write-active deliverable is now the deterministic tiny LoRA
+training/checkpoint/resume engineering gate plus its durable decision update.
 
 The gate decides whether to advance to a tiny training benchmark:
 
@@ -205,6 +207,36 @@ and config verification. Model loading remains a separate unresolved gate.
 - **Inconclusive path:** repeat only after the invalidating external condition
   is removed and a fresh audit is captured.
 
+**Observed decision:** E3 passed. Advance to E5. The device-resident
+full-weight AdamW lower bound fails analytically, so E5 is explicitly LoRA
+infrastructure evidence rather than a substitute headline method.
+
+### E5 — Tiny LoRA training, checkpoint, and exact resume
+
+- **Question:** can the verified Pythia base complete deterministic backward and
+  optimizer plumbing, atomically checkpoint at step three, resume explicitly,
+  and match an uninterrupted control?
+- **Inputs:** exact offline snapshot; fresh training-head load report and
+  resource audit; CC0 `calibration-neutral` and `control-neutral` synthetic
+  fixtures; exact token-ID matrix hash.
+- **Frozen profile:** seed 17; CUDA FP16; batch 1; sequence length 128; five
+  steps; 640 input tokens and 635 causal-loss targets; LoRA rank 4, alpha 8,
+  dropout 0, bias none, exact `query_key_value` targets; fresh AdamW with all
+  hyperparameters recorded; one uninterrupted control and one interruption
+  after step three followed by explicit resume.
+- **Control:** offline/local-files-only base loading, exact snapshot rehash,
+  same token blocks and initial seed, no shuffle/workers, one heavy job at a
+  time, and no fallback to quantization/offload/another model or optimizer.
+- **Pass:** both conditions complete five unique optimizer steps; final adapter,
+  optimizer, scheduler, loss sequence, token count, and cursor semantic hashes
+  match exactly; all checkpoint file hashes and the event chain verify.
+- **Stop:** snapshot/load-report/audit drift; under 1 GiB post-load GPU headroom;
+  nonfinite loss or gradient; skipped update; CUDA OOM; 15-minute wall limit;
+  severe instability; incomplete metrics; checkpoint corruption; or resume
+  divergence.
+- **Claim ceiling:** engineering smoke only. It does not justify PEFT for the
+  headline causal claim or establish any behavioral result.
+
 ## Observed results
 
 - **2026-08-20T02:10:08-04:00:** repository and PR state reconciled clean at
@@ -225,6 +257,11 @@ and config verification. Model loading remains a separate unresolved gate.
 - **2026-08-20T03:12:57-04:00:** the user explicitly authorized using as much
   host RAM as needed. E3 will repeat from a new exact head with a recorded
   low-RAM override; the first failure remains preserved.
+- **2026-08-20T03:19:29-04:00:** E3 passed at exact head `76c2479`. The model
+  loaded 1,011,781,632 FP16 parameters in 2.5291 seconds, peaked at
+  2,042,486,784 allocated GPU bytes, produced finite `[1,20,50304]` logits,
+  and averaged 1,294.30 predicted tokens/second across three repeats. The RAM
+  override was requested but the ordinary threshold passed, so it was unused.
 
 ## Decisions
 
@@ -235,6 +272,9 @@ and config verification. Model loading remains a separate unresolved gate.
 - Waive only the E3 available-host-RAM hard threshold through an explicit,
   reported CLI option. Continue to enforce VRAM, disk, identity, and integrity
   gates and stop on actual allocation failure or severe instability.
+- Do not allocate a device-resident full-weight AdamW state: its optimistic
+  8,094,253,056-byte lower bound exceeds the 6,441,992,192-byte GPU before
+  activations. Advance with LoRA only as a trainer/resume diagnostic.
 - Keep external spend at CAD $0 for this gate; no paid resource is needed.
 - Defer CPU fallback, quantization, offload, optimizer choice, and training
   method until E3 identifies the actual limiting variable.
@@ -247,19 +287,21 @@ and config verification. Model loading remains a separate unresolved gate.
 - Build: `python -m compileall scripts src tests` if code changes.
 - Focused: benchmark, manifest, artifact-policy, and any new training tests.
 - Regression: complete `pytest` and all three top-level validators before push.
-- Integration: exact-head resource audit and structured model execution result.
-- Target: successful CUDA load/logits on the RTX 2060, or preserved actionable
-  failure.
-- Operational: not required for E2/E3; sustained thermal/training validation is a
-  later gate.
+- Integration: exact-head resource audit, load report, and structured training
+  control/resume results.
+- Target: five-step CUDA LoRA control plus interrupted/resumed semantic equality
+  on the RTX 2060, or one preserved actionable failure.
+- Operational: not required; this is a bounded engineering smoke.
 
 ## Resumable milestones
 
-1. Authorization/current state committed and PR checks green.
-2. E1 exact-head audit passed.
-3. E2 acquisition result preserved and verified.
-4. E3 offline CUDA load/logits result preserved.
-5. State and decision updated; training gate either activated or stopped.
+1. Authorization/current state committed and PR checks green — complete.
+2. E1 exact-head audit passed — complete.
+3. E2 acquisition result preserved and verified — complete.
+4. E3 offline CUDA load/logits result preserved — complete.
+5. State and decision updated; E5 training gate activated — complete.
+6. E5 implementation, exact-head validation, and local control/resume run.
+7. E5 evidence, compute ledger, and advance/stop decision published.
 
 ## Exact restart procedure
 
@@ -273,6 +315,6 @@ the user-authorized RAM-threshold override explicitly.
 
 ## Completion classification
 
-Complete this plan only after E3 has a preserved result and E4 records the
-advance/stop decision. A downloaded file without a complete identity-bound
-result is partial acquisition, not completion.
+Complete this plan only after E5 has a preserved control/resume result and the
+training advance/stop decision is recorded. The successful inference result is
+complete for its bounded gate but does not complete the trainer objective.
