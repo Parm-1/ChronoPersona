@@ -190,9 +190,12 @@ passed, local model acquisition and bounded engineering training are authorized
 and active. The next real-content qualification gate is externally blocked.
 
 The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
-failure. Exactly one versioned v1 attention-policy rescue is active; if it
-fails, stop that local training path without another tuning rescue. Evidence-
-bearing naturalistic execution still requires rights-qualified, historically
-version-bounded A/B samples and an explicitly authorized held-out source-C
-review packet. Paid compute, public model/data release, repository-visibility
-change, and requester-pays retrieval remain outside the active gate.
+failure. Its single versioned v1 attention-policy rescue passed the bounded
+five-step control/interruption/resume engineering gate with exact semantic
+state equality; do not reopen either profile or infer scientific training
+adequacy. The next local engineering gate is a shared hash-verified snapshot
+loader for registry tokenizer/scorer execution. Evidence-bearing naturalistic
+execution still requires rights-qualified, historically version-bounded A/B
+samples and an explicitly authorized held-out source-C review packet. Paid
+compute, public model/data release, repository-visibility change, and
+requester-pays retrieval remain outside the active gate.

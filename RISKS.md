@@ -24,19 +24,22 @@
 | R-20 | Positive-result search after failed gates | Critical | One-rescue rules; frozen C; preserve every seed/failure; stop at failed C |
 | R-21 | Temporary recovery/publisher machinery contaminates Git evidence | High | Permanent repository-state tests; merge only exact clean heads |
 | R-22 | AI-assisted design/code claims are unaudited | Medium | Maintain AI-use ledger and human verification record |
-| R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Freeze implementation/backend/reduction policy in config, load report, run identity, and runtime; preserve v0; allow only the explicit v1 rescue |
+| R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Frozen implementation/backend/reduction policy passed the sole v1 rescue; preserve v0/v1 and require the same explicit binding in later model execution |
+| R-24 | Registry scoring loads unverified bytes from a populated cache | High | Keep direct provider loading blocked until tokenizer/model consumers accept only a manifest/hash-verified local snapshot; prove offline execution with regressions |
 
 ## Current highest risks
 
 1. Source roles cannot yet be qualified or frozen.
 2. Evaluation remains a small development instrument rather than a sealed powered benchmark.
-3. Target-model backward, checkpoint/resume, sustained throughput, and broad-update feasibility remain unmeasured; v0 failed before backward.
+3. Target-model backward/checkpoint/resume passed only a five-step LoRA smoke;
+   sustained stability and broad-update feasibility remain unmeasured.
 4. The project may identify ecological source composition rather than a residual temporal component.
 5. A/B discovery may fail prospective C transport; that is a valid falsification, not a reason to replace C.
 
 ## Current risk decision
 
-The design is defensible and bounded local engineering execution is authorized.
-Run only the predeclared v1 attention rescue on a clean green exact head; stop
-that path if it fails. Evidence-bearing naturalistic execution remains blocked
-on external source qualification and later model/compute gates.
+The design is defensible and the bounded v1 resume gate passed. Preserve both
+v0 and v1 without further tuning. The next local risk-reduction task is a
+shared verified-snapshot boundary for registry tokenizer/scorer execution.
+Evidence-bearing naturalistic execution remains blocked on external source
+qualification and later model/compute gates.

@@ -32,8 +32,8 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 
 ## Milestone 0B — Models and compute
 
-**Status:** final-Pythia acquisition/inference measured; v0 training failed
-pre-backward; the sole v1 attention-policy rescue is active.
+**Status:** final-Pythia acquisition/inference and bounded training resume gate
+measured; v0 failure preserved; sole v1 rescue passed.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
@@ -53,12 +53,15 @@ Measured on 2026-08-20:
   logits; load time, peak memory, and bounded forward throughput were recorded;
 - the first tiny-LoRA v0 control failed before backward because forced eager
   attention produced non-finite logits; an attention-only discriminator
-  supports one explicit SDPA-MATH v1 rescue.
+  supported one explicit SDPA-MATH v1 rescue;
+- the v1 control and planned step-three interruption/resume each completed five
+  optimizer steps, and independent verification found exact semantic equality
+  across final adapter, optimizer, scheduler, scaler, RNG, counters, and loss
+  state.
 
-Still unmeasured: a successful backward/optimizer step, checkpoint/recovery on
-the target model, sustained training throughput, and derived branch cost. The
-active gate is the one versioned v1 control/interruption/resume rescue; no
-second tuning rescue is allowed.
+Still unmeasured: sustained training stability, broad-update capacity, registry
+scoring through the verified snapshot layer, and derived branch-set cost. The
+one v1 rescue is closed; no second tuning rescue is allowed.
 
 Pass when one common checkpoint and one fallback are legally accessible, immutable, capable, trainable, and supported by measured cost. Stop a path when capability, memory, artifact access, or authorized budget fails.
 
@@ -125,6 +128,7 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Commit and exact-head validate the versioned v1 SDPA-MATH rescue, then run its
-offline control/interruption/resume gate once. Preserve any failure and stop
-without a v2. Source qualification remains independently externally blocked.
+Publish the completed v1 engineering evidence, then integrate registry
+tokenizer/scorer execution with a reusable manifest/hash-verified local-
+snapshot loader. Keep execution offline and fail closed on unverified cache
+bytes. Source qualification remains independently externally blocked.

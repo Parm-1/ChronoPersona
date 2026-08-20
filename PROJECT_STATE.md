@@ -14,14 +14,16 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Active — sole SDPA-MATH rescue for the tiny Pythia training/resume gate**
+**Active — verified-snapshot integration for registry tokenizer/scorer execution**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
-The first frozen tiny-LoRA control then failed before backward under forced
-eager attention. The active gate is exactly one versioned SDPA-MATH rescue;
-real-source scientific execution still requires the separate source evidence
-listed below.
+The first frozen tiny-LoRA control failed before backward under forced eager
+attention. Its one versioned SDPA-MATH rescue subsequently completed the
+five-step uninterrupted and interruption/resume conditions with exact semantic
+state equality. The next local gate is to reuse the same hash-verified snapshot
+boundary for registry tokenizer/scorer execution; real-source scientific
+execution still requires the separate source evidence listed below.
 
 ## Latest verified evidence
 
@@ -48,9 +50,12 @@ listed below.
 - Direct Transformers tokenizer/scorer repository or cache loading is
   deliberately disabled until those consumers use the same reusable
   manifest/hash-verified snapshot layer.
-- The pinned 2.09 GB model was downloaded and loaded locally. No successful
-  optimizer update, public model/data release, paid compute, or real A/B/C
-  corpus qualification occurred.
+- The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
+  LoRA control and resumed condition each completed five optimizer steps on
+  synthetic fixtures and independently verified exact final semantic state
+  equality. This is engineering evidence only.
+- No public model/data release, paid compute, or real A/B/C corpus
+  qualification occurred.
 - Exact run and delivery state lives in `PROGRESS.md`; historical no-weight
   preflight reports remain valid only for their recorded commits.
 
@@ -65,8 +70,8 @@ listed below.
 - final era windows;
 - source-general era decodability;
 - a trainable causal checkpoint and insertion point;
-- reliable registry scoring on local hardware;
-- successful target-model backward/checkpoint/resume behavior;
+- sustained target-model training stability or broad-update feasibility;
+- registry tokenizer/scorer execution through the verified snapshot boundary;
 - synthetic calibration sensitivity;
 - any temporal behavioral effect.
 
@@ -87,8 +92,9 @@ listed below.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Pinned-model load, logits, peak-memory, and tiny-training benchmarks on the
-   measured RTX 2060 runtime.
+5. Registry tokenizer/scorer execution through the manifest/hash-verified
+   local snapshot, followed by any additional measured cost gate justified by
+   the causal branch design.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -111,8 +117,8 @@ listed below.
 
 ## Exact next action
 
-Commit and validate the v1 attention-only rescue, update stacked draft PR #31,
-and require exact-head CI. Then capture a fresh audit and MATH-policy offline
-load report before running the single control/interruption/resume gate. Stop on
-any v1 failure. Bounded rights-qualified source samples remain a separate
-external blocker.
+Publish the completed v1 evidence on draft PR #32 and require exact-head CI.
+Then integrate the existing registry tokenizer/scorer consumers with a reusable
+manifest/hash-verified offline snapshot loader and run the bounded target
+checks. Bounded rights-qualified source samples remain a separate external
+blocker.

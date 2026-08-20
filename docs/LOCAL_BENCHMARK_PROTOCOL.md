@@ -432,8 +432,12 @@ $runId = (Get-Content artifacts/local/pythia-lora-v1-control.json -Raw |
 $control = Join-Path "runs/pythia-lora-smoke-v1/control" $runId
 $resumed = Join-Path "runs/pythia-lora-smoke-v1/resumed" $runId
 
-python scripts/benchmark_lora_training.py verify --run-root $control
-python scripts/benchmark_lora_training.py verify --run-root $resumed
+python scripts/benchmark_lora_training.py verify `
+  --run-root $control `
+  --output artifacts/local/pythia-lora-v1-control-verify.json
+python scripts/benchmark_lora_training.py verify `
+  --run-root $resumed `
+  --output artifacts/local/pythia-lora-v1-resumed-verify.json
 python scripts/benchmark_lora_training.py compare `
   --control-root $control `
   --resumed-root $resumed `
@@ -452,6 +456,14 @@ optimizer-state tensor bytes, and input-token throughput. Allocation failure,
 severe paging or desktop instability, driver/thermal instability, a nonfinite
 value, a skipped optimizer update, or any integrity mismatch still stops the
 gate.
+
+**Observed 2026-08-20 result:** exact clean head `3f03885` completed the v1
+control and planned interruption/resume under run
+`run-1b8f0867fbd6038265f609b3595ae93d`. Both verifiers passed and the
+comparator returned exact semantic equality with final-manifest SHA-256
+`78ae0dd9272e6d046c237cf2b10243691098c70234a8b3db2f1c353b347f365a`.
+The gate is closed; never rerun these immutable output names or create v2.
+See `reports/stage0/pythia_lora_resume_gate_2026-08-20.md`.
 
 The full-weight AdamW path is not attempted. Even the optimistic FP16
 weights/gradients/two-FP16-moment lower bound is 8,094,253,056 bytes, exceeding

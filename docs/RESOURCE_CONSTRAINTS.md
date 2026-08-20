@@ -9,10 +9,11 @@ This document is a binding design input. ChronoPersona should maximize scientifi
 - GPU: NVIDIA GeForce RTX 2060, 6,144 MiB VRAM, compute capability 7.5
 - System RAM: 17.13 GB decimal (16 GiB class)
 - CPU: 12 logical processors
-- Sampled free storage on the intended local drive: approximately 255 GB
+- Sampled free storage on the intended local drive: approximately 251 GB
 - Runtime: PyTorch `2.13.0+cu130`, compiled CUDA 13.0, CUDA available
-- Model load and bounded inference throughput: recorded; sustained thermals and
-  successful training throughput remain unmeasured
+- Model load, bounded inference, and five-step LoRA training/checkpoint/resume
+  throughput: recorded; sustained thermals and full-width training remain
+  unmeasured
 
 ### Potential borrowed machine
 
@@ -25,11 +26,12 @@ The current-machine values were measured by the no-network resource audit on
 remeasured on the exact run head. The borrowed-machine values remain reported
 and unverified.
 
-For the active final-Pythia loading and bounded training measurements, the user explicitly authorized
-using as much host RAM as needed on 2026-08-20. That run may therefore waive the
-conservative available-RAM margin while continuing to record live and peak RAM.
-This does not waive GPU, disk, artifact-integrity, exact-head, or severe system-
-instability stops, and it does not by itself authorize a larger training plan.
+For final-Pythia loading and bounded training measurements, the user explicitly
+authorized using as much host RAM as needed on 2026-08-20. Those local runs may
+therefore waive the conservative available-RAM margin while continuing to
+record live and peak RAM. This does not waive GPU, disk, artifact-integrity,
+exact-head, or severe system-instability stops, and it does not by itself
+authorize a larger training plan.
 
 ## User objective
 
@@ -132,7 +134,10 @@ Substantial training is blocked until all are true:
 
 Naturalistic interpretation is blocked until Synthetic Identifiability Calibration passes.
 
-The 12-branch two-era/two-source pilot is blocked until a smaller end-to-end smoke run demonstrates deterministic identities, failure handling, resumption, and artifact completeness.
+The smaller trainer/checkpoint/resume prerequisite passed on the bounded v1
+LoRA smoke. The 12-branch two-era/two-source pilot remains blocked by source,
+evaluation, synthetic-calibration, causal-checkpoint, broad-update, and cost
+gates; the smoke does not satisfy those requirements.
 
 ## Method constraints
 
@@ -176,7 +181,7 @@ Do not commit model weights, raw corpora, or large checkpoints to Git.
 - Prefer interruptible checkpoints and clean resume semantics.
 - Stop immediately on thermal instability, disk exhaustion risk, hash mismatch,
   repeated out-of-memory failure, or severe desktop instability. Record paging;
-  the active final-Pythia load may use it under the explicit low-RAM override.
+  bounded final-Pythia work may use it under the explicit low-RAM override.
 
 ## Budget decision format
 
@@ -195,6 +200,9 @@ Any request to increase compute must be presented as:
 The repository remains at Rungs 0–1 and CAD $0. The user explicitly authorized
 model downloads and training on 2026-08-20. Pinned acquisition and bounded
 loading/logits passed. The first tiny-LoRA v0 control failed before backward;
-the active operation is its sole attention-only v1 rescue, with one job at a
-time and all integrity, swapping, OOM, thermal, disk, and scientific stop
-rules. This does not authorize the full naturalistic branch set.
+its sole attention-only v1 rescue then passed the five-step control and planned
+interruption/resume equality gate with one job at a time. This bounded smoke
+does not establish sustained or broad-update fit and does not authorize the
+full naturalistic branch set. The next local operation is offline registry
+tokenizer/scorer integration through the existing hash-verified snapshot;
+integrity, swapping, OOM, thermal, disk, and scientific stop rules remain.

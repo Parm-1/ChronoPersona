@@ -432,7 +432,7 @@ temporal, or CSTG result.
 ## D-029 — Consume the one tiny-training rescue for explicit SDPA MATH
 
 **Date:** 2026-08-20
-**Status:** accepted and active for one v1 run
+**Status:** executed and passed at bounded engineering level
 
 The first frozen tiny-LoRA control at exact head `f2568ab` and run
 `run-b035b9becad60b6dc55ff3fd6fba6016` failed on its first forward with
@@ -470,6 +470,52 @@ There is no second tuning rescue.
 **Claim ceiling:** a v1 pass would prove only the bounded trainer/checkpoint/
 resume engineering gate on this exact runtime. It would not validate PEFT for
 the causal design or establish temporal, behavioral, or CSTG evidence.
+
+**Observed result:** exact clean head `3f03885` completed the sole v1 rescue.
+Uninterrupted control and planned step-three interruption/resume run
+`run-1b8f0867fbd6038265f609b3595ae93d` each completed five optimizer steps.
+Both independent verifiers passed, and the comparator returned exact equality
+for adapter, optimizer, scheduler, scaler, CPU/CUDA RNG, counters, losses, and
+complete state. The shared final-manifest SHA-256 is
+`78ae0dd9272e6d046c237cf2b10243691098c70234a8b3db2f1c353b347f365a`.
+The rescue is closed; do not create v2 or tune v0/v1.
+
+**Evidence:**
+`reports/stage0/pythia_lora_resume_gate_2026-08-20.md`.
+
+## D-030 — Accept the bounded resume gate and close the training rescue
+
+**Date:** 2026-08-20
+**Status:** accepted at Target Verified engineering level
+
+Accept exact clean head `3f03885` and run
+`run-1b8f0867fbd6038265f609b3595ae93d` as evidence that the frozen local
+Pythia LoRA path can perform backward and optimizer updates, publish and verify
+an atomic step-three checkpoint, resume in a fresh process, and reproduce the
+uninterrupted final semantic state exactly. The control and resumed conditions
+each completed five unique optimizer steps, 640 input tokens, and 635 causal
+targets. Independent verification passed and comparison returned `equal` for
+adapter, optimizer, scheduler, scaler, CPU/CUDA RNG, counters, losses, and
+complete state.
+
+Close E5 and the one-rescue path. Preserve the failed eager v0 and successful
+SDPA-MATH v1 artifacts; do not rerun them to improve timing, create v2, or tune
+another training variable. The next local engineering decision is whether the
+existing registry tokenizer/scorer consumers can use a shared manifest/hash-
+verified offline snapshot interface without trusting arbitrary cache contents.
+
+**Rejected alternatives:** do not treat the five-step smoke as evidence that
+LoRA is scientifically adequate, that a full-width causal branch fits, or that
+sustained operation has passed. Do not unblock real-source or temporal claims
+from an engineering equality result.
+
+**Claim ceiling:** Target Verified for this bounded trainer/checkpoint/resume
+path on the exact RTX 2060, software stack, model revision, fixtures, and
+training profile only. No model-behavior, temporal, causal-training, or CSTG
+claim is authorized.
+
+**Evidence:**
+`reports/stage0/pythia_lora_resume_gate_2026-08-20.md`.
 
 ## Pending decisions
 

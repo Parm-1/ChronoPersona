@@ -43,17 +43,18 @@ The **development content-integrity gate is passed**. Stage 0 engineering and re
 
 No evidence-bearing scientific model training or real-source qualification has
 occurred. One local engineering-only tiny-LoRA control failed before backward;
-its sole attention-policy rescue remains target-unverified. Source roles, era
-windows, causal checkpoint, dose, confirmation evaluation, meaningful-effect
-threshold, and prospective estimator remain unfrozen.
+its sole attention-policy rescue passed a five-step control and planned
+interruption/resume gate with exact final semantic state equality. This is
+trainer/checkpoint engineering evidence only. Source roles, era windows,
+causal checkpoint, dose, confirmation evaluation, meaningful-effect threshold,
+and prospective estimator remain unfrozen.
 
 External blockers include:
 
 - bounded rights-qualified, historically versioned real-source samples;
 - source continuity, composition, overlap, and exposure measurements;
-- successful target-model backward/checkpoint/resume evidence;
 - a shared hash-verified loader for registry scoring;
-- sustained throughput/cost evidence for any later branch plan;
+- sustained training and broad-update cost evidence for any later branch plan;
 - expanded development and sealed confirmation evaluation partitions.
 
 Default external-compute authorization remains **C$0**.
