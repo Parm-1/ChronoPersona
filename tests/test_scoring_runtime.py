@@ -2824,8 +2824,12 @@ def test_profile_selection_rejects_windows_leaf_aliases(suffix: str) -> None:
     module = _score_cli()
     aliased = Path(str(module.ROOT / V1_SCORING_PROFILE.config_path) + suffix)
 
-    with pytest.raises(ScoringRunError, match="canonical scoring config"):
+    with pytest.raises(ScoringRunError) as caught:
         module._selected_profile(aliased)
+    assert str(caught.value) in {
+        "scoring config path is not allowlisted",
+        "scoring execution requires the canonical scoring config",
+    }
 
 
 @pytest.mark.parametrize("suffix", [".", " "])
