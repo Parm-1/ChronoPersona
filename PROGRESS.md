@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T02:42:05-04:00
+**Last updated:** 2026-08-20T03:03:06-04:00
 
 ## Current objective
 
@@ -11,10 +11,12 @@ resume benchmark is locally viable.
 
 ## Current verified boundary
 
-- **Repository tooling — Tested:** commit
-  `99219b7445fc2ba330f348c39deec57cf45fbab2` passed 281 local tests with one
-  optional skip. Draft PR #29 passed CI, content-integrity, and run-registry
-  checks on Python 3.11, 3.12, and 3.13.
+- **Repository tooling — Tested:** implementation commit
+  `d812ba8183c3fedc54f67a53b19d71acdb5236df` passed 303 local tests with one
+  optional skip. The pilot, model-manifest, and development-evaluation
+  validators also passed against that exact clean commit. Draft PR #29's prior
+  head passed CI on Python 3.11, 3.12, and 3.13; the new head is pending push
+  and CI.
 - **Artifact policy — Tested:** the manifest validates with 13 artifacts and
   exactly one benchmark-ready model, final Pythia 1B deduped at immutable Hub
   revision `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
@@ -33,10 +35,10 @@ measurement, not a causal or behavioral research result.
 
 ## Next evidence gate
 
-Commit the exact-file acquisition/load split, then download only the pinned
-final-Pythia inference artifact into `artifacts/local/hf-cache`, verify it, and
-execute the guarded offline CUDA benchmark against a fresh post-acquisition
-audit.
+Publish and validate the exact-file acquisition/load split, then download only
+the pinned final-Pythia inference artifact into `artifacts/local/hf-cache`,
+verify it, and execute the guarded offline CUDA benchmark against a fresh post-
+acquisition audit.
 
 - **Pass:** immutable revision loads without remote code, logits complete, and
   load time, peak RAM/VRAM, dtype, parameter count, throughput, and loss are
@@ -51,12 +53,13 @@ audit.
 ## Last known-good baseline
 
 - Branch: `fix/model-feasibility-gates`
-- Head: `99219b7445fc2ba330f348c39deec57cf45fbab2`
+- Tested implementation: `d812ba8183c3fedc54f67a53b19d71acdb5236df`
 - Stacked base: `fix/windows-fixture-line-endings` at
   `bbcad88f04afc9f276806997168aebe953f2c972`
 - Upstream main: `8d6644b299cedfc57e8bdc590d85e17b4f97d2b5`
-- Delivery: draft PR #29, clean merge state, all reported checks passing
-- Worktree at reconciliation: clean and synchronized with origin
+- Delivery: draft PR #29; the tested implementation commit is one local commit
+  ahead of the published PR head and is pending push/CI
+- Execution worktree: detached, clean, and exactly bound to the tested commit
 
 ## Status
 
@@ -95,10 +98,10 @@ audit.
   exact file hashes/allowlists, revision/config identity, audit recency,
   runtime/resource drift, exclusive evidence outputs, parent runtime identity,
   model/logits semantics, truncation rejection, and alternate-loader blocks.
-- Most recent full candidate-tree run before the final durability additions:
-  298 passed, one skipped; pilot, model-manifest, and
-  development-evaluation validators passed. Exact staged-commit verification
-  is pending.
+- Exact clean implementation commit `d812ba8`: 303 passed, one skipped; pilot,
+  model-manifest, and development-evaluation validators passed; the no-download
+  Pythia plan resolved the expected 2,092,816,302-byte inference set and exact
+  5,232,040,755-byte disk margin.
 
 ### Integrated
 
@@ -141,9 +144,10 @@ audit.
 
 ## Workspace state
 
-- Tracked worktree was clean at reconciliation. The current intentional dirty
-  state contains the authorization plan, exact manifest identities,
-  acquisition/load split, alternate-loader block, tests, and protocol updates.
+- The exact execution worktree at `d812ba8` is clean. The primary worktree has
+  unrelated concurrent `AGENTS.md` and untracked PR-template changes whose
+  provenance is not part of this deliverable; they are preserved and excluded
+  from commits and model-run identity.
 - Ignored cache: `artifacts/local/hf-cache` (exists, empty at reconciliation).
 - Ignored evidence: resource audits and structured failure reports under
   `artifacts/local/`.
@@ -165,7 +169,8 @@ audit.
    5,232,040,755 bytes free on `artifacts/local/hf-cache`.
 2. Confirm no unrelated heavy GPU workload and record live RAM/VRAM without
    stopping user processes.
-3. Commit any tracked plan/state changes before auditing resources.
+3. Use a clean exact-head execution worktree; do not include unrelated primary-
+   worktree changes in the run identity.
 4. Generate a new no-network resource audit bound to the exact clean head and
    cache directory.
 5. Run `benchmark_model.py --acquire-only --allow-download` with the explicit

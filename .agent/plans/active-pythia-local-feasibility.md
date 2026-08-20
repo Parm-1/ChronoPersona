@@ -2,8 +2,8 @@
 
 **Status:** active
 **Started:** 2026-08-20T02:10:08-04:00
-**Last reconciled:** 2026-08-20T02:42:05-04:00
-**Source head:** `99219b7445fc2ba330f348c39deec57cf45fbab2`
+**Last reconciled:** 2026-08-20T03:03:06-04:00
+**Tested implementation:** `d812ba8183c3fedc54f67a53b19d71acdb5236df`
 **Branch:** `fix/model-feasibility-gates`
 
 ## Objective and end state
@@ -26,8 +26,10 @@ time, and exact resume behavior before any scientific training branch.
 
 ## Verified starting state
 
-- Clean local branch synchronized with `origin/fix/model-feasibility-gates`.
-- Draft PR #29 is stacked on draft PR #28 and all reported checks pass.
+- Exact detached execution worktree is clean at tested implementation commit
+  `d812ba8`; unrelated concurrent primary-worktree edits are excluded.
+- Draft PR #29 is stacked on draft PR #28. Its prior head passed all reported
+  checks; the tested implementation head is pending push and CI.
 - CPython 3.11.9 virtual environment with PyTorch `2.13.0+cu130`, Transformers
   5.15.1, Hugging Face Hub 1.28.0, and Accelerate 1.14.0.
 - CUDA 13.0 available; RTX 2060 compute capability 7.5 and 6,144 MiB VRAM.
@@ -38,11 +40,11 @@ time, and exact resume behavior before any scientific training branch.
   `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
 - Exact required inference set: five files totaling 2,092,816,302 bytes;
   exact 2.5x disk margin: 5,232,040,755 bytes.
-- Local suite: 281 passed, one skipped. Exact-head CI passed Python 3.11–3.13.
+- Exact implementation suite: 303 passed, one skipped; all three top-level
+  validators and the no-download acquisition plan passed.
 - User explicitly authorized model downloads and training on 2026-08-20.
-- Earlier candidate tree: 298 tests passed with one optional skip; pilot,
-  model-manifest, and development-evaluation validators passed. Exact staged
-  commit verification remains pending after the final durability additions.
+- The no-download plan at the tested commit resolved the exact required bytes
+  and disk margin without acquiring weights.
 
 ## Active deliverable and evidence gate
 
@@ -200,6 +202,9 @@ Falsified only by pinned revision/cache evidence and a successful safe loader.
   3,792 MiB VRAM, approximately 6.9 GB RAM, and approximately 255 GB disk were
   free. Interpretation: the permission blocker is gone, but E1–E3 remain
   necessary because artifact integrity and live fit are not established.
+- **2026-08-20T03:03:06-04:00:** exact clean implementation commit `d812ba8`
+  passed 303 tests with one optional skip, all top-level validators, and the
+  no-download acquisition plan. No model weights were downloaded.
 
 ## Decisions
 
