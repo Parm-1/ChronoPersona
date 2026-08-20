@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T12:26:18-04:00
+**Last updated:** 2026-08-20T12:28:30-04:00
 
 ## Decision
 
@@ -10,12 +10,12 @@ all 12 development items, 24 forms, and 48 candidates with zero failures and
 byte-identical reports. Freeze native `prefix-policy=none` before logits.
 
 Accept the dependency-light registry-scoring implementation as **Tested** at
-exact local code head `dc14bf8`. It is delivered on draft PR #34, but every
-GitHub-hosted job for that head was rejected before startup by an account-level
-payment/spending-limit annotation. Keep target scoring blocked until exact-head
-CI can actually run and pass; then require fresh clean-head resource evidence
-before either attempt. No development logits have been inspected. Preserve the
-completed v0/v1 training evidence without rerunning it.
+code head `dc14bf8` and **Integrated** at public-delivery correction head
+`39052c5876feefd5716493b2fd0d9cc149762bd5`. All 18 exact-head push/PR checks
+passed on draft PR #34. Keep target scoring blocked until a fresh clean-head
+resource audit passes every frozen threshold before attempt A. No development
+logits have been inspected. Preserve the completed v0/v1 training evidence
+without rerunning it.
 
 The user explicitly authorized changing `Parm-1/ChronoPersona` from private to
 public to obtain free standard GitHub-hosted Actions capacity. After a
@@ -28,10 +28,10 @@ secret scanning, and push protection are verified. No billing setting changed.
 
 ## Current objective
 
-Deliver the narrow Linux symlink-cleanup correction surfaced by public Actions
-and require all checks to pass at the resulting exact head. Only then execute
-the frozen two-attempt gate if fresh resource audits pass. Require
-byte-identical deterministic scores and independently valid runtime receipts.
+Require the state-only delivery head to preserve green exact-head CI, then
+capture fresh audit A and execute attempt A only if every frozen resource gate
+passes. Release CUDA/staging state, capture fresh audit B, and require
+byte-identical deterministic scores plus independently valid runtime receipts.
 
 ## Current verified boundary
 
@@ -81,18 +81,18 @@ byte-identical deterministic scores and independently valid runtime receipts.
   Adversarial tests cover exact score semantics, complete resource evidence,
   model/runtime identity, output transactions, failure receipts, final
   Git/input rebinding, and byte-exact repeat verification.
-- **Scoring delivery — portability correction pending:** `dc14bf8` is pushed
-  on draft PR #34. Its private-repository jobs were rejected before startup by
-  GitHub's account-level payment/spending gate. Public-delivery head `0f58e60`
-  then proved that hosted jobs start but exposed the Linux cleanup defect below.
-  No target scoring or development-logit evidence exists.
-- **Public Actions — Integrated, portability correction pending:** exact head
+- **Scoring delivery — Integrated:** exact correction head
+  `39052c5876feefd5716493b2fd0d9cc149762bd5` is pushed on open draft PR #34
+  and passed all 18/18 push/PR checks across Python 3.11, 3.12, and 3.13. No
+  target scoring or development-logit evidence exists yet.
+- **Public Actions — Integrated:** exact head
   `0f58e60` started all 18 push/PR checks. Content Integrity and Run Registry
   Smoke passed 12/12. All six CI jobs reached the suite and reported 458
   passing tests plus one shared cleanup failure after the linked-parent
   security assertion: POSIX requires unlinking a directory symlink rather than
   calling `os.rmdir`. The narrow cross-platform test cleanup is the only
-  observed failure and must receive a new exact-head CI run.
+  observed failure. The platform-correct cleanup at `39052c5` then passed all
+  18/18 checks.
 
 ## Evidence
 
@@ -184,6 +184,9 @@ byte-identical deterministic scores and independently valid runtime receipts.
   `32391745573` failed only the same Linux cleanup line with 458 tests passing
   in each Python job; Content Integrity runs `32391740415`/`32391745535` and
   Run Registry Smoke runs `32391740416`/`32391745557` passed all 12 jobs.
+- Corrected exact-head CI at `39052c5`: all 18/18 push/PR checks completed
+  successfully with no failure, cancellation, timeout, skip, action-required,
+  or pending result. PR #34 remains open and draft.
 
 ## Risks
 
@@ -227,8 +230,8 @@ byte-identical deterministic scores and independently valid runtime receipts.
   `feat/verified-registry-loader`; exact tested code head `dc14bf8` is pushed,
   and public-delivery head `0f58e60` proved hosted jobs now start. Its 12
   integrity/smoke checks passed; six CI jobs exposed one Linux-only test cleanup
-  defect after 458 passing tests. A narrow correction is being delivered before
-  the scoring gate can advance.
+  defect after 458 passing tests. Exact correction head `39052c5` then passed
+  all 18/18 checks, closing E3.
 - Repository visibility: public by explicit user authorization. Anonymous read
   access, external-fork workflow approval, secret scanning, and push protection
   are verified. No billing or spending setting was changed.
@@ -239,11 +242,9 @@ byte-identical deterministic scores and independently valid runtime receipts.
 
 ## Next write-active deliverable
 
-1. Deliver the narrow linked-parent cleanup correction and require exact-head
-   CI before any development logits are inspected.
-2. Require all standard GitHub-hosted checks to pass; do not change account
-   billing or spending settings.
-3. After CI passes, capture fresh audit A and run attempt A only if every frozen
+1. Push the state-only E3 closure and require its exact-head CI before any
+   development logits are inspected.
+2. Capture fresh audit A and run attempt A only if every frozen
    resource gate passes; then release state, capture fresh audit B, run attempt
    B, and require the offline repeat verifier to accept exact score bytes.
 

@@ -1,6 +1,6 @@
 # Verified Registry Model Scoring
 
-**Status:** active — E0-E2 complete; E3 public-repository CI delivery pending; no development logits inspected
+**Status:** active — E0-E3 complete; E4 exact-head target scoring ready for fresh resource audit A; no development logits inspected
 **Started:** 2026-08-20T07:17:14-04:00
 **Frozen baseline:** `dd0b56471b55babe2a4eb273381deeef2f852d49`
 **Branch:** `feat/verified-registry-scoring`
@@ -169,7 +169,7 @@ threshold, output-transaction, lock-release, and final-rebind failures. This is
 pre-execution Tested evidence only; no exact-head CI or target-scoring evidence
 exists yet and no model logits were inspected.
 
-### E3 — Implementation delivery (active)
+### E3 — Implementation delivery (complete)
 
 - Complete: pushed exact tested code head `dc14bf8` and opened draft PR #34
   stacked on `feat/verified-registry-loader`.
@@ -206,6 +206,10 @@ exists yet and no model logits were inspected.
   a POSIX directory symlink after its security assertion had passed. Deliver
   the narrow platform-correct cleanup and require a new exact-head green run;
   this is a test-portability defect, not model-scoring evidence.
+- Complete: exact correction head
+  `39052c5876feefd5716493b2fd0d9cc149762bd5` passed all 18/18 push/PR checks
+  across Python 3.11, 3.12, and 3.13. PR #34 remains open and draft. E3 is
+  closed; do not rerun prior failed billing/cleanup heads.
 
 ### E4 — Exact-head target scoring
 
@@ -262,7 +266,6 @@ shorten the registry, quantize, offload, or choose a preferred output.
 
 Read `PROGRESS.md`, confirm this is the sole active plan, inspect branch/status,
 and preserve PR #33 at `dd0b564` plus draft PR #34. Confirm the repository is
-public with read-only workflow tokens and external-fork approval, push the
-local delivery checkpoint, and require all checks at the resulting exact head.
-Never run model scoring before E3 exact-head CI passes, and never merge draft
-PRs.
+public with read-only workflow tokens and external-fork approval and confirm
+the current exact head has green CI. Then capture fresh clean-head audit A and
+stop before loading if any frozen gate fails. Never merge draft PRs.
