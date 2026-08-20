@@ -181,7 +181,8 @@ exists yet and no model logits were inspected.
   `96453153543`, which again completed with no steps and the same account-level
   rejection. After the user resumed the blocked goal, one fresh availability
   probe produced job `96483944575`; it likewise completed with no steps and the
-  same annotation. Hosted-runner availability is therefore still blocked.
+  same annotation. Hosted-runner availability remained blocked while the
+  repository was private.
 - On 2026-08-20 the user explicitly authorized changing
   `Parm-1/ChronoPersona` from private to public to restore free standard
   GitHub-hosted Actions capacity. Pre-exposure scans found no credentials,
@@ -195,10 +196,16 @@ exists yet and no model logits were inspected.
   deployments, environments, repository secrets, and variables remain absent.
   Secret scanning and push protection are enabled, and every external fork PR
   requires workflow approval.
-- Push the local checkpoint and require every check to pass at the resulting
-  exact head before inspecting development logits. A public visibility flag
-  alone is not CI evidence; jobs must start and complete on standard hosted
-  runners.
+- Require every check to pass at the resulting exact head before inspecting
+  development logits. A public visibility flag alone is not CI evidence; jobs
+  must start and complete on standard hosted runners.
+- Observed at public-delivery head `0f58e60`: all 18 push/PR checks started.
+  Content Integrity and Run Registry Smoke passed 12/12. All six CI matrix
+  jobs reached the full suite and reported 458 passing tests plus one shared
+  Linux-only cleanup failure: the linked-parent regression used `os.rmdir` on
+  a POSIX directory symlink after its security assertion had passed. Deliver
+  the narrow platform-correct cleanup and require a new exact-head green run;
+  this is a test-portability defect, not model-scoring evidence.
 
 ### E4 — Exact-head target scoring
 

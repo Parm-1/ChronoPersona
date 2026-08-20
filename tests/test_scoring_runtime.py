@@ -2311,4 +2311,7 @@ def test_output_location_rejects_linked_parent() -> None:
                 )
         finally:
             if os.path.lexists(linked):
-                os.rmdir(linked)
+                if os.name == "nt":
+                    os.rmdir(linked)
+                else:
+                    linked.unlink()

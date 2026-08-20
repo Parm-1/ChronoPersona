@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T12:20:02-04:00
+**Last updated:** 2026-08-20T12:26:18-04:00
 
 ## Decision
 
@@ -28,10 +28,10 @@ secret scanning, and push protection are verified. No billing setting changed.
 
 ## Current objective
 
-Push the public-visibility delivery checkpoint to draft PR #34 and require all
-checks to start and pass at that resulting exact head. Only then execute the
-frozen two-attempt gate if fresh resource audits pass. Require byte-identical
-deterministic scores and independently valid runtime receipts.
+Deliver the narrow Linux symlink-cleanup correction surfaced by public Actions
+and require all checks to pass at the resulting exact head. Only then execute
+the frozen two-attempt gate if fresh resource audits pass. Require
+byte-identical deterministic scores and independently valid runtime receipts.
 
 ## Current verified boundary
 
@@ -81,12 +81,18 @@ deterministic scores and independently valid runtime receipts.
   Adversarial tests cover exact score semantics, complete resource evidence,
   model/runtime identity, output transactions, failure receipts, final
   Git/input rebinding, and byte-exact repeat verification.
-- **Scoring delivery — CI pending:** `dc14bf8` is pushed on draft PR
-  #34. All 18 push/PR matrix jobs were rejected before startup with GitHub's
-  account-level failed-payment/spending-limit annotation. This is not passing
-  CI and is not a test result. Repository visibility is now public, but the
-  resulting checkpoint has not yet been pushed and tested; no target scoring
-  or development-logit evidence exists.
+- **Scoring delivery — portability correction pending:** `dc14bf8` is pushed
+  on draft PR #34. Its private-repository jobs were rejected before startup by
+  GitHub's account-level payment/spending gate. Public-delivery head `0f58e60`
+  then proved that hosted jobs start but exposed the Linux cleanup defect below.
+  No target scoring or development-logit evidence exists.
+- **Public Actions — Integrated, portability correction pending:** exact head
+  `0f58e60` started all 18 push/PR checks. Content Integrity and Run Registry
+  Smoke passed 12/12. All six CI jobs reached the suite and reported 458
+  passing tests plus one shared cleanup failure after the linked-parent
+  security assertion: POSIX requires unlinking a directory symlink rather than
+  calling `os.rmdir`. The narrow cross-platform test cleanup is the only
+  observed failure and must receive a new exact-head CI run.
 
 ## Evidence
 
@@ -173,6 +179,11 @@ deterministic scores and independently valid runtime receipts.
   token. External fork workflows require approval from all contributors.
   Secret scanning and push protection are enabled. Pages, releases,
   deployments, environments, repository secrets, and variables remain absent.
+- Public exact-head CI at `0f58e60`: 18/18 jobs started, proving the prior
+  account-level zero-step blocker is removed. Runs `32391740331` and
+  `32391745573` failed only the same Linux cleanup line with 458 tests passing
+  in each Python job; Content Integrity runs `32391740415`/`32391745535` and
+  Run Registry Smoke runs `32391740416`/`32391745557` passed all 12 jobs.
 
 ## Risks
 
@@ -214,10 +225,10 @@ deterministic scores and independently valid runtime receipts.
   `dd0b564`.
 - Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, stacked on
   `feat/verified-registry-loader`; exact tested code head `dc14bf8` is pushed,
-  but its hosted jobs were rejected before startup by the account billing/
-  spending-limit gate. This blocker-state checkpoint is intentionally retained
-  locally until Actions can run, avoiding another known-unstartable workflow
-  batch.
+  and public-delivery head `0f58e60` proved hosted jobs now start. Its 12
+  integrity/smoke checks passed; six CI jobs exposed one Linux-only test cleanup
+  defect after 458 passing tests. A narrow correction is being delivered before
+  the scoring gate can advance.
 - Repository visibility: public by explicit user authorization. Anonymous read
   access, external-fork workflow approval, secret scanning, and push protection
   are verified. No billing or spending setting was changed.
@@ -228,11 +239,10 @@ deterministic scores and independently valid runtime receipts.
 
 ## Next write-active deliverable
 
-1. Push the public-visibility delivery checkpoint and require exact-head CI
-   before any
-   development logits are inspected.
-2. Confirm the jobs actually start on standard GitHub-hosted runners and all
-   checks pass; do not change account billing or spending settings.
+1. Deliver the narrow linked-parent cleanup correction and require exact-head
+   CI before any development logits are inspected.
+2. Require all standard GitHub-hosted checks to pass; do not change account
+   billing or spending settings.
 3. After CI passes, capture fresh audit A and run attempt A only if every frozen
    resource gate passes; then release state, capture fresh audit B, run attempt
    B, and require the offline repeat verifier to accept exact score bytes.
