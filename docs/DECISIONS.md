@@ -368,6 +368,33 @@ passes its evidence gate.
 **Current-state authority:** `PROGRESS.md` and
 `.agent/plans/active-pythia-local-feasibility.md`.
 
+## D-027 — Permit a recorded low-RAM final-Pythia load attempt
+
+**Date:** 2026-08-20
+**Status:** accepted and active for the bounded loading measurement
+
+After the exact pinned snapshot was acquired and verified, the first offline
+CUDA execution stopped before model loading because post-import available RAM
+fell below the conservative two-times-weight threshold. The user then
+explicitly authorized using as much RAM as needed.
+
+Add an explicit `--allow-low-ram` execution option. It waives only the hard
+available-RAM threshold while preserving both audited and live RAM values, the
+threshold, whether it passed, and whether the override was used in the
+structured result. Immutable file identity, offline loading, clean exact-head
+binding, disk, conservative VRAM, model/logit semantics, and structured failure
+gates remain unchanged.
+
+**Reason:** the first failure measured a conservative host-headroom policy, not
+model incompatibility or an allocation failure. A named and visible override
+honors the user's resource authorization without silently weakening the normal
+default or erasing the failed attempt.
+
+**Claim ceiling:** a successful override run would establish only bounded local
+loading/logits feasibility under the observed host-memory pressure. It would
+not establish full-weight training fit, sustained stability, scorer validity,
+temporal behavior, or CSTG.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

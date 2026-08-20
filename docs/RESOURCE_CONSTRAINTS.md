@@ -24,6 +24,12 @@ The current-machine values were measured by the no-network resource audit on
 remeasured on the exact run head. The borrowed-machine values remain reported
 and unverified.
 
+For the active final-Pythia loading measurement, the user explicitly authorized
+using as much host RAM as needed on 2026-08-20. That run may therefore waive the
+conservative available-RAM margin while continuing to record live and peak RAM.
+This does not waive GPU, disk, artifact-integrity, exact-head, or severe system-
+instability stops, and it does not by itself authorize a larger training plan.
+
 ## User objective
 
 Spend as little money as possible while producing the strongest credible paper.
@@ -167,7 +173,9 @@ Do not commit model weights, raw corpora, or large checkpoints to Git.
 - Do not run multiple seeds concurrently on the current machine.
 - Avoid making the daily-use computer unusable for speculative sweeps.
 - Prefer interruptible checkpoints and clean resume semantics.
-- Stop immediately on thermal instability, swapping, disk exhaustion risk, hash mismatch, or repeated out-of-memory failure.
+- Stop immediately on thermal instability, disk exhaustion risk, hash mismatch,
+  repeated out-of-memory failure, or severe desktop instability. Record paging;
+  the active final-Pythia load may use it under the explicit low-RAM override.
 
 ## Budget decision format
 

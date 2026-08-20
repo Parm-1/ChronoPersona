@@ -485,6 +485,10 @@ def test_execution_resources_bind_identity_and_conservative_headroom() -> None:
     assert report["live_vram"]["nvidia_smi_free_bytes"] == 6 * 1024 * 1024
     assert report["live_vram"]["conservative_free_bytes"] == 6 * 1024 * 1024
     assert report["minimum_available_ram_bytes"] == 2_000_000
+    assert report["conservative_available_ram_bytes"] == 10_000_000
+    assert report["ram_threshold_enforced"] is True
+    assert report["ram_threshold_passed"] is True
+    assert report["ram_threshold_override_used"] is False
     assert report["minimum_free_vram_bytes"] == 1_500_000
 
     cpu_report = module._validate_execution_resources(
@@ -518,12 +522,23 @@ def test_execution_resources_reject_identity_and_headroom_drift() -> None:
             {"weight_size_bytes": 1_000_000},
         )
 
+    low_ram_override = module._validate_execution_resources(
+        audited,
+        low_ram,
+        {"weight_size_bytes": 1_000_000},
+        enforce_ram_threshold=False,
+    )
+    assert low_ram_override["ram_threshold_enforced"] is False
+    assert low_ram_override["ram_threshold_passed"] is False
+    assert low_ram_override["ram_threshold_override_used"] is True
+
     low_vram = _execution_audit(nvidia_free_mib=1)
     with pytest.raises(RuntimeError, match="VRAM"):
         module._validate_execution_resources(
             audited,
             low_vram,
             {"weight_size_bytes": 1_000_000},
+            enforce_ram_threshold=False,
         )
 
 
@@ -533,9 +548,10 @@ def test_live_resource_audit_is_embedded_with_verifiable_hash(
 ) -> None:
     module = _benchmark_module()
     audited = _execution_audit()
-    live = _execution_audit()
+    live = _execution_audit(available_ram=1_000_000)
     args = argparse.Namespace(
         device="cuda",
+        allow_low_ram=True,
         _supplied_resource_audit=audited,
     )
     monkeypatch.setattr(
@@ -553,6 +569,20 @@ def test_live_resource_audit_is_embedded_with_verifiable_hash(
     assert report["live_resource_audit"] == live
     assert report["live_resource_audit_sha256"] == "c" * 64
     assert report["execution_resource_validation"]["live_vram"]
+    assert report["execution_resource_validation"][
+        "ram_threshold_override_used"
+    ] is True
+
+    post_report = module._post_import_resource_preflight(
+        args,
+        {"weight_size_bytes": 1_000_000},
+        report,
+    )
+    assert post_report["post_import_resource_audit"] == live
+    assert post_report["post_import_resource_audit_sha256"] == "c" * 64
+    assert post_report["post_import_resource_validation"][
+        "ram_threshold_override_used"
+    ] is True
 
 
 def test_parent_imported_runtime_must_match_live_audit() -> None:
@@ -880,6 +910,18 @@ def test_execution_rejects_combined_download_and_load() -> None:
 
     assert completed.returncode == 2
     assert "acquisition and loading must be separate" in completed.stderr
+
+
+def test_low_ram_override_requires_execution() -> None:
+    completed = _run(
+        "scripts/benchmark_model.py",
+        "--artifact",
+        "pythia-1b-deduped-main",
+        "--allow-low-ram",
+    )
+
+    assert completed.returncode == 2
+    assert "meaningful only with --execute" in completed.stderr
 
 
 def test_peak_process_memory_is_measurable_on_supported_platform() -> None:

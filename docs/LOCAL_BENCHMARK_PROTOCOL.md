@@ -199,6 +199,7 @@ $env:TRANSFORMERS_OFFLINE = "1"
 python scripts/benchmark_model.py `
   --artifact pythia-1b-deduped-main `
   --execute `
+  --allow-low-ram `
   --device cuda `
   --dtype float16 `
   --cache-dir $env:HF_HOME `
@@ -213,9 +214,11 @@ Execution rehashes the full allowlist, captures a live audit before importing
 the model stack, verifies the actual parent Torch/Transformers/CUDA/device
 identity, and captures another live audit after those imports and immediately
 before loading. Both complete child audits and their hashes are embedded in the
-result. The run fails if stable runtime/GPU identity drifts, available physical
-RAM is below twice the weight bytes, or conservative free VRAM is below 1.5
-times the weight bytes.
+result. By default the run fails if available physical RAM is below twice the
+weight bytes. The explicit `--allow-low-ram` option records that threshold and
+whether it passed but waives only that hard stop under the user's 2026-08-20
+authorization. Conservative free VRAM must still remain at least 1.5 times the
+weight bytes, and all runtime, disk, and integrity gates remain enforced.
 
 For a subsequent run, capture a new resource audit and continue to omit
 `--allow-download`:
@@ -224,6 +227,7 @@ For a subsequent run, capture a new resource audit and continue to omit
 python scripts/benchmark_model.py `
   --artifact pythia-1b-deduped-main `
   --execute `
+  --allow-low-ram `
   --device cuda `
   --dtype float16 `
   --cache-dir $env:HF_HOME `
@@ -255,12 +259,14 @@ Stop the benchmark sequence when any of these occurs:
 
 - free disk falls below the safety margin;
 - the resource audit is stale or runtime/GPU identity drifts;
-- physical RAM or conservative free VRAM falls below the declared load margin;
+- physical RAM falls below the declared load margin unless the run explicitly
+  records `--allow-low-ram`; conservative free VRAM always remains enforced;
 - the model revision differs from the manifest;
 - a required file hash, exact allowlist, or model config identity differs;
 - the model requests custom remote code;
 - the model license is unverified;
-- the process causes system swapping or severe desktop instability;
+- the process encounters an allocation failure or causes severe desktop
+  instability; low-RAM runs may page and must record observed peak process RAM;
 - the GPU repeatedly runs out of memory;
 - thermal or driver instability appears;
 - output metadata is incomplete.

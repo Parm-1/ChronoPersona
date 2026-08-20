@@ -478,6 +478,7 @@ def _validate_execution_resources(
     artifact: Mapping[str, Any],
     *,
     require_cuda: bool = True,
+    enforce_ram_threshold: bool = True,
 ) -> dict[str, Any]:
     audited_git = audited.get("git")
     live_git = live.get("git")
@@ -630,7 +631,8 @@ def _validate_execution_resources(
         raise ValueError("audited available RAM must be an integer")
     if not isinstance(live_ram, int) or isinstance(live_ram, bool):
         raise ValueError("live available RAM must be an integer")
-    if min(audited_ram, live_ram) < minimum_ram:
+    ram_threshold_passed = min(audited_ram, live_ram) >= minimum_ram
+    if enforce_ram_threshold and not ram_threshold_passed:
         raise RuntimeError("available RAM is below the model-load safety threshold")
 
     audited_vram: dict[str, int] | None = None
@@ -663,7 +665,13 @@ def _validate_execution_resources(
         ),
         "audited_available_ram_bytes": audited_ram,
         "live_available_ram_bytes": live_ram,
+        "conservative_available_ram_bytes": min(audited_ram, live_ram),
         "minimum_available_ram_bytes": minimum_ram,
+        "ram_threshold_enforced": enforce_ram_threshold,
+        "ram_threshold_passed": ram_threshold_passed,
+        "ram_threshold_override_used": (
+            not enforce_ram_threshold and not ram_threshold_passed
+        ),
         "audited_vram": audited_vram,
         "live_vram": live_vram,
         "minimum_free_vram_bytes": minimum_vram if require_cuda else None,
@@ -695,6 +703,9 @@ def _live_execution_preflight(
         live_audit,
         artifact,
         require_cuda=args.device == "cuda",
+        enforce_ram_threshold=not bool(
+            getattr(args, "allow_low_ram", False)
+        ),
     )
     preflight["execution_resource_validation"] = validation
     setattr(args, "_resource_preflight", preflight)
@@ -797,6 +808,9 @@ def _post_import_resource_preflight(
         post_audit,
         artifact,
         require_cuda=args.device == "cuda",
+        enforce_ram_threshold=not bool(
+            getattr(args, "allow_low_ram", False)
+        ),
     )
     preflight["post_import_resource_validation"] = validation
     setattr(args, "_resource_preflight", preflight)
@@ -941,6 +955,9 @@ def _failure_report(
         "revision": artifact.get("revision") if artifact else None,
         "device": args.device,
         "requested_dtype": args.dtype,
+        "ram_threshold_override_requested": bool(
+            getattr(args, "allow_low_ram", False)
+        ),
         "cache_dir": (
             str(args.cache_dir)
             if args.cache_dir is not None
@@ -1359,6 +1376,7 @@ def _execute(args: argparse.Namespace, artifact: dict[str, Any]) -> dict[str, An
         "artifact_integrity": artifact_integrity,
         "device": str(device),
         "requested_dtype": args.dtype,
+        "ram_threshold_override_requested": bool(args.allow_low_ram),
         "model_dtype": str(next(model.parameters()).dtype),
         "parameter_count": parameter_count,
         "loaded_model_validation": loaded_model_validation,
@@ -1446,6 +1464,15 @@ def _parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--allow-low-ram",
+        action="store_true",
+        help=(
+            "explicitly request that the available-RAM safety threshold be "
+            "recorded but not enforced; disk, VRAM, identity, and integrity "
+            "gates remain enforced"
+        ),
+    )
+    parser.add_argument(
         "--prompt",
         default=(
             "In the fictional city of Lume, inspectors compare two reports "
@@ -1486,6 +1513,12 @@ def main() -> int:
     if args.allow_download and not args.acquire_only:
         print(
             "error: --allow-download is meaningful only with --acquire-only",
+            file=sys.stderr,
+        )
+        return 2
+    if args.allow_low_ram and not args.execute:
+        print(
+            "error: --allow-low-ram is meaningful only with --execute",
             file=sys.stderr,
         )
         return 2

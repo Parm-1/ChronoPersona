@@ -3,7 +3,7 @@
 **Status:** active
 **Started:** 2026-08-20T02:10:08-04:00
 **Last reconciled:** 2026-08-20T03:03:06-04:00
-**Tested implementation:** `d812ba8183c3fedc54f67a53b19d71acdb5236df`
+**Tested and acquired head:** `b8e0c5d699a8bf46548018ae803afb597524a336`
 **Branch:** `fix/model-feasibility-gates`
 
 ## Objective and end state
@@ -26,16 +26,18 @@ time, and exact resume behavior before any scientific training branch.
 
 ## Verified starting state
 
-- Exact detached execution worktree is clean at tested implementation commit
-  `d812ba8`; unrelated concurrent primary-worktree edits are excluded.
+- Exact detached execution worktree is clean at acquired commit `b8e0c5d`;
+  unrelated concurrent primary-worktree edits are excluded.
 - PRs #28 and #29 were merged externally after passing their reported checks.
-  The tested hardening head is pending push, a new draft PR, and exact-head CI.
+  Draft PR #30 covers the hardening head and all 18 `b8e0c5d` checks passed;
+  the subsequent low-RAM override is pending validation and publication.
 - CPython 3.11.9 virtual environment with PyTorch `2.13.0+cu130`, Transformers
   5.15.1, Hugging Face Hub 1.28.0, and Accelerate 1.14.0.
 - CUDA 13.0 available; RTX 2060 compute capability 7.5 and 6,144 MiB VRAM.
 - At reconciliation: 3,792 MiB free VRAM, approximately 6.9 GB available RAM,
   and approximately 255 GB free disk.
-- Explicit cache `artifacts/local/hf-cache` exists and is empty.
+- Explicit cache `artifacts/local/hf-cache` contains the exact verified five-
+  file Pythia snapshot at the pinned revision.
 - Manifest: 13 artifacts, one benchmark-ready final Pythia revision
   `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
 - Exact required inference set: five files totaling 2,092,816,302 bytes;
@@ -78,20 +80,23 @@ safetensors loading fails before meaningful CUDA allocation.
 
 Falsified by successful immutable load and forward pass.
 
-### H3 — Dynamic desktop headroom invalidates the run
+### H3 — Dynamic desktop headroom triggers the conservative RAM gate
 
 Unrelated GPU/RAM use leaves insufficient safe headroom even though the hardware
 class is nominally capable.
 
-Supported if a fresh audit or live observation fails the stop threshold; do not
-terminate unrelated processes to manufacture a pass.
+Observed on the first offline attempt: post-import available RAM fell below the
+two-times-weight threshold. Preserve that result and use the explicit user-
+authorized RAM override on the single retry; do not terminate unrelated
+processes to manufacture headroom.
 
 ### H4 — Acquisition or identity is incomplete
 
 The download is partial, resolves a different revision, or lacks the required
 safe inference files.
 
-Falsified only by pinned revision/cache evidence and a successful safe loader.
+Falsified at the acquisition layer by the complete exact-file, revision, hash,
+and config verification. Model loading remains a separate unresolved gate.
 
 ## Scope and ownership
 
@@ -178,13 +183,16 @@ Falsified only by pinned revision/cache evidence and a successful safe loader.
   `TRANSFORMERS_OFFLINE=1`, then execute the benchmark on CUDA. The script
   embeds child-process audits before and after parent model-stack imports,
   validates the actual imported runtime/GPU identity, and rechecks physical RAM
-  plus conservative VRAM headroom immediately before load.
+  plus conservative VRAM headroom immediately before load. Pass
+  `--allow-low-ram` so the user-authorized run records but does not enforce the
+  physical-RAM margin.
 - **Expected:** complete JSON with loaded model/logits semantics, memory, load
   time, throughput, loss, and both resource bindings, or one structured
   failure.
-- **Stop:** stale/drifted audit, low RAM/VRAM, architecture/dtype/parameter/logit
-  mismatch, OOM, swapping, severe desktop impact, thermal/driver instability,
-  or incomplete metadata.
+- **Stop:** stale/drifted audit, low VRAM, architecture/dtype/parameter/logit
+  mismatch, allocation failure, OOM, severe desktop impact, thermal/driver
+  instability, or incomplete metadata. Low available host RAM is recorded but
+  is not a stop under the explicit override.
 - **Artifact:** `artifacts/local/pythia-main-cuda-authorized.json`.
 
 ### E4 — Post-run decision
@@ -207,6 +215,16 @@ Falsified only by pinned revision/cache evidence and a successful safe loader.
 - **2026-08-20T03:03:06-04:00:** exact clean implementation commit `d812ba8`
   passed 303 tests with one optional skip, all top-level validators, and the
   no-download acquisition plan. No model weights were downloaded.
+- **2026-08-20T03:08:56-04:00:** E2 completed at exact head `b8e0c5d`; all
+  five files totaling 2,092,816,302 bytes matched the pinned revision, exact
+  allowlist, sizes, SHA-256 digests, and GPT-NeoX config.
+- **2026-08-20T03:09:27-04:00:** the first offline E3 attempt stopped at
+  `live-resource-preflight` before model import/load because available RAM was
+  3,281,063,936 bytes versus the 4,181,403,056-byte conservative threshold.
+  Artifact integrity and 3,764 MiB conservative free VRAM remained valid.
+- **2026-08-20T03:12:57-04:00:** the user explicitly authorized using as much
+  host RAM as needed. E3 will repeat from a new exact head with a recorded
+  low-RAM override; the first failure remains preserved.
 
 ## Decisions
 
@@ -214,6 +232,9 @@ Falsified only by pinned revision/cache evidence and a successful safe loader.
   benchmark-ready artifact and is sufficient to test the local loading path.
 - Retain scientific, legal, integrity, and resource stop conditions. The user
   lifted permission restrictions, not the evidentiary meaning of a result.
+- Waive only the E3 available-host-RAM hard threshold through an explicit,
+  reported CLI option. Continue to enforce VRAM, disk, identity, and integrity
+  gates and stop on actual allocation failure or severe instability.
 - Keep external spend at CAD $0 for this gate; no paid resource is needed.
 - Defer CPU fallback, quantization, offload, optimizer choice, and training
   method until E3 identifies the actual limiting variable.
@@ -247,7 +268,8 @@ resource reality, and resume the first incomplete milestone. Never reconstruct
 authorization or run identity from chat alone. Before E2, require a clean head,
 fresh audit, existing explicit cache, and all E1 stop conditions passing. Before
 E3, require complete E2 integrity, a second fresh audit, explicit offline mode,
-no conflicting heavy job, and all E3 headroom checks passing.
+no conflicting heavy job, and all non-RAM E3 headroom checks passing. Record
+the user-authorized RAM-threshold override explicitly.
 
 ## Completion classification
 
