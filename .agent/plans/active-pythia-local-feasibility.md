@@ -1,10 +1,11 @@
 # Active ExecPlan — Pythia Local Feasibility
 
-**Status:** active — inference passed; tiny training gate in implementation
+**Status:** active — implementation validated; target CUDA training pending
 **Started:** 2026-08-20T02:10:08-04:00
-**Last reconciled:** 2026-08-20T03:19:29-04:00
+**Last reconciled:** 2026-08-20T04:49:51-04:00
 **Successful inference head:** `76c2479738d137d33d59d526a1392d17ceffe09a`
-**Branch:** `fix/model-feasibility-gates`
+**Training implementation head:** `7b6398fe6f4fe8fcf55762b3cb246eb38468bf90`
+**Branch:** `feat/tiny-training-resume-gate`
 
 ## Objective and end state
 
@@ -41,8 +42,9 @@ time, and exact resume behavior before any scientific training branch.
   `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
 - Exact required inference set: five files totaling 2,092,816,302 bytes;
   exact 2.5x disk margin: 5,232,040,755 bytes.
-- Exact implementation suite: 303 passed, one skipped; all three top-level
-  validators and the no-download acquisition plan passed.
+- Exact clean training implementation suite: 344 passed, one skipped; all
+  three top-level validators, diff checks, and the self-hashed no-network
+  training plan passed.
 - User explicitly authorized model downloads and training on 2026-08-20.
 - The no-download plan at the tested commit resolved the exact required bytes
   and disk margin without acquiring weights.
@@ -97,8 +99,8 @@ processes to manufacture headroom.
 The download is partial, resolves a different revision, or lacks the required
 safe inference files.
 
-Falsified at the acquisition layer by the complete exact-file, revision, hash,
-and config verification. Model loading remains a separate unresolved gate.
+Falsified by complete exact-file, revision, hash, config, offline model load,
+and finite-logits verification.
 
 ## Scope and ownership
 
@@ -230,7 +232,8 @@ infrastructure evidence rather than a substitute headline method.
 - **Pass:** both conditions complete five unique optimizer steps; final adapter,
   optimizer, scheduler, loss sequence, token count, and cursor semantic hashes
   match exactly; all checkpoint file hashes and the event chain verify.
-- **Stop:** snapshot/load-report/audit drift; under 1 GiB post-load GPU headroom;
+- **Stop:** snapshot/load-report/audit drift; under 1,610,612,736 bytes post-load
+  global GPU headroom;
   nonfinite loss or gradient; skipped update; CUDA OOM; 15-minute wall limit;
   severe instability; incomplete metrics; checkpoint corruption; or resume
   divergence.
@@ -262,6 +265,13 @@ infrastructure evidence rather than a substitute headline method.
   2,042,486,784 allocated GPU bytes, produced finite `[1,20,50304]` logits,
   and averaged 1,294.30 predicted tokens/second across three repeats. The RAM
   override was requested but the ordinary threshold passed, so it was unused.
+- **2026-08-20T04:49:51-04:00:** E5 implementation commit `7b6398f` passed
+  344 tests with one optional skip in a clean detached worktree. All three
+  top-level validators, diff checks, and the self-hashed no-network plan
+  passed. The 40-test training/CLI subset covers exact checkpoint/resume
+  equality, corruption, Windows junction escape, global locking, structured
+  OOM/nonfinite failure, and transactional late-timeout rollback. No model was
+  loaded during this validation.
 
 ## Decisions
 
@@ -300,18 +310,20 @@ infrastructure evidence rather than a substitute headline method.
 3. E2 acquisition result preserved and verified — complete.
 4. E3 offline CUDA load/logits result preserved — complete.
 5. State and decision updated; E5 training gate activated — complete.
-6. E5 implementation, exact-head validation, and local control/resume run.
-7. E5 evidence, compute ledger, and advance/stop decision published.
+6. E5 implementation and exact-head local validation — complete.
+7. Stacked draft PR, exact-head CI, and local CUDA control/resume run.
+8. E5 evidence, compute ledger, and advance/stop decision published.
 
 ## Exact restart procedure
 
 Read `PROGRESS.md`, confirm this is the sole active plan, inspect branch/cache/
 resource reality, and resume the first incomplete milestone. Never reconstruct
-authorization or run identity from chat alone. Before E2, require a clean head,
-fresh audit, existing explicit cache, and all E1 stop conditions passing. Before
-E3, require complete E2 integrity, a second fresh audit, explicit offline mode,
-no conflicting heavy job, and all non-RAM E3 headroom checks passing. Record
-the user-authorized RAM-threshold override explicitly.
+authorization or run identity from chat alone. Push the exact scoped head, open
+a stacked draft PR without merging, and require green exact-head CI. Then use a
+clean detached checkout, capture a fresh cache-bound audit, reproduce the
+offline load at that same head, and run E5 in the frozen control/interruption/
+resume order. Record the user-authorized RAM-threshold override explicitly and
+stop on every non-RAM gate.
 
 ## Completion classification
 

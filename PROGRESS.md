@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T03:19:29-04:00
+**Last updated:** 2026-08-20T04:49:51-04:00
 
 ## Current objective
 
@@ -10,13 +10,12 @@ checkpoint has loaded and produced finite logits on the local RTX 2060.
 
 ## Current verified boundary
 
-- **Repository tooling — Tested:** exact execution head
-  `76c2479738d137d33d59d526a1392d17ceffe09a` passed 304 local tests with one
+- **Repository tooling — Tested:** exact clean training implementation head
+  `7b6398fe6f4fe8fcf55762b3cb246eb38468bf90` passed 344 local tests with one
   optional skip. The pilot, model-manifest, and development-evaluation
-  validators also passed against that exact clean commit. PR #29's prior head
-  passed CI on Python 3.11, 3.12, and 3.13 and was merged externally; the new
-  hardened head was published as draft PR #30 and all 18 exact-head checks
-  passed.
+  validators and the self-hashed no-network training plan also passed. Draft PR
+  #30 remains open at the successful inference head `92a3e09`, where all 18
+  checks passed on Python 3.11, 3.12, and 3.13.
 - **Artifact policy — Tested:** the manifest validates with 13 artifacts and
   exactly one benchmark-ready model, final Pythia 1B deduped at immutable Hub
   revision `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
@@ -25,8 +24,11 @@ checkpoint has loaded and produced finite logits on the local RTX 2060.
   head resource audit passed benchmark preflight. The exact five-file Pythia
   snapshot was independently verified, loaded unquantized in CUDA FP16, and
   produced finite logits in the frozen synthetic probe.
-- **Training behavior — Missing:** no backward pass, optimizer step, training
-  throughput, checkpoint write, or model-training resume has run.
+- **Training behavior — Tested in the dependency-free harness, Target
+  Unverified:** the exact five-step state machine, planned interruption,
+  checkpoint verification, resume, equality comparison, failure artifacts,
+  locking, and path containment pass locally. No Pythia backward pass or
+  optimizer step has run yet.
 
 ## Active deliverable
 
@@ -36,9 +38,10 @@ optimizer, scheduler, loss sequence, step count, and token count must match.
 
 ## Next evidence gate
 
-Build and validate the real tiny-training runner, reproduce the successful
-load at its exact clean head, then execute the control and interrupted/resumed
-conditions from the same verified offline snapshot and token blocks.
+Publish the validated runner on a stacked draft PR and require exact-head CI.
+Then reproduce the successful load at that clean head and execute the control
+and interrupted/resumed conditions from the same verified offline snapshot and
+token blocks.
 
 - **Pass:** five optimizer updates complete in both conditions; checkpoint
   hashes validate; the resumed and uninterrupted semantic states and loss
@@ -53,21 +56,25 @@ conditions from the same verified offline snapshot and token blocks.
 
 ## Last known-good baseline
 
-- Branch: `fix/model-feasibility-gates`
+- Branch: `feat/tiny-training-resume-gate`
+- Validated training implementation head:
+  `7b6398fe6f4fe8fcf55762b3cb246eb38468bf90`
 - Tested inference head: `76c2479738d137d33d59d526a1392d17ceffe09a`
 - Upstream main: `78785b5c57b4bef306ac2d5632a191e97c5b6b0e`, which
   contains the externally merged PRs #28 and #29
-- Delivery: draft PR #30 is open and its exact inference head passed all 18
-  checks; the durable measurement update is pending push
-- Execution worktree: detached, clean, and exactly bound to the tested commit
+- Delivery: draft PR #30 is open at `92a3e09` and passed all 18 checks; the
+  training implementation commit is local and awaiting its own stacked draft
+  PR.
+- Execution worktree: detached, clean, and exactly bound to `7b6398f`
 
 ## Status
 
 - Evidence level: bounded model loading/logits is Target Verified; training is
   Unverified.
 - Delivery state: the earlier preflight implementation was merged through PR
-  #29; acquisition/offline-load hardening is published in draft PR #30 and its
-  exact head is green. The successful local evidence is not yet committed.
+  #29; acquisition/offline-load hardening and successful local inference are
+  published in green draft PR #30. The training implementation is committed
+  locally and exact-head validated but not yet pushed.
 - Authorization: on 2026-08-20 the user explicitly lifted restrictions on
   model downloads and training. This authorizes local ChronoPersona model
   acquisition and bounded local training. No paid-compute budget, public model
@@ -95,13 +102,18 @@ conditions from the same verified offline snapshot and token blocks.
   identity, explicit existing cache and audited directory identity, CUDA audit
   rejection, disk margin, Windows peak process memory, and structured failure
   context.
-- The current acquisition-integrity focused suite passes 56 tests covering
+- The acquisition-integrity focused suite covers
   exact file hashes/allowlists, revision/config identity, audit recency,
   runtime/resource drift, exclusive evidence outputs, parent runtime identity,
   model/logits semantics, truncation rejection, and alternate-loader blocks.
-- Exact clean execution commit `76c2479`: 304 passed, one skipped; pilot,
-  model-manifest, and development-evaluation validators passed; all 18 draft PR
-  checks passed.
+- The combined training, CLI, acquisition, manifest, and alternate-loader suite
+  passes 96 tests. The training/CLI subset passes 40 tests, including
+  checkpoint tampering, Windows junction escape, OOM/nonfinite failures,
+  transactional timeout rollback, global locking, exact event topology, and
+  control/resume comparison.
+- Exact clean implementation commit `7b6398f`: 344 passed, one skipped; pilot,
+  model-manifest, development-evaluation validators, diff checks, and the
+  no-network training plan passed.
 
 ### Integrated
 
@@ -154,13 +166,14 @@ conditions from the same verified offline snapshot and token blocks.
 - A successful inference load does not imply full-weight training fits.
 - Partial Hugging Face downloads must not be mistaken for a complete immutable
   artifact.
-- PRs #28 and #29 were merged externally. Draft PR #30 covers the hardening
-  work, but its `b8e0c5d` checks do not cover the new low-RAM override; update
-  and recheck it. Agents remain unauthorized to merge it.
+- PRs #28 and #29 were merged externally. Draft PR #30 covers the full
+  inference path through `92a3e09` and is green. The new training branch must
+  receive its own exact-head checks. Agents remain unauthorized to merge any
+  PR.
 
 ## Workspace state
 
-- The exact execution worktree at `76c2479` is clean. The primary worktree has
+- The exact execution worktree at `7b6398f` is clean. The primary worktree has
   unrelated concurrent `AGENTS.md` and untracked PR-template changes whose
   provenance is not part of this deliverable; they are preserved and excluded
   from commits and model-run identity.
@@ -186,15 +199,13 @@ conditions from the same verified offline snapshot and token blocks.
 
 ## Exact restart instructions
 
-1. Preserve the inference evidence and finish draft PR #30 without merging it.
-2. Create a focused training-gate branch/plan stacked on the tested PR #30 head.
-3. Implement the frozen five-step LoRA plan, exact offline snapshot/load-report
-   binding, capacity calculation, checkpoint hashing, explicit resume, control
-   comparison, and failure artifacts with dependency-free tests.
-4. Commit, run the full suite and validators, push a new draft PR, and wait for
-   exact-head CI.
-5. Capture a fresh exact-head resource audit and a new successful load report;
+1. Commit this reconciled state on `feat/tiny-training-resume-gate` without
+   staging the unrelated primary-worktree files.
+2. Push the branch, open a stacked draft PR against
+   `fix/model-feasibility-gates`, and wait for exact-head CI without merging.
+3. Capture a fresh exact-head resource audit and a new successful load report;
    do not reuse the older Git-bound audit as current evidence.
-6. Run one uninterrupted control and one planned step-three interruption plus
+4. Run one uninterrupted control and one planned step-three interruption plus
    explicit resume. Stop on any declared failure and preserve both output roots.
-7. Update the compute ledger and decision record from the verified result.
+5. Verify and compare both conditions, then update the compute ledger and
+   decision record from the observed result.
