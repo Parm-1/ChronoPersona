@@ -28,8 +28,8 @@ time, and exact resume behavior before any scientific training branch.
 
 - Exact detached execution worktree is clean at tested implementation commit
   `d812ba8`; unrelated concurrent primary-worktree edits are excluded.
-- Draft PR #29 is stacked on draft PR #28. Its prior head passed all reported
-  checks; the tested implementation head is pending push and CI.
+- PRs #28 and #29 were merged externally after passing their reported checks.
+  The tested hardening head is pending push, a new draft PR, and exact-head CI.
 - CPython 3.11.9 virtual environment with PyTorch `2.13.0+cu130`, Transformers
   5.15.1, Hugging Face Hub 1.28.0, and Accelerate 1.14.0.
 - CUDA 13.0 available; RTX 2060 compute capability 7.5 and 6,144 MiB VRAM.
@@ -95,14 +95,15 @@ Falsified only by pinned revision/cache evidence and a successful safe loader.
 
 ## Scope and ownership
 
-- **Write scope:** `PROGRESS.md`, `.agent/`, the existing PR #29 branch, bounded
-  benchmark code/tests if defects are found, and decision reports.
+- **Write scope:** `PROGRESS.md`, `.agent/`, the existing feature branch, a new
+  follow-up draft PR, bounded benchmark code/tests if defects are found, and
+  decision reports.
 - **Generated evidence:** ignored `artifacts/local/` only; no weights or machine-
   specific paths in Git.
 - **Read-only scope:** manifest, protocol, run registry, evaluation code, Hub
   metadata, CI, and PR state.
-- **Protected state:** unrelated user processes, data, caches, branches, PR #28,
-  repository visibility, and external accounts.
+- **Protected state:** unrelated user processes, data, caches, branches, merged
+  PR history, repository visibility, and external accounts.
 - **Concurrency:** root agent is the only writer. Subagents are read-only.
 
 ## Prohibited shortcuts
@@ -125,7 +126,8 @@ Falsified only by pinned revision/cache evidence and a successful safe loader.
   records.
 - **Changed variable:** authorization state only.
 - **Procedure:** update current state/decision documents, run focused validation,
-  commit, push to PR #29, and wait for required CI.
+  commit, push the feature branch, open a new draft PR, and wait for required
+  CI.
 - **Expected:** clean exact head with authorization and stop conditions recorded.
 - **Stop:** inconsistent repository state or failing validation.
 - **Artifacts:** tracked plan/state commit and PR checks.

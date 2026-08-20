@@ -14,9 +14,9 @@ resume benchmark is locally viable.
 - **Repository tooling — Tested:** implementation commit
   `d812ba8183c3fedc54f67a53b19d71acdb5236df` passed 303 local tests with one
   optional skip. The pilot, model-manifest, and development-evaluation
-  validators also passed against that exact clean commit. Draft PR #29's prior
-  head passed CI on Python 3.11, 3.12, and 3.13; the new head is pending push
-  and CI.
+  validators also passed against that exact clean commit. PR #29's prior head
+  passed CI on Python 3.11, 3.12, and 3.13 and was merged externally; the new
+  hardened head is pending push, a new draft PR, and exact-head CI.
 - **Artifact policy — Tested:** the manifest validates with 13 artifacts and
   exactly one benchmark-ready model, final Pythia 1B deduped at immutable Hub
   revision `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
@@ -54,19 +54,19 @@ acquisition audit.
 
 - Branch: `fix/model-feasibility-gates`
 - Tested implementation: `d812ba8183c3fedc54f67a53b19d71acdb5236df`
-- Stacked base: `fix/windows-fixture-line-endings` at
-  `bbcad88f04afc9f276806997168aebe953f2c972`
-- Upstream main: `8d6644b299cedfc57e8bdc590d85e17b4f97d2b5`
-- Delivery: draft PR #29; the tested implementation commit is one local commit
-  ahead of the published PR head and is pending push/CI
+- Upstream main: `78785b5c57b4bef306ac2d5632a191e97c5b6b0e`, which
+  contains the externally merged PRs #28 and #29
+- Delivery: the tested hardening commits are local on
+  `fix/model-feasibility-gates` and pending push, a new draft PR, and CI
 - Execution worktree: detached, clean, and exactly bound to the tested commit
 
 ## Status
 
 - Evidence level: model/runtime preflight is Integrated; model loading and
   training are Unverified.
-- Delivery state: preflight implementation is Published for review in draft PR
-  #29; the authorized model run is not yet executed.
+- Delivery state: the earlier preflight implementation was merged through PR
+  #29; the acquisition/offline-load hardening is committed locally but not yet
+  published. The authorized model run is not yet executed.
 - Authorization: on 2026-08-20 the user explicitly lifted restrictions on
   model downloads and training. This authorizes local ChronoPersona model
   acquisition and bounded local training. No paid-compute budget, public model
@@ -139,8 +139,9 @@ acquisition audit.
 - A successful inference load does not imply full-weight training fits.
 - Partial Hugging Face downloads must not be mistaken for a complete immutable
   artifact.
-- Draft PR #29 is stacked on unmerged draft PR #28; neither may be merged
-  automatically under the current delivery workflow.
+- PRs #28 and #29 were merged externally. Their checks and review do not cover
+  the new hardening commits; a new exact-head draft PR is required. Agents
+  remain unauthorized to merge it.
 
 ## Workspace state
 
@@ -154,8 +155,10 @@ acquisition audit.
 - No model, training, or background benchmark process was active.
 - Measured live resources: 6,144 MiB total / 3,792 MiB free VRAM; approximately
   6.9 GB available RAM; approximately 255 GB free disk.
-- External writes so far: branches and draft PRs #28 and #29 only. No merge,
-  release, visibility change, paid operation, or public model/data publication.
+- External writes by agents so far: branches and draft PRs #28 and #29. Both
+  PRs were subsequently merged by an external actor; no agent performed a
+  merge, release, visibility change, paid operation, or public model/data
+  publication.
 
 ## Active plan and evidence
 
