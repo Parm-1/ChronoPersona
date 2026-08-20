@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current transition — E5 closes on green exact-head CI; next is measurement reliability**
+**Current gate — development measurement coherence, no new logits yet**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -25,10 +25,11 @@ state equality. The exact Pythia tokenizer now also passed two byte-identical
 12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
 loader. The model scorer then completed two fresh exact-head invocations with
 byte-identical deterministic scores and complete verifier-valid receipts. The
-containing E5 evidence head closes this scorer plan when all exact-head checks
-pass; after that condition, development measurement reliability is the next
-local gate. Real-source scientific execution still requires the separate
-source evidence listed below.
+  containing E5 evidence head `a7dd27c` passed all 18 exact-head checks and
+  closed the scorer plan. A separate versioned measurement-reliability plan is
+  now active; its first deliverable is dependency-light registry and tokenizer
+  evidence, not another model score. Real-source scientific execution still
+  requires the separate source evidence listed below.
 
 ## Latest verified evidence
 
@@ -105,9 +106,9 @@ source evidence listed below.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Predeclared measurement-reliability criteria plus revision and retest of the
-   four directionally inconsistent items and three primary/diagnostic sign
-   disagreements.
+5. Delivery and exact tokenizer validation of the pre-logits, versioned
+   14-item/112-form measurement-coherence contract, followed by its separately
+   frozen bounded score only if the no-weights gates pass.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -131,9 +132,9 @@ source evidence listed below.
 
 ## Exact next action
 
-If the containing E5 head is not yet green, publish the repeated-scorer evidence
-and Windows/Python 3.13 stable-read fix on draft PR #34 and require exact-head
-CI. Once that condition is met, open a separate measurement-development plan
-with frozen reliability and invariance criteria before revising or rescoring
-any item. Bounded rights-qualified source samples remain a separate external
-blocker.
+Complete the blind pre-logits review of the 14-item/112-form/224-candidate
+`development-v1` coherence contract, then run two exact offline Pythia
+tokenizer audits. Require one common continuation-token count per item and zero
+boundary failures. Do not load weights or inspect v1 logits until the versioned
+scorer profile is delivered and passes exact-head CI. Bounded rights-qualified
+source samples remain a separate external blocker.

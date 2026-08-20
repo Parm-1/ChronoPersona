@@ -1,9 +1,14 @@
 from copy import deepcopy
 from pathlib import Path
 
+import pytest
+
 from chronopersona.evaluation import (
     canonical_json_sha256,
     load_evaluation_registry,
+    load_evaluation_registry_with_sha256,
+    parse_evaluation_registry_bytes,
+    EvaluationRegistryFormatError,
     sha256_file,
     validate_evaluation_registry,
 )
@@ -28,6 +33,20 @@ def test_registry_file_hash_is_stable() -> None:
 
     assert first == second
     assert len(first) == 64
+
+
+def test_stable_registry_load_parses_and_hashes_one_byte_snapshot() -> None:
+    items, digest = load_evaluation_registry_with_sha256(REGISTRY)
+
+    assert items == load_evaluation_registry(REGISTRY)
+    assert digest == sha256_file(REGISTRY)
+
+
+def test_registry_byte_parser_rejects_nested_duplicate_keys() -> None:
+    payload = b'{"outer":{"status":"pending","status":"pass"}}\n'
+
+    with pytest.raises(EvaluationRegistryFormatError, match="duplicate JSON key"):
+        parse_evaluation_registry_bytes(payload)
 
 
 def test_canonical_hash_ignores_mapping_insertion_order() -> None:

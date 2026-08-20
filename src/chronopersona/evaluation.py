@@ -5,9 +5,12 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 from typing import Any
+
+from .file_integrity import stable_read_unchanged
 
 
 _ITEM_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -46,37 +49,121 @@ _PERIOD_CUE = re.compile(
     re.IGNORECASE,
 )
 _WORD = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
+_ITEM_KEYS = {
+    "schema_version",
+    "item_id",
+    "status",
+    "domain",
+    "construct",
+    "rationale",
+    "direction_note",
+    "reference_pole",
+    "poles",
+    "forms",
+    "expected_invariances",
+    "forbidden_cues",
+    "reviews",
+}
+_POLE_KEYS = {"id", "label"}
+_FORM_KEYS = {"form_id", "context_id", "template_id", "prompt", "candidates"}
+_CANDIDATE_KEYS = {"pole", "text"}
+_REVIEW_KEYS = {"status", "reviewer", "note"}
 
 
 class EvaluationRegistryFormatError(ValueError):
     """Raised when a JSONL evaluation registry is structurally unreadable."""
 
 
-def load_evaluation_registry(path: str | Path) -> tuple[dict[str, Any], ...]:
-    """Load non-empty JSONL records while preserving file order."""
-
+def _parse_evaluation_registry_bytes(
+    payload: bytes,
+) -> tuple[dict[str, Any], ...]:
     records: list[dict[str, Any]] = []
-    with open(path, "r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            stripped = line.strip()
-            if not stripped:
-                continue
-            try:
-                value = json.loads(stripped)
-            except json.JSONDecodeError as error:
+    try:
+        text = payload.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise EvaluationRegistryFormatError(
+            "evaluation registry must be valid UTF-8"
+        ) from error
+
+    def reject_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        output: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in output:
                 raise EvaluationRegistryFormatError(
-                    f"line {line_number}: invalid JSON: {error.msg}"
-                ) from error
-            if not isinstance(value, dict):
-                raise EvaluationRegistryFormatError(
-                    f"line {line_number}: each record must be an object"
+                    f"duplicate JSON key: {key}"
                 )
-            records.append(value)
+            output[key] = value
+        return output
+
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            value = json.loads(
+                stripped,
+                object_pairs_hook=reject_duplicates,
+            )
+        except json.JSONDecodeError as error:
+            raise EvaluationRegistryFormatError(
+                f"line {line_number}: invalid JSON: {error.msg}"
+            ) from error
+        except EvaluationRegistryFormatError as error:
+            raise EvaluationRegistryFormatError(
+                f"line {line_number}: {error}"
+            ) from error
+        if not isinstance(value, dict):
+            raise EvaluationRegistryFormatError(
+                f"line {line_number}: each record must be an object"
+            )
+        records.append(value)
     if not records:
         raise EvaluationRegistryFormatError(
             "evaluation registry must contain at least one item"
         )
     return tuple(records)
+
+
+def parse_evaluation_registry_bytes(
+    payload: bytes,
+) -> tuple[dict[str, Any], ...]:
+    """Parse one already-captured, duplicate-free JSONL byte snapshot."""
+
+    return _parse_evaluation_registry_bytes(payload)
+
+
+def load_evaluation_registry_with_sha256(
+    path: str | Path,
+) -> tuple[tuple[dict[str, Any], ...], str]:
+    """Load and hash one stable JSONL byte snapshot."""
+
+    selected = Path(path)
+    before = selected.stat()
+    with selected.open("rb") as handle:
+        descriptor_before = os.fstat(handle.fileno())
+        payload = handle.read()
+        descriptor_after = os.fstat(handle.fileno())
+    after = selected.stat()
+    if not stable_read_unchanged(
+        before,
+        descriptor_before,
+        descriptor_after,
+        after,
+    ):
+        raise EvaluationRegistryFormatError(
+            "evaluation registry changed while it was being read"
+        )
+    return (
+        _parse_evaluation_registry_bytes(payload),
+        hashlib.sha256(payload).hexdigest(),
+    )
+
+
+def load_evaluation_registry(path: str | Path) -> tuple[dict[str, Any], ...]:
+    """Load non-empty duplicate-free JSONL records from one stable read."""
+
+    records, _ = load_evaluation_registry_with_sha256(path)
+    return records
 
 
 def sha256_file(path: str | Path) -> str:
@@ -145,6 +232,12 @@ def _review_errors(
             f"item {item_id!r} missing reviews: "
             + ", ".join(sorted(missing))
         )
+    extra = set(reviews) - _REQUIRED_REVIEWS
+    if extra:
+        errors.append(
+            f"item {item_id!r} unexpected reviews: "
+            + ", ".join(sorted(extra))
+        )
 
     for review_name, raw_review in reviews.items():
         prefix = f"item {item_id!r} review {review_name!r}"
@@ -154,6 +247,8 @@ def _review_errors(
         if not isinstance(raw_review, Mapping):
             errors.append(f"{prefix} must be an object")
             continue
+        if set(raw_review) != _REVIEW_KEYS:
+            errors.append(f"{prefix} fields must be exact")
         status = raw_review.get("status")
         if status not in _ALLOWED_REVIEW_STATUSES:
             errors.append(
@@ -186,6 +281,8 @@ def validate_evaluation_registry(
 
     for index, item in enumerate(items):
         location = f"items[{index}]"
+        if set(item) != _ITEM_KEYS:
+            errors.append(f"{location} fields must match the item-v1 schema exactly")
         item_id = item.get("item_id")
         if not _nonempty_string(item_id) or not _ITEM_ID.fullmatch(item_id):
             errors.append(
@@ -196,7 +293,10 @@ def validate_evaluation_registry(
             item_ids.append(item_id)
             item_label = f"item {item_id!r}"
 
-        if item.get("schema_version") != 1:
+        if (
+            type(item.get("schema_version")) is not int
+            or item.get("schema_version") != 1
+        ):
             errors.append(f"{item_label} schema_version must be 1")
 
         status = item.get("status")
@@ -228,6 +328,8 @@ def validate_evaluation_registry(
                 if not isinstance(pole, Mapping):
                     errors.append(f"{prefix} must be an object")
                     continue
+                if set(pole) != _POLE_KEYS:
+                    errors.append(f"{prefix} fields must be exact")
                 pole_id = pole.get("id")
                 if not _nonempty_string(pole_id) or not _ITEM_ID.fullmatch(
                     pole_id
@@ -256,6 +358,8 @@ def validate_evaluation_registry(
                 f"{item_label} expected_invariances must be a string list"
             )
         else:
+            if len(invariances) != len(set(invariances)):
+                errors.append(f"{item_label} expected_invariances must be unique")
             missing_invariances = _REQUIRED_INVARIANCES - set(invariances)
             if missing_invariances:
                 errors.append(
@@ -266,14 +370,19 @@ def validate_evaluation_registry(
         forbidden_cues = item.get("forbidden_cues")
         if not isinstance(forbidden_cues, list) or not all(
             _nonempty_string(value) for value in forbidden_cues
-        ):
+        ) or not forbidden_cues:
             errors.append(
-                f"{item_label} forbidden_cues must be a string list"
+                f"{item_label} forbidden_cues must be a non-empty string list"
             )
+        elif len(forbidden_cues) != len(set(forbidden_cues)):
+            errors.append(f"{item_label} forbidden_cues must be unique")
 
         forms = item.get("forms")
         form_ids: list[str] = []
         prompts: list[str] = []
+        factorized_forms = False
+        factor_metadata_complete = True
+        factor_metadata_count = 0
         candidate_orders: list[tuple[str, str]] = []
         if not isinstance(forms, list) or len(forms) < 2:
             errors.append(f"{item_label} must contain at least two forms")
@@ -283,6 +392,11 @@ def validate_evaluation_registry(
                 if not isinstance(form, Mapping):
                     errors.append(f"{prefix} must be an object")
                     continue
+                allowed_form_keys = _FORM_KEYS if (
+                    "context_id" in form or "template_id" in form
+                ) else _FORM_KEYS - {"context_id", "template_id"}
+                if set(form) != allowed_form_keys:
+                    errors.append(f"{prefix} fields must be exact")
                 form_id = form.get("form_id")
                 if not _nonempty_string(form_id) or not _ITEM_ID.fullmatch(
                     form_id
@@ -292,6 +406,30 @@ def validate_evaluation_registry(
                     )
                 else:
                     form_ids.append(form_id)
+
+                context_id = form.get("context_id")
+                template_id = form.get("template_id")
+                if context_id is not None or template_id is not None:
+                    factorized_forms = True
+                    factor_metadata_count += 1
+                    if (
+                        not _nonempty_string(context_id)
+                        or not _ITEM_ID.fullmatch(context_id)
+                    ):
+                        errors.append(
+                            f"{prefix}.context_id must be a lowercase hyphenated slug"
+                        )
+                        factor_metadata_complete = False
+                    if (
+                        not _nonempty_string(template_id)
+                        or not _ITEM_ID.fullmatch(template_id)
+                    ):
+                        errors.append(
+                            f"{prefix}.template_id must be a lowercase hyphenated slug"
+                        )
+                        factor_metadata_complete = False
+                elif factorized_forms:
+                    factor_metadata_complete = False
 
                 prompt = form.get("prompt")
                 if not _nonempty_string(prompt):
@@ -303,6 +441,8 @@ def validate_evaluation_registry(
                         errors.append(
                             f"{prefix}.prompt must not have leading or trailing whitespace"
                         )
+                    if "\n" in prompt or "\r" in prompt:
+                        errors.append(f"{prefix}.prompt must be a single line")
                     cue = _temporal_cue(prompt)
                     if cue is not None:
                         errors.append(
@@ -325,6 +465,8 @@ def validate_evaluation_registry(
                     if not isinstance(candidate, Mapping):
                         errors.append(f"{candidate_prefix} must be an object")
                         continue
+                    if set(candidate) != _CANDIDATE_KEYS:
+                        errors.append(f"{candidate_prefix} fields must be exact")
                     pole = candidate.get("pole")
                     if pole not in pole_ids:
                         errors.append(
@@ -339,10 +481,14 @@ def validate_evaluation_registry(
                         )
                         continue
                     candidate_texts.append(text)
-                    if not text[0].isspace():
+                    if (
+                        not text.startswith(" ")
+                        or len(text) < 2
+                        or text[1].isspace()
+                    ):
                         errors.append(
                             f"{candidate_prefix}.text must begin with whitespace "
-                            "to make the continuation boundary explicit"
+                            "consisting of exactly one ASCII space"
                         )
                     if text != text.rstrip():
                         errors.append(
@@ -387,7 +533,14 @@ def validate_evaluation_registry(
 
             if len(form_ids) != len(set(form_ids)):
                 errors.append(f"{item_label} form ids must be unique")
-            if len(prompts) != len(set(prompts)):
+            if factorized_forms and (
+                not factor_metadata_complete
+                or factor_metadata_count != len(forms)
+            ):
+                errors.append(
+                    f"{item_label} factorial forms must all define context_id and template_id"
+                )
+            if not factorized_forms and len(prompts) != len(set(prompts)):
                 errors.append(f"{item_label} paraphrase prompts must be distinct")
             if (
                 isinstance(invariances, list)

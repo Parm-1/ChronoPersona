@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T12:50:29-04:00
+**Last updated:** 2026-08-20T15:14:11-04:00
 
 ## Decision
 
@@ -27,12 +27,13 @@ enabled. The prior zero-step billing blocker is empirically closed: draft PR
 
 ## Current objective and closure condition
 
-Publish the bounded scorer evidence, the Windows/Python 3.13 stable-read
-portability fix, D-033, compute-ledger rows, and reconciled current state on
-draft PR #34. Require all exact-head checks to pass. Do not rerun the completed
-model score. This scorer plan closes automatically when the containing E5 head
-passes every required check; no post-CI closure commit is needed. Only after
-that condition is met may a separate measurement-reliability plan start.
+Deliver the sealed `development-v1` measurement-coherence contract without
+loading model weights. The final blind semantic lock accepted exactly 14 items,
+eight forms per item from two contexts x two templates x two explicit candidate
+orders, and exact 4/4 order balance. Finish adversarial contract review, push a
+focused draft PR, and require exact-head CI before two fresh offline tokenizer
+audits. Model scoring remains blocked until those reports pass and the v1
+scoring profile is separately frozen.
 
 ## Current verified boundary
 
@@ -60,6 +61,11 @@ that condition is met may a separate measurement-reliability plan start.
   forms; four evidence-integration items had directional agreement `0.5`.
   The observed primary/diagnostic sign disagreements make reliability work the
   next local gate.
+- **Development-v1 pre-logits contract — Tested:** all 14 sealed items passed
+  internal blind semantic lock; the generated 14/112/224 topology, closed
+  criteria, tokenizer bindings, and failure paths pass focused tests. Internal
+  review is not criterion validation, and the required clean-head E2 tokenizer
+  pair has not run.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -84,14 +90,22 @@ that condition is met may a separate measurement-reliability plan start.
   `reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`
 - training report:
   `reports/stage0/pythia_lora_resume_gate_2026-08-20.md`
-- decisions: D-029 through D-033 in `docs/DECISIONS.md`
+- decisions: D-029 through D-034 in `docs/DECISIONS.md`
+- v1 internal review: `evaluations/reviews/development-v1-internal.md`
+- v1 registry/criteria SHA-256:
+  `81eb8e331d9fbd8d80ec675f209998e081e00834e5d1d141e2979b4f541c49ea` /
+  `d73b9d4d575f64587c5aea9acc18a6073a42bb1bd70491d29bd8422e95a73bca`
 - compute ledger: failed v0, completed v1 load/control/resume, and scorer A/B
   rows in `COMPUTE_LEDGER.csv`
 
 ## Artifacts
 
-- Frozen scoring config: `configs/runs/pythia-development-score-v0.json`
-- Active scorer plan: `.agent/plans/active-verified-registry-scoring.md`
+- Preserved v0 scoring config: `configs/runs/pythia-development-score-v0.json`
+- Active reliability plan:
+  `.agent/plans/active-development-measurement-reliability.md`
+- Sealed pre-logits registry/criteria:
+  `evaluations/registry/development-v1.jsonl` and
+  `configs/evaluations/development-v1-reliability-v0.json`
 - Ignored raw scorer evidence:
   `artifacts/local/pythia-score-{resource-a,resource-b,a,b,runtime-a,runtime-b,comparison}-cee0f2fa.json`
 - Raw audits and receipts remain untracked because they contain local paths,
@@ -102,8 +116,9 @@ that condition is met may a separate measurement-reliability plan start.
 
 ## Validation
 
-- Draft PR #34 exact head `cee0f2fa`: 18/18 push/PR checks passed across
-  Python 3.11, 3.12, and 3.13; PR remains open and draft.
+- Draft PR #34 exact evidence head `a7dd27c`: 18/18 push/PR checks passed across
+  Python 3.11, 3.12, and 3.13; PR remains open and draft. The scorer plan is
+  complete by its predeclared exact-head closure condition.
 - Both target scorer invocations exited 0. The verifier accepted complete
   receipts, strict chronology, distinct process/audit identities, frozen
   Git/model/tokenizer/runtime identity, resource thresholds, and exact score
@@ -121,8 +136,15 @@ that condition is met may a separate measurement-reliability plan start.
   ctime only within each API view; direct Python 3.13 probes and focused tests
   pass without weakening mutation detection. The full current-tree suite passes
   with 463 tests and two platform-optional skips; all three top-level validators,
-  compilation, and diff checks pass. This fix is part of the E5 delivery whose
-  closure condition is green exact-head CI.
+  compilation, and diff checks pass. Exact-head CI subsequently passed and
+  closed that E5 delivery.
+- The current v1 pre-logits implementation passes 51 focused dependency-light
+  registry, tokenizer, verifier, and evaluation-loader tests. This is
+  working-tree Tested evidence only; no v1 tokenizer acceptance report,
+  scoring profile, model deserialization, or logits exist yet.
+- The full working-tree suite passes 494 tests with two platform-optional
+  symlink skips. Generator reproduction, compilation, all three top-level
+  validators, and diff checks pass. Exact-head CI remains the delivery gate.
 
 ## Risks
 
@@ -145,10 +167,11 @@ that condition is met may a separate measurement-reliability plan start.
 
 - Repository: public by explicit user authorization; anonymous access and
   security settings verified.
-- Current branch: `feat/verified-registry-scoring`, stacked on tokenizer branch
-  `feat/verified-registry-loader`.
+- Current branch: `feat/development-measurement-reliability`, based on scorer
+  evidence head `a7dd27c`. Its delivery head and exact-head CI status are live
+  GitHub state and must not be inferred from this preserved base identity.
 - Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, open and
-  draft, green at execution head `cee0f2fa`.
+  draft, green at final evidence head `a7dd27c`.
 - PR #32/#33 remain open draft delivery history. PR #31 was merged externally
   at the preserved v0 head; Codex performed no merge.
 - No force push, release, paid operation, model/data publication, or
@@ -156,9 +179,7 @@ that condition is met may a separate measurement-reliability plan start.
 
 ## Next write-active deliverable
 
-The containing E5 commit is the final scorer-plan change. Push it, require
-exact-head CI, and add a bounded PR result note. When that head is green, this
-plan is closed by its recorded condition. The next write-active deliverable is
-a separate measurement-reliability plan for the four inconsistent items, the
-three primary/diagnostic sign disagreements, and missing dissent/transparency
-constructs. Do not rerun E4 to improve timing or presentation.
+Complete E1 adversarial review and deliver the scoped implementation on a new
+draft PR. After exact-head CI passes, run the two distinct canonical
+byte-identical E2 Pythia tokenizer audits. Do not deserialize model weights or
+inspect v1 logits before the separate scorer-profile and exact-head CI gate.

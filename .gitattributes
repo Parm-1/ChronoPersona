@@ -1,2 +1,7 @@
 # Manifest-bound text fixtures are hashed byte-for-byte and must retain LF.
 tests/fixtures/content-integrity/documents/*.txt text eol=lf
+
+# The generated v1 registry is hashed as exact UTF-8/LF bytes on every host.
+evaluations/registry/development-v1.jsonl text eol=lf
+configs/evaluations/development-v1-reliability-v0.json text eol=lf
+scripts/build_development_v1_registry.py text eol=lf

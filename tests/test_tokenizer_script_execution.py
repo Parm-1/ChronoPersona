@@ -139,7 +139,7 @@ def test_execute_report_is_finally_hashed_portable_and_repeatable(
     monkeypatch.setattr(
         module,
         "_execution_git_binding",
-        lambda: (
+        lambda *_args, **_kwargs: (
             dict(binding),
             {
                 "model_manifest": manifest_payload,
@@ -235,7 +235,7 @@ def test_execute_rebinds_head_and_canonical_inputs_before_publication(
     monkeypatch.setattr(
         module,
         "_execution_git_binding",
-        lambda: next(observations),
+        lambda *_args, **_kwargs: next(observations),
     )
     monkeypatch.setattr(sys, "argv", _argv(cache, snapshot, output))
 
@@ -307,7 +307,7 @@ def test_execute_rejects_noncanonical_inputs_before_loader(
     )
     monkeypatch.setattr(
         module,
-        "load_evaluation_registry",
+        "load_evaluation_registry_with_sha256",
         lambda *_args: (_ for _ in ()).throw(
             AssertionError("registry loader was reached")
         ),
@@ -354,7 +354,7 @@ def test_execute_rejects_prefix_policy_outside_manifest_contract(
     monkeypatch.setattr(
         module,
         "_execution_git_binding",
-        lambda: (
+        lambda *_args, **_kwargs: (
             {
                 "git_head": "e" * 40,
                 "worktree_clean": True,
@@ -372,4 +372,59 @@ def test_execute_rejects_prefix_policy_outside_manifest_contract(
     monkeypatch.setattr(sys, "argv", argv)
 
     assert module.main() == 1
+    assert not output.exists()
+
+
+def test_v1_execute_rejects_profile_drift_before_provider_load(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _module()
+    cache = tmp_path / "cache"
+    snapshot = cache / "snapshot"
+    snapshot.mkdir(parents=True)
+    output = tmp_path / "must-not-publish.json"
+    manifest_payload = module.DEFAULT_MANIFEST.read_bytes()
+    registry_payload = module.V1_REGISTRY.read_bytes()
+    criteria_payload = module.V1_RELIABILITY_CRITERIA.read_bytes()
+    provider_reached = False
+
+    def forbidden_provider(*_args, **_kwargs):
+        nonlocal provider_reached
+        provider_reached = True
+        raise AssertionError("provider must not be reached")
+
+    monkeypatch.setattr(module, "load_manifest_tokenizer", forbidden_provider)
+    binding = {
+        "git_head": "e" * 40,
+        "worktree_clean": True,
+        "model_manifest_git_blob": "f" * 40,
+        "development_registry_git_blob": "1" * 40,
+        "measurement_reliability_criteria_git_blob": "2" * 40,
+    }
+    payloads = {
+        "model_manifest": manifest_payload,
+        "development_registry": registry_payload,
+        "measurement_reliability_criteria": criteria_payload,
+    }
+    monkeypatch.setattr(
+        module,
+        "_execution_git_binding",
+        lambda *_args, **_kwargs: (dict(binding), dict(payloads)),
+    )
+    argv = _argv(cache, snapshot, output)
+    argv.extend(
+        [
+            "--registry",
+            str(module.V1_REGISTRY),
+            "--reliability-criteria",
+            str(module.V1_RELIABILITY_CRITERIA),
+            "--max-length",
+            "1024",
+        ]
+    )
+    monkeypatch.setattr(sys, "argv", argv)
+
+    assert module.main() == 1
+    assert provider_reached is False
     assert not output.exists()

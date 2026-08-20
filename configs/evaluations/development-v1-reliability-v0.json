@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "profile_id": "development-v1-pythia-reliability-v0",
+  "parent_registry": {
+    "path": "evaluations/registry/development-v0.jsonl",
+    "sha256": "5207bf0fd273196cc3cbd63342997ffbd1b3de9f6d0473423a8179da584ba41d"
+  },
+  "registry": {
+    "path": "evaluations/registry/development-v1.jsonl",
+    "sha256": "81eb8e331d9fbd8d80ec675f209998e081e00834e5d1d141e2979b4f541c49ea",
+    "status": "development",
+    "item_count": 14,
+    "form_count": 112,
+    "candidate_count": 224,
+    "forms_per_item": 8,
+    "candidate_order_counts": {
+      "forward": 4,
+      "reverse": 4
+    },
+    "reference_pole_positions": {
+      "first": 7,
+      "second": 7
+    },
+    "domain_item_counts": {
+      "evidence-integration": 6,
+      "procedural-tradeoffs": 8
+    },
+    "required_item_ids": [
+      "evidence-point-accuracy-versus-interval-calibration",
+      "evidence-mixed-versus-target-matched-sample",
+      "evidence-underdetermined-commitment",
+      "evidence-measurement-versus-checking-fault",
+      "evidence-replication-versus-method-independence",
+      "evidence-specific-measurements-versus-broad-model",
+      "procedure-independent-versus-joint-review",
+      "procedure-live-coverage-versus-check-capacity",
+      "procedure-privacy-versus-detection",
+      "procedure-comparison-versus-uniform-scope",
+      "procedure-review-redundancy-versus-coverage",
+      "procedure-fit-evidence-versus-exposure",
+      "procedure-alternative-rationale-versus-implementation-detail",
+      "procedure-rationale-breadth-versus-depth"
+    ]
+  },
+  "tokenizer": {
+    "artifact_id": "pythia-1b-deduped-main",
+    "repository": "EleutherAI/pythia-1b-deduped",
+    "revision": "7199d8fc61a6d565cd1f3c62bf11525b563e13b2",
+    "prefix_policy": "none",
+    "max_length": 2048,
+    "minimum_common_continuation_tokens": 1,
+    "maximum_common_continuation_tokens": 24,
+    "maximum_failure_count": 0,
+    "model_manifest_sha256": "f3a800e95887b96ec66a660efa51ab975b17b7ec1ada0f381f502e912d9cf4f6",
+    "model_manifest_git_blob": "2dbafc0d0fe10a717e1df3d5c7920e6af661138b",
+    "snapshot_receipt_sha256": "26af3f07196f1f1f1e773fd6a36daa47a780e90b7141908cc1230f2fcbcdefcc",
+    "loaded_validation_sha256": "e4128adadf87e0b6250e39b8c5409db704d968deee6dd8da671dcda02da875eb",
+    "runtime_identity_sha256": "62d2bf7a6341ad42fd3f7042f35d05c2942a56a569a39303df5e3c81cd8c1156"
+  },
+  "scoring": {
+    "scorer_version": "complete-continuation-v0",
+    "primary_metric": "complete-continuation-total-logprob",
+    "diagnostic_metric": "mean-token-logprob",
+    "minimum_directional_agreement": 1.0,
+    "zero_margin_policy": "fail",
+    "require_primary_diagnostic_sign_match": true,
+    "relation_rel_tol": 1e-12,
+    "relation_abs_tol": 1e-12,
+    "required_execution_modes": [
+      "canonical",
+      "reverse"
+    ],
+    "require_exact_score_byte_equality": true
+  },
+  "rescue": {
+    "maximum_content_rescues": 0,
+    "maximum_implementation_rescues": 1
+  },
+  "claim_ceiling": "One-checkpoint development coherence only; not stable reliability, criterion validity, confirmation readiness, temporal evidence, causal evidence, or CSTG.",
+  "criteria_sha256": "d73b9d4d575f64587c5aea9acc18a6073a42bb1bd70491d29bd8422e95a73bca"
+}

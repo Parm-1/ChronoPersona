@@ -189,8 +189,10 @@ Activity is not progress unless it creates evidence or a reusable artifact.
 ## Current boundary
 
 The repository remains in Stage 0. The development content-integrity gate has
-passed, local model acquisition and bounded engineering training are authorized
-and active. The next real-content qualification gate is externally blocked.
+passed; local model acquisition, bounded engineering training, the verified
+tokenizer boundary, and the deterministic registry scorer have completed their
+scoped engineering gates. The next real-content qualification gate is
+externally blocked.
 
 The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
 failure. Its single versioned v1 attention-policy rescue passed the bounded
@@ -199,9 +201,12 @@ state equality; do not reopen either profile or infer scientific training
 adequacy. The exact Pythia tokenizer boundary path is Target Verified through
 the shared hash-verified snapshot loader. The bounded repeated registry scorer
 also passed with byte-identical deterministic outputs, but four development
-items were paraphrase-direction inconsistent; the next local gate is
-predeclared measurement reliability and invariance, not scientific
-interpretation. Evidence-bearing naturalistic execution still
+items were paraphrase-direction inconsistent. The active local gate is the
+pre-logits `development-v1` measurement-coherence contract: blind internal
+semantic lock and dependency-light implementation are Tested, while delivery,
+exact-head CI, and two clean-head tokenizer audits remain pending. Do not
+deserialize the model or inspect v1 logits before the separately frozen
+scorer-profile gate passes. Evidence-bearing naturalistic execution still
 requires rights-qualified, historically version-bounded A/B samples and an
 explicitly authorized held-out source-C review packet. Paid compute, public
 model/data release, another repository-visibility change, and requester-pays

@@ -634,6 +634,81 @@ does not authorize a larger or concurrent local model job.
 **Evidence:**
 `reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`.
 
+## D-034 — Replace the confounded two-form seed with one strict v1 coherence screen
+
+**Date:** 2026-08-20
+**Status:** accepted for pre-logits development
+
+Preserve `development-v0` and its exact scorer evidence. Create a new
+`development-v1` registry with 14 items and eight forms per item: two contexts
+crossed with two continuation templates and two explicit candidate orders,
+with exact 4/4 order balance. The first inheritance-oriented draft was rejected
+by blind internal semantic review before tokenizer acceptance or model logits;
+the current neutral constructs were rewritten from those pre-logits findings.
+This is a new development identity, not a repaired or relabeled v0 result.
+
+For each item, require all sixteen Pythia continuation records to have one
+common token count between 1 and 24 before model scoring. This makes the primary
+total-logprob margin and mean-token diagnostic algebraically proportional for
+every form and aggregate. After the wording, tokenizer evidence, run profile,
+and hashes are sealed, require eight nonzero same-sign margins for every item,
+zero primary/diagnostic sign disagreements, and byte-identical scores from
+fresh canonical-order and reverse-execution attempts. All 14 items must pass;
+no failed form, item, or domain may be removed after inspection.
+
+**Observed basis:** v0's two forms simultaneously changed scenario, prompt,
+candidate wording, and candidate array order. Four items reversed direction,
+so those factors cannot be identified separately. Unequal continuation lengths
+mathematically permitted the two form-level and one aggregate primary/diagnostic
+sign disagreements, while equal lengths did not prevent every reversal. Length
+is therefore a controlled defect channel, not a complete causal explanation.
+Candidate array order is not model-visible in the current independent-
+continuation scorer; reverse execution tests engineering state/order
+invariance, not behavioral label-position effects. Blind review of the initial
+candidate draft found dominance or template defects in eleven of fourteen
+items; that draft was discarded before acceptance evidence or logits, rather
+than patched after observing pole scores.
+
+The final blind pre-logits lock accepted all fourteen rewritten items and found
+no explicit temporal, institutional, political, demographic, copied-survey, or
+pole-specific moral cues. The accepted generated registry SHA-256 is
+`81eb8e331d9fbd8d80ec675f209998e081e00834e5d1d141e2979b4f541c49ea`;
+the criteria SHA-256 is
+`d73b9d4d575f64587c5aea9acc18a6073a42bb1bd70491d29bd8422e95a73bca`.
+The review remains internal and direct-exposure/contamination checks remain
+pending. Its bounded evidence is preserved in
+`evaluations/reviews/development-v1-internal.md`.
+
+Prompt mention order is not independently counterbalanced in this small screen.
+The v1 claim is therefore coherence under one prompt presentation, not prompt-
+order invariance, an unbiased direction estimate, or criterion validity. The
+model-input projection remains limited to prompt plus one continuation; pole
+IDs, `reference_pole`, and `direction_note` are scoring metadata and must not be
+passed to the provider.
+
+**Rejected alternatives:** do not rewrite only the four inconsistent items,
+select wording that restores a preferred pole, switch to mean-token scoring,
+introduce a score-derived deadband, discard capability-like anchors after
+seeing their values, run a third tie-breaker, or overwrite v0. Do not claim that
+eight forms or one public checkpoint estimates stable psychometric reliability.
+
+**Failure and rescue:** before logits, wording may change only from construct
+review and tokenizer evidence. After freeze, any form reversal, exact-zero
+margin, metric-sign mismatch, incomplete coverage, identity drift, nonfinite
+value, truncation, or non-determinism fails the whole gate. The sole permitted
+rescue is one independently demonstrated implementation correction unrelated
+to pole outcomes; there is no alternate content rescue. A semantic failure
+requires a new recorded design decision.
+
+**Claim ceiling:** a pass is one-checkpoint small-set coherence evidence. It may
+authorize a later multi-model development panel and expansion toward 24–40
+items per primary domain. It does not establish criterion validity, a
+meaningful-effect threshold, confirmation readiness, a temporal result, causal
+evidence, or CSTG.
+
+**Procedure:**
+`.agent/plans/active-development-measurement-reliability.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

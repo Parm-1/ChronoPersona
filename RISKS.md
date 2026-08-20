@@ -42,7 +42,8 @@
 The design is defensible; the bounded v1 resume gate, exact tokenizer boundary,
 and repeated registry-scorer path passed their engineering gates. Preserve
 those artifacts without tuning or rerunning them. The next local risk-reduction
-task is measurement reliability: revise the four inconsistent items and test
-predeclared paraphrase, ordering, and metric invariance before any evaluation
-freeze. Evidence-bearing naturalistic execution remains blocked on external
-source qualification and later calibration/model-compute gates.
+task is measurement reliability: complete blind pre-logits review and exact
+tokenizer validation of the versioned 14-item/112-form registry before any new
+model score or evaluation freeze. Evidence-bearing naturalistic execution
+remains blocked on external source qualification and later calibration/model-
+compute gates.
