@@ -294,9 +294,47 @@ Accept the final repository review as a hardening pass over the existing Stage 0
 
 **Evidence:** `reports/stage0/final_repository_review.md`.
 
+## D-025 — Accept the no-weight model/runtime preflight and preserve the acquisition boundary
+
+**Date:** 2026-08-20
+**Status:** accepted at metadata and runtime-preflight level
+
+Accept the bounded local resource audit, metadata-only Hub audit, corrected
+artifact identities, and benchmark-integrity hardening as the first measured
+part of Milestone 0B.
+
+The accepted preflight establishes that:
+
+- PyTorch `2.13.0+cu130` exposes CUDA 13.0 on the local RTX 2060;
+- the selected public artifacts are pinned when a live immutable revision is
+  available, while missing licenses and unreviewed execution paths remain
+  fail-closed;
+- the OLMo `stage1-step20000-tokens42B` artifact is bound to
+  `f9dd86fb2eee6a7f0c79dc6fc2f671b58523cddb`, not the distinct default/main
+  artifact;
+- exactly one artifact, final Pythia 1B deduped at
+  `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`, is eligible for the first
+  loading/logits benchmark;
+- benchmark execution requires an exact-clean-head resource audit and records
+  actionable structured failures.
+
+**Reason:** artifact identity, executable policy, and measured machine state
+must be trustworthy before a multi-gigabyte weight acquisition or an OOM can be
+interpreted as model feasibility evidence.
+
+**Claim ceiling:** no model weights were acquired, no model was loaded, no
+logits or training throughput were measured, no checkpoint/resume path was
+validated, and no temporal claim is advanced.
+
+**Boundary:** the 2.09 GB final Pythia artifact is not downloaded under the
+current authorization. Tiny continued pretraining remains further gated on a
+successful load, measured headroom, and its own legal/resource preflight.
+
+**Evidence:** `reports/stage0/model_compute_preflight_2026-08-20.md`.
+
 ## Pending decisions
 
-- Exact public checkpoint identifiers and revisions.
+- License-cleared executable public-panel checkpoints.
 - Causal base checkpoint and insertion point.
 - Final era windows.
 - Final source families A, B, and held-out C after real-sample qualification.
