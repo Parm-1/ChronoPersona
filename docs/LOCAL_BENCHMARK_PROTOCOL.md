@@ -293,20 +293,18 @@ commit.
 ## 10. What remains after the loading benchmark
 
 A successful inference benchmark proves only that the verified model
-loading/logits path can run. Registry scoring remains unverified until the
-provider uses the same verified-snapshot layer, tokenizer audit passes, and an
-explicit registry execution completes. Issue #2 still requires a tiny
-continued-pretraining benchmark measuring:
-
-- forward and backward memory;
-- optimizer-state memory;
-- activation checkpointing;
-- tokens per second;
-- checkpoint write size and time;
-- safe interruption and resumption;
-- full-weight versus PEFT modes.
-
-That training benchmark should be implemented only after the model-loading result identifies the actual local envelope. It must use a tiny redistributable fixture and cannot be interpreted scientifically.
+loading/logits path can run. The exact Pythia tokenizer subsequently passed two
+byte-identical `development-v0` boundary audits through a private verified-
+snapshot stage; see
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`. Registry model
+scoring remains unverified until the model provider uses the same snapshot
+layer, binds the accepted tokenizer-audit identity and fresh resource/load
+evidence, and an explicit repeated registry execution completes. The bounded
+continued-training prerequisite subsequently passed under the frozen v1 LoRA
+profile in Section 11, including forward/backward/update memory, throughput,
+checkpoint round-trip, planned interruption, and exact resume equality.
+Sustained stability, full-width/broad-update feasibility, and branch-set cost
+remain unmeasured and are not implied by that smoke.
 
 ## 11. Run the frozen tiny LoRA checkpoint/resume gate
 

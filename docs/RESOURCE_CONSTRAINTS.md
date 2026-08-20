@@ -203,6 +203,8 @@ loading/logits passed. The first tiny-LoRA v0 control failed before backward;
 its sole attention-only v1 rescue then passed the five-step control and planned
 interruption/resume equality gate with one job at a time. This bounded smoke
 does not establish sustained or broad-update fit and does not authorize the
-full naturalistic branch set. The next local operation is offline registry
-tokenizer/scorer integration through the existing hash-verified snapshot;
-integrity, swapping, OOM, thermal, disk, and scientific stop rules remain.
+full naturalistic branch set. The exact Pythia tokenizer boundary audit passed
+twice without deserializing model weights. The next local operation is bounded
+offline registry model-scoring integration through the existing hash-verified
+snapshot and accepted tokenizer identity; integrity, swapping, OOM, thermal,
+disk, and scientific stop rules remain.

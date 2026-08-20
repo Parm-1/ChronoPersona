@@ -25,7 +25,7 @@
 | R-21 | Temporary recovery/publisher machinery contaminates Git evidence | High | Permanent repository-state tests; merge only exact clean heads |
 | R-22 | AI-assisted design/code claims are unaudited | Medium | Maintain AI-use ledger and human verification record |
 | R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Frozen implementation/backend/reduction policy passed the sole v1 rescue; preserve v0/v1 and require the same explicit binding in later model execution |
-| R-24 | Registry scoring loads unverified bytes from a populated cache | High | Keep direct provider loading blocked until tokenizer/model consumers accept only a manifest/hash-verified local snapshot; prove offline execution with regressions |
+| R-24 | Registry scoring loads unverified bytes from a populated cache | High | The tokenizer boundary now accepts only a manifest/hash-verified private stage; keep model scoring blocked until the model provider uses the same snapshot identity with clean-head resource/load binding and offline regressions |
 
 ## Current highest risks
 
@@ -38,8 +38,10 @@
 
 ## Current risk decision
 
-The design is defensible and the bounded v1 resume gate passed. Preserve both
-v0 and v1 without further tuning. The next local risk-reduction task is a
-shared verified-snapshot boundary for registry tokenizer/scorer execution.
+The design is defensible, the bounded v1 resume gate passed, and the exact
+Pythia tokenizer boundary passed two byte-identical audits. Preserve v0/v1 and
+the accepted tokenizer evidence without tuning or rerunning them. The next
+local risk-reduction task is bounded registry model scoring through the same
+verified snapshot, accepted tokenizer identity, and fresh resource/load gate.
 Evidence-bearing naturalistic execution remains blocked on external source
 qualification and later model/compute gates.

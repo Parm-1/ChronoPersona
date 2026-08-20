@@ -517,6 +517,45 @@ claim is authorized.
 **Evidence:**
 `reports/stage0/pythia_lora_resume_gate_2026-08-20.md`.
 
+## D-031 — Accept the verified Pythia tokenizer boundary and freeze native no-prefix execution
+
+**Date:** 2026-08-20
+**Status:** accepted at Target Verified engineering level
+
+Accept exact clean head `c57ce40` as evidence that the canonical Pythia
+tokenizer can be constructed only from a private copy of manifest/hash-verified
+local snapshot files and can audit all 12 `development-v0` items, 24 forms, and
+48 candidates without a boundary, context, or truncation failure. Two fresh
+invocations produced byte-identical reports with canonical output SHA-256
+`6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523`.
+
+Freeze `prefix-policy=none` before any registry logits are inspected. The
+manifest-bound tokenizer reports zero native special tokens and the exact
+backend's pre-logits probe produced identical token IDs with and without native
+special-token insertion. A BOS condition is therefore not the native path and
+must not be selected later because it yields preferred scores.
+
+**Rejected alternatives:** do not trust an arbitrary populated cache, load by
+repository/name, enable downloads during tokenizer construction, accept a
+slow/custom tokenizer fallback, add an item-specific tokenizer adapter, or run
+both prefix policies and select after model scoring. Do not treat hashing the
+safetensors file as model deserialization.
+
+**Claim ceiling:** Target Verified for this exact Pythia tokenizer,
+snapshot/runtime identity, and development-registry boundary path only. No
+model score, reliability result, calibration result, temporal effect, or CSTG
+claim is authorized. Model scoring remains blocked until its separate
+clean-head resource, exact-load, verified-snapshot, and deterministic-output
+gate passes.
+
+Revisit this decision before scoring if the artifact revision, manifest
+`tokenizer_runtime` identity, or Python/Transformers/tokenizers/huggingface-hub
+identity changes. Otherwise preserve the passing reports without rerunning
+them.
+
+**Evidence:**
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

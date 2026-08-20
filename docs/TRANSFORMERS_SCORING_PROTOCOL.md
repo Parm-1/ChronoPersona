@@ -116,6 +116,14 @@ final self-hashes, contain no absolute local path, and have identical canonical
 `output_sha256` values. A different prefix policy is a new documented
 development condition; do not select one based on a preferred model score.
 
+**Observed 2026-08-20 result:** exact clean head `c57ce40` ran both commands
+from fresh invocations. Both reports were byte-identical, passed 12 items, 24
+forms, and 48 candidates with zero failures, and shared canonical output
+SHA-256
+`6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523`.
+The accepted prefix remains `none`; no model was loaded. See
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`.
+
 ## 5. Tokenizer audit output
 
 The deterministic report records:
@@ -173,7 +181,8 @@ Scoring execution remains blocked until all of these are true:
 2. immutable Pythia acquisition and loading/logits benchmarks succeed;
 3. the model provider consumes the exact hash-verified local snapshot and
    rechecks it before loading;
-4. the exact Pythia tokenizer audit has passed through that snapshot layer;
+4. the accepted exact Pythia tokenizer audit is bound by report hash through
+   that snapshot layer;
 5. the cache has sufficient storage and the exact Git commit is recorded.
 
 No scoring command may download or load directly by repository/revision. After

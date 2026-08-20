@@ -258,7 +258,8 @@ Changes after freezing create a new registry version. They never overwrite a com
 - Several evidence-integration items have an epistemically stronger alternative and may exhibit capability ceilings.
 - The current procedural set does not yet cover dissent tolerance or transparency versus operational secrecy.
 - Only two paraphrases per item are included.
-- No tokenizer audit has run on DatedGPT, OLMo, or Pythia.
+- The exact Pythia tokenizer passed the `development-v0` boundary audit twice;
+  no executable tokenizer audit has run on DatedGPT or OLMo.
 - No public-checkpoint score has been generated.
 - Direct-exposure and contamination reviews are pending.
 - Human criterion validity has not been established.
@@ -270,16 +271,16 @@ These are explicit next tasks, not details to conceal in a final appendix.
 
 After this scaffold is validated:
 
-1. integrate the existing Transformers provider with a reusable
-   manifest/hash-verified local-snapshot loader;
-2. run tokenizer-only boundary audits through that offline loader before model
-   scoring;
-3. use the immutable Pythia loading benchmark to qualify the local runtime;
-4. exercise the scorer only after the verified-snapshot integration passes;
-5. measure reliability on the twelve development items;
-6. revise ceiling-prone or wording-sensitive items;
-7. add dissent and transparency constructs;
-8. expand toward 24–40 development items per primary domain only if the small
+1. integrate the model provider and scorer with the accepted manifest/hash-
+   verified local-snapshot and tokenizer-audit identities;
+2. keep deterministic scientific score content separate from runtime and
+   hardware execution receipts;
+3. exercise the scorer only after a fresh clean-head resource audit and exact
+   Pythia load binding pass;
+4. measure reliability on the twelve development items;
+5. revise ceiling-prone or wording-sensitive items;
+6. add dissent and transparency constructs;
+7. expand toward 24–40 development items per primary domain only if the small
    set behaves coherently;
-9. keep the final confirmatory registry frozen and separate from development
+8. keep the final confirmatory registry frozen and separate from development
    outputs.

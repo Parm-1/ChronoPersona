@@ -1,10 +1,11 @@
 # Verified Registry Tokenizer Loader
 
-**Status:** active
+**Status:** active — E5 passed; E6 evidence publication and exact-head CI pending
 **Frozen baseline:** `fa809ed6a0337400088834a64f0718c85e7dd0fd`
 **Branch:** `feat/verified-registry-loader`
-**Write-active deliverable:** one offline Pythia tokenizer audit through a
-manifest/hash-verified local snapshot interface.
+**Target execution head:** `c57ce40e2b0fad6a3e1ad07a3eada7e9405ccb6d`
+**Write-active deliverable:** publish the accepted Pythia tokenizer evidence
+and require final exact-head CI on draft PR #33.
 
 ## Objective
 
@@ -70,12 +71,12 @@ canonical Git inputs are stable-read and rebound before publication.
 
 ## Gates
 
-### E0 — Baseline and plan
+### E0 — Baseline and plan (complete)
 
 - Confirm a clean isolated branch at exact `fa809ed`.
 - Record this plan and keep one writer for the implementation worktree.
 
-### E1 — Shared verifier
+### E1 — Shared verifier (complete)
 
 - Add a verified-snapshot result with local path kept separate from its portable
   self-hashed receipt.
@@ -84,7 +85,7 @@ canonical Git inputs are stable-read and rebound before publication.
   tokenizer runtime expectations.
 - Preserve compatibility for the existing acquisition/training consumers.
 
-### E2 — Provider and CLI
+### E2 — Provider and CLI (complete)
 
 - Unlock tokenizer loading only; keep the model loader and scoring CLI blocked.
 - Bind execution to single-read HEAD blobs for the canonical manifest/registry
@@ -95,7 +96,7 @@ canonical Git inputs are stable-read and rebound before publication.
   output overwrite. Record enforced offline controls and
   `network_observation=not-instrumented`.
 
-### E3 — Dependency-light validation
+### E3 — Dependency-light validation (complete)
 
 - Pass dependency-light adversarial tests covering policy-first ordering,
   wrong repository/revision/layout, missing/extra/changed files, cache escape,
@@ -103,14 +104,14 @@ canonical Git inputs are stable-read and rebound before publication.
   post-load mutation, output overwrite, final report hashing, and path
   portability, manifest-bound runtime drift, and prefix-policy mismatch.
 
-### E4 — Implementation delivery gate
+### E4 — Implementation delivery gate (complete)
 
 - Commit the scoped implementation on this isolated branch.
 - Push the exact branch and open a stacked draft PR against the delivered
   `feat/tiny-training-resume-gate` baseline.
 - Require exact-head CI to pass before target execution.
 
-### E5 — Target tokenizer audit
+### E5 — Target tokenizer audit (complete)
 
 - Run the real Pythia tokenizer audit with prefix policy `none`, the native
   no-prefix convention frozen in the manifest before logits. Require the
@@ -119,7 +120,7 @@ canonical Git inputs are stable-read and rebound before publication.
 - Require 12 items, 24 forms, 48 candidates, zero boundary/context/truncation
   failures, and no local path in either report.
 
-### E6 — Evidence publication
+### E6 — Evidence publication (active)
 
 - Preserve a bounded tracked aggregate report and a decision accepting or
   rejecting the tokenizer gate without changing registry content.
@@ -127,6 +128,24 @@ canonical Git inputs are stable-read and rebound before publication.
 - Commit and push the evidence-only update, refresh the same draft PR, and
   require exact-head CI again. Do not rerun a passing target merely to improve
   timing or presentation.
+
+## Observed E5 result
+
+Two separately observed CLI invocations at exact clean head `c57ce40` returned
+0 and wrote distinct output files whose 50,169 serialized bytes were identical.
+Both audited 12 items, 24 forms, and 48 candidates with zero failures. The
+canonical output SHA-256 is
+`6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523`;
+the portable snapshot receipt SHA-256 is
+`26af3f07196f1f1f1e773fd6a36daa47a780e90b7141908cc1230f2fcbcdefcc`.
+Both self-hashes recomputed, all identities matched, and recursive inspection
+found no absolute local path. No model weight was deserialized. Network traffic
+was not instrumented; offline/local-only/no-download controls were enforced.
+
+The bounded tracked result is
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`. Do not rerun E5
+unless the artifact revision, manifest tokenizer runtime identity, or
+Python/Transformers/tokenizers/huggingface-hub identity changes.
 
 ## Stop conditions
 

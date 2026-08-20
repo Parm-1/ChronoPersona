@@ -32,8 +32,9 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 
 ## Milestone 0B — Models and compute
 
-**Status:** final-Pythia acquisition/inference and bounded training resume gate
-measured; v0 failure preserved; sole v1 rescue passed.
+**Status:** final-Pythia acquisition/inference, bounded training resume, and
+verified tokenizer-boundary gates measured; v0 failure preserved; sole v1
+rescue passed; registry model scoring remains pending.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
@@ -58,10 +59,13 @@ Measured on 2026-08-20:
   optimizer steps, and independent verification found exact semantic equality
   across final adapter, optimizer, scheduler, scaler, RNG, counters, and loss
   state.
+- the exact Pythia tokenizer loaded through the private verified-snapshot stage
+  and passed two byte-identical 12-item/24-form/48-candidate boundary audits
+  with zero failures under the predeclared native no-prefix policy.
 
 Still unmeasured: sustained training stability, broad-update capacity, registry
-scoring through the verified snapshot layer, and derived branch-set cost. The
-one v1 rescue is closed; no second tuning rescue is allowed.
+model scoring through the verified snapshot layer, and derived branch-set cost.
+The one v1 rescue is closed; no second tuning rescue is allowed.
 
 Pass when one common checkpoint and one fallback are legally accessible, immutable, capable, trainable, and supported by measured cost. Stop a path when capability, memory, artifact access, or authorized budget fails.
 
@@ -128,7 +132,9 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Publish the completed v1 engineering evidence, then integrate registry
-tokenizer/scorer execution with a reusable manifest/hash-verified local-
-snapshot loader. Keep execution offline and fail closed on unverified cache
-bytes. Source qualification remains independently externally blocked.
+Accept the exact Pythia tokenizer boundary audit, then integrate registry model
+scoring with the reusable manifest/hash-verified local snapshot, accepted
+tokenizer identity, and fresh resource/load evidence. Keep execution offline,
+separate deterministic scores from runtime receipts, and fail closed on
+unverified bytes. Source qualification remains independently externally
+blocked.

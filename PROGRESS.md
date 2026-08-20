@@ -1,29 +1,28 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T06:59:19-04:00
+**Last updated:** 2026-08-20T07:10:30-04:00
 
 ## Decision
 
-Accept the sole v1 attention-policy rescue as **Target Verified** for the
-bounded Pythia trainer/checkpoint/resume engineering gate. The uninterrupted
-and interrupted/resumed conditions completed five steps and produced exact
-semantic state equality. Close this rescue without a v2 and preserve the v0
-eager-attention failure as separate immutable evidence.
+Accept exact head `c57ce40` as **Target Verified engineering evidence** for the
+Pythia verified-snapshot tokenizer boundary path. Two fresh invocations audited
+all 12 development items, 24 forms, and 48 candidates with zero failures and
+byte-identical reports. Freeze native `prefix-policy=none` before logits.
 
-The next local engineering deliverable is a reusable manifest/hash-verified
-snapshot loader for registry tokenizer execution. Keep model scoring blocked
-until its separate live-resource and exact-load gate is integrated.
+Keep model scoring blocked until its separate verified-snapshot, accepted-
+tokenizer, clean-head resource, exact-load, and deterministic-output gate is
+integrated. Preserve the completed v0/v1 training evidence without rerunning it.
 
 ## Current objective
 
-Implement the tokenizer-first verified-snapshot gate on the isolated stacked
-branch `feat/verified-registry-loader`, run the exact offline Pythia boundary
-audit twice, and require deterministic portable results before opening its
-draft PR. Do not load model weights or run registry scoring in this workstream.
+Publish the bounded tokenizer evidence on draft PR #33 and require exact-head
+CI. Then integrate only the registry model scorer with the accepted snapshot
+and tokenizer identities, fresh resource/load evidence, and separate
+deterministic score versus runtime-receipt artifacts.
 
 ## Current verified boundary
 
-- **Repository implementation — Tested:** exact execution head
+- **Training implementation — Tested:** exact execution head
   `3f03885b0237933ffb2b2f2a68bcf0e8f168a5d3` passed 354 tests with one
   optional skip in a clean detached worktree. The pilot, model-manifest, and
   development-evaluation validators and diff checks passed. The stored frozen
@@ -53,10 +52,11 @@ draft PR. Do not load model weights or run registry scoring in this workstream.
 - **Scientific boundary — Externally blocked:** the v1 result is engineering
   evidence only. No real-source qualification, model-behavior result,
   temporal effect, PEFT-adequacy result, or CSTG evidence exists.
-- **Tokenizer loader — Tested, not yet delivered:** the isolated implementation
-  worktree passed 390 tests with two optional skips, all three top-level
-  validators, compile checks, and diff checks. Target audit evidence remains
-  pending a scoped commit and exact-head CI.
+- **Tokenizer boundary — Target Verified:** exact clean head `c57ce40` produced
+  two byte-identical offline-enforced reports over 12 items, 24 forms, and 48
+  candidates with zero boundary/context/truncation failures. Both report and nested
+  snapshot-receipt self-hashes validate; no local path or model deserialization
+  occurred.
 
 ## Evidence
 
@@ -73,6 +73,13 @@ draft PR. Do not load model weights or run registry scoring in this workstream.
   `reports/stage0/pythia_lora_attention_diagnostic_2026-08-20.json`
 - decisions: `docs/DECISIONS.md` D-029 and D-030
 - compute ledger: failed v0 plus completed v1 load, control, and resume rows
+- tokenizer report:
+  `reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`
+- tokenizer canonical output SHA-256:
+  `6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523`
+- portable snapshot receipt SHA-256:
+  `26af3f07196f1f1f1e773fd6a36daa47a780e90b7141908cc1230f2fcbcdefcc`
+- tokenizer decision: `docs/DECISIONS.md` D-031
 
 ## Artifacts
 
@@ -87,6 +94,8 @@ draft PR. Do not load model weights or run registry scoring in this workstream.
   `runs/pythia-lora-smoke-v1/{control,resumed}/run-1b8f0867fbd6038265f609b3595ae93d`
 - Preserved v0 run root:
   `runs/pythia-lora-smoke-v0/control/run-b035b9becad60b6dc55ff3fd6fba6016`
+- Ignored tokenizer reports:
+  `artifacts/local/pythia-tokenizer-none-{a,b}-c57ce40.json`
 
 ## Validation
 
@@ -101,15 +110,24 @@ draft PR. Do not load model weights or run registry scoring in this workstream.
 - Maximum allocated/reserved CUDA memory: 2,203,960,320 / 2,275,409,920
   bytes. Maximum process RSS: 2,807,263,232 bytes. The resume explicitly used
   the authorized host-RAM threshold override; all other gates passed.
+- Tokenizer implementation: 390 tests passed with two platform-optional skips;
+  all three validators, compile, and diff checks passed. Draft PR #33 then
+  passed all 18 exact-head checks at `c57ce40` before target execution.
+- Tokenizer target: both fresh invocations exited 0; raw reports were 50,169
+  bytes with identical SHA-256
+  `ee11e4c99d6577fa2e3be5a53e4c17b626ff91bcdee877b295799dc5926c39bb`.
+  The canonical and receipt self-hashes recomputed, every candidate passed,
+  runtime/backend/native-prefix identities matched, and recursive inspection
+  found no absolute local path.
 
 ## Risks
 
 - The smoke is only five steps on one GPU/runtime and does not establish
   sustained stability, broad-update capacity, or scientific training adequacy.
-- Direct registry tokenizer/scorer loading remains deliberately disabled until
-  it consumes a reusable verified-snapshot interface. Tokenizer integration is
-  now write-active; scorer execution remains blocked. A populated cache is not
-  proof of content integrity.
+- The verified tokenizer path is accepted only for exact Pythia and this
+  runtime/registry identity. Registry model scoring remains blocked; a
+  populated cache or passing tokenizer audit is not proof that model scoring is
+  resource-safe, deterministic, or reliable.
 - Rights-qualified, historically bounded A/B/C source samples, source-role
   feasibility, evaluation sealing, synthetic calibration, and branch-level
   cost evidence remain unresolved.
@@ -121,22 +139,25 @@ draft PR. Do not load model weights or run registry scoring in this workstream.
 
 - Completed evidence branch: `feat/tiny-training-resume-gate`
 - Current isolated implementation branch: `feat/verified-registry-loader`
-  from exact tested base `fa809ed6a0337400088834a64f0718c85e7dd0fd`.
+  from exact tested base `fa809ed6a0337400088834a64f0718c85e7dd0fd`;
+  target execution head `c57ce40e2b0fad6a3e1ad07a3eada7e9405ccb6d`.
 - Current implementation worktree:
   `C:\Users\sandh\Documents\Codex\2026-08-20\chronopersona-verified-loader`.
 - Draft PR #32: `https://github.com/Parm-1/ChronoPersona/pull/32`
+- Draft PR #33: `https://github.com/Parm-1/ChronoPersona/pull/33`, stacked on
+  `feat/tiny-training-resume-gate`; 18/18 checks passed at the target head
+  before this evidence-only update.
 - PR #31: externally merged at `f2568ab`; it does not contain the v1 rescue.
 - No merge by Codex, force push, release, repository-visibility change, paid
   operation, model/data publication, or third-party contact occurred.
 
 ## Next write-active deliverable
 
-1. Commit and push the tested implementation, open its stacked draft PR, and require
-   exact-head CI.
-2. Run two fresh-invocation Pythia
-   `prefix-policy=none` audits. Require all 12 items, 24 forms, and 48
-   candidates to pass with identical output hashes and no machine paths.
-3. Preserve a bounded tracked report, update the same draft PR, and require
-   exact-head CI again. Keep model scoring as the next plan.
+1. Commit and push the bounded tokenizer evidence update to draft PR #33 and
+   require exact-head CI; do not rerun the passing target.
+2. Activate the separate model-scoring ExecPlan.
+3. Integrate the model provider/scorer with the accepted snapshot/tokenizer
+   identities, a fresh resource/load gate, and separate deterministic score and
+   runtime receipt artifacts before any development logits are inspected.
 
 Do not reopen or tune v0/v1. Do not infer a scientific result from this gate.

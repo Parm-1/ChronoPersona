@@ -193,9 +193,11 @@ The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
 failure. Its single versioned v1 attention-policy rescue passed the bounded
 five-step control/interruption/resume engineering gate with exact semantic
 state equality; do not reopen either profile or infer scientific training
-adequacy. The next local engineering gate is a shared hash-verified snapshot
-loader for registry tokenizer/scorer execution. Evidence-bearing naturalistic
-execution still requires rights-qualified, historically version-bounded A/B
-samples and an explicitly authorized held-out source-C review packet. Paid
-compute, public model/data release, repository-visibility change, and
-requester-pays retrieval remain outside the active gate.
+adequacy. The exact Pythia tokenizer boundary path is Target Verified through
+the shared hash-verified snapshot loader. The next local engineering gate is
+bounded registry model scoring with fresh resource/load binding and the
+accepted tokenizer identity. Evidence-bearing naturalistic execution still
+requires rights-qualified, historically version-bounded A/B samples and an
+explicitly authorized held-out source-C review packet. Paid compute, public
+model/data release, repository-visibility change, and requester-pays retrieval
+remain outside the active gate.

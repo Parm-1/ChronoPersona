@@ -14,16 +14,19 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Active — verified-snapshot integration for registry tokenizer/scorer execution**
+**Current — publish accepted tokenizer evidence; next — bounded registry model scoring**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
 The first frozen tiny-LoRA control failed before backward under forced eager
 attention. Its one versioned SDPA-MATH rescue subsequently completed the
 five-step uninterrupted and interruption/resume conditions with exact semantic
-state equality. The next local gate is to reuse the same hash-verified snapshot
-boundary for registry tokenizer/scorer execution; real-source scientific
-execution still requires the separate source evidence listed below.
+state equality. The exact Pythia tokenizer now also passed two byte-identical
+12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
+loader. The next local gate is to integrate the model scorer with that same
+boundary, the accepted tokenizer identity, and fresh resource/load evidence;
+real-source scientific execution still requires the separate source evidence
+listed below.
 
 ## Latest verified evidence
 
@@ -47,9 +50,11 @@ execution still requires the separate source evidence listed below.
   2,092,816,302 bytes, separates allowlisted acquisition from offline loading,
   rehashes the snapshot, validates config/model/logits identity, and captures a
   fresh live resource audit immediately before load.
-- Direct Transformers tokenizer/scorer repository or cache loading is
-  deliberately disabled until those consumers use the same reusable
-  manifest/hash-verified snapshot layer.
+- The Transformers tokenizer now loads only from a private copy of exact
+  manifest/hash-verified snapshot files. Its two fresh `development-v0` audits
+  were byte-identical and passed all 48 candidates with zero failures. Direct
+  repository/cache loading remains disabled, and model scoring remains blocked
+  until its clean-head resource and exact-load integration is complete.
 - The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
   LoRA control and resumed condition each completed five optimizer steps on
   synthetic fixtures and independently verified exact final semantic state
@@ -71,7 +76,8 @@ execution still requires the separate source evidence listed below.
 - source-general era decodability;
 - a trainable causal checkpoint and insertion point;
 - sustained target-model training stability or broad-update feasibility;
-- registry tokenizer/scorer execution through the verified snapshot boundary;
+- registry model scoring through the verified snapshot boundary and accepted
+  tokenizer identity;
 - synthetic calibration sensitivity;
 - any temporal behavioral effect.
 
@@ -92,9 +98,9 @@ execution still requires the separate source evidence listed below.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Registry tokenizer/scorer execution through the manifest/hash-verified
-   local snapshot, followed by any additional measured cost gate justified by
-   the causal branch design.
+5. Registry model scoring through the manifest/hash-verified local snapshot,
+   accepted tokenizer audit, and fresh resource/load binding, followed by any
+   additional measured cost gate justified by the causal branch design.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -117,8 +123,8 @@ execution still requires the separate source evidence listed below.
 
 ## Exact next action
 
-Publish the completed v1 evidence on draft PR #32 and require exact-head CI.
-Then integrate the existing registry tokenizer/scorer consumers with a reusable
-manifest/hash-verified offline snapshot loader and run the bounded target
-checks. Bounded rights-qualified source samples remain a separate external
-blocker.
+Publish the accepted tokenizer evidence on draft PR #33 and require exact-head
+CI. Then integrate only the existing registry model scorer with the reusable
+manifest/hash-verified offline snapshot and accepted tokenizer-audit identity,
+and run the bounded repeated Pythia development score. Bounded rights-qualified
+source samples remain a separate external blocker.
