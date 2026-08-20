@@ -344,6 +344,7 @@ def _validate_execution_resources(
     *,
     require_cuda: bool = True,
     enforce_ram_threshold: bool = True,
+    minimum_free_vram_bytes: int | None = None,
 ) -> dict[str, Any]:
     audited_git = audited.get("git")
     live_git = live.get("git")
@@ -477,11 +478,20 @@ def _validate_execution_resources(
         raise ValueError("artifact weight size is required for resource checks")
     ram_multiplier = MIN_AVAILABLE_RAM_MULTIPLIER if require_cuda else 3
     minimum_ram = weight_bytes * ram_multiplier
-    minimum_vram = (
-        weight_bytes * MIN_FREE_VRAM_NUMERATOR
-        + MIN_FREE_VRAM_DENOMINATOR
-        - 1
-    ) // MIN_FREE_VRAM_DENOMINATOR
+    if minimum_free_vram_bytes is None:
+        minimum_vram = (
+            weight_bytes * MIN_FREE_VRAM_NUMERATOR
+            + MIN_FREE_VRAM_DENOMINATOR
+            - 1
+        ) // MIN_FREE_VRAM_DENOMINATOR
+    elif (
+        not isinstance(minimum_free_vram_bytes, int)
+        or isinstance(minimum_free_vram_bytes, bool)
+        or minimum_free_vram_bytes <= 0
+    ):
+        raise ValueError("minimum free VRAM override must be a positive integer")
+    else:
+        minimum_vram = minimum_free_vram_bytes
 
     audited_memory = audited.get("memory")
     live_memory = live.get("memory")
@@ -547,6 +557,8 @@ def _live_execution_preflight(
     args: argparse.Namespace,
     artifact: Mapping[str, Any],
     preflight: dict[str, Any],
+    *,
+    minimum_free_vram_bytes: int | None = None,
 ) -> dict[str, Any]:
     storage_path = Path(preflight["cache_storage_path"])
     live_audit, live_sha256 = _capture_live_resource_audit(storage_path)
@@ -571,6 +583,7 @@ def _live_execution_preflight(
         enforce_ram_threshold=not bool(
             getattr(args, "allow_low_ram", False)
         ),
+        minimum_free_vram_bytes=minimum_free_vram_bytes,
     )
     preflight["execution_resource_validation"] = validation
     setattr(args, "_resource_preflight", preflight)
@@ -649,6 +662,8 @@ def _post_import_resource_preflight(
     args: argparse.Namespace,
     artifact: Mapping[str, Any],
     preflight: dict[str, Any],
+    *,
+    minimum_free_vram_bytes: int | None = None,
 ) -> dict[str, Any]:
     storage_path = Path(preflight["cache_storage_path"])
     post_audit, post_sha256 = _capture_live_resource_audit(storage_path)
@@ -676,6 +691,7 @@ def _post_import_resource_preflight(
         enforce_ram_threshold=not bool(
             getattr(args, "allow_low_ram", False)
         ),
+        minimum_free_vram_bytes=minimum_free_vram_bytes,
     )
     preflight["post_import_resource_validation"] = validation
     setattr(args, "_resource_preflight", preflight)

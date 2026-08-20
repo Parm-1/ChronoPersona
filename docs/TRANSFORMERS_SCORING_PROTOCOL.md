@@ -27,8 +27,11 @@ Tokenizer execution consumes only an explicit local snapshot after the shared
 verifier enforces the canonical manifest, repository/revision cache layout,
 complete file allowlist, sizes, hashes, config, and cache-contained targets.
 Direct repository lookup and download-on-load remain disabled. Model scoring is
-still fail-closed until its separate live-resource and exact-load gate is
-integrated. Plan mode remains available for both operations.
+implemented only through the frozen exact-snapshot, accepted-tokenizer,
+live-resource, exact-load, and deterministic-output gate below. Target
+execution remains blocked until that implementation is committed, exact-head
+CI passes, and a fresh resource audit satisfies every threshold. Plan mode
+remains available for both operations.
 
 ## 2. Install the smallest dependency set first
 
@@ -163,10 +166,11 @@ Before loading weights:
 
 ```powershell
 python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v0.json `
   --artifact pythia-1b-deduped-main `
   --prefix-policy none `
-  --device cuda `
-  --dtype auto `
+  --device cuda:0 `
+  --dtype float16 `
   --max-length 2048 `
   --output artifacts/local/pythia-score-plan.json
 ```
@@ -175,7 +179,9 @@ The plan performs no network access and does not import PyTorch.
 
 ## 7. First development score gate
 
-Scoring execution remains blocked until all of these are true:
+Do not run this section until the implementation commit is clean, pushed, and
+green in exact-head CI. Scoring then remains fail-closed unless all of these are
+true:
 
 1. the local resource audit passes;
 2. immutable Pythia acquisition and loading/logits benchmarks succeed;
@@ -185,11 +191,93 @@ Scoring execution remains blocked until all of these are true:
    that snapshot layer;
 5. the cache has sufficient storage and the exact Git commit is recorded.
 
-No scoring command may download or load directly by repository/revision. After
-the shared loader exists, add an offline, explicit-float16 command here and
-require deterministic repeated score artifacts with identical canonical
-`output_sha256` values. Hardware/runtime metadata remains in the separate run
-and compute ledgers.
+No scoring command may download or load directly by repository/revision. The
+only accepted target procedure is two fresh invocations with separate fresh
+resource audits and a dependency-light offline verifier. Every named output is
+create-only and must not already exist.
+
+Use the existing hash-verified cache. In an isolated worktree without its own
+cache, set `$cache` to the absolute existing cache directory; do not create a
+junction or symlink. The commands below use a worktree-local cache only as the
+portable example.
+
+```powershell
+$cache = (Resolve-Path "artifacts/local/hf-cache").Path
+$revision = "7199d8fc61a6d565cd1f3c62bf11525b563e13b2"
+$snapshot = (Resolve-Path (Join-Path $cache "models--EleutherAI--pythia-1b-deduped/snapshots/$revision")).Path
+$tokenizerAudit = (Resolve-Path "artifacts/local/pythia-tokenizer-none-a-c57ce40.json").Path
+$head = (git rev-parse --short=8 HEAD).Trim()
+$auditA = "artifacts/local/pythia-score-resource-a-$head.json"
+$scoreA = "artifacts/local/pythia-score-a-$head.json"
+$receiptA = "artifacts/local/pythia-score-runtime-a-$head.json"
+$auditB = "artifacts/local/pythia-score-resource-b-$head.json"
+$scoreB = "artifacts/local/pythia-score-b-$head.json"
+$receiptB = "artifacts/local/pythia-score-runtime-b-$head.json"
+$comparison = "artifacts/local/pythia-score-comparison-$head.json"
+
+python scripts/audit_local_resources.py `
+  --path $cache `
+  --repo (Get-Location) `
+  --output $auditA
+
+python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v0.json `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --device cuda:0 `
+  --dtype float16 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --resource-audit $auditA `
+  --tokenizer-audit $tokenizerAudit `
+  --attempt a `
+  --allow-low-ram `
+  --execute `
+  --output $scoreA `
+  --runtime-output $receiptA
+
+python scripts/audit_local_resources.py `
+  --path $cache `
+  --repo (Get-Location) `
+  --output $auditB
+
+python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v0.json `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --device cuda:0 `
+  --dtype float16 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --resource-audit $auditB `
+  --tokenizer-audit $tokenizerAudit `
+  --attempt b `
+  --allow-low-ram `
+  --execute `
+  --output $scoreB `
+  --runtime-output $receiptB
+
+python scripts/verify_registry_scores.py `
+  --config configs/runs/pythia-development-score-v0.json `
+  --score-a $scoreA `
+  --receipt-a $receiptA `
+  --resource-audit-a $auditA `
+  --score-b $scoreB `
+  --receipt-b $receiptB `
+  --resource-audit-b $auditB `
+  --output $comparison
+```
+
+Attempt A must fully release its lock, CUDA state, and private staging before
+audit B is captured. The verifier requires distinct process IDs, distinct raw
+resource audits, ordered timestamps, exact clean-head identity, complete
+resource/runtime receipts, and byte-identical score artifacts. Hardware and
+runtime measurements remain outside the deterministic score identity. A
+pre-import resource failure is pending and may be retried only after resources
+naturally return and a new audit is captured; any failure after deserialization
+starts consumes the sole attempt and stops this gate.
 
 ## 8. Score semantics
 

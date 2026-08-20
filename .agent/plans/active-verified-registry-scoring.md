@@ -1,6 +1,6 @@
 # Verified Registry Model Scoring
 
-**Status:** active — E0 complete; E1 implementation active; no development logits inspected
+**Status:** active — E0-E2 complete; E3 delivery active; no development logits inspected
 **Started:** 2026-08-20T07:17:14-04:00
 **Frozen baseline:** `dd0b56471b55babe2a4eb273381deeef2f852d49`
 **Branch:** `feat/verified-registry-scoring`
@@ -14,8 +14,10 @@ through the verified snapshot and accepted tokenizer identities.
 Enable `development-v0` scoring only after the accepted tokenizer identity,
 exact local snapshot, clean Git head, fresh live resources, CUDA FP16 model
 load, and frozen SDPA-MATH policy all pass. Two fresh invocations must produce
-byte-identical deterministic score files. Runtime receipts may differ only in
-declared attempt metadata.
+byte-identical deterministic score files. Runtime receipts may differ in
+declared attempt-specific process, timing, resource, storage, and metric
+evidence; their frozen Git, run, input, model, and runtime identities must
+match.
 
 A pass is Target Verified engineering evidence for this exact scorer path. It
 does not establish score reliability, a temporal effect, calibration
@@ -38,6 +40,8 @@ sensitivity, model representativeness, causal evidence, or CSTG.
 - Accepted tokenizer canonical / raw report SHA-256:
   `6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523` /
   `ee11e4c99d6577fa2e3be5a53e4c17b626ff91bcdee877b295799dc5926c39bb`.
+- Accepted ordered scoring-token matrix SHA-256:
+  `b2477a108542308b17d80811aa0ff15ad72f37a67363c3fa9177fde85805dfe1`.
 - Tokenizer backend SHA-256:
   `1b0aca3746c0870daeb9137101cd89acbb38710fc433db83331287d5b0e47ee0`.
 - Prefix policy `none`, empty prefix token IDs, maximum length 2,048.
@@ -78,9 +82,10 @@ this plan; do not update either input inside this gate.
 
 ## Implementation invariants
 
-1. Reuse one shared resource-policy implementation. Extract dependency-light
-   validation from `benchmark_model.py` without changing its behavior, and keep
-   compatibility wrappers and existing tests.
+1. Reuse one tested resource-policy implementation. The scoring CLI calls the
+   existing `benchmark_model.py` validators directly and preserves their
+   ordering and behavior; it does not maintain a second threshold
+   implementation.
 2. Generalize the create-only verified staging helper. Model loading stages
    only `config.json` and `model.safetensors`, stream-verifies them during and
    after copy, and never consumes the mutable cache as the deserialization
@@ -106,8 +111,27 @@ this plan; do not update either input inside this gate.
    receipt; orphan or partial scores are invalid.
 8. A dependency-light repeat verifier must validate both self-hashes, raw score
    byte equality, both complete receipts, immutable receipt identity equality,
-   12/24/48 and token totals, zero integrity failures, and recursive absence of
-   absolute paths from deterministic scores.
+   both distinct raw resource-audit bindings, 12/24/48 and token totals, zero
+   integrity failures, and recursive absence of absolute paths from
+   deterministic scores.
+
+## Pre-logits implementation decisions
+
+- The original E1 wording proposed extracting the resource validators into a
+  new shared module. Direct reuse of the already tested benchmark validators is
+  the smaller behavior-preserving implementation, so this plan records that
+  amendment before any development logits are inspected.
+- Model deserialization reads only a private, randomly named create-only stage.
+  Its exact files are rehashed before the resource callback, again immediately
+  before deserialization, and after loading. This closes ordinary cache-writer
+  races. A malicious same-account process that can replace and restore private
+  staged bytes during deserialization remains outside the trusted-local-host
+  threat model.
+- The complete receipt records elapsed time through score-file fsync, before
+  the receipt itself is written. A final wall-limit check runs after receipt
+  fsync and rolls back both owned outputs if it fails; therefore publication is
+  transactionally bounded even though that last duration is not embedded in
+  the already-written receipt.
 
 ## Evidence gates
 
@@ -117,7 +141,7 @@ this plan; do not update either input inside this gate.
 - Create this successor branch, plan, frozen run specification, and one-writer
   state transition without changing manifest or registry.
 
-### E1 — Shared loader/resource implementation (active)
+### E1 — Shared loader/resource implementation (complete)
 
 - Extract/reuse the exact resource gate, add verified model staging/loading,
   accepted-tokenizer binding, deterministic attention controls, split output
@@ -125,7 +149,7 @@ this plan; do not update either input inside this gate.
 - Keep plan mode dependency-light and model execution fail-closed until every
   required input is explicit.
 
-### E2 — Dependency-light validation
+### E2 — Dependency-light validation (complete)
 
 - Cover canonical-input/run-spec drift, tokenizer-report drift, snapshot and
   stage integrity, links/escape, resource/runtime drift, pre-import ordering,
@@ -135,9 +159,18 @@ this plan; do not update either input inside this gate.
 - Pass compile checks, all validators, focused tests, full pytest, and
   `git diff --check`.
 
-### E3 — Implementation delivery
+Observed on the complete scoped working-tree implementation: 457 tests passed
+with two platform-optional symlink skips; the pilot, model-manifest, and
+development-registry validators passed; production modules compiled; and
+`git diff --check` passed. Focused adversarial review additionally replayed
+resource chronology, raw-hash transport, path alias, type-alias, platform,
+threshold, output-transaction, lock-release, and final-rebind failures. This is
+pre-execution Tested evidence only; no exact-head CI or target-scoring evidence
+exists yet and no model logits were inspected.
 
-- Commit and push the scoped implementation.
+### E3 — Implementation delivery (active)
+
+- Push the scoped implementation commit.
 - Open a draft PR stacked on `feat/verified-registry-loader`.
 - Require all exact-head CI checks to pass before inspecting development
   logits.
@@ -147,8 +180,9 @@ this plan; do not update either input inside this gate.
 - Capture fresh audit A, run score A in a fresh process, and let the process
   release CUDA/staging state.
 - Capture fresh audit B and run score B in another fresh process.
-- Run the repeat verifier. Require complete receipts and byte-identical score
-  artifacts.
+- Run the repeat verifier with both original resource-audit files. Require
+  complete receipts, distinct process and audit identities, and byte-identical
+  score artifacts.
 
 ### E5 — Evidence publication
 

@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -115,7 +116,32 @@ def test_direct_download_flags_are_disabled() -> None:
         assert "verified acquisition workflow" in model.stderr
 
 
-def test_tokenizer_execution_requires_paths_and_model_remains_blocked() -> None:
+def test_execute_download_rejection_preserves_failure_receipt() -> None:
+    with tempfile.TemporaryDirectory(dir=ROOT / "artifacts" / "local") as raw_root:
+        runtime = Path(raw_root) / "failure.json"
+        completed = _run(
+            "scripts/score_registry_transformers.py",
+            "--artifact",
+            "pythia-1b-deduped-main",
+            "--prefix-policy",
+            "none",
+            "--execute",
+            "--allow-download",
+            "--attempt",
+            "a",
+            "--runtime-output",
+            str(runtime),
+        )
+
+        assert completed.returncode == 2
+        receipt = json.loads(runtime.read_text(encoding="utf-8"))
+        assert receipt["status"] == "failed"
+        assert receipt["failure_stage"] == "cli-preflight"
+        assert receipt["network_access_permitted"] is False
+        assert receipt["score"]["valid_score_published"] is False
+
+
+def test_tokenizer_and_model_execution_require_explicit_paths() -> None:
     tokenizer = _run(
         "scripts/audit_registry_tokenizer.py",
         "--artifact",
@@ -138,4 +164,7 @@ def test_tokenizer_execution_requires_paths_and_model_remains_blocked() -> None:
     assert tokenizer.returncode == 1
     assert model.returncode == 1
     assert "explicit --cache-dir and --snapshot-path" in tokenizer.stderr
-    assert "clean-head live-resource" in model.stderr
+    assert "--execute requires explicit" in model.stderr
+    assert "--cache-dir" in model.stderr
+    assert "--resource-audit" in model.stderr
+    assert "--runtime-output" in model.stderr

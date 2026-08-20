@@ -1,13 +1,23 @@
+from contextlib import nullcontext
 import hashlib
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from chronopersona.model_manifest import load_model_manifest
 from chronopersona.scoring import ScoringIntegrityError
+from chronopersona.scoring_runtime import load_scoring_config
 from chronopersona.tokenization import PreparedContinuation
 from chronopersona.transformers_provider import (
+    LoadedModel,
+    LoadedTokenizer,
+    TransformersContinuationProvider,
     TransformersProviderError,
+    _configure_model_determinism,
+    _validate_loaded_model,
+    _validate_loading_info,
+    _stage_verified_files,
     _loaded_tokenizer_validation,
     _stage_tokenizer_files,
     load_manifest_model,
@@ -23,6 +33,12 @@ MANIFEST = (
     / "MODEL_MANIFEST.json"
 )
 MANIFEST_SHA256 = hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
+SCORING_CONFIG = (
+    Path(__file__).resolve().parents[1]
+    / "configs"
+    / "runs"
+    / "pythia-development-score-v0.json"
+)
 
 
 def _ready_artifact():
@@ -530,9 +546,7 @@ def test_private_staging_refuses_preexisting_target(tmp_path: Path) -> None:
     assert (destination / "config.json").read_bytes() == b"sentinel"
 
 
-@pytest.mark.parametrize("allow_download", [False, True])
-def test_manifest_model_load_blocks_before_optional_imports(
-    allow_download: bool,
+def test_manifest_model_policy_blocks_before_optional_imports(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def unexpected_import():
@@ -543,13 +557,517 @@ def test_manifest_model_load_blocks_before_optional_imports(
         unexpected_import,
     )
 
-    with pytest.raises(
-        TransformersProviderError,
-        match="clean-head live-resource",
-    ):
+    with pytest.raises(ValueError, match="license must be verified"):
         load_manifest_model(
-            _ready_artifact(),
-            allow_download=allow_download,
-            device="cuda",
+            _artifact("datedgpt-2013-base"),
+            loaded_tokenizer=None,  # type: ignore[arg-type]
+            cache_dir="unused",
+            snapshot_path="unused",
+            expected_manifest_sha256=MANIFEST_SHA256,
+            device="cuda:0",
             dtype="float16",
+            expected_model={},
+            expected_determinism={},
+            expected_runtime={},
         )
+
+
+def test_private_model_staging_copies_only_config_and_safetensors(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    stage = tmp_path / "stage"
+    source.mkdir()
+    stage.mkdir()
+    payloads = {
+        "config.json": b"config",
+        "model.safetensors": b"model-weights",
+        "tokenizer.json": b"must-not-stage",
+    }
+    for filename, payload in payloads.items():
+        (source / filename).write_bytes(payload)
+    receipt = {
+        "files": [
+            {
+                "filename": filename,
+                "size_bytes": len(payload),
+                "sha256": hashlib.sha256(payload).hexdigest(),
+            }
+            for filename, payload in payloads.items()
+        ]
+    }
+
+    staged = _stage_verified_files(
+        source,
+        stage,
+        receipt,
+        filenames={"config.json", "model.safetensors"},
+        label="model",
+    )
+
+    assert set(staged) == {"config.json", "model.safetensors"}
+    assert {path.name for path in stage.iterdir()} == set(staged)
+    assert not (stage / "tokenizer.json").exists()
+
+
+def test_manifest_model_load_uses_private_stage_and_exact_kwargs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact = _ready_artifact()
+    cache = tmp_path / "cache"
+    snapshot = cache / "snapshot"
+    snapshot.mkdir(parents=True)
+    receipt = {
+        "schema_version": 1,
+        "status": "verified",
+        "artifact_id": artifact["id"],
+        "repository": artifact["repository"],
+        "revision": artifact["revision"],
+        "receipt_sha256": "a" * 64,
+        "files": [],
+    }
+    verification = {
+        "snapshot_path": str(snapshot),
+        "portable_receipt": receipt,
+    }
+    loaded_tokenizer = LoadedTokenizer(
+        tokenizer=object(),
+        repository=str(artifact["repository"]),
+        revision=str(artifact["revision"]),
+        model_manifest_sha256=MANIFEST_SHA256,
+        snapshot_verification=receipt,
+        tokenizer_validation={"verified": True},
+        runtime_identity={"python": "fixture"},
+    )
+    order: list[str] = []
+    observed: dict[str, object] = {}
+
+    class FakeCuda:
+        @staticmethod
+        def empty_cache() -> None:
+            pass
+
+        @staticmethod
+        def reset_peak_memory_stats(_device: object) -> None:
+            pass
+
+        @staticmethod
+        def synchronize(_device: object) -> None:
+            pass
+
+    class FakeTorch:
+        float16 = "float16"
+        cuda = FakeCuda()
+
+        @staticmethod
+        def device(value: str):
+            return type("Device", (), {"type": "cuda", "index": 0, "value": value})()
+
+    class FakeModel:
+        def to(self, _device: object):
+            return self
+
+        def eval(self):
+            order.append("eval")
+            return self
+
+    class AutoModel:
+        @classmethod
+        def from_pretrained(cls, path: Path, **kwargs: object):
+            order.append("deserialize")
+            observed["path"] = path
+            observed["kwargs"] = kwargs
+            return FakeModel(), {
+                "missing_keys": [],
+                "unexpected_keys": [],
+                "mismatched_keys": [],
+                "error_msgs": [],
+            }
+
+    class Backend:
+        MATH = "math"
+
+    monkeypatch.setenv("HF_HUB_OFFLINE", "1")
+    monkeypatch.setenv("TRANSFORMERS_OFFLINE", "1")
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider.verify_snapshot",
+        lambda *_args, **_kwargs: verification,
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._import_model_stack",
+        lambda: (FakeTorch, object(), AutoModel, object(), Backend),
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._validate_model_runtime",
+        lambda *_args: {"verified": True},
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._configure_model_determinism",
+        lambda *_args: {"verified": True},
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._stage_verified_files",
+        lambda _source, destination, *_args, **_kwargs: (
+            order.append("stage"),
+            (destination / "config.json").write_bytes(b"config"),
+            (destination / "model.safetensors").write_bytes(b"weights"),
+            {
+                "config.json": {"size_bytes": 6, "sha256": "a" * 64},
+                "model.safetensors": {"size_bytes": 7, "sha256": "b" * 64},
+            },
+        )[-1],
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._verify_staged_files",
+        lambda *_args, **_kwargs: order.append("verify"),
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._validate_loaded_model",
+        lambda *_args: {"verified": True},
+    )
+
+    loaded = load_manifest_model(
+        artifact,
+        loaded_tokenizer=loaded_tokenizer,
+        cache_dir=cache,
+        snapshot_path=snapshot,
+        expected_manifest_sha256=MANIFEST_SHA256,
+        device="cuda:0",
+        dtype="float16",
+        expected_model={"vocabulary_size": 50304},
+        expected_determinism={},
+        expected_runtime={},
+        pre_deserialization_check=lambda *_args: order.append("preflight"),
+    )
+
+    assert order[:5] == ["stage", "verify", "preflight", "verify", "deserialize"]
+    assert observed["path"] != snapshot
+    assert not Path(observed["path"]).exists()
+    assert observed["kwargs"] == {
+        "local_files_only": True,
+        "trust_remote_code": False,
+        "torch_dtype": "float16",
+        "use_safetensors": True,
+        "low_cpu_mem_usage": True,
+        "attn_implementation": "sdpa",
+        "output_loading_info": True,
+        "weights_only": True,
+    }
+    assert loaded.loading_info == {
+        "error_msgs": [],
+        "mismatched_keys": [],
+        "missing_keys": [],
+        "unexpected_keys": [],
+    }
+
+
+def test_determinism_configuration_rejects_noop_runtime(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = load_scoring_config(SCORING_CONFIG)
+    monkeypatch.setenv("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+
+    class CudaBackend:
+        matmul = SimpleNamespace(allow_tf32=False)
+
+        @staticmethod
+        def allow_fp16_bf16_reduction_math_sdp(_value: bool) -> None:
+            pass
+
+        @staticmethod
+        def fp16_bf16_reduction_math_sdp_allowed() -> bool:
+            return False
+
+    class Cuda:
+        @staticmethod
+        def manual_seed_all(_seed: int) -> None:
+            pass
+
+    class Torch:
+        backends = SimpleNamespace(
+            cuda=CudaBackend(),
+            cudnn=SimpleNamespace(allow_tf32=False, benchmark=False),
+        )
+        cuda = Cuda()
+
+        @staticmethod
+        def use_deterministic_algorithms(_enabled: bool) -> None:
+            pass
+
+        @staticmethod
+        def are_deterministic_algorithms_enabled() -> bool:
+            return False
+
+        @staticmethod
+        def set_float32_matmul_precision(_value: str) -> None:
+            pass
+
+        @staticmethod
+        def get_float32_matmul_precision() -> str:
+            return "medium"
+
+        @staticmethod
+        def manual_seed(_seed: int) -> None:
+            pass
+
+    with pytest.raises(TransformersProviderError, match="not applied exactly"):
+        _configure_model_determinism(
+            Torch,
+            lambda _backend: nullcontext(),
+            "math",
+            config["determinism"],
+        )
+
+
+@pytest.mark.parametrize(
+    ("case", "message"),
+    [
+        ("quantized", "quantization policy mismatch"),
+        ("device-map", "device-map policy mismatch"),
+        ("offload", "offload-hook policy mismatch"),
+    ],
+)
+def test_loaded_model_rejects_hidden_loading_modes(
+    case: str,
+    message: str,
+) -> None:
+    config = load_scoring_config(SCORING_CONFIG)
+
+    class Parameter:
+        dtype = "torch.float16"
+        device = "cuda:0"
+        is_meta = False
+
+        def numel(self) -> int:
+            return config["model"]["parameter_count"]
+
+    Model = type(
+        "GPTNeoXForCausalLM",
+        (),
+        {
+            "training": False,
+            "is_quantized": False,
+            "hf_device_map": None,
+            "_hf_hook": None,
+            "config": SimpleNamespace(
+                model_type="gpt_neox",
+                vocab_size=config["model"]["vocabulary_size"],
+                _attn_implementation="sdpa",
+            ),
+            "parameters": lambda _self: [Parameter()],
+            "buffers": lambda _self: [],
+            "modules": lambda self: [self],
+        },
+    )
+    model = Model()
+    if case == "quantized":
+        model.is_quantized = True
+    elif case == "device-map":
+        model.hf_device_map = {"": "disk"}
+    else:
+        model._hf_hook = object()
+
+    with pytest.raises(TransformersProviderError, match=message):
+        _validate_loaded_model(model, object(), config["model"])
+
+
+@pytest.mark.parametrize(
+    "loading_info",
+    [
+        {
+            "missing_keys": ["weight"],
+            "unexpected_keys": [],
+            "mismatched_keys": [],
+            "error_msgs": [],
+        },
+        {
+            "missing_keys": [],
+            "unexpected_keys": [],
+            "mismatched_keys": [],
+            "error_msgs": [],
+            "extra": [],
+        },
+    ],
+)
+def test_model_loading_diagnostics_fail_closed(loading_info: dict) -> None:
+    with pytest.raises(TransformersProviderError, match="diagnostic"):
+        _validate_loading_info(loading_info)
+
+
+@pytest.mark.parametrize(
+    ("logits", "autocast_enabled", "message", "expected_context_entries"),
+    [
+        (None, False, "does not contain rank-3 logits", 1),
+        (
+            SimpleNamespace(ndim=2, shape=(1, 4)),
+            False,
+            "does not contain rank-3 logits",
+            1,
+        ),
+        (SimpleNamespace(ndim=3, shape=(1, 4, 2)), False, "vocabulary shape", 1),
+        (SimpleNamespace(ndim=3, shape=(1, 4, 3)), False, "non-finite", 1),
+        (None, True, "autocast is forbidden", 0),
+    ],
+)
+def test_provider_enters_math_context_and_rejects_bad_logits(
+    logits: object,
+    autocast_enabled: bool,
+    message: str,
+    expected_context_entries: int,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Input:
+        shape = (1, 4)
+
+    class BooleanResult:
+        @staticmethod
+        def all():
+            return SimpleNamespace(item=lambda: False)
+
+    class Cuda:
+        matmul = SimpleNamespace(allow_tf32=False)
+
+        @staticmethod
+        def synchronize(_device: object) -> None:
+            pass
+
+    class Torch:
+        long = "long"
+        cuda = Cuda()
+        backends = SimpleNamespace(
+            cuda=Cuda(),
+            cudnn=SimpleNamespace(allow_tf32=False, benchmark=False),
+        )
+
+        @staticmethod
+        def is_autocast_enabled(_device: str) -> bool:
+            return autocast_enabled
+
+        @staticmethod
+        def are_deterministic_algorithms_enabled() -> bool:
+            return True
+
+        @staticmethod
+        def get_float32_matmul_precision() -> str:
+            return "highest"
+
+        @staticmethod
+        def device(value: str) -> str:
+            return value
+
+        @staticmethod
+        def tensor(*_args, **_kwargs) -> Input:
+            return Input()
+
+        @staticmethod
+        def ones_like(_value: object) -> object:
+            return object()
+
+        @staticmethod
+        def inference_mode():
+            return nullcontext()
+
+        @staticmethod
+        def isfinite(_value: object) -> BooleanResult:
+            return BooleanResult()
+
+    class Backend:
+        MATH = "math"
+
+    class Model:
+        training = False
+
+        def named_parameters(self):
+            return []
+
+        def __call__(self, **_kwargs):
+            return SimpleNamespace(logits=logits)
+
+    loaded = LoadedModel(
+        tokenizer=object(),
+        model=Model(),
+        repository="repo",
+        revision="a" * 40,
+        device="cuda:0",
+        dtype="float16",
+        vocabulary_size=3,
+        model_manifest_sha256="b" * 64,
+        snapshot_verification={},
+        tokenizer_validation={},
+        runtime_identity={},
+        model_validation={"determinism": {"verified": True}},
+        loading_info={},
+        load_seconds=0.0,
+    )
+    entered = 0
+
+    class Context:
+        def __enter__(self):
+            nonlocal entered
+            entered += 1
+
+        def __exit__(self, *_args):
+            return False
+
+    monkeypatch.setenv("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider._import_scoring_stack",
+        lambda: (Torch, object(), Backend),
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider.math_sdpa_context",
+        lambda *_args: Context(),
+    )
+    monkeypatch.setattr(
+        "chronopersona.transformers_provider.prepare_continuation",
+        lambda *_args, **_kwargs: _prepared(),
+    )
+    provider = TransformersContinuationProvider(
+        loaded,
+        prefix_policy="none",
+        max_length=2048,
+    )
+
+    with pytest.raises(TransformersProviderError, match=message):
+        provider("prompt", "continuation")
+
+    assert entered == expected_context_entries
+
+
+def test_provider_rejects_parameter_or_eval_state_mutation() -> None:
+    parameter = SimpleNamespace(_version=0)
+    model = SimpleNamespace(
+        training=False,
+        named_parameters=lambda: [("weight", parameter)],
+    )
+    loaded = LoadedModel(
+        tokenizer=object(),
+        model=model,
+        repository="repo",
+        revision="a" * 40,
+        device="cuda:0",
+        dtype="float16",
+        vocabulary_size=3,
+        model_manifest_sha256="b" * 64,
+        snapshot_verification={},
+        tokenizer_validation={},
+        runtime_identity={},
+        model_validation={"determinism": {"verified": True}},
+        loading_info={},
+        load_seconds=0.0,
+    )
+    provider = TransformersContinuationProvider(
+        loaded,
+        prefix_policy="none",
+        max_length=2048,
+    )
+
+    parameter._version = 1
+    with pytest.raises(TransformersProviderError, match="parameters changed"):
+        provider.assert_model_unchanged()
+
+    parameter._version = 0
+    model.training = True
+    with pytest.raises(TransformersProviderError, match="left evaluation mode"):
+        provider.assert_model_unchanged()

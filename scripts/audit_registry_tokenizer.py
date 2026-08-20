@@ -144,7 +144,9 @@ def _git_hash_payload(relative: str, payload: bytes) -> str:
     return completed.stdout.decode("ascii").strip()
 
 
-def _execution_git_binding() -> tuple[dict[str, object], dict[str, bytes]]:
+def _execution_git_binding(
+    extra_inputs: tuple[tuple[str, Path], ...] = (),
+) -> tuple[dict[str, object], dict[str, bytes]]:
     head = _git("rev-parse", "HEAD")
     dirty = _git("status", "--porcelain", "--untracked-files=all")
     if dirty:
@@ -157,6 +159,7 @@ def _execution_git_binding() -> tuple[dict[str, object], dict[str, bytes]]:
     for label, path in (
         ("model_manifest", DEFAULT_MANIFEST),
         ("development_registry", DEFAULT_REGISTRY),
+        *extra_inputs,
     ):
         relative = path.relative_to(ROOT).as_posix()
         payload = _stable_file_bytes(path)

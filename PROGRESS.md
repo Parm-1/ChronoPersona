@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T07:17:14-04:00
+**Last updated:** 2026-08-20T09:37:11-04:00
 
 ## Decision
 
@@ -9,16 +9,18 @@ Pythia verified-snapshot tokenizer boundary path. Two fresh invocations audited
 all 12 development items, 24 forms, and 48 candidates with zero failures and
 byte-identical reports. Freeze native `prefix-policy=none` before logits.
 
-Keep model scoring blocked until its separate verified-snapshot, accepted-
-tokenizer, clean-head resource, exact-load, and deterministic-output gate is
-integrated. Preserve the completed v0/v1 training evidence without rerunning it.
+Accept the dependency-light registry-scoring implementation as **Tested** in
+the scoped working tree. Keep target scoring blocked until the implementation
+is delivered and exact-head CI passes; then require fresh clean-head resource
+evidence before either attempt. No development logits have been inspected.
+Preserve the completed v0/v1 training evidence without rerunning it.
 
 ## Current objective
 
-Integrate only the Pythia registry model scorer with the accepted snapshot and
-tokenizer identities, fresh resource/load evidence, explicit CUDA FP16
-SDPA-MATH execution, and separate deterministic score versus runtime-receipt
-artifacts. Require two fresh score invocations to match byte for byte.
+Deliver the tested scorer on `feat/verified-registry-scoring`, obtain exact-head
+CI, then execute the frozen two-attempt gate only if fresh resource audits pass.
+Require byte-identical deterministic scores and independently valid runtime
+receipts.
 
 ## Current verified boundary
 
@@ -60,6 +62,14 @@ artifacts. Require two fresh score invocations to match byte for byte.
 - **Tokenizer delivery — Tested:** evidence head `dd0b564` is pushed on draft
   PR #33 and all 18 exact-head checks passed. That head is the immutable baseline
   for the separate scoring branch.
+- **Scoring implementation — Tested:** the complete scoped scorer working-tree
+  diff based on `fd487dd` passed 457 tests with two platform-optional symlink
+  skips, production-module compilation, all three top-level validators, and
+  diff checks. Adversarial tests cover exact score semantics, complete resource
+  evidence, model/runtime identity, output transactions, failure receipts,
+  final Git/input rebinding, and byte-exact repeat verification. This is
+  pre-execution Tested evidence; no exact-head CI or target-scoring evidence
+  exists yet, and no development logits were inspected.
 
 ## Evidence
 
@@ -99,6 +109,10 @@ artifacts. Require two fresh score invocations to match byte for byte.
   `runs/pythia-lora-smoke-v0/control/run-b035b9becad60b6dc55ff3fd6fba6016`
 - Ignored tokenizer reports:
   `artifacts/local/pythia-tokenizer-none-{a,b}-c57ce40.json`
+- Frozen scorer config:
+  `configs/runs/pythia-development-score-v0.json`
+- Active scorer plan:
+  `.agent/plans/active-verified-registry-scoring.md`
 
 ## Validation
 
@@ -122,6 +136,11 @@ artifacts. Require two fresh score invocations to match byte for byte.
   The canonical and receipt self-hashes recomputed, every candidate passed,
   runtime/backend/native-prefix identities matched, and recursive inspection
   found no absolute local path.
+- Scoring implementation working tree: 457 passed, two platform-optional
+  symlink skips; pilot, model-manifest, and development-registry validators
+  passed; compile and `git diff --check` passed. Independent read-only review
+  found no remaining provider, resource-verifier, or output-transaction
+  blocker after replaying the adversarial regressions.
 
 ## Risks
 
@@ -130,7 +149,9 @@ artifacts. Require two fresh score invocations to match byte for byte.
 - The verified tokenizer path is accepted only for exact Pythia and this
   runtime/registry identity. Registry model scoring remains blocked; a
   populated cache or passing tokenizer audit is not proof that model scoring is
-  resource-safe, deterministic, or reliable.
+  resource-safe, deterministic, or reliable. Target scoring remains blocked
+  until exact-head implementation CI passes and a fresh resource audit
+  satisfies every frozen threshold.
 - Rights-qualified, historically bounded A/B/C source samples, source-role
   feasibility, evaluation sealing, synthetic calibration, and branch-level
   cost evidence remain unresolved.
@@ -157,11 +178,11 @@ artifacts. Require two fresh score invocations to match byte for byte.
 
 ## Next write-active deliverable
 
-1. Integrate the model provider/scorer with the accepted snapshot/tokenizer
-   identities, fresh resource/load gates, and separate deterministic score and
-   runtime receipt artifacts.
-2. Pass dependency-light adversarial tests, the full suite, and all validators.
-3. Push a stacked draft PR and require exact-head CI before any development
-   logits are inspected.
+1. Deliver the scoped implementation commit: push the feature branch and open
+   a stacked draft PR against `feat/verified-registry-loader`.
+2. Require exact-head CI before any development logits are inspected.
+3. After CI, capture fresh audit A and run attempt A only if every frozen
+   resource gate passes; then release state, capture fresh audit B, run attempt
+   B, and require the offline repeat verifier to accept exact score bytes.
 
 Do not reopen or tune v0/v1. Do not infer a scientific result from this gate.

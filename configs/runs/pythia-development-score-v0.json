@@ -29,6 +29,7 @@
     "output_sha256": "6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523",
     "backend_sha256": "1b0aca3746c0870daeb9137101cd89acbb38710fc433db83331287d5b0e47ee0",
     "native_prefix_probe_sha256": "f2b89b376c56b7100ec3947ae1ccd3b468eceedcfbfe7031389bae0f8c327af1",
+    "scoring_token_matrix_sha256": "b2477a108542308b17d80811aa0ff15ad72f37a67363c3fa9177fde85805dfe1",
     "prefix_policy": "none",
     "prefix_token_ids": []
   },

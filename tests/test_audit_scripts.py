@@ -491,6 +491,23 @@ def test_execution_resources_bind_identity_and_conservative_headroom() -> None:
     assert report["ram_threshold_override_used"] is False
     assert report["minimum_free_vram_bytes"] == 1_500_000
 
+    overridden = module._validate_execution_resources(
+        audited,
+        live,
+        {"weight_size_bytes": 1_000_000},
+        minimum_free_vram_bytes=5_000_000,
+    )
+    assert overridden["minimum_free_vram_bytes"] == 5_000_000
+
+    for invalid in (0, -1, True):
+        with pytest.raises(ValueError, match="positive integer"):
+            module._validate_execution_resources(
+                audited,
+                live,
+                {"weight_size_bytes": 1_000_000},
+                minimum_free_vram_bytes=invalid,
+            )
+
     cpu_report = module._validate_execution_resources(
         audited,
         live,
