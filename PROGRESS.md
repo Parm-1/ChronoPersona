@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T17:04:48-04:00
+**Last updated:** 2026-08-20T17:20:21-04:00
 
 ## Decision
 
@@ -49,13 +49,14 @@ enabled. The prior zero-step billing blocker is empirically closed: draft PR
 
 ## Current objective and closure condition
 
-Publish D-037, the portable E4 failure report, failed ledger row, and closed
-execution state on `feat/development-v1-scoring`; require all checks to pass on
-that exact evidence head. The result-blind receipt/code review found an
-observability gap—the exact failing audit was not embedded—but no evidence that
-the frozen resource rejection was erroneous, so no rescue qualifies. Do not run
-A or B. A future scoring condition requires a new recorded decision and an
-independently demonstrated implementation defect unrelated to pole outcomes.
+Harden future failed scorer receipts so an exact resident-resource observation
+is preserved before threshold validation can raise. Work from green failure-
+evidence baseline `8fc16af` on `fix/scoring-failure-observability`; use only
+dependency-light injected tests and exact-head CI. This is result-blind
+observability work, not a rescue: do not run A or B, alter a threshold, or infer
+that the frozen resource rejection was erroneous. Closure requires the scoped
+fix, unchanged successful-output semantics, a green full offline suite, and all
+checks green on one unchanged draft-PR head.
 
 ## Current verified boundary
 
@@ -152,6 +153,8 @@ independently demonstrated implementation defect unrelated to pole outcomes.
   `79253400d524b883f41073d0be77aa9d0dd3339372ea22ed95e72f1541b8290b`
 - E4 failure report:
   `reports/stage0/pythia_v1_scoring_failure_2026-08-20.md`
+- failure-evidence delivery head:
+  `8fc16af35b27089b1f0bde68c249d0313e8f0e9e` (18/18 checks passed)
 - compute ledger: failed v0 training, completed v1 load/control/resume, completed
   v0 scorer A/B, and failed v1 scorer A rows in `COMPUTE_LEDGER.csv`
 
@@ -275,8 +278,7 @@ independently demonstrated implementation defect unrelated to pole outcomes.
   intended stack base for E3.
 - Draft PR #36: `https://github.com/Parm-1/ChronoPersona/pull/36`, open and
   draft, stacked on PR #35. Exact execution head `e435c40` passed 18/18 checks;
-  the portable failure-evidence commit and its checks are the remaining
-  delivery work.
+  failure-evidence head `8fc16af` also passed all 18 checks.
 - Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, open and
   draft, green at final evidence head `a7dd27c`.
 - PR #32/#33 remain open draft delivery history. PR #31 was merged externally
@@ -286,9 +288,9 @@ independently demonstrated implementation defect unrelated to pole outcomes.
 
 ## Next write-active deliverable
 
-Publish D-037, the portable E4 failure report, failed ledger row, and closed
-plan state; require green exact-head CI. The bounded result-blind review is
-complete and did not establish a rescue-qualifying defect. Do not run B, rerun
-A, recover transient scores, change thresholds, or alter content/metrics. A
-future condition requires a new decision and an independently demonstrated
-implementation defect unrelated to pole outcomes.
+Implement D-038 on `fix/scoring-failure-observability`: persist an exact
+prevalidation resident-resource observation in future failed receipts, prove
+the threshold still fails closed with injected tests, and deliver the scoped
+branch through exact-head CI. Do not run B, rerun A, recover transient scores,
+change thresholds, or alter content/metrics. This fix cannot authorize a future
+scoring condition.

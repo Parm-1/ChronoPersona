@@ -846,6 +846,41 @@ not evidence for any model preference, temporal effect, causal result, or CSTG.
 `reports/stage0/pythia_v1_scoring_failure_2026-08-20.md` and the failed v1 row
 in `COMPUTE_LEDGER.csv`.
 
+## D-038 — Preserve future failed resident audits without reopening E4
+
+**Date:** 2026-08-20
+**Status:** accepted; result-blind implementation gate
+
+The consumed E4 attempt exposed one bounded evidence-schema defect: the scorer
+captures a live resident-resource audit, but shared threshold validation can
+raise before the caller stores that audit in the failure context. The failure
+receipt therefore preserved the rejection and all prior bindings but not the
+exact observation that triggered it.
+
+Harden future scorer failures by storing a clearly partial resident-resource
+observation in the existing mutable resource state before validation. Bind the
+phase label, raw and semantic audit hashes, capture time, age, frozen threshold,
+conservative VRAM, and complete audit. If validation raises, copy that pending
+record into the private failed receipt. Remove it after a fully successful
+resident check. Do not change the validator, threshold, score, successful
+receipt schema, or output transaction.
+
+This correction is evidence-observability hardening, not a scoring rescue. It
+cannot reconstruct attempt A's missing value, establish that its resource
+rejection was wrong, recover a score, authorize attempt B, or authorize an A
+retry. D-037 remains controlling for E4. Validate this change only with
+dependency-light injected audits, the offline test suite, and exact-head CI;
+do not load a model or inspect logits.
+
+**Claim ceiling:** Tested failure-evidence preservation for future scorer
+failures. No model-behavior, measurement-reliability, temporal, causal, or CSTG
+claim is authorized.
+
+**Next gate:** implement and deliver the scoped observability fix from green
+baseline `8fc16af` on `fix/scoring-failure-observability`. After delivery, the
+next scientific gate remains externally blocked on rights-qualified source
+evidence and explicit held-out source-C authorization.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

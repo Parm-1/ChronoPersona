@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — publish the consumed development-v1 E4 failure; no further model execution is authorized**
+**Current gate — harden future failed-receipt observability; no further model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -37,7 +37,9 @@ post-score resident-VRAM gate before score publication. Attempt A is consumed;
 no A score, B run, comparison, or coherence result exists, and no pole value
 was inspected. A result-blind receipt/code review found an observability gap
 but no evidence that the resource rejection was erroneous, so no rescue
-qualifies. The active work is failure publication, not another model run.
+qualifies. Failure evidence is delivered and green at `8fc16af`. The active
+work is one dependency-light observability fix so future resident-resource
+failures retain the exact captured audit; it is not another model run.
 Real-source scientific execution still requires the separate source evidence
 listed below.
 
@@ -154,8 +156,9 @@ listed below.
 
 ## Exact next action
 
-Publish D-037, the portable E4 failure report, failed ledger row, and closed
-plan state, then require green exact-head CI. The result-blind review is
-complete and did not establish a rescue-qualifying defect; do not rerun A or
-start B. Any future scoring condition requires a new recorded decision.
-Bounded rights-qualified source samples remain a separate external blocker.
+Implement D-038 from green baseline `8fc16af` on
+`fix/scoring-failure-observability`: preserve the exact pending resident audit
+in future failed receipts, prove fail-closed behavior without a model run, and
+deliver it through exact-head CI. This does not authorize rerunning A or
+starting B. After that bounded fix, rights-qualified source samples and any new
+scoring-condition decision are the hard boundaries.

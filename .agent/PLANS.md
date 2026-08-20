@@ -1,7 +1,16 @@
 # Active Plans
 
-No experiment ExecPlan is write-active. The latest plan is closed as a
-preserved failed gate:
+One result-blind engineering ExecPlan is write-active:
+
+- `.agent/plans/active-scoring-failure-observability.md` — preserve an exact
+  captured resident-resource observation in future failed scorer receipts
+  before threshold validation can raise. This is evidence-observability
+  hardening only: it does not reopen E4, authorize a model run, or imply the
+  consumed resource rejection was erroneous. Baseline `8fc16af`; branch
+  `fix/scoring-failure-observability`; next gate is dependency-light
+  implementation and regression validation.
+
+The latest experiment plan is closed as a preserved failed gate:
 
 - `.agent/plans/active-development-measurement-reliability.md` — replace the
   confounded two-form development instrument with a versioned, tokenizer-
@@ -10,8 +19,8 @@ preserved failed gate:
   the post-score resident-VRAM gate before publication. The active deliverable
   was the portable failure closure and one result-blind defect-eligibility
   review. D-037 and the receipt/code audit found no automatically qualifying
-  defect. Attempt A is consumed; do not run B or retry. Delivery of the bounded
-  failure record is repository state work, not a new experiment plan.
+  defect. Attempt A is consumed; do not run B or retry. The bounded failure
+  record is delivered and green at `8fc16af`.
 
 Completed plans remain under `.agent/plans/` as durable history. In particular,
 `active-pythia-local-feasibility.md` records the completed v0/v1 loading and
