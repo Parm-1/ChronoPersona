@@ -770,17 +770,41 @@ def _resident_resource_check(
     minimum = config["resource_limits"][
         "minimum_postload_global_free_vram_bytes"
     ]
-    validation = model_benchmark._validate_execution_resources(
-        reference,
-        observed,
-        artifact,
-        require_cuda=True,
-        enforce_ram_threshold=False,
-        minimum_free_vram_bytes=minimum,
-    )
+    pending_resource = {
+        "label": label,
+        "audit_sha256": observed_sha256,
+        "audit_semantic_sha256": canonical_json_sha256(observed),
+        "captured_at": observed.get("captured_at"),
+        "age_seconds": age,
+        "minimum_free_vram_bytes": minimum,
+        "audit": observed,
+    }
+    state["pending_resident_resource_check"] = pending_resource
+    try:
+        validation = model_benchmark._validate_execution_resources(
+            reference,
+            observed,
+            artifact,
+            require_cuda=True,
+            enforce_ram_threshold=False,
+            minimum_free_vram_bytes=minimum,
+        )
+    except Exception:
+        try:
+            pending_resource["conservative_vram"] = (
+                model_benchmark._conservative_vram(observed)
+            )
+        except Exception as observation_error:
+            pending_resource["conservative_vram_error"] = {
+                "error_type": type(observation_error).__name__,
+                "error": str(observation_error),
+            }
+        raise
     conservative = model_benchmark._conservative_vram(observed)
+    pending_resource["conservative_vram"] = conservative
     if conservative["conservative_free_bytes"] < minimum:
         raise ScoringRunError(f"{label} global free VRAM is below the frozen threshold")
+    state.pop("pending_resident_resource_check", None)
     return {
         "label": label,
         "audit_sha256": observed_sha256,
@@ -1202,10 +1226,12 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
 def _failure_receipt(args: argparse.Namespace, error: Exception) -> dict[str, Any]:
     context = dict(getattr(args, "_failure_context", {}))
     resource_state = getattr(args, "_resource_state", None)
-    if isinstance(resource_state, dict) and isinstance(
-        resource_state.get("preflight"), dict
-    ):
-        context["resource_preflight"] = resource_state["preflight"]
+    if isinstance(resource_state, dict):
+        if isinstance(resource_state.get("preflight"), dict):
+            context["resource_preflight"] = resource_state["preflight"]
+        pending_resource = resource_state.get("pending_resident_resource_check")
+        if isinstance(pending_resource, Mapping):
+            context["failed_resident_resource_check"] = dict(pending_resource)
     provider = getattr(args, "_provider", None)
     metrics = getattr(provider, "runtime_metrics", None)
     if callable(metrics):

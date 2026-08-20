@@ -1,6 +1,6 @@
 # Scoring Failure Observability
 
-**Status:** active — design frozen; implementation and delivery pending
+**Status:** implementation Tested; complete when every check passes on the unchanged delivery head, otherwise active at the first failed delivery gate
 **Started:** 2026-08-20
 **Baseline:** `8fc16af35b27089b1f0bde68c249d0313e8f0e9e`
 **Branch:** `fix/scoring-failure-observability`
@@ -66,11 +66,19 @@ publish only a sanitized aggregate and hashes.
 - Bind the work to baseline `8fc16af` on a separate branch.
 - Reaffirm that the fix supplies no rescue authority.
 
+**Result:** completed in the pre-implementation plan commit based on
+`8fc16af`.
+
 ### E1 — Failure-context implementation
 
 - Preserve the exact captured observation before validation can raise.
 - Copy it into a failed receipt without changing successful output semantics.
 - Keep all resource failures fail-closed and score publication rolled back.
+
+**Result:** completed. The pending record is stored before the shared validator;
+the validator retains its original call order and exception precedence. Failure
+enrichment bare re-raises the original exception, while success clears the
+pending record and returns the prior eight-field schema.
 
 ### E2 — Dependency-light validation
 
@@ -86,12 +94,22 @@ publish only a sanitized aggregate and hashes.
   compilation, and `git diff --check`. No model import, deserialization,
   logits, or network action is part of validation.
 
+**Result:** completed in the scoped working tree. Three focused resident-
+resource regressions passed. The full offline suite passed 536 tests with two
+platform-optional skips. Pilot, model-manifest, development-v0, and
+development-v1 validators passed; changed modules compiled; `git diff --check`
+was clean apart from line-ending warnings. No model import, deserialization,
+logits, or network action occurred.
+
 ### E3 — Delivery
 
-- Commit and push the scoped branch.
+- Freeze the implementation, validation, and closure state in the scoped
+  delivery commit before pushing it.
 - Open one draft PR stacked on draft PR #36.
 - Require every attached check to pass on one unchanged exact head.
-- Close this plan as Tested and exact-head delivered; do not run E4.
+- When those external checks pass, that unchanged head is exact-head delivered
+  and this plan is complete. Do not add a post-green state-only closure commit,
+  and do not run E4.
 
 ## Stop conditions
 

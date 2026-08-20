@@ -38,8 +38,9 @@ no A score, B run, comparison, or coherence result exists, and no pole value
 was inspected. A result-blind receipt/code review found an observability gap
 but no evidence that the resource rejection was erroneous, so no rescue
 qualifies. Failure evidence is delivered and green at `8fc16af`. The active
-work is one dependency-light observability fix so future resident-resource
-failures retain the exact captured audit; it is not another model run.
+work is delivery of one dependency-light Tested observability fix so future
+resident-resource failures retain the exact captured audit; it is not another
+model run.
 Real-source scientific execution still requires the separate source evidence
 listed below.
 
@@ -156,9 +157,10 @@ listed below.
 
 ## Exact next action
 
-Implement D-038 from green baseline `8fc16af` on
-`fix/scoring-failure-observability`: preserve the exact pending resident audit
-in future failed receipts, prove fail-closed behavior without a model run, and
-deliver it through exact-head CI. This does not authorize rerunning A or
-starting B. After that bounded fix, rights-qualified source samples and any new
-scoring-condition decision are the hard boundaries.
+Deliver the Tested D-038 change on `fix/scoring-failure-observability`: commit,
+push, open one draft PR stacked on PR #36, and require every attached check to
+pass on the unchanged head. The implementation preserves the pending resident
+audit and the original fail-closed validator order without a model run. This
+does not authorize rerunning A or starting B. After that bounded delivery,
+rights-qualified source samples and any new scoring-condition decision are the
+hard boundaries.

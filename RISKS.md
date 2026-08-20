@@ -47,7 +47,7 @@ post-score resident-VRAM gate before publication. Preserve that consumed
 failure and do not run B. The result-blind cause/defect-eligibility review is
 complete: it found a failed-audit observability gap but no evidence that the
 resource rejection was erroneous, so no rescue qualifies. The next local task
-is the D-038 dependency-light hardening that retains a captured resident audit
-before validation raises; it does not authorize model execution. Evidence-
-bearing naturalistic execution remains blocked on external source qualification
-and later calibration/model-compute gates.
+is delivery of the Tested D-038 dependency-light hardening that retains a
+captured resident audit before validation raises; it does not authorize model
+execution. Evidence-bearing naturalistic execution remains blocked on external
+source qualification and later calibration/model-compute gates.

@@ -7,8 +7,9 @@ One result-blind engineering ExecPlan is write-active:
   before threshold validation can raise. This is evidence-observability
   hardening only: it does not reopen E4, authorize a model run, or imply the
   consumed resource rejection was erroneous. Baseline `8fc16af`; branch
-  `fix/scoring-failure-observability`; next gate is dependency-light
-  implementation and regression validation.
+  `fix/scoring-failure-observability`. Implementation and local validation are
+  Tested; the unchanged delivery head must pass every attached check. The plan
+  completes from that external result without a state-only follow-up commit.
 
 The latest experiment plan is closed as a preserved failed gate:
 

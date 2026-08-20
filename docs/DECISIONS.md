@@ -876,10 +876,11 @@ do not load a model or inspect logits.
 failures. No model-behavior, measurement-reliability, temporal, causal, or CSTG
 claim is authorized.
 
-**Next gate:** implement and deliver the scoped observability fix from green
-baseline `8fc16af` on `fix/scoring-failure-observability`. After delivery, the
-next scientific gate remains externally blocked on rights-qualified source
-evidence and explicit held-out source-C authorization.
+**Next gate:** deliver the Tested scoped observability fix from green baseline
+`8fc16af` on `fix/scoring-failure-observability` and require every check green
+on the unchanged head. After delivery, the next scientific gate remains
+externally blocked on rights-qualified source evidence and explicit held-out
+source-C authorization.
 
 ## Pending decisions
 

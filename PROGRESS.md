@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T17:20:21-04:00
+**Last updated:** 2026-08-20T17:28:04-04:00
 
 ## Decision
 
@@ -49,14 +49,15 @@ enabled. The prior zero-step billing blocker is empirically closed: draft PR
 
 ## Current objective and closure condition
 
-Harden future failed scorer receipts so an exact resident-resource observation
-is preserved before threshold validation can raise. Work from green failure-
-evidence baseline `8fc16af` on `fix/scoring-failure-observability`; use only
-dependency-light injected tests and exact-head CI. This is result-blind
-observability work, not a rescue: do not run A or B, alter a threshold, or infer
-that the frozen resource rejection was erroneous. Closure requires the scoped
-fix, unchanged successful-output semantics, a green full offline suite, and all
-checks green on one unchanged draft-PR head.
+Deliver the Tested future-failure observability hardening from green baseline
+`8fc16af` on `fix/scoring-failure-observability`. The implementation preserves
+an exact resident-resource observation before threshold validation can raise,
+while retaining the original validator order, exception precedence, threshold,
+and successful receipt schema. This is result-blind observability work, not a
+rescue: do not run A or B, alter a threshold, or infer that the frozen resource
+rejection was erroneous. The plan completes if every attached check passes on
+the unchanged delivery head; a failure leaves the first failed delivery gate
+active. Do not create a post-green state-only closure commit.
 
 ## Current verified boundary
 
@@ -235,6 +236,13 @@ checks green on one unchanged draft-PR head.
   the 224-forward schedule, rollback, and stop rule. It classified the missing
   failed-audit payload as an observability gap, not proof that the threshold
   rejection was an implementation defect. No rescue is authorized.
+- D-038 observability hardening is Tested in the scoped working tree. A real
+  below-floor injected audit still raised from the shared validator, while the
+  failed receipt retained the exact audit, raw/semantic hashes, phase, frozen
+  threshold, and conservative VRAM. Success cleared the pending record and
+  returned the unchanged eight-field resident-resource schema. Three focused
+  regressions and the full offline suite (536 passed, two skipped) passed; no
+  model import, deserialization, logits, or network action occurred.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -288,9 +296,9 @@ checks green on one unchanged draft-PR head.
 
 ## Next write-active deliverable
 
-Implement D-038 on `fix/scoring-failure-observability`: persist an exact
-prevalidation resident-resource observation in future failed receipts, prove
-the threshold still fails closed with injected tests, and deliver the scoped
-branch through exact-head CI. Do not run B, rerun A, recover transient scores,
-change thresholds, or alter content/metrics. This fix cannot authorize a future
-scoring condition.
+Commit and push the Tested D-038 hardening, open one draft PR stacked on PR
+#36, and require every check to pass on the unchanged delivery head. Do not run
+B, rerun A, recover transient scores, change thresholds, or alter
+content/metrics. This fix cannot authorize a future scoring condition; after
+delivery, rights-qualified source evidence and any new scoring-condition
+decision are the hard boundaries.

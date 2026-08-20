@@ -1995,14 +1995,15 @@ def test_resident_resource_check_forwards_frozen_postload_vram_floor() -> None:
         def _conservative_vram(value):
             return _conservative_vram_fixture(value)
 
+    state = {
+        "preflight": {
+            "post_import_resource_audit": audit,
+            "cache_storage_path": audit["disk"]["path"],
+        }
+    }
     result = module._resident_resource_check(
         FakeBenchmark,
-        {
-            "preflight": {
-                "post_import_resource_audit": audit,
-                "cache_storage_path": audit["disk"]["path"],
-            }
-        },
+        state,
         {"weight_size_bytes": config["artifact"]["model_safetensors_size_bytes"]},
         config,
         label="post-load",
@@ -2015,6 +2016,153 @@ def test_resident_resource_check_forwards_frozen_postload_vram_floor() -> None:
     assert result["execution_resource_validation"][
         "minimum_free_vram_bytes"
     ] == minimum
+    assert "pending_resident_resource_check" not in state
+    assert set(result) == {
+        "label",
+        "audit_sha256",
+        "audit_semantic_sha256",
+        "captured_at",
+        "age_seconds",
+        "conservative_vram",
+        "execution_resource_validation",
+        "audit",
+    }
+
+
+def test_failed_resident_resource_check_preserves_exact_audit_in_receipt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _score_cli()
+    import benchmark_model
+
+    config = _config()
+    minimum = config["resource_limits"][
+        "minimum_postload_global_free_vram_bytes"
+    ]
+    reference = _resource_audit_fixture(
+        "a",
+        captured_at=_attempt_times("a")["post_import"],
+    )
+    observed = _resource_audit_fixture(
+        "a",
+        captured_at=_attempt_times("a")["post_score"],
+        torch_free_bytes=minimum - 1,
+        nvidia_free_mib=4096,
+    )
+    observed_sha256 = hashlib.sha256(pretty_json_bytes(observed)).hexdigest()
+
+    class FakeBenchmark:
+        @staticmethod
+        def _capture_live_resource_audit(_path):
+            return observed, observed_sha256
+
+        @staticmethod
+        def _resource_audit_age_seconds(_audit):
+            return 0.25
+
+        _validate_execution_resources = staticmethod(
+            benchmark_model._validate_execution_resources
+        )
+        _conservative_vram = staticmethod(benchmark_model._conservative_vram)
+
+    state = {
+        "preflight": {
+            "post_import_resource_audit": reference,
+            "cache_storage_path": observed["disk"]["path"],
+        }
+    }
+    error: RuntimeError
+    with pytest.raises(
+        RuntimeError, match="free VRAM is below the model-load safety threshold"
+    ) as caught:
+        module._resident_resource_check(
+            FakeBenchmark,
+            state,
+            {
+                "weight_size_bytes": config["artifact"][
+                    "model_safetensors_size_bytes"
+                ]
+            },
+            config,
+            label="post-score",
+        )
+    error = caught.value
+
+    pending = state["pending_resident_resource_check"]
+    assert pending == {
+        "label": "post-score",
+        "audit_sha256": observed_sha256,
+        "audit_semantic_sha256": canonical_json_sha256(observed),
+        "captured_at": observed["captured_at"],
+        "age_seconds": 0.25,
+        "minimum_free_vram_bytes": minimum,
+        "conservative_vram": benchmark_model._conservative_vram(observed),
+        "audit": observed,
+    }
+
+    args = argparse.Namespace(attempt="a")
+    args._failure_context = {"started_at": _attempt_times("a")["started"]}
+    args._resource_state = state
+    args._failure_stage = "post-score-resource-check"
+    monkeypatch.setattr(module.tokenizer_cli, "_git", lambda *_args: "b" * 40)
+    receipt = module._failure_receipt(args, error)
+
+    assert receipt["status"] == "failed"
+    assert receipt["failure_stage"] == "post-score-resource-check"
+    assert receipt["failure_context"]["failed_resident_resource_check"] == pending
+    assert receipt["scientific_claim_authorized"] is False
+    assert receipt["score"]["valid_score_published"] is False
+
+
+def test_failed_resident_resource_enrichment_does_not_mask_validation_error() -> None:
+    module = _score_cli()
+    config = _config()
+    audit = _resource_audit_fixture(
+        "a", captured_at=_attempt_times("a")["post_score"]
+    )
+
+    class FakeBenchmark:
+        @staticmethod
+        def _capture_live_resource_audit(_path):
+            return audit, "a" * 64
+
+        @staticmethod
+        def _resource_audit_age_seconds(_audit):
+            return 0.0
+
+        @staticmethod
+        def _validate_execution_resources(*_args, **_kwargs):
+            raise RuntimeError("validation sentinel")
+
+        @staticmethod
+        def _conservative_vram(_audit):
+            raise ValueError("observation sentinel")
+
+    state = {
+        "preflight": {
+            "post_import_resource_audit": audit,
+            "cache_storage_path": audit["disk"]["path"],
+        }
+    }
+    with pytest.raises(RuntimeError, match="validation sentinel"):
+        module._resident_resource_check(
+            FakeBenchmark,
+            state,
+            {
+                "weight_size_bytes": config["artifact"][
+                    "model_safetensors_size_bytes"
+                ]
+            },
+            config,
+            label="post-score",
+        )
+
+    pending = state["pending_resident_resource_check"]
+    assert pending["audit"] == audit
+    assert pending["conservative_vram_error"] == {
+        "error_type": "ValueError",
+        "error": "observation sentinel",
+    }
 
 
 def test_scoring_preflight_forwards_frozen_preload_vram_floor(
