@@ -300,6 +300,13 @@ under separate condition roots. Condition names, resource observations,
 timings, and interruption history are runtime metadata, so they do not change
 the frozen identity.
 
+The superseded v0 identity remains bound to its eager-attention step-zero
+failure. The only rescue is v1, whose scientific identity additionally binds
+Transformers `sdpa`, the PyTorch MATH-only SDPA backend, and disabled reduced-
+precision FP16/BF16 math-SDPA reduction. Those fields must match the successful
+exact-head load report and the observed runtime summary. A missing, automatic,
+efficient, or eager policy is not equivalent.
+
 The extension adds these immutable artifacts:
 
 ```text
@@ -336,6 +343,12 @@ runtime report binds all step and attempt files; the terminal `complete` event
 binds that report and the final manifest. Completed-run verification also
 requires the exact condition registry entry and exact control or planned-
 interruption event topology.
+
+Before backward, the target backend records an exact token-block hash plus
+logits dtype/shape and NaN/infinity counts, loss dtype/class, forward timing,
+and forward allocation/reservation peaks. The latest record is retained in the
+attempt summary even when the first forward is non-finite, so a step-zero
+failure cannot be mistaken for an OOM, backward, or optimizer failure.
 
 The final manifest intentionally excludes timings, dynamic free memory,
 attempt role, and physical Torch archive hashes. It includes deterministic

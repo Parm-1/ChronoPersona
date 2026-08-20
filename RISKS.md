@@ -24,15 +24,19 @@
 | R-20 | Positive-result search after failed gates | Critical | One-rescue rules; frozen C; preserve every seed/failure; stop at failed C |
 | R-21 | Temporary recovery/publisher machinery contaminates Git evidence | High | Permanent repository-state tests; merge only exact clean heads |
 | R-22 | AI-assisted design/code claims are unaudited | Medium | Maintain AI-use ledger and human verification record |
+| R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Freeze implementation/backend/reduction policy in config, load report, run identity, and runtime; preserve v0; allow only the explicit v1 rescue |
 
 ## Current highest risks
 
 1. Source roles cannot yet be qualified or frozen.
 2. Evaluation remains a small development instrument rather than a sealed powered benchmark.
-3. Real-model capability, logits, memory, throughput, and broad-update feasibility are unmeasured.
+3. Target-model backward, checkpoint/resume, sustained throughput, and broad-update feasibility remain unmeasured; v0 failed before backward.
 4. The project may identify ecological source composition rather than a residual temporal component.
 5. A/B discovery may fail prospective C transport; that is a valid falsification, not a reason to replace C.
 
 ## Current risk decision
 
-The design is defensible, but evidence-bearing execution is not authorized. Merge the design only on a clean green exact head, then stop until external source and model/compute evidence exists.
+The design is defensible and bounded local engineering execution is authorized.
+Run only the predeclared v1 attention rescue on a clean green exact head; stop
+that path if it fails. Evidence-bearing naturalistic execution remains blocked
+on external source qualification and later model/compute gates.

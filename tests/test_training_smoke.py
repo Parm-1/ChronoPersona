@@ -23,6 +23,7 @@ from chronopersona.training_smoke import (
     TrainingCheckpointState,
     TrainingSmokeError,
     build_training_plan,
+    classify_forward_numerics,
     compare_training_runs,
     full_weight_adamw_capacity,
     load_training_checkpoint,
@@ -37,7 +38,11 @@ from chronopersona.training_smoke import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CONFIG_PATH = ROOT / "configs" / "runs" / "pythia-lora-smoke-v0.json"
+CONFIG_PATH = ROOT / "configs" / "runs" / "pythia-lora-smoke-v1.json"
+V0_CONFIG_PATH = ROOT / "configs" / "runs" / "pythia-lora-smoke-v0.json"
+ATTENTION_DIAGNOSTIC_PATH = (
+    ROOT / "reports" / "stage0" / "pythia_lora_attention_diagnostic_2026-08-20.json"
+)
 
 
 def _artifact() -> dict:
@@ -81,6 +86,9 @@ def _load_report(artifact: dict, git_commit: str) -> dict:
             "model_type": artifact["model_type"],
             "parameter_count": artifact["parameter_count"],
             "parameter_dtypes": ["torch.float16"],
+            "attention_implementation": "sdpa",
+            "sdpa_backends": ["math"],
+            "sdpa_math_allow_fp16_reduction": False,
             "verified": True,
         },
     }
@@ -247,6 +255,28 @@ class OomToyBackend(ToyBackend):
         return super().run_step(token_block, step)
 
 
+class NumericDiagnosticFailureBackend(ToyBackend):
+    @property
+    def runtime_summary(self):
+        return {
+            "attention_implementation": "sdpa",
+            "sdpa_backends": ["math"],
+            "sdpa_math_allow_fp16_reduction": False,
+            "last_forward_numeric": {
+                "step": 1,
+                "token_block_sha256": "9" * 64,
+                "stage": "logits-nonfinite",
+                "logits_nonfinite_count": 7,
+                "loss_finite": False,
+                "loss_value": None,
+                "forward_peak_allocated_bytes": 123,
+            },
+        }
+
+    def run_step(self, token_block, step):
+        raise TrainingSmokeError("injected non-finite logits diagnostic")
+
+
 def _clock(prefix: str):
     sequence = count()
     return lambda: f"{prefix}-{next(sequence):04d}"
@@ -258,10 +288,110 @@ def test_committed_training_config_is_strict_and_non_scientific() -> None:
     assert config["network_allowed"] is False
     assert config["scientific_claim_authorized"] is False
     assert config["resource_limits"]["ram_threshold_enforced"] is False
+    assert config["run_name"] == "pythia-1b-deduped-lora-smoke-v1"
+    assert config["determinism"]["attention_implementation"] == "sdpa"
+    assert config["determinism"]["sdpa_backends"] == ["math"]
+    assert config["determinism"]["sdpa_math_allow_fp16_reduction"] is False
 
     changed = json.loads(json.dumps(config))
     changed["steps"] = 6
     assert "steps must be exactly 5" in validate_training_config(changed)
+
+    for key, value in (
+        ("attention_implementation", "eager"),
+        ("sdpa_backends", ["efficient"]),
+        ("sdpa_math_allow_fp16_reduction", True),
+    ):
+        changed = json.loads(json.dumps(config))
+        changed["determinism"][key] = value
+        assert "determinism must match the frozen E5 policy" in validate_training_config(
+            changed
+        )
+
+
+def test_v1_changes_only_the_predeclared_attention_rescue() -> None:
+    v0 = json.loads(V0_CONFIG_PATH.read_text(encoding="utf-8"))
+    v1 = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    expected = json.loads(json.dumps(v0))
+    expected["run_name"] = "pythia-1b-deduped-lora-smoke-v1"
+    expected["determinism"].update(
+        {
+            "attention_implementation": "sdpa",
+            "sdpa_backends": ["math"],
+            "sdpa_math_allow_fp16_reduction": False,
+        }
+    )
+
+    assert v1 == expected
+
+
+def test_attention_diagnostic_is_self_hashed_and_non_scientific() -> None:
+    report = json.loads(ATTENTION_DIAGNOSTIC_PATH.read_text(encoding="utf-8"))
+    observed = report.pop("diagnostic_sha256")
+
+    assert canonical_sha256(report) == observed
+    assert report["failed_run"]["completed_steps"] == 0
+    assert report["failed_run"]["run_id"] == "run-b035b9becad60b6dc55ff3fd6fba6016"
+    assert report["failed_run"]["attempt_file_sha256"] == (
+        "e9be995c08affa71e73343c80844756329150031cc5cf96338a7e5dc3e8aceaf"
+    )
+    assert report["failed_run"]["cli_report_sha256"] == (
+        "6405a6e68138250c39fb70988075e1cbe39a7b7bbf495e3b5a2e74f3ae67c347"
+    )
+    assert report["execution_controls"]["backward_performed"] is False
+    assert report["execution_controls"]["optimizer_update_performed"] is False
+    assert report["evidence_scope"].startswith("diagnosis-only")
+
+
+@pytest.mark.parametrize(
+    ("logits_finite", "loss_finite", "expected"),
+    [
+        (True, True, "complete"),
+        (False, False, "logits-nonfinite"),
+        (True, False, "loss-nonfinite"),
+    ],
+)
+def test_forward_numeric_classification_is_fail_loud(
+    logits_finite: bool,
+    loss_finite: bool,
+    expected: str,
+) -> None:
+    assert classify_forward_numerics(
+        logits_finite=logits_finite,
+        loss_finite=loss_finite,
+    ) == expected
+
+
+def test_load_report_binds_the_complete_attention_policy() -> None:
+    config = load_training_config(CONFIG_PATH)
+    artifact = _artifact()
+    report = _load_report(artifact, "1" * 40)
+
+    for key, value in (
+        ("attention_implementation", "eager"),
+        ("sdpa_backends", ["efficient"]),
+        ("sdpa_math_allow_fp16_reduction", True),
+    ):
+        changed = json.loads(json.dumps(report))
+        changed["loaded_model_validation"][key] = value
+        with pytest.raises(TrainingSmokeError, match="load report model validation mismatch"):
+            build_training_plan(
+                config,
+                git_commit="1" * 40,
+                config_sha256="c" * 64,
+                model_manifest_sha256="d" * 64,
+                artifact=artifact,
+                load_report=changed,
+                load_report_sha256="e" * 64,
+                content_manifest_sha256="f" * 64,
+                content_records=(
+                    {"record_id": "control-neutral", "content_sha256": "2" * 64},
+                    {"record_id": "calibration-neutral", "content_sha256": "3" * 64},
+                ),
+                tokenizer_identity={"class": "FakeTokenizer", "eos_token_id": 0},
+                runtime_identity={"python": "3.11"},
+                packed_tokens=pack_token_documents(([1, 2, 3], [4, 5]), 0),
+            )
 
 
 def test_training_plan_identity_is_order_stable_and_input_sensitive() -> None:
@@ -572,6 +702,41 @@ def test_oom_failure_is_structured_and_preserves_attempt_context(
     assert attempt["completed_steps"] == 1
     assert attempt["backend"]["attempt_context"]["resource_audit_sha256"] == "a" * 64
     assert not (run_root / "artifacts" / "final-manifest.json").exists()
+
+
+def test_numeric_failure_preserves_pre_backward_diagnostic(
+    tmp_path: Path,
+) -> None:
+    plan = _plan()
+    with pytest.raises(TrainingSmokeError, match="non-finite logits diagnostic"):
+        run_training_condition(
+            plan,
+            tmp_path,
+            condition="control",
+            backend_factory=lambda current, state: NumericDiagnosticFailureBackend(
+                current, state
+            ),
+            serialize=_json_serialize,
+            deserialize=_json_deserialize,
+            adapter_deserialize=_json_deserialize,
+        )
+    run_root = tmp_path / "control" / plan.identity["run_id"]
+    events = read_event_log(
+        run_root / "events.jsonl", expected_run_id=plan.identity["run_id"]
+    )
+    failure = events.events[-1]
+    attempt_ref = failure["data"]["attempt_report"]
+    attempt_path = run_root / attempt_ref["path"]
+    attempt = json.loads(attempt_path.read_text(encoding="utf-8"))
+    numeric = attempt["backend"]["runtime"]["last_forward_numeric"]
+
+    assert events.state == "failed"
+    assert failure["data"]["completed_steps"] == 0
+    assert attempt_ref["file_sha256"] == training_smoke.sha256_file(attempt_path)
+    assert attempt["status"] == "failed"
+    assert numeric["stage"] == "logits-nonfinite"
+    assert numeric["loss_value"] is None
+    assert numeric["forward_peak_allocated_bytes"] == 123
 
 
 def test_resume_rejects_checkpoint_not_bound_to_progress_event(tmp_path: Path) -> None:

@@ -32,13 +32,14 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 
 ## Milestone 0B — Models and compute
 
-**Status:** runtime and metadata preflight measured; final-Pythia acquisition and model execution active.
+**Status:** final-Pythia acquisition/inference measured; v0 training failed
+pre-backward; the sole v1 attention-policy rescue is active.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
 Measure actual hardware, storage, runtime, load time, peak memory, complete-continuation throughput, tiny full-weight training throughput, checkpoint time, and recovery.
 
-Measured on 2026-08-20 without model weights:
+Measured on 2026-08-20:
 
 - the local PyTorch CUDA runtime recognizes the RTX 2060 and its 6 GB device;
 - selected Hub revisions and license metadata are bound fail-closed in the
@@ -48,11 +49,16 @@ Measured on 2026-08-20 without model weights:
 - Windows peak-process memory, Torch CUDA identity, clean-commit resource
   binding, disk margin, and structured benchmark failure evidence are covered
   by the local benchmark protocol and tests.
+- the exact final-Pythia snapshot loaded in CUDA FP16 and produced finite
+  logits; load time, peak memory, and bounded forward throughput were recorded;
+- the first tiny-LoRA v0 control failed before backward because forced eager
+  attention produced non-finite logits; an attention-only discriminator
+  supports one explicit SDPA-MATH v1 rescue.
 
-Still unmeasured: model load/logits, peak model memory, throughput, tiny legal
-continued pretraining, checkpoint/recovery, and derived cost. The first active
-gate acquires only the pinned 2.09 GB final Pythia artifact and measures loading
-before any training implementation or run.
+Still unmeasured: a successful backward/optimizer step, checkpoint/recovery on
+the target model, sustained training throughput, and derived branch cost. The
+active gate is the one versioned v1 control/interruption/resume rescue; no
+second tuning rescue is allowed.
 
 Pass when one common checkpoint and one fallback are legally accessible, immutable, capable, trainable, and supported by measured cost. Stop a path when capability, memory, artifact access, or authorized budget fails.
 
@@ -119,7 +125,6 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Run the exact-clean-head final-Pythia acquisition and CUDA loading/logits
-benchmark under the active plan. Preserve success or failure before deciding
-whether a tiny deterministic training/resume benchmark is viable. Source
-qualification remains independently externally blocked.
+Commit and exact-head validate the versioned v1 SDPA-MATH rescue, then run its
+offline control/interruption/resume gate once. Preserve any failure and stop
+without a v2. Source qualification remains independently externally blocked.

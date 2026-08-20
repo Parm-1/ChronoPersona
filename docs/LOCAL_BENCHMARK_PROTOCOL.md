@@ -310,20 +310,34 @@ That training benchmark should be implemented only after the model-loading resul
 
 ## 11. Run the frozen tiny LoRA checkpoint/resume gate
 
-The committed training configuration is
-`configs/runs/pythia-lora-smoke-v0.json`. It is limited to five batch-one,
+The original frozen v0 control at commit `f2568ab` failed before backward or
+an optimizer update: eager attention produced non-finite logits on the first
+exact 128-token block. Preserve its `run-b035b9becad60b6dc55ff3fd6fba6016`
+run tree and reports; never resume, overwrite, or relabel it. A bounded
+diagnostic changed only attention execution, reproduced the eager failure with
+and without LoRA wrappers, and found finite logits under SDPA. The self-hashed
+diagnostic is preserved in
+`reports/stage0/pythia_lora_attention_diagnostic_2026-08-20.json`.
+
+The sole predeclared rescue is the separately versioned committed training
+configuration `configs/runs/pythia-lora-smoke-v1.json`. It is limited to five batch-one,
 sequence-128 optimizer updates over the two eligible CC0 synthetic fixture
 records. It uses rank-4 FP32 LoRA adapters over the frozen FP16 base, targets
 the 16 fused GPT-NeoX `query_key_value` projections, and has exactly 524,288
 trainable parameters. AdamW and dynamic-loss-scaler defaults are expanded into
 explicit frozen fields in the config rather than inherited from library
-defaults. This is trainer/checkpoint evidence only.
+defaults. Relative to v0, only the run name and complete attention policy
+change: Transformers `sdpa`, PyTorch `SDPBackend.MATH`, and disabled reduced-
+precision FP16/BF16 math-SDPA reduction. The MATH-only context remains active
+through backward because activation checkpointing recomputes attention there.
+This is trainer/checkpoint evidence only. If v1 fails, stop this local rescue
+path; do not change sequence length, LoRA, optimizer, scaler, dtype, or data.
 
 First inspect the no-network plan:
 
 ```powershell
 python scripts/benchmark_lora_training.py plan `
-  --output artifacts/local/pythia-lora-plan.json
+  --output artifacts/local/pythia-lora-v1-plan.json
 ```
 
 The runner deliberately has no download option. Use the already verified
@@ -334,7 +348,7 @@ $snapshot = Join-Path $env:HF_HOME `
   "models--EleutherAI--pythia-1b-deduped\snapshots\7199d8fc61a6d565cd1f3c62bf11525b563e13b2"
 ```
 
-Real execution requires the canonical `runs/pythia-lora-smoke-v0` output root
+Real execution requires the canonical `runs/pythia-lora-smoke-v1` output root
 and also holds one fixed host-temporary training lock, independent of run ID or
 condition. A stale lock is never removed automatically; inspect it before any
 manual recovery. This keeps control and resumed invocations, alternate run
@@ -342,8 +356,11 @@ identities, and separate worktrees from loading concurrent heavy jobs.
 
 Commit and validate the complete training implementation first. Then capture a
 fresh audit and repeat Section 7's offline loading/logits command at that exact
-clean training head. The resulting successful inference report is an immutable
-input to the training run identity; do not reuse the older `76c2479` report.
+clean training head, writing
+`artifacts/local/pythia-main-cuda-training-v1-head.json`. The benchmark must
+report the same explicit SDPA MATH policy as v1. The resulting successful
+inference report is an immutable input to the training run identity; do not
+reuse either the older `76c2479` report or the automatic-SDPA `f2568ab` report.
 
 Capture a fresh cache-bound audit immediately before the uninterrupted
 operational reference, then run it:
@@ -352,16 +369,16 @@ operational reference, then run it:
 python scripts/audit_local_resources.py `
   --repo . `
   --path $env:HF_HOME `
-  --output artifacts/local/resource-audit-lora-control.json
+  --output artifacts/local/resource-audit-lora-v1-control.json
 
 python scripts/benchmark_lora_training.py run `
   --condition control `
   --cache-dir $env:HF_HOME `
   --snapshot-path $snapshot `
-  --resource-audit artifacts/local/resource-audit-lora-control.json `
-  --load-report artifacts/local/pythia-main-cuda-training-head.json `
-  --output-root runs/pythia-lora-smoke-v0 `
-  --output artifacts/local/pythia-lora-control.json
+  --resource-audit artifacts/local/resource-audit-lora-v1-control.json `
+  --load-report artifacts/local/pythia-main-cuda-training-v1-head.json `
+  --output-root runs/pythia-lora-smoke-v1 `
+  --output artifacts/local/pythia-lora-v1-control.json
 ```
 
 Capture another fresh audit and execute the declared step-three interruption.
@@ -372,17 +389,17 @@ artifact, progress event, attempt report, and `failed` event have been written:
 python scripts/audit_local_resources.py `
   --repo . `
   --path $env:HF_HOME `
-  --output artifacts/local/resource-audit-lora-interrupt.json
+  --output artifacts/local/resource-audit-lora-v1-interrupt.json
 
 python scripts/benchmark_lora_training.py run `
   --condition resumed `
   --interrupt-after 3 `
   --cache-dir $env:HF_HOME `
   --snapshot-path $snapshot `
-  --resource-audit artifacts/local/resource-audit-lora-interrupt.json `
-  --load-report artifacts/local/pythia-main-cuda-training-head.json `
-  --output-root runs/pythia-lora-smoke-v0 `
-  --output artifacts/local/pythia-lora-interrupted.json
+  --resource-audit artifacts/local/resource-audit-lora-v1-interrupt.json `
+  --load-report artifacts/local/pythia-main-cuda-training-v1-head.json `
+  --output-root runs/pythia-lora-smoke-v1 `
+  --output artifacts/local/pythia-lora-v1-interrupted.json
 ```
 
 Capture one more fresh audit, then authorize the explicit resume. The runner
@@ -394,33 +411,33 @@ adapter/optimizer/scheduler/scaler state, and restores CPU/CUDA RNG last:
 python scripts/audit_local_resources.py `
   --repo . `
   --path $env:HF_HOME `
-  --output artifacts/local/resource-audit-lora-resume.json
+  --output artifacts/local/resource-audit-lora-v1-resume.json
 
 python scripts/benchmark_lora_training.py run `
   --condition resumed `
   --resume `
   --cache-dir $env:HF_HOME `
   --snapshot-path $snapshot `
-  --resource-audit artifacts/local/resource-audit-lora-resume.json `
-  --load-report artifacts/local/pythia-main-cuda-training-head.json `
-  --output-root runs/pythia-lora-smoke-v0 `
-  --output artifacts/local/pythia-lora-resumed.json
+  --resource-audit artifacts/local/resource-audit-lora-v1-resume.json `
+  --load-report artifacts/local/pythia-main-cuda-training-v1-head.json `
+  --output-root runs/pythia-lora-smoke-v1 `
+  --output artifacts/local/pythia-lora-v1-resumed.json
 ```
 
 Finally verify each condition and require exact semantic equality:
 
 ```powershell
-$runId = (Get-Content artifacts/local/pythia-lora-control.json -Raw |
+$runId = (Get-Content artifacts/local/pythia-lora-v1-control.json -Raw |
   ConvertFrom-Json).run_id
-$control = Join-Path "runs/pythia-lora-smoke-v0/control" $runId
-$resumed = Join-Path "runs/pythia-lora-smoke-v0/resumed" $runId
+$control = Join-Path "runs/pythia-lora-smoke-v1/control" $runId
+$resumed = Join-Path "runs/pythia-lora-smoke-v1/resumed" $runId
 
 python scripts/benchmark_lora_training.py verify --run-root $control
 python scripts/benchmark_lora_training.py verify --run-root $resumed
 python scripts/benchmark_lora_training.py compare `
   --control-root $control `
   --resumed-root $resumed `
-  --output artifacts/local/pythia-lora-comparison.json
+  --output artifacts/local/pythia-lora-v1-comparison.json
 ```
 
 The frozen resource gates require at least 3,695,181,824 bytes conservative

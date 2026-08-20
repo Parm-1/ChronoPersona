@@ -14,11 +14,18 @@ import time
 from typing import Any
 
 from .run_registry import canonical_sha256
+from .attention_policy import (
+    ATTENTION_IMPLEMENTATION,
+    SDPA_BACKENDS,
+    SDPA_MATH_ALLOW_FP16_REDUCTION,
+    math_sdpa_context,
+)
 from .training_smoke import (
     StepResult,
     TrainingCheckpointState,
     TrainingPlan,
     TrainingSmokeError,
+    classify_forward_numerics,
 )
 
 
@@ -136,6 +143,7 @@ class TorchTrainingBackend:
             import torch.nn.functional as functional
             import transformers
             from safetensors.torch import save as save_safetensors
+            from torch.nn.attention import SDPBackend, sdpa_kernel
             from transformers import AutoModelForCausalLM
         except ImportError as error:
             raise TrainingSmokeError("install the ChronoPersona models dependencies") from error
@@ -144,6 +152,8 @@ class TorchTrainingBackend:
         self.functional = functional
         self.transformers = transformers
         self._save_safetensors = save_safetensors
+        self._sdpa_kernel = sdpa_kernel
+        self._sdpa_backend = SDPBackend.MATH
         self.plan = plan
         self.snapshot_path = Path(snapshot_path).resolve(strict=True)
         self.device = torch.device("cuda")
@@ -152,6 +162,7 @@ class TorchTrainingBackend:
         self._postload_conservative_free_bytes = 0
         self._prestep_conservative_free_bytes: int | None = None
         self._has_run_step = False
+        self._last_forward_numeric: dict[str, Any] | None = None
 
         if not torch.cuda.is_available() or torch.cuda.device_count() != 1:
             raise TrainingSmokeError("training requires exactly one available CUDA device")
@@ -160,6 +171,18 @@ class TorchTrainingBackend:
         torch.backends.cudnn.allow_tf32 = False
         torch.backends.cudnn.benchmark = False
         torch.set_float32_matmul_precision("highest")
+        determinism = plan.config["determinism"]
+        if (
+            determinism["attention_implementation"] != ATTENTION_IMPLEMENTATION
+            or determinism["sdpa_backends"] != list(SDPA_BACKENDS)
+            or determinism["sdpa_math_allow_fp16_reduction"]
+            is not SDPA_MATH_ALLOW_FP16_REDUCTION
+        ):
+            raise TrainingSmokeError("training attention policy is not the frozen SDPA rescue")
+        try:
+            math_sdpa_context(torch, sdpa_kernel, SDPBackend.MATH)
+        except RuntimeError as error:
+            raise TrainingSmokeError(str(error)) from error
         seed = int(plan.config["seed"])
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
@@ -173,7 +196,7 @@ class TorchTrainingBackend:
             torch_dtype=torch.float16,
             use_safetensors=True,
             low_cpu_mem_usage=True,
-            attn_implementation="eager",
+            attn_implementation=determinism["attention_implementation"],
         )
         model.to(self.device)
         torch.cuda.synchronize(self.device)
@@ -183,6 +206,10 @@ class TorchTrainingBackend:
             raise TrainingSmokeError("loaded training model architecture mismatch")
         if getattr(model.config, "model_type", None) != artifact["model_type"]:
             raise TrainingSmokeError("loaded training model type mismatch")
+        if getattr(model.config, "_attn_implementation", None) != determinism[
+            "attention_implementation"
+        ]:
+            raise TrainingSmokeError("loaded training attention implementation mismatch")
         parameter_count = sum(parameter.numel() for parameter in model.parameters())
         if parameter_count != artifact["parameter_count"]:
             raise TrainingSmokeError("loaded training model parameter count mismatch")
@@ -289,6 +316,12 @@ class TorchTrainingBackend:
             "process_max_rss_bytes": _max_rss_bytes(),
             "torch": str(self.torch.__version__),
             "transformers": str(self.transformers.__version__),
+            "attention_implementation": ATTENTION_IMPLEMENTATION,
+            "sdpa_backends": list(SDPA_BACKENDS),
+            "sdpa_math_allow_fp16_reduction": SDPA_MATH_ALLOW_FP16_REDUCTION,
+            "last_forward_numeric": dict(self._last_forward_numeric)
+            if self._last_forward_numeric is not None
+            else None,
         }
 
     def _inject_lora(self) -> None:
@@ -417,38 +450,120 @@ class TorchTrainingBackend:
         step_start = time.perf_counter()
         torch.cuda.reset_peak_memory_stats(self.device)
         forward_start = time.perf_counter()
-        with torch.autocast(device_type="cuda", dtype=torch.float16):
-            outputs = self.model(input_ids=input_ids, labels=input_ids, use_cache=False)
-            loss = outputs.loss
-        torch.cuda.synchronize(self.device)
-        forward_seconds = time.perf_counter() - forward_start
-        forward_end_allocated = int(torch.cuda.memory_allocated(self.device))
-        forward_end_reserved = int(torch.cuda.memory_reserved(self.device))
-        forward_peak_allocated = int(torch.cuda.max_memory_allocated(self.device))
-        forward_peak_reserved = int(torch.cuda.max_memory_reserved(self.device))
-        if not bool(torch.isfinite(loss).item()):
-            raise TrainingSmokeError("training loss is non-finite")
+        try:
+            attention_context = math_sdpa_context(
+                torch, self._sdpa_kernel, self._sdpa_backend
+            )
+        except RuntimeError as error:
+            raise TrainingSmokeError(str(error)) from error
+        with attention_context:
+            with torch.autocast(device_type="cuda", dtype=torch.float16):
+                outputs = self.model(input_ids=input_ids, labels=input_ids, use_cache=False)
+                loss = outputs.loss
+            torch.cuda.synchronize(self.device)
+            forward_seconds = time.perf_counter() - forward_start
+            forward_end_allocated = int(torch.cuda.memory_allocated(self.device))
+            forward_end_reserved = int(torch.cuda.memory_reserved(self.device))
+            forward_peak_allocated = int(torch.cuda.max_memory_allocated(self.device))
+            forward_peak_reserved = int(torch.cuda.max_memory_reserved(self.device))
+            logits = outputs.logits
+            logits_nan_count = int(torch.isnan(logits).sum().item())
+            logits_positive_infinity_count = int(torch.isposinf(logits).sum().item())
+            logits_negative_infinity_count = int(torch.isneginf(logits).sum().item())
+            logits_nonfinite_count = (
+                logits_nan_count
+                + logits_positive_infinity_count
+                + logits_negative_infinity_count
+            )
+            logits_finite = logits_nonfinite_count == 0
+            loss_finite = bool(torch.isfinite(loss).item())
+            # The numeric classifier itself materializes full-logits masks.
+            # Include those temporary allocations in the frozen VRAM gate.
+            torch.cuda.synchronize(self.device)
+            forward_end_allocated = int(torch.cuda.memory_allocated(self.device))
+            forward_end_reserved = int(torch.cuda.memory_reserved(self.device))
+            forward_peak_allocated = int(torch.cuda.max_memory_allocated(self.device))
+            forward_peak_reserved = int(torch.cuda.max_memory_reserved(self.device))
+            if loss_finite:
+                loss_class = "finite"
+                loss_value: float | None = float(loss.detach().float().item())
+            elif bool(torch.isnan(loss).item()):
+                loss_class = "nan"
+                loss_value = None
+            elif bool(torch.isposinf(loss).item()):
+                loss_class = "positive-infinity"
+                loss_value = None
+            elif bool(torch.isneginf(loss).item()):
+                loss_class = "negative-infinity"
+                loss_value = None
+            else:
+                loss_class = "other-nonfinite"
+                loss_value = None
+            numeric_stage = classify_forward_numerics(
+                logits_finite=logits_finite,
+                loss_finite=loss_finite,
+            )
+            self._last_forward_numeric = {
+                "step": step,
+                "token_block_sha256": canonical_sha256(
+                    {
+                        "dtype": "int64",
+                        "shape": [1, len(token_block)],
+                        "values": list(token_block),
+                    }
+                ),
+                "stage": numeric_stage,
+                "logits_dtype": str(logits.dtype),
+                "logits_shape": [int(size) for size in logits.shape],
+                "logits_nonfinite_count": logits_nonfinite_count,
+                "logits_nan_count": logits_nan_count,
+                "logits_positive_infinity_count": logits_positive_infinity_count,
+                "logits_negative_infinity_count": logits_negative_infinity_count,
+                "loss_dtype": str(loss.dtype),
+                "loss_finite": loss_finite,
+                "loss_class": loss_class,
+                "loss_value": loss_value,
+                "forward_seconds": forward_seconds,
+                "forward_end_allocated_bytes": forward_end_allocated,
+                "forward_end_reserved_bytes": forward_end_reserved,
+                "forward_peak_allocated_bytes": forward_peak_allocated,
+                "forward_peak_reserved_bytes": forward_peak_reserved,
+            }
+            self._condition_peak_allocated_bytes = max(
+                self._condition_peak_allocated_bytes,
+                forward_peak_allocated,
+            )
+            self._condition_peak_reserved_bytes = max(
+                self._condition_peak_reserved_bytes,
+                forward_peak_reserved,
+            )
+            if numeric_stage == "logits-nonfinite":
+                raise TrainingSmokeError("training logits are non-finite")
+            if numeric_stage == "loss-nonfinite":
+                raise TrainingSmokeError("training loss is non-finite")
 
-        torch.cuda.reset_peak_memory_stats(self.device)
-        backward_start = time.perf_counter()
-        self.scaler.scale(loss).backward()
-        self.scaler.unscale_(self.optimizer)
-        gradients = [parameter.grad for _, parameter in self._adapter_named_parameters]
-        if any(gradient is None for gradient in gradients):
-            raise TrainingSmokeError("an adapter gradient is missing")
-        if not all(bool(torch.isfinite(gradient).all().item()) for gradient in gradients):
-            raise TrainingSmokeError("an adapter gradient is non-finite")
-        grad_norm = torch.nn.utils.clip_grad_norm_(
-            [parameter for _, parameter in self._adapter_named_parameters],
-            float(self.plan.config["gradient"]["max_norm"]),
-            error_if_nonfinite=True,
-        )
-        torch.cuda.synchronize(self.device)
-        backward_seconds = time.perf_counter() - backward_start
-        backward_end_allocated = int(torch.cuda.memory_allocated(self.device))
-        backward_end_reserved = int(torch.cuda.memory_reserved(self.device))
-        backward_peak_allocated = int(torch.cuda.max_memory_allocated(self.device))
-        backward_peak_reserved = int(torch.cuda.max_memory_reserved(self.device))
+            torch.cuda.reset_peak_memory_stats(self.device)
+            backward_start = time.perf_counter()
+            # Keep the MATH-only SDPA context active: non-reentrant activation
+            # checkpointing recomputes attention during backward.
+            self.scaler.scale(loss).backward()
+            self.scaler.unscale_(self.optimizer)
+            gradients = [parameter.grad for _, parameter in self._adapter_named_parameters]
+            if any(gradient is None for gradient in gradients):
+                raise TrainingSmokeError("an adapter gradient is missing")
+            if not all(bool(torch.isfinite(gradient).all().item()) for gradient in gradients):
+                raise TrainingSmokeError("an adapter gradient is non-finite")
+            grad_norm = torch.nn.utils.clip_grad_norm_(
+                [parameter for _, parameter in self._adapter_named_parameters],
+                float(self.plan.config["gradient"]["max_norm"]),
+                error_if_nonfinite=True,
+            )
+            torch.cuda.synchronize(self.device)
+            backward_seconds = time.perf_counter() - backward_start
+            backward_end_allocated = int(torch.cuda.memory_allocated(self.device))
+            backward_end_reserved = int(torch.cuda.memory_reserved(self.device))
+            backward_peak_allocated = int(torch.cuda.max_memory_allocated(self.device))
+            backward_peak_reserved = int(torch.cuda.max_memory_reserved(self.device))
 
         torch.cuda.reset_peak_memory_stats(self.device)
         optimizer_start = time.perf_counter()
@@ -546,6 +661,7 @@ class TorchTrainingBackend:
                 "process_max_rss_bytes": _max_rss_bytes(),
                 "input_tokens": len(token_block),
                 "causal_targets": len(token_block) - 1,
+                "forward_numeric": dict(self._last_forward_numeric),
             },
         )
 

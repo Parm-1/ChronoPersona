@@ -35,6 +35,17 @@ def test_training_plan_is_no_network_and_records_full_weight_blocker() -> None:
     assert report["scientific_claim_authorized"] is False
     assert report["training_profile"]["steps"] == 5
     assert report["training_profile"]["causal_targets"] == 635
+    assert report["training_profile"]["determinism"] == {
+        "algorithms": True,
+        "attention_implementation": "sdpa",
+        "cublas_workspace_config": ":4096:8",
+        "cudnn_benchmark": False,
+        "sdpa_backends": ["math"],
+        "sdpa_math_allow_fp16_reduction": False,
+        "shuffle": False,
+        "tf32": False,
+        "workers": 0,
+    }
     assert report["full_weight_adamw_capacity"]["fits_before_activations"] is False
     assert report["full_weight_adamw_capacity"]["shortfall_bytes"] == 1_652_260_864
 
@@ -87,8 +98,9 @@ def test_run_refuses_existing_report_before_execution(tmp_path: Path) -> None:
     assert "missing-load" not in completed.stderr
 
 
-def test_run_report_must_be_outside_immutable_run_tree() -> None:
-    output = ROOT / "runs" / "pythia-lora-smoke-v0" / "forbidden-report.json"
+@pytest.mark.parametrize("version", ("v0", "v1"))
+def test_run_report_must_be_outside_immutable_run_tree(version: str) -> None:
+    output = ROOT / "runs" / f"pythia-lora-smoke-{version}" / "forbidden-report.json"
     assert not output.exists()
 
     completed = _run(

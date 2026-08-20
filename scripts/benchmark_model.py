@@ -45,6 +45,11 @@ from chronopersona.model_manifest import (  # noqa: E402
     load_model_manifest,
     validate_model_manifest,
 )
+from chronopersona.attention_policy import (  # noqa: E402
+    ATTENTION_IMPLEMENTATION,
+    attention_policy_record,
+    math_sdpa_context,
+)
 from chronopersona.model_snapshot import (  # noqa: E402
     minimum_free_disk_bytes as _minimum_free_disk_bytes,
     required_download_bytes as _required_download_bytes,
@@ -95,6 +100,7 @@ def _plan(artifact: dict[str, Any], allow_download: bool) -> dict[str, Any]:
         "requires_remote_code": artifact["requires_remote_code"],
         "license_status": artifact["license"]["status"],
         "constraints": artifact.get("constraints", []),
+        "attention_policy": attention_policy_record(),
     }
 
 
@@ -971,6 +977,12 @@ def _verify_loaded_model(
             "loaded model type mismatch: "
             f"expected {expected_model_type}, observed {observed_model_type}"
         )
+    observed_attention = getattr(model.config, "_attn_implementation", None)
+    if observed_attention != ATTENTION_IMPLEMENTATION:
+        raise RuntimeError(
+            "loaded attention implementation mismatch: "
+            f"expected {ATTENTION_IMPLEMENTATION}, observed {observed_attention}"
+        )
 
     parameter_count = sum(parameter.numel() for parameter in model.parameters())
     expected_parameter_count = artifact.get("parameter_count")
@@ -993,6 +1005,12 @@ def _verify_loaded_model(
         "model_type": observed_model_type,
         "parameter_count": parameter_count,
         "parameter_dtypes": parameter_dtypes,
+        "attention_implementation": observed_attention,
+        **{
+            key: value
+            for key, value in attention_policy_record().items()
+            if key != "attention_implementation"
+        },
         "verified": True,
     }
 
@@ -1089,6 +1107,7 @@ def _execute(args: argparse.Namespace, artifact: dict[str, Any]) -> dict[str, An
         import torch
         import torch.nn.functional as functional
         import transformers
+        from torch.nn.attention import SDPBackend, sdpa_kernel
         from transformers import AutoModelForCausalLM, AutoTokenizer
     except ImportError as error:
         raise RuntimeError(
@@ -1116,6 +1135,11 @@ def _execute(args: argparse.Namespace, artifact: dict[str, Any]) -> dict[str, An
     device = torch.device(args.device)
     requested_dtype = _dtype(torch, args.dtype)
 
+    _set_failure_stage(args, "attention-policy")
+    attention_context = math_sdpa_context(
+        torch, sdpa_kernel, SDPBackend.MATH
+    )
+
     if device.type == "cuda":
         torch.cuda.empty_cache()
         torch.cuda.reset_peak_memory_stats(device)
@@ -1134,6 +1158,7 @@ def _execute(args: argparse.Namespace, artifact: dict[str, Any]) -> dict[str, An
         torch_dtype=requested_dtype,
         use_safetensors=True,
         low_cpu_mem_usage=True,
+        attn_implementation=ATTENTION_IMPLEMENTATION,
     )
     model.to(device)
     model.eval()
@@ -1163,7 +1188,7 @@ def _execute(args: argparse.Namespace, artifact: dict[str, Any]) -> dict[str, An
     durations: list[float] = []
     losses: list[float] = []
     logits_validation: dict[str, Any] | None = None
-    with torch.inference_mode():
+    with torch.inference_mode(), attention_context:
         for index in range(args.warmup + args.repeats):
             if device.type == "cuda":
                 torch.cuda.synchronize(device)

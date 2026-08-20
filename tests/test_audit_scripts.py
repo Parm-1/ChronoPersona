@@ -784,6 +784,7 @@ def test_loaded_model_and_logits_semantics_are_verified() -> None:
 
     class FakeConfig:
         model_type = "gpt_neox"
+        _attn_implementation = "sdpa"
 
     model_type = type(
         "GPTNeoXForCausalLM",
@@ -804,6 +805,22 @@ def test_loaded_model_and_logits_semantics_are_verified() -> None:
         "torch.float16",
     )
     assert identity["verified"] is True
+    assert identity["attention_implementation"] == "sdpa"
+    assert identity["sdpa_backends"] == ["math"]
+    assert identity["sdpa_math_allow_fp16_reduction"] is False
+
+    model.config._attn_implementation = "eager"
+    with pytest.raises(RuntimeError, match="attention implementation mismatch"):
+        module._verify_loaded_model(
+            model,
+            {
+                "architecture": "GPTNeoXForCausalLM",
+                "model_type": "gpt_neox",
+                "parameter_count": 7,
+            },
+            "torch.float16",
+        )
+    model.config._attn_implementation = "sdpa"
 
     class Scalar:
         def __init__(self, value: bool) -> None:

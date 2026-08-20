@@ -117,6 +117,9 @@ _DETERMINISM_FIELDS = frozenset(
     {
         "algorithms",
         "cublas_workspace_config",
+        "attention_implementation",
+        "sdpa_backends",
+        "sdpa_math_allow_fp16_reduction",
         "tf32",
         "cudnn_benchmark",
         "shuffle",
@@ -259,8 +262,8 @@ def validate_training_config(config: Mapping[str, Any]) -> tuple[str, ...]:
         "steps": 5,
         "checkpoint_after_step": 3,
     }
-    if not isinstance(config.get("run_name"), str) or not config["run_name"]:
-        errors.append("run_name must be a nonempty string")
+    if config.get("run_name") != "pythia-1b-deduped-lora-smoke-v1":
+        errors.append("run_name must identify the frozen v1 SDPA rescue")
     for key, expected in exact_top.items():
         if config.get(key) != expected:
             errors.append(f"{key} must be exactly {expected!r}")
@@ -344,6 +347,9 @@ def validate_training_config(config: Mapping[str, Any]) -> tuple[str, ...]:
     if isinstance(determinism, Mapping) and dict(determinism) != {
         "algorithms": True,
         "cublas_workspace_config": ":4096:8",
+        "attention_implementation": "sdpa",
+        "sdpa_backends": ["math"],
+        "sdpa_math_allow_fp16_reduction": False,
         "tf32": False,
         "cudnn_benchmark": False,
         "shuffle": False,
@@ -435,11 +441,28 @@ def full_weight_adamw_capacity(
     }
 
 
+def classify_forward_numerics(
+    *,
+    logits_finite: bool,
+    loss_finite: bool,
+) -> str:
+    """Classify the earliest invalid forward value without importing Torch."""
+
+    if not isinstance(logits_finite, bool) or not isinstance(loss_finite, bool):
+        raise TrainingSmokeError("forward numeric flags must be booleans")
+    if not logits_finite:
+        return "logits-nonfinite"
+    if not loss_finite:
+        return "loss-nonfinite"
+    return "complete"
+
+
 def validate_load_report(
     report: Mapping[str, Any],
     *,
     artifact: Mapping[str, Any],
     git_commit: str,
+    determinism: Mapping[str, Any],
 ) -> tuple[str, ...]:
     errors: list[str] = []
     expected = {
@@ -485,6 +508,11 @@ def validate_load_report(
         "model_type": artifact.get("model_type"),
         "parameter_count": artifact.get("parameter_count"),
         "parameter_dtypes": ["torch.float16"],
+        "attention_implementation": determinism.get("attention_implementation"),
+        "sdpa_backends": determinism.get("sdpa_backends"),
+        "sdpa_math_allow_fp16_reduction": determinism.get(
+            "sdpa_math_allow_fp16_reduction"
+        ),
         "verified": True,
     }
     if not isinstance(validation, Mapping):
@@ -518,6 +546,7 @@ def build_training_plan(
         load_report,
         artifact=artifact,
         git_commit=git_commit,
+        determinism=config["determinism"],
     )
     if load_errors:
         raise TrainingSmokeError("; ".join(load_errors))

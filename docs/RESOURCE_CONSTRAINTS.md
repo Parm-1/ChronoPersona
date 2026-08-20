@@ -11,7 +11,8 @@ This document is a binding design input. ChronoPersona should maximize scientifi
 - CPU: 12 logical processors
 - Sampled free storage on the intended local drive: approximately 255 GB
 - Runtime: PyTorch `2.13.0+cu130`, compiled CUDA 13.0, CUDA available
-- Sustained thermals and model loading/training throughput: not yet recorded
+- Model load and bounded inference throughput: recorded; sustained thermals and
+  successful training throughput remain unmeasured
 
 ### Potential borrowed machine
 
@@ -24,7 +25,7 @@ The current-machine values were measured by the no-network resource audit on
 remeasured on the exact run head. The borrowed-machine values remain reported
 and unverified.
 
-For the active final-Pythia loading measurement, the user explicitly authorized
+For the active final-Pythia loading and bounded training measurements, the user explicitly authorized
 using as much host RAM as needed on 2026-08-20. That run may therefore waive the
 conservative available-RAM margin while continuing to record live and peak RAM.
 This does not waive GPU, disk, artifact-integrity, exact-head, or severe system-
@@ -192,8 +193,8 @@ Any request to increase compute must be presented as:
 ## Current resource decision
 
 The repository remains at Rungs 0–1 and CAD $0. The user explicitly authorized
-model downloads and training on 2026-08-20. Runtime preflight is measured; the
-active operation is one pinned final-Pythia acquisition and loading/logits
-benchmark. Training remains sequenced after measured loading headroom, with one
-job at a time and the existing integrity, swapping, OOM, thermal, disk, and
-scientific stop rules—not the full naturalistic branch set.
+model downloads and training on 2026-08-20. Pinned acquisition and bounded
+loading/logits passed. The first tiny-LoRA v0 control failed before backward;
+the active operation is its sole attention-only v1 rescue, with one job at a
+time and all integrity, swapping, OOM, thermal, disk, and scientific stop
+rules. This does not authorize the full naturalistic branch set.

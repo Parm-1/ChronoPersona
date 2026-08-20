@@ -17,9 +17,13 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "configs" / "runs" / "pythia-lora-smoke-v0.json"
+DEFAULT_CONFIG = ROOT / "configs" / "runs" / "pythia-lora-smoke-v1.json"
 DEFAULT_MANIFEST = ROOT / "artifacts" / "manifests" / "MODEL_MANIFEST.json"
-DEFAULT_OUTPUT_ROOT = ROOT / "runs" / "pythia-lora-smoke-v0"
+DEFAULT_OUTPUT_ROOT = ROOT / "runs" / "pythia-lora-smoke-v1"
+IMMUTABLE_OUTPUT_ROOTS = (
+    ROOT / "runs" / "pythia-lora-smoke-v0",
+    DEFAULT_OUTPUT_ROOT,
+)
 HOST_TRAINING_LOCK = (
     Path(tempfile.gettempdir()) / "chronopersona-pythia-lora-training.lock"
 )
@@ -132,6 +136,7 @@ def _static_plan(args: argparse.Namespace) -> dict[str, Any]:
             "checkpoint_after_step": config["checkpoint_after_step"],
             "lora": config["lora"],
             "optimizer": config["optimizer"],
+            "determinism": config["determinism"],
         },
         "full_weight_adamw_capacity": capacity,
         "resource_limits": config["resource_limits"],
@@ -273,7 +278,12 @@ def _build_execution_plan(
     if dirty:
         raise TrainingSmokeError("training execution requires a clean worktree")
     load_report, load_report_sha = _json_with_sha(args.load_report, "inference report")
-    load_errors = validate_load_report(load_report, artifact=artifact, git_commit=git_commit)
+    load_errors = validate_load_report(
+        load_report,
+        artifact=artifact,
+        git_commit=git_commit,
+        determinism=config["determinism"],
+    )
     if load_errors:
         raise TrainingSmokeError("; ".join(load_errors))
     snapshot = verify_snapshot(
@@ -424,7 +434,7 @@ def _output_target_error(args: argparse.Namespace) -> str | None:
         return None
     if output.exists():
         return f"refusing to overwrite output report: {output}"
-    protected_roots = [DEFAULT_OUTPUT_ROOT]
+    protected_roots = list(IMMUTABLE_OUTPUT_ROOTS)
     if args.command == "run":
         protected_roots.append(args.output_root)
     elif args.command == "verify":

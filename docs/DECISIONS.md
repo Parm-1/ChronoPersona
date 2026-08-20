@@ -429,6 +429,48 @@ temporal, or CSTG result.
 
 **Evidence:** `reports/stage0/pythia_local_inference_2026-08-20.md`.
 
+## D-029 — Consume the one tiny-training rescue for explicit SDPA MATH
+
+**Date:** 2026-08-20
+**Status:** accepted and active for one v1 run
+
+The first frozen tiny-LoRA control at exact head `f2568ab` and run
+`run-b035b9becad60b6dc55ff3fd6fba6016` failed on its first forward with
+non-finite loss. It completed zero steps and zero training tokens; no backward
+or optimizer update occurred. Preserve that v0 run as failed evidence and do
+not resume, overwrite, or reinterpret it.
+
+A bounded, offline, no-update discriminator used the same immutable model and
+first 128-token block. Eager attention produced non-finite logits both with
+zero-initialized LoRA wrappers and after removing them, and at every tested
+prefix from 16 through 128 tokens. SDPA produced finite logits and loss across
+evaluation, training, and gradient-checkpointing modes. Explicit MATH-only and
+efficient SDPA were each finite. This observes an attention-implementation
+cause; FP16 eager-attention overflow is a plausible but not independently
+proven intermediate mechanism.
+
+Consume the single predeclared rescue by creating v1. Relative to v0, change
+only the run name and the full attention policy: load with Transformers
+`attn_implementation="sdpa"`, constrain PyTorch SDPA to `SDPBackend.MATH`
+through forward and checkpoint-recomputed backward, and disable reduced-
+precision FP16/BF16 math-SDPA reduction. Bind and verify all three fields in
+the configuration, plan identity, successful exact-head load report, runtime
+summary, and failure evidence. The diagnostic is preserved in
+`reports/stage0/pythia_lora_attention_diagnostic_2026-08-20.json`.
+
+**Rejected alternatives:** do not change LoRA geometry, learning rate,
+optimizer, loss scaler, dtype, data, token packing, sequence length, model, or
+offload/quantization. Those variables occur after or outside the observed
+eager-forward failure and would confound the rescue.
+
+**Stop rule:** if the exact v1 control fails any integrity, finite-value,
+memory, update, wall-time, or stability gate, stop this local training path.
+There is no second tuning rescue.
+
+**Claim ceiling:** a v1 pass would prove only the bounded trainer/checkpoint/
+resume engineering gate on this exact runtime. It would not validate PEFT for
+the causal design or establish temporal, behavioral, or CSTG evidence.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

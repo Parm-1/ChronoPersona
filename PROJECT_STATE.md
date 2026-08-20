@@ -14,13 +14,14 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Active — immutable final-Pythia acquisition and local loading/logits measurement**
+**Active — sole SDPA-MATH rescue for the tiny Pythia training/resume gate**
 
-The design and repository-governance gates have passed. A no-weight local
-runtime and model-metadata preflight is measured, and the user authorized model
-downloads and training on 2026-08-20. The active gate now measures one pinned
-licensed model before any training. Real-source scientific execution still
-requires the separate source evidence listed below.
+The design and repository-governance gates have passed. The immutable final-
+Pythia snapshot was acquired, verified, and loaded offline with finite logits.
+The first frozen tiny-LoRA control then failed before backward under forced
+eager attention. The active gate is exactly one versioned SDPA-MATH rescue;
+real-source scientific execution still requires the separate source evidence
+listed below.
 
 ## Latest verified evidence
 
@@ -47,10 +48,11 @@ requires the separate source evidence listed below.
 - Direct Transformers tokenizer/scorer repository or cache loading is
   deliberately disabled until those consumers use the same reusable
   manifest/hash-verified snapshot layer.
-- No model weights were downloaded, no model was loaded or trained, and no real
-  A/B/C corpus was qualified.
-- The preceding no-weight statement is the verified baseline before the newly
-  authorized acquisition; `PROGRESS.md` is the current run-state authority.
+- The pinned 2.09 GB model was downloaded and loaded locally. No successful
+  optimizer update, public model/data release, paid compute, or real A/B/C
+  corpus qualification occurred.
+- Exact run and delivery state lives in `PROGRESS.md`; historical no-weight
+  preflight reports remain valid only for their recorded commits.
 
 ### Reported by primary sources
 
@@ -63,7 +65,8 @@ requires the separate source evidence listed below.
 - final era windows;
 - source-general era decodability;
 - a trainable causal checkpoint and insertion point;
-- reliable real-model scoring on local hardware;
+- reliable registry scoring on local hardware;
+- successful target-model backward/checkpoint/resume behavior;
 - synthetic calibration sensitivity;
 - any temporal behavioral effect.
 
@@ -108,8 +111,8 @@ requires the separate source evidence listed below.
 
 ## Exact next action
 
-Commit the authorization and integrity changes, capture a fresh exact-clean-head
-audit, acquire and verify only the pinned five-file final-Pythia snapshot, then
-capture a second audit and measure offline float16 CUDA loading/logits. Review
-that result before implementing or running the tiny training/resume benchmark.
-Bounded rights-qualified source samples remain a separate external blocker.
+Commit and validate the v1 attention-only rescue, update stacked draft PR #31,
+and require exact-head CI. Then capture a fresh audit and MATH-policy offline
+load report before running the single control/interruption/resume gate. Stop on
+any v1 failure. Bounded rights-qualified source samples remain a separate
+external blocker.

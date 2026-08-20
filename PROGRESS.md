@@ -1,211 +1,125 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T04:49:51-04:00
+**Last updated:** 2026-08-20T05:20:35-04:00
+
+## Decision
+
+Preserve the first frozen tiny-LoRA control as a target failure and consume the
+single permitted rescue on a separately versioned v1 attention policy. The v1
+profile changes only the run name and attention execution: Transformers
+`sdpa`, PyTorch `SDPBackend.MATH`, and reduced-precision FP16/BF16 math-SDPA
+reduction disabled. If v1 fails, stop the local training path; there is no v2
+tuning rescue.
 
 ## Current objective
 
-Implement and run the smallest deterministic tiny LoRA continued-pretraining
-and checkpoint/resume benchmark now that the immutable final Pythia 1B deduped
-checkpoint has loaded and produced finite logits on the local RTX 2060.
+Commit, validate, publish, and execute the exact v1 five-step LoRA control plus
+planned step-three interruption/resume gate on the verified immutable Pythia
+snapshot. Require exact semantic equality between uninterrupted and resumed
+conditions, or preserve one final actionable failure.
 
 ## Current verified boundary
 
-- **Repository tooling — Tested:** exact clean training implementation head
-  `7b6398fe6f4fe8fcf55762b3cb246eb38468bf90` passed 344 local tests with one
-  optional skip. The pilot, model-manifest, and development-evaluation
-  validators and the self-hashed no-network training plan also passed. Draft PR
-  #30 remains open at the successful inference head `92a3e09`, where all 18
-  checks passed on Python 3.11, 3.12, and 3.13.
-- **Artifact policy — Tested:** the manifest validates with 13 artifacts and
-  exactly one benchmark-ready model, final Pythia 1B deduped at immutable Hub
-  revision `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
-- **Local runtime — Target Verified for bounded inference:** PyTorch
-  `2.13.0+cu130` exposes CUDA 13.0 and the NVIDIA GeForce RTX 2060. A clean-
-  head resource audit passed benchmark preflight. The exact five-file Pythia
-  snapshot was independently verified, loaded unquantized in CUDA FP16, and
-  produced finite logits in the frozen synthetic probe.
-- **Training behavior — Tested in the dependency-free harness, Target
-  Unverified:** the exact five-step state machine, planned interruption,
-  checkpoint verification, resume, equality comparison, failure artifacts,
-  locking, and path containment pass locally. No Pythia backward pass or
-  optimizer step has run yet.
+- **Repository implementation — Tested:** exact head
+  `f2568ab47d3162cf99eb445feac1b711980ff4f4` passed 344 tests with one
+  optional skip in a clean detached worktree. The pilot, model-manifest, and
+  development-evaluation validators and no-network training plan passed.
+- **Delivery — Tested:** stacked draft PR #31 is open at `f2568ab`; all 18
+  exact-head checks passed. Draft PR #30 remains green at the successful
+  inference head. Agents are not authorized to merge either PR.
+- **Artifact — Tested:** the exact five-file Pythia snapshot at revision
+  `7199d8fc61a6d565cd1f3c62bf11525b563e13b2` remains hash verified and
+  offline. The 2,090,701,528-byte safetensors SHA-256 is
+  `fdb3f09a4a4d30678e021247e71f5b160bdd147de2aedd2d7d25e01feecc8e13`.
+- **Inference — Target Verified:** Pythia loads unquantized in CUDA FP16 on the
+  RTX 2060 and produces finite logits on the bounded synthetic probe.
+- **Training v0 — Target Failed:** exact run
+  `run-b035b9becad60b6dc55ff3fd6fba6016` failed on the first forced-eager
+  forward with non-finite loss. It completed zero steps and zero training
+  tokens; no backward or optimizer update ran. Its run tree and evidence are
+  immutable and must not be resumed or overwritten.
+- **Diagnosis — Inspected/Target diagnostic:** on the same model and exact
+  first 128-token block, eager attention remained non-finite after removing
+  LoRA and across prefix lengths 16–128. Automatic, explicit MATH-only, and
+  explicit efficient SDPA produced finite logits/loss. This localizes the
+  observed cause to attention implementation. A specific FP16 overflow
+  intermediate remains inferred rather than directly measured.
+- **Training v1 — Tested locally, Target Unverified:** dependency-free tests
+  now bind the entire SDPA policy, preserve pre-backward numeric evidence, and
+  isolate v0/v1 outputs. No v1 backward or optimizer step has run.
 
-## Active deliverable
+## Evidence
 
-One five-step, batch-one, sequence-128 LoRA engineering smoke with a planned
-step-three interruption/resume and an uninterrupted control. Final adapter,
-optimizer, scheduler, loss sequence, step count, and token count must match.
+- Failed v0 run: `run-b035b9becad60b6dc55ff3fd6fba6016`
+- Failed v0 plan SHA-256:
+  `c97329c4c64f0fedd37f940eae37bfb061e949fbb8527557c4014fa23e2dcf0d`
+- Failed attempt semantic SHA-256:
+  `84ab0221299779a66d6a44196382a0edb8358274f440df87f68d0b4b0d86c2ad`
+- Failed CLI report SHA-256:
+  `6405a6e68138250c39fb70988075e1cbe39a7b7bbf495e3b5a2e74f3ae67c347`
+- Exact token matrix SHA-256:
+  `e7ecab791e9e736c980e61639b20a1cf9bfd7701c81c1757ed51a49e644683ea`
+- Diagnostic envelope:
+  `reports/stage0/pythia_lora_attention_diagnostic_2026-08-20.json`
+- Decision: `docs/DECISIONS.md` D-029
+- Compute ledger: failed v0 row appended; v1 remains absent until observed.
 
-## Next evidence gate
+## Artifacts
 
-Publish the validated runner on a stacked draft PR and require exact-head CI.
-Then reproduce the successful load at that clean head and execute the control
-and interrupted/resumed conditions from the same verified offline snapshot and
-token blocks.
+- Frozen historical config: `configs/runs/pythia-lora-smoke-v0.json`
+- Sole rescue config: `configs/runs/pythia-lora-smoke-v1.json`
+- Active plan: `.agent/plans/active-pythia-local-feasibility.md`
+- Protocol: `docs/LOCAL_BENCHMARK_PROTOCOL.md`
+- Inference report: `reports/stage0/pythia_local_inference_2026-08-20.md`
+- Local ignored cache: `artifacts/local/hf-cache`
+- Preserved v0 run tree in the detached execution worktree:
+  `runs/pythia-lora-smoke-v0/control/run-b035b9becad60b6dc55ff3fd6fba6016`
 
-- **Pass:** five optimizer updates complete in both conditions; checkpoint
-  hashes validate; the resumed and uninterrupted semantic states and loss
-  sequence match exactly; memory, throughput, and checkpoint timing are
-  complete.
-- **Fail:** integrity, nonfinite loss/gradient, skipped update, CUDA OOM,
-  checkpoint mismatch, resume divergence, severe instability, thermal, or disk
-  gate produces an actionable structured failure and stops the path.
-- **Inconclusive:** interruption or an unrelated resource change invalidates
-  the measurement; preserve partial cache state and repeat only after a fresh
-  exact-head audit.
+## Validation
 
-## Last known-good baseline
+- Current uncommitted v1 rescue focused suite: benchmark/training/CLI tests
+  pass; full exact-commit validation is pending the scoped commit.
+- PyTorch minimum for model execution is now 2.5 because the frozen reduction-
+  policy setter/getter is unavailable in 2.3–2.4. The installed target runtime
+  is `2.13.0+cu130` with Transformers 5.15.1.
+- The successful exact-head v1 load report must explicitly prove `sdpa`,
+  `sdpa_backends=["math"]`, and disabled reduced-precision math reduction.
+  Older automatic-SDPA reports are invalid inputs to v1.
+
+## Risks
+
+- The MATH backend may use more activation memory than automatic efficient
+  SDPA. All original conservative VRAM, allocation, wall-time, disk, identity,
+  finite-value, and stability gates remain enforced.
+- Free RAM/VRAM can drift on this daily-use Windows host. Available host RAM is
+  observed but not thresholded under the user's explicit instruction; actual
+  allocation failure, severe paging, thermal, or driver instability still
+  stops the run.
+- The diagnosis is an engineering result, not evidence about model behavior,
+  temporal priors, training adequacy, or CSTG.
+- The original primary worktree contains unrelated `AGENTS.md` and untracked
+  PR-template state. Preserve and exclude both from scoped commits.
+
+## Delivery state
 
 - Branch: `feat/tiny-training-resume-gate`
-- Validated training implementation head:
-  `7b6398fe6f4fe8fcf55762b3cb246eb38468bf90`
-- Tested inference head: `76c2479738d137d33d59d526a1392d17ceffe09a`
-- Upstream main: `78785b5c57b4bef306ac2d5632a191e97c5b6b0e`, which
-  contains the externally merged PRs #28 and #29
-- Delivery: draft PR #30 is open at `92a3e09` and passed all 18 checks; the
-  training implementation commit is local and awaiting its own stacked draft
-  PR.
-- Execution worktree: detached, clean, and exactly bound to `7b6398f`
+- Current published head: `f2568ab47d3162cf99eb445feac1b711980ff4f4`
+- Draft PR #31:
+  `https://github.com/Parm-1/ChronoPersona/pull/31`
+- No merge, release, repository-visibility change, paid operation, model/data
+  publication, or third-party contact was performed.
 
-## Status
+## Next write-active deliverable
 
-- Evidence level: bounded model loading/logits is Target Verified; training is
-  Unverified.
-- Delivery state: the earlier preflight implementation was merged through PR
-  #29; acquisition/offline-load hardening and successful local inference are
-  published in green draft PR #30. The training implementation is committed
-  locally and exact-head validated but not yet pushed.
-- Authorization: on 2026-08-20 the user explicitly lifted restrictions on
-  model downloads and training. This authorizes local ChronoPersona model
-  acquisition and bounded local training. No paid-compute budget, public model
-  or dataset release, repository-visibility change, or third-party contact is
-  required or inferred for this gate.
-- Primary risk: the model consumes about 2.04 GB allocated VRAM before backward
-  activations. LoRA is plausible but backward/checkpoint headroom is unmeasured.
+Finish the scoped v1 rescue commit, validate it from a clean exact-head
+worktree, push it to draft PR #31, and require exact-head CI. Then:
 
-## Current evidence by level
+1. capture a fresh cache-bound audit;
+2. regenerate the offline inference report under the explicit MATH-only policy;
+3. run the uninterrupted v1 control;
+4. if it passes, run the planned step-three interruption and explicit resume;
+5. verify both conditions and compare exact semantic state;
+6. update the ledger, decision, plan, and this file from observed evidence.
 
-### Inspected
-
-- The intended cache contains only the verified pinned Pythia snapshot and Hub
-  cache metadata; approximately 251 GB remained free after acquisition.
-- The exact five-file inference set is 2,092,816,302 bytes. The safetensors file
-  is 2,090,701,528 bytes with SHA-256
-  `fdb3f09a4a4d30678e021247e71f5b160bdd147de2aedd2d7d25e01feecc8e13`.
-- The exact 2.5x download safety margin is 5,232,040,755 bytes.
-- Pythia is Apache-2.0 and does not require custom remote code at the pinned
-  revision.
-
-### Tested
-
-- Benchmark safety tests cover canonical manifest binding, clean matching Git
-  identity, explicit existing cache and audited directory identity, CUDA audit
-  rejection, disk margin, Windows peak process memory, and structured failure
-  context.
-- The acquisition-integrity focused suite covers
-  exact file hashes/allowlists, revision/config identity, audit recency,
-  runtime/resource drift, exclusive evidence outputs, parent runtime identity,
-  model/logits semantics, truncation rejection, and alternate-loader blocks.
-- The combined training, CLI, acquisition, manifest, and alternate-loader suite
-  passes 96 tests. The training/CLI subset passes 40 tests, including
-  checkpoint tampering, Windows junction escape, OOM/nonfinite failures,
-  transactional timeout rollback, global locking, exact event topology, and
-  control/resume comparison.
-- Exact clean implementation commit `7b6398f`: 344 passed, one skipped; pilot,
-  model-manifest, development-evaluation validators, diff checks, and the
-  no-network training plan passed.
-
-### Integrated
-
-- Exact-clean-head no-network resource audit and benchmark preflight completed
-  on the RTX 2060.
-- Local-only execution reached the model-load stage and preserved an expected
-  missing-cache failure without network access.
-- Exact-head acquisition completed in 25.0 seconds. All five required files,
-  the immutable revision, exact allowlist, sizes, hashes, and config passed.
-- The first offline execution preserved a structured pre-load RAM-gate failure:
-  3,281,063,936 bytes available versus a 4,181,403,056-byte threshold, with
-  3,764 MiB conservative free VRAM.
-- The exact offline retry loaded 1,011,781,632 FP16 parameters in 2.5291
-  seconds, peaked at 2,042,486,784 allocated / 2,084,569,088 reserved GPU bytes
-  and 2,810,875,904 bytes process RSS, and produced finite `[1,20,50304]`
-  logits. Three repeats averaged 0.014680 seconds, 1,294.30 predicted tokens/s,
-  and loss 5.769263. The RAM override was requested but not needed.
-
-### Missing or unverified
-
-- Sustained thermals and desktop impact.
-- Backward/optimizer memory, tiny-training throughput, checkpoint write, and
-  exact resume behavior.
-
-## Material changes and decisions
-
-- The former model-acquisition authorization blocker is superseded by the
-  user's 2026-08-20 instruction.
-- Legal identity, artifact integrity, scientific gates, and resource stop
-  conditions remain validity requirements, not permission restrictions.
-- Start with one licensed immutable Pythia artifact; do not bulk-download the
-  blocked DatedGPT, PIT, ChronoGPT, TypewriterLM, Kairos, or OLMo candidates.
-- Continue at CAD $0 because the next gate is local and no paid resource is
-  needed. A concrete paid operation would require its own bounded cost target.
-- The user's follow-up authorizes using as much host RAM as needed. The retry
-  will explicitly record and waive only the available-RAM threshold; GPU,
-  disk, identity, integrity, and actual allocation-failure stops remain.
-- Device-resident full-weight AdamW is infeasible: the optimistic
-  8,094,253,056-byte state lower bound exceeds total GPU memory by
-  1,652,260,864 bytes before activations. Use LoRA for the engineering smoke
-  only; do not reinterpret it as the headline training method.
-
-## Open uncertainties and regression risks
-
-- Free VRAM and RAM can change because this is a daily-use Windows machine.
-- Transformers/PyTorch loading compatibility is verified for the pinned model.
-  Registry tokenizer/scoring execution remains deliberately
-  blocked until it consumes the reusable hash-verified snapshot layer; plan
-  mode remains available.
-- A successful inference load does not imply full-weight training fits.
-- Partial Hugging Face downloads must not be mistaken for a complete immutable
-  artifact.
-- PRs #28 and #29 were merged externally. Draft PR #30 covers the full
-  inference path through `92a3e09` and is green. The new training branch must
-  receive its own exact-head checks. Agents remain unauthorized to merge any
-  PR.
-
-## Workspace state
-
-- The exact execution worktree at `7b6398f` is clean. The primary worktree has
-  unrelated concurrent `AGENTS.md` and untracked PR-template changes whose
-  provenance is not part of this deliverable; they are preserved and excluded
-  from commits and model-run identity.
-- Ignored cache: `artifacts/local/hf-cache` contains the verified 2.09 GB
-  pinned snapshot.
-- Ignored evidence: resource audits and structured failure reports under
-  `artifacts/local/`.
-- No model, training, or background benchmark process is active.
-- Successful-run resources: 6,144 MiB total VRAM; 3,742 MiB conservative free
-  before load; 2,042,486,784 peak allocated model/logits bytes; approximately
-  251 GB free disk.
-- External writes by agents so far: branches and draft PRs #28, #29, and #30.
-  PRs #28 and #29 were subsequently merged by an external actor; no agent
-  performed a merge, release, visibility change, paid operation, or public
-  model/data publication.
-
-## Active plan and evidence
-
-- Active plan: `.agent/plans/active-pythia-local-feasibility.md`
-- Decision report: `reports/stage0/model_compute_preflight_2026-08-20.md`
-- Inference result: `reports/stage0/pythia_local_inference_2026-08-20.md`
-- Model protocol: `docs/LOCAL_BENCHMARK_PROTOCOL.md`
-
-## Exact restart instructions
-
-1. Commit this reconciled state on `feat/tiny-training-resume-gate` without
-   staging the unrelated primary-worktree files.
-2. Push the branch, open a stacked draft PR against
-   `fix/model-feasibility-gates`, and wait for exact-head CI without merging.
-3. Capture a fresh exact-head resource audit and a new successful load report;
-   do not reuse the older Git-bound audit as current evidence.
-4. Run one uninterrupted control and one planned step-three interruption plus
-   explicit resume. Stop on any declared failure and preserve both output roots.
-5. Verify and compare both conditions, then update the compute ledger and
-   decision record from the observed result.
+Stop permanently on any v1 integrity, numeric, memory, update, checkpoint,
+resume, stability, or wall-time failure. Do not change another variable.
