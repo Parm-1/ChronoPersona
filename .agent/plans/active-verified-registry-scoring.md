@@ -1,10 +1,10 @@
 # Verified Registry Model Scoring
 
-**Status:** active — E0-E2 complete; E3 delivery active; no development logits inspected
+**Status:** active — E0-E2 complete; E3 public-repository CI delivery pending; no development logits inspected
 **Started:** 2026-08-20T07:17:14-04:00
 **Frozen baseline:** `dd0b56471b55babe2a4eb273381deeef2f852d49`
 **Branch:** `feat/verified-registry-scoring`
-**Worktree:** `C:\Users\sandh\Documents\Codex\2026-08-20\chronopersona-verified-loader`
+**Worktree:** current branch worktree; do not persist its machine-local absolute path
 **Parent delivery:** draft PR #33, 18/18 checks green at `dd0b564`
 **Write-active deliverable:** one bounded offline Pythia registry-scoring path
 through the verified snapshot and accepted tokenizer identities.
@@ -159,10 +159,11 @@ this plan; do not update either input inside this gate.
 - Pass compile checks, all validators, focused tests, full pytest, and
   `git diff --check`.
 
-Observed on the complete scoped working-tree implementation: 457 tests passed
-with two platform-optional symlink skips; the pilot, model-manifest, and
+Observed at exact code head `dc14bf83171dce66c3c92a02ce44e1fb656d667a`:
+457 tests passed with two platform-optional symlink skips in a fresh detached
+worktree that began without `artifacts/local`; the pilot, model-manifest, and
 development-registry validators passed; production modules compiled; and
-`git diff --check` passed. Focused adversarial review additionally replayed
+`git show --check` passed. Focused adversarial review additionally replayed
 resource chronology, raw-hash transport, path alias, type-alias, platform,
 threshold, output-transaction, lock-release, and final-rebind failures. This is
 pre-execution Tested evidence only; no exact-head CI or target-scoring evidence
@@ -170,10 +171,34 @@ exists yet and no model logits were inspected.
 
 ### E3 — Implementation delivery (active)
 
-- Push the scoped implementation commit.
-- Open a draft PR stacked on `feat/verified-registry-loader`.
-- Require all exact-head CI checks to pass before inspecting development
-  logits.
+- Complete: pushed exact tested code head `dc14bf8` and opened draft PR #34
+  stacked on `feat/verified-registry-loader`.
+- Observed blocker: all 18 hosted push/PR matrix jobs for `dc14bf8` were
+  rejected before startup. GitHub Actions run `32377136301` reports failed
+  account payments or an insufficient spending limit; this is not a test
+  failure and no agent is authorized to change billing.
+- A later bounded rerun probe of that run's Python 3.11 job produced job
+  `96453153543`, which again completed with no steps and the same account-level
+  rejection. After the user resumed the blocked goal, one fresh availability
+  probe produced job `96483944575`; it likewise completed with no steps and the
+  same annotation. Hosted-runner availability is therefore still blocked.
+- On 2026-08-20 the user explicitly authorized changing
+  `Parm-1/ChronoPersona` from private to public to restore free standard
+  GitHub-hosted Actions capacity. Pre-exposure scans found no credentials,
+  repository secrets, tracked model weights, or raw corpora. The user was
+  informed that commit metadata includes a personal email and that historical
+  Actions logs and local path strings become public and cannot be recalled
+  after third-party copying.
+- Observed after the change: anonymous GitHub API access returned HTTP 200;
+  repository visibility is `public`; main and draft PR #32/#33/#34 heads were
+  unchanged; default workflow permissions remain read-only; Pages, releases,
+  deployments, environments, repository secrets, and variables remain absent.
+  Secret scanning and push protection are enabled, and every external fork PR
+  requires workflow approval.
+- Push the local checkpoint and require every check to pass at the resulting
+  exact head before inspecting development logits. A public visibility flag
+  alone is not CI evidence; jobs must start and complete on standard hosted
+  runners.
 
 ### E4 — Exact-head target scoring
 
@@ -187,7 +212,7 @@ exists yet and no model logits were inspected.
 ### E5 — Evidence publication
 
 - Preserve ignored raw audits/scores/receipts/comparison.
-- Commit only a bounded portable aggregate report, D-032, compute-ledger rows,
+- Commit only a bounded portable aggregate report, D-033, compute-ledger rows,
   and canonical state/protocol updates.
 - Push the evidence head and require exact-head CI again. Do not rerun a pass to
   improve timing or presentation.
@@ -229,5 +254,8 @@ shorten the registry, quantize, offload, or choose a preferred output.
 ## Exact restart procedure
 
 Read `PROGRESS.md`, confirm this is the sole active plan, inspect branch/status,
-and preserve PR #33 at `dd0b564`. Resume the first incomplete gate above. Never
-run model scoring before E3 exact-head CI passes, and never merge draft PRs.
+and preserve PR #33 at `dd0b564` plus draft PR #34. Confirm the repository is
+public with read-only workflow tokens and external-fork approval, push the
+local delivery checkpoint, and require all checks at the resulting exact head.
+Never run model scoring before E3 exact-head CI passes, and never merge draft
+PRs.

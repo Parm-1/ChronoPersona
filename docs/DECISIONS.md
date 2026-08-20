@@ -556,6 +556,43 @@ them.
 **Evidence:**
 `reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`.
 
+## D-032 — Use public repository visibility for standard hosted CI
+
+**Date:** 2026-08-20
+**Status:** accepted and applied by explicit user authorization
+
+Change `Parm-1/ChronoPersona` from private to public so its existing standard
+GitHub-hosted Actions workflows can use GitHub's free public-repository
+capacity without changing billing or spending settings. Treat visibility as a
+delivery mechanism only: it does not authorize merging, releases, a reuse
+license, paid compute, or publication of models, datasets, or raw corpora.
+
+Before exposure, scan the current tree, all reachable Git history, GitHub
+issues/PRs/comments, Actions configuration, repository secrets and variables,
+and publication surfaces. The audit found no credentials, private keys,
+repository secrets, tracked model weights, raw corpora, releases, deployments,
+Pages site, environments, or self-hosted runners. Existing workflows use
+standard hosted runners, read-only default tokens, and no privileged fork
+trigger.
+
+**Accepted disclosure:** public visibility exposes every remote branch,
+reachable commit, issue, PR, retained Actions log, one personal email in commit
+metadata, and historical local workspace strings. These disclosures and the
+fact that returning to private cannot recall third-party copies were stated
+before the change. No history rewrite, force push, or remote branch deletion
+was authorized or performed. The repository has no license, so public access
+is not a reuse grant.
+
+**Observed result:** GitHub reports `PUBLIC`, anonymous API and Git access work,
+main and draft PR #32/#33/#34 heads are unchanged, and the fork network remains
+empty. Actions remain enabled with read-only default workflow permissions;
+every external contributor's fork workflow now requires approval. Secret
+scanning and push protection are enabled. No billing setting changed.
+
+**Revisit rule:** another visibility change requires explicit user
+authorization. A private rollback restores GitHub access control only; it does
+not retract public clones, copied logs, or indexed commit metadata.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

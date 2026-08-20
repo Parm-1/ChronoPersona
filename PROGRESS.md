@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T09:37:11-04:00
+**Last updated:** 2026-08-20T12:20:02-04:00
 
 ## Decision
 
@@ -9,18 +9,29 @@ Pythia verified-snapshot tokenizer boundary path. Two fresh invocations audited
 all 12 development items, 24 forms, and 48 candidates with zero failures and
 byte-identical reports. Freeze native `prefix-policy=none` before logits.
 
-Accept the dependency-light registry-scoring implementation as **Tested** in
-the scoped working tree. Keep target scoring blocked until the implementation
-is delivered and exact-head CI passes; then require fresh clean-head resource
-evidence before either attempt. No development logits have been inspected.
-Preserve the completed v0/v1 training evidence without rerunning it.
+Accept the dependency-light registry-scoring implementation as **Tested** at
+exact local code head `dc14bf8`. It is delivered on draft PR #34, but every
+GitHub-hosted job for that head was rejected before startup by an account-level
+payment/spending-limit annotation. Keep target scoring blocked until exact-head
+CI can actually run and pass; then require fresh clean-head resource evidence
+before either attempt. No development logits have been inspected. Preserve the
+completed v0/v1 training evidence without rerunning it.
+
+The user explicitly authorized changing `Parm-1/ChronoPersona` from private to
+public to obtain free standard GitHub-hosted Actions capacity. After a
+full-history/current-tree/GitHub-surface audit found no credentials, repository
+secrets, tracked model weights, or raw corpora, the repository was made public.
+The known disclosure of one personal commit email, local workspace strings,
+and historical Actions logs was stated before the change. Anonymous access,
+unchanged branch/PR heads, read-only workflow tokens, external-fork approval,
+secret scanning, and push protection are verified. No billing setting changed.
 
 ## Current objective
 
-Deliver the tested scorer on `feat/verified-registry-scoring`, obtain exact-head
-CI, then execute the frozen two-attempt gate only if fresh resource audits pass.
-Require byte-identical deterministic scores and independently valid runtime
-receipts.
+Push the public-visibility delivery checkpoint to draft PR #34 and require all
+checks to start and pass at that resulting exact head. Only then execute the
+frozen two-attempt gate if fresh resource audits pass. Require byte-identical
+deterministic scores and independently valid runtime receipts.
 
 ## Current verified boundary
 
@@ -62,14 +73,20 @@ receipts.
 - **Tokenizer delivery — Tested:** evidence head `dd0b564` is pushed on draft
   PR #33 and all 18 exact-head checks passed. That head is the immutable baseline
   for the separate scoring branch.
-- **Scoring implementation — Tested:** the complete scoped scorer working-tree
-  diff based on `fd487dd` passed 457 tests with two platform-optional symlink
-  skips, production-module compilation, all three top-level validators, and
-  diff checks. Adversarial tests cover exact score semantics, complete resource
-  evidence, model/runtime identity, output transactions, failure receipts,
-  final Git/input rebinding, and byte-exact repeat verification. This is
-  pre-execution Tested evidence; no exact-head CI or target-scoring evidence
-  exists yet, and no development logits were inspected.
+- **Scoring implementation — Tested:** exact code head
+  `dc14bf83171dce66c3c92a02ce44e1fb656d667a` passed 457 tests with two
+  platform-optional symlink skips in a fresh detached worktree that began
+  without the ignored `artifacts/local` directory. Production-module
+  compilation, all three top-level validators, and diff checks passed.
+  Adversarial tests cover exact score semantics, complete resource evidence,
+  model/runtime identity, output transactions, failure receipts, final
+  Git/input rebinding, and byte-exact repeat verification.
+- **Scoring delivery — CI pending:** `dc14bf8` is pushed on draft PR
+  #34. All 18 push/PR matrix jobs were rejected before startup with GitHub's
+  account-level failed-payment/spending-limit annotation. This is not passing
+  CI and is not a test result. Repository visibility is now public, but the
+  resulting checkpoint has not yet been pushed and tested; no target scoring
+  or development-logit evidence exists.
 
 ## Evidence
 
@@ -101,8 +118,8 @@ receipts.
 - Completed feasibility plan: `.agent/plans/active-pythia-local-feasibility.md`
 - Protocol: `docs/LOCAL_BENCHMARK_PROTOCOL.md`
 - Local ignored cache: `artifacts/local/hf-cache`
-- Clean execution worktree:
-  `C:\Users\sandh\Documents\Codex\2026-08-20\chronopersona-run-d812ba8`
+- Clean detached execution worktree; its machine-local absolute path is not
+  persisted.
 - v1 local run roots:
   `runs/pythia-lora-smoke-v1/{control,resumed}/run-1b8f0867fbd6038265f609b3595ae93d`
 - Preserved v0 run root:
@@ -136,11 +153,26 @@ receipts.
   The canonical and receipt self-hashes recomputed, every candidate passed,
   runtime/backend/native-prefix identities matched, and recursive inspection
   found no absolute local path.
-- Scoring implementation working tree: 457 passed, two platform-optional
-  symlink skips; pilot, model-manifest, and development-registry validators
-  passed; compile and `git diff --check` passed. Independent read-only review
-  found no remaining provider, resource-verifier, or output-transaction
-  blocker after replaying the adversarial regressions.
+- Exact scoring code head `dc14bf8`: 457 passed, two platform-optional symlink
+  skips from a fresh detached checkout; pilot, model-manifest, and
+  development-registry validators passed; compile and `git show --check`
+  passed. Independent read-only review found no remaining provider,
+  resource-verifier, or output-transaction blocker after replaying the
+  adversarial regressions.
+- Draft PR #34 exact-code-head CI: blocked, not failed by tests. GitHub Actions
+  run `32377136301` reports that jobs were not started because of account
+  payments or the spending limit. The PR comment preserves the full local/CI
+  distinction. A bounded rerun probe at 2026-08-20T10:02-04:00 created job
+  `96453153543`; it again completed with zero steps and the same billing/
+  spending-limit annotation. The resumed-goal probe created job `96483944575`;
+  it also completed with zero steps and the same annotation.
+- Public-exposure verification: GitHub reports visibility `PUBLIC` and
+  anonymous API access returns HTTP 200. Main remains `c0f28ce`; draft PR
+  #32/#33/#34 heads remain `fa809ed`/`dd0b564`/`dc14bf8`; Actions remain
+  enabled with read-only default workflow permissions and no PR-approval
+  token. External fork workflows require approval from all contributors.
+  Secret scanning and push protection are enabled. Pages, releases,
+  deployments, environments, repository secrets, and variables remain absent.
 
 ## Risks
 
@@ -150,8 +182,16 @@ receipts.
   runtime/registry identity. Registry model scoring remains blocked; a
   populated cache or passing tokenizer audit is not proof that model scoring is
   resource-safe, deterministic, or reliable. Target scoring remains blocked
-  until exact-head implementation CI passes and a fresh resource audit
-  satisfies every frozen threshold.
+  until public-repository GitHub-hosted jobs actually pass at the new exact
+  head and a fresh resource audit satisfies every frozen threshold. Do not
+  alter billing, weaken the CI gate, or substitute the local suite for
+  exact-head CI.
+- Public visibility intentionally exposes all branch history, issues, PRs,
+  commit metadata, and retained Actions logs. The audit found no credentials,
+  repository secrets, tracked model weights, or raw corpora, but a personal
+  commit email and historical local workspace strings are now public. Returning
+  the repository to private would not retract third-party copies. The absence
+  of a repository license means visibility is not a reuse grant.
 - Rights-qualified, historically bounded A/B/C source samples, source-role
   feasibility, evaluation sealing, synthetic calibration, and branch-level
   cost evidence remain unresolved.
@@ -166,22 +206,34 @@ receipts.
   head `dd0b56471b55babe2a4eb273381deeef2f852d49`.
 - Current scorer branch: `feat/verified-registry-scoring`, created from exact
   tokenizer evidence head `dd0b564`.
-- Current implementation worktree:
-  `C:\Users\sandh\Documents\Codex\2026-08-20\chronopersona-verified-loader`.
+- Current implementation worktree: the active scoring-branch worktree; its
+  machine-local absolute path is not persisted.
 - Draft PR #32: `https://github.com/Parm-1/ChronoPersona/pull/32`
 - Draft PR #33: `https://github.com/Parm-1/ChronoPersona/pull/33`, stacked on
   `feat/tiny-training-resume-gate`; 18/18 checks passed at evidence head
   `dd0b564`.
+- Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, stacked on
+  `feat/verified-registry-loader`; exact tested code head `dc14bf8` is pushed,
+  but its hosted jobs were rejected before startup by the account billing/
+  spending-limit gate. This blocker-state checkpoint is intentionally retained
+  locally until Actions can run, avoiding another known-unstartable workflow
+  batch.
+- Repository visibility: public by explicit user authorization. Anonymous read
+  access, external-fork workflow approval, secret scanning, and push protection
+  are verified. No billing or spending setting was changed.
 - PR #31: externally merged at `f2568ab`; it does not contain the v1 rescue.
-- No merge by Codex, force push, release, repository-visibility change, paid
-  operation, model/data publication, or third-party contact occurred.
+- No merge by Codex, force push, release, paid operation, model/data
+  publication, or third-party contact occurred. The only visibility change was
+  the explicitly authorized private-to-public transition.
 
 ## Next write-active deliverable
 
-1. Deliver the scoped implementation commit: push the feature branch and open
-   a stacked draft PR against `feat/verified-registry-loader`.
-2. Require exact-head CI before any development logits are inspected.
-3. After CI, capture fresh audit A and run attempt A only if every frozen
+1. Push the public-visibility delivery checkpoint and require exact-head CI
+   before any
+   development logits are inspected.
+2. Confirm the jobs actually start on standard GitHub-hosted runners and all
+   checks pass; do not change account billing or spending settings.
+3. After CI passes, capture fresh audit A and run attempt A only if every frozen
    resource gate passes; then release state, capture fresh audit B, run attempt
    B, and require the offline repeat verifier to accept exact score bytes.
 

@@ -86,7 +86,7 @@ Continue safe, reversible, local work without repeated permission requests. Do n
 
 - rent or purchase compute;
 - accept paid licenses;
-- make the repository public;
+- change repository visibility again;
 - push or publish branches outside the requested GitHub workflow;
 - release models, datasets, or raw corpora;
 - register a study;
@@ -104,12 +104,15 @@ deliverable is ready. Do not request routine confirmation for those actions.
 
 This standing authorization does not include merging pull requests, force
 pushing, deleting remote branches, creating releases, changing repository
-visibility, spending money, or publishing models, datasets, or raw corpora.
+visibility again, spending money, or publishing models, datasets, or raw
+corpora.
 Those actions still require explicit user authorization.
 
 ## GitHub collaboration
 
-Use private `Parm-1/ChronoPersona`, one gate per draft PR. Bind review to the
+Use public `Parm-1/ChronoPersona`, one gate per draft PR. Public visibility is
+an Actions-delivery decision, not a license grant or authorization to publish
+models, datasets, or raw corpora. Bind review to the
 exact base/head and omitted local state; a material commit is stale. Review is
 advisory and CI does not prove CSTG, license, or publication claims. Standing
 delivery authority still excludes the actions above.
@@ -199,5 +202,5 @@ bounded registry model scoring with fresh resource/load binding and the
 accepted tokenizer identity. Evidence-bearing naturalistic execution still
 requires rights-qualified, historically version-bounded A/B samples and an
 explicitly authorized held-out source-C review packet. Paid compute, public
-model/data release, repository-visibility change, and requester-pays retrieval
-remain outside the active gate.
+model/data release, another repository-visibility change, and requester-pays
+retrieval remain outside the active gate.
