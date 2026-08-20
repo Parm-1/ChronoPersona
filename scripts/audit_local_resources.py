@@ -328,6 +328,12 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = _parser().parse_args()
+    if args.output is not None and args.output.exists():
+        print(
+            f"error: refusing to overwrite existing output: {args.output}",
+            file=sys.stderr,
+        )
+        return 2
     try:
         audit = build_audit(args.path, args.repo)
     except OSError as error:
@@ -338,7 +344,16 @@ def main() -> int:
     print(rendered)
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+        try:
+            with args.output.open(
+                "x",
+                encoding="utf-8",
+                newline="\n",
+            ) as handle:
+                handle.write(rendered + "\n")
+        except OSError as error:
+            print(f"error: could not preserve resource audit: {error}", file=sys.stderr)
+            return 1
     return 0
 
 

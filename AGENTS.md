@@ -170,6 +170,14 @@ Activity is not progress unless it creates evidence or a reusable artifact.
 
 ## Current boundary
 
-The repository is in Stage 0. The development content-integrity gate has passed, and the next bounded real-content qualification gate is externally blocked. The repository is intentionally stopped at that boundary. Novelty has been reviewed under the CSTG redesign; development model, source, evaluation, calibration, run-lifecycle, and integrity tooling exists.
+The repository is in Stage 0. The development content-integrity gate has
+passed, local model acquisition and bounded training measurement are authorized
+and active, and the next bounded real-content qualification gate remains
+externally blocked.
 
-Resume only when small rights-qualified, historically version-bounded A/B samples and an explicitly authorized held-out source-C review packet are available under the existing firewall. Local model and compute measurement also remains required. No bulk corpus acquisition, requester-pays retrieval, model training, paid compute, or evidence-bearing naturalistic run is authorized by the current state.
+Acquire and measure one pinned, license-cleared model at a time under the
+resource and integrity gates. Evidence-bearing naturalistic execution still
+requires small rights-qualified, historically version-bounded A/B samples and
+an explicitly authorized held-out source-C review packet. No requester-pays
+retrieval, paid compute, public model/data release, or evidence-bearing
+naturalistic run is part of the active local gate.

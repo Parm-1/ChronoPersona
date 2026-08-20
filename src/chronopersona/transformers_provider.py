@@ -24,6 +24,13 @@ class TransformersProviderError(RuntimeError):
     """Raised when an approved Transformers operation cannot be completed."""
 
 
+_VERIFIED_SNAPSHOT_BLOCKER = (
+    "direct repository/cache loading is disabled until this provider consumes "
+    "a manifest-hash-verified local snapshot; benchmark-ready artifacts use "
+    "the separate verified acquisition workflow first"
+)
+
+
 @dataclass(frozen=True)
 class LoadedTokenizer:
     tokenizer: Any
@@ -105,20 +112,7 @@ def load_manifest_tokenizer(
     """Load only a tokenizer after operation-specific policy checks."""
 
     assert_tokenizer_ready(artifact)
-    auto_tokenizer = _import_tokenizer()
-    repository, revision = _artifact_identity(artifact)
-    tokenizer = auto_tokenizer.from_pretrained(
-        repository,
-        revision=revision,
-        cache_dir=str(cache_dir) if cache_dir is not None else None,
-        local_files_only=not allow_download,
-        trust_remote_code=False,
-    )
-    return LoadedTokenizer(
-        tokenizer=tokenizer,
-        repository=repository,
-        revision=revision,
-    )
+    raise TransformersProviderError(_VERIFIED_SNAPSHOT_BLOCKER)
 
 
 def _resolve_dtype(torch: Any, dtype: str) -> Any:
@@ -149,42 +143,7 @@ def load_manifest_model(
     assert_model_score_ready(artifact)
     if device not in {"cpu", "cuda"}:
         raise TransformersProviderError("device must be cpu or cuda")
-
-    torch, auto_model, auto_tokenizer = _import_model_stack()
-    if device == "cuda" and not torch.cuda.is_available():
-        raise TransformersProviderError(
-            "CUDA was requested but torch.cuda.is_available() is false"
-        )
-    repository, revision = _artifact_identity(artifact)
-    cache = str(cache_dir) if cache_dir is not None else None
-    tokenizer = auto_tokenizer.from_pretrained(
-        repository,
-        revision=revision,
-        cache_dir=cache,
-        local_files_only=not allow_download,
-        trust_remote_code=False,
-    )
-    model = auto_model.from_pretrained(
-        repository,
-        revision=revision,
-        cache_dir=cache,
-        local_files_only=not allow_download,
-        trust_remote_code=False,
-        use_safetensors=True,
-        low_cpu_mem_usage=True,
-        torch_dtype=_resolve_dtype(torch, dtype),
-    )
-    model.to(torch.device(device))
-    model.eval()
-    actual_dtype = str(next(model.parameters()).dtype)
-    return LoadedModel(
-        tokenizer=tokenizer,
-        model=model,
-        repository=repository,
-        revision=revision,
-        device=device,
-        dtype=actual_dtype,
-    )
+    raise TransformersProviderError(_VERIFIED_SNAPSHOT_BLOCKER)
 
 
 class TransformersContinuationProvider:

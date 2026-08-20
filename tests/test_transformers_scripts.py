@@ -86,14 +86,42 @@ def test_blocked_model_execution_fails_before_optional_imports() -> None:
     assert "dependencies are missing" not in completed.stderr
 
 
-def test_download_flags_require_execute() -> None:
+def test_direct_download_flags_are_disabled() -> None:
+    for execute in (False, True):
+        execution_flag = ("--execute",) if execute else ()
+        tokenizer = _run(
+            "scripts/audit_registry_tokenizer.py",
+            "--artifact",
+            "pythia-1b-deduped-main",
+            "--prefix-policy",
+            "none",
+            *execution_flag,
+            "--allow-download",
+        )
+        model = _run(
+            "scripts/score_registry_transformers.py",
+            "--artifact",
+            "pythia-1b-deduped-main",
+            "--prefix-policy",
+            "none",
+            *execution_flag,
+            "--allow-download",
+        )
+
+        assert tokenizer.returncode == 2
+        assert model.returncode == 2
+        assert "verified acquisition workflow" in tokenizer.stderr
+        assert "verified acquisition workflow" in model.stderr
+
+
+def test_ready_execution_requires_verified_snapshot_loader() -> None:
     tokenizer = _run(
         "scripts/audit_registry_tokenizer.py",
         "--artifact",
         "pythia-1b-deduped-main",
         "--prefix-policy",
         "none",
-        "--allow-download",
+        "--execute",
     )
     model = _run(
         "scripts/score_registry_transformers.py",
@@ -101,10 +129,12 @@ def test_download_flags_require_execute() -> None:
         "pythia-1b-deduped-main",
         "--prefix-policy",
         "none",
-        "--allow-download",
+        "--device",
+        "cpu",
+        "--execute",
     )
 
-    assert tokenizer.returncode == 2
-    assert model.returncode == 2
-    assert "meaningful only with --execute" in tokenizer.stderr
-    assert "meaningful only with --execute" in model.stderr
+    assert tokenizer.returncode == 1
+    assert model.returncode == 1
+    assert "manifest-hash-verified local snapshot" in tokenizer.stderr
+    assert "manifest-hash-verified local snapshot" in model.stderr

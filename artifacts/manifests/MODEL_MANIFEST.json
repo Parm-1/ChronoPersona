@@ -490,12 +490,40 @@
       "immutable": true,
       "checkpoint_ref": "step143000, final checkpoint",
       "architecture": "GPTNeoXForCausalLM",
+      "model_type": "gpt_neox",
       "parameter_count": 1011781632,
       "context_length": 2048,
       "tokenizer": "GPT-NeoX-20B tokenizer",
       "precision": "float16 weights",
       "weight_format": "safetensors available",
-      "weight_size_bytes": 2090000000,
+      "weight_size_bytes": 2090701528,
+      "required_files": [
+        {
+          "filename": "config.json",
+          "size_bytes": 569,
+          "sha256": "302d6702a29de1039066e41404877fb8c53b7ddc82e88f9aba277f230086cfe0"
+        },
+        {
+          "filename": "model.safetensors",
+          "size_bytes": 2090701528,
+          "sha256": "fdb3f09a4a4d30678e021247e71f5b160bdd147de2aedd2d7d25e01feecc8e13"
+        },
+        {
+          "filename": "special_tokens_map.json",
+          "size_bytes": 99,
+          "sha256": "6f50ab5a5a509a1c309d6171f339b196a900dc9c99ad0408ff23bb615fdae7ad"
+        },
+        {
+          "filename": "tokenizer_config.json",
+          "size_bytes": 396,
+          "sha256": "70e38394e494931c6f773ba41e19460dd4436526b852207367f04341b4066d3f"
+        },
+        {
+          "filename": "tokenizer.json",
+          "size_bytes": 2113710,
+          "sha256": "c24618a1b3e6a38167beff1c72cffd126c3a66254347304b50547d12c5f25624"
+        }
+      ],
       "requires_remote_code": false,
       "license": {
         "status": "verified",

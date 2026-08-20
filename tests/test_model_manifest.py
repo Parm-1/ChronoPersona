@@ -99,6 +99,77 @@ def test_benchmark_ready_requires_immutable_revision() -> None:
     )
 
 
+def test_benchmark_ready_requires_exact_safe_file_identities() -> None:
+    manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
+    artifact = next(
+        item
+        for item in manifest["artifacts"]
+        if item["id"] == "pythia-1b-deduped-main"
+    )
+
+    artifact.pop("required_files")
+    errors = validate_model_manifest(manifest)
+    assert any("exact required_files" in error for error in errors)
+
+    artifact["required_files"] = [
+        {
+            "filename": "../model.safetensors",
+            "size_bytes": artifact["weight_size_bytes"],
+            "sha256": "not-a-digest",
+        }
+    ]
+    errors = validate_model_manifest(manifest)
+    assert any("safe relative path" in error for error in errors)
+    assert any("64-character lowercase digest" in error for error in errors)
+
+
+def test_benchmark_ready_weight_size_matches_required_safetensors() -> None:
+    manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
+    artifact = next(
+        item
+        for item in manifest["artifacts"]
+        if item["id"] == "pythia-1b-deduped-main"
+    )
+    artifact["weight_size_bytes"] += 1
+
+    errors = validate_model_manifest(manifest)
+
+    assert any(
+        "must equal the total required safetensors size" in error
+        for error in errors
+    )
+
+
+def test_benchmark_ready_requires_exact_model_identity() -> None:
+    manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
+    artifact = next(
+        item
+        for item in manifest["artifacts"]
+        if item["id"] == "pythia-1b-deduped-main"
+    )
+    artifact["model_type"] = None
+    artifact["parameter_count"] = None
+
+    errors = validate_model_manifest(manifest)
+
+    assert any("exact model_type" in error for error in errors)
+    assert any("exact parameter_count" in error for error in errors)
+
+
+def test_required_files_reject_download_pattern_metacharacters() -> None:
+    manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
+    artifact = next(
+        item
+        for item in manifest["artifacts"]
+        if item["id"] == "pythia-1b-deduped-main"
+    )
+    artifact["required_files"][0]["filename"] = "config[ab].json"
+
+    errors = validate_model_manifest(manifest)
+
+    assert any("download-pattern metacharacters" in error for error in errors)
+
+
 def test_local_outputs_require_portable_paths() -> None:
     for unsafe in (r"C:\report.json", r"..\report.json", "artifacts/NUL.json"):
         manifest = deepcopy(dict(load_model_manifest(MANIFEST)))

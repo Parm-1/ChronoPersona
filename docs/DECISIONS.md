@@ -332,6 +332,103 @@ successful load, measured headroom, and its own legal/resource preflight.
 
 **Evidence:** `reports/stage0/model_compute_preflight_2026-08-20.md`.
 
+## D-026 — Activate bounded local model acquisition and training measurement
+
+**Date:** 2026-08-20
+**Status:** accepted and active
+
+The user explicitly lifted restrictions on model downloads and training. The
+project may therefore acquire pinned, legally cleared model artifacts and run
+bounded local loading and training measurements without another routine
+permission request.
+
+The first active operation remains one immutable final-Pythia acquisition and
+CUDA loading/logits benchmark. Training follows only if that measurement gives
+enough headroom to design a deterministic tiny checkpoint/resume gate.
+
+**Reason:** the prior stop was an authorization boundary rather than negative
+model evidence. Removing it should advance the smallest measured gate, not
+silently expand to every candidate, corpus, branch, or compute environment.
+
+**Preserved requirements:** verified license and immutable identity, no
+unreviewed remote code, exact run/resource binding, one heavy job at a time,
+structured failure preservation, and immediate stop on integrity mismatch,
+swapping, repeated OOM, severe desktop impact, thermal/driver instability, or
+disk risk.
+
+**Scope interpretation:** the active local gate remains CAD $0 and requires no
+paid service, public release, repository-visibility change, or third-party
+contact. Those materially different actions are not implied merely because
+local acquisition/training is now authorized.
+
+**Claim ceiling:** authorization is not evidence. No model feasibility,
+training, scorer, temporal, or CSTG claim advances until the corresponding run
+passes its evidence gate.
+
+**Current-state authority:** `PROGRESS.md` and
+`.agent/plans/active-pythia-local-feasibility.md`.
+
+## D-027 — Permit a recorded low-RAM final-Pythia load attempt
+
+**Date:** 2026-08-20
+**Status:** accepted and active for the bounded loading measurement
+
+After the exact pinned snapshot was acquired and verified, the first offline
+CUDA execution stopped before model loading because post-import available RAM
+fell below the conservative two-times-weight threshold. The user then
+explicitly authorized using as much RAM as needed.
+
+Add an explicit `--allow-low-ram` execution option. It waives only the hard
+available-RAM threshold while preserving both audited and live RAM values, the
+threshold, whether it passed, and whether the override was used in the
+structured result. Immutable file identity, offline loading, clean exact-head
+binding, disk, conservative VRAM, model/logit semantics, and structured failure
+gates remain unchanged.
+
+**Reason:** the first failure measured a conservative host-headroom policy, not
+model incompatibility or an allocation failure. A named and visible override
+honors the user's resource authorization without silently weakening the normal
+default or erasing the failed attempt.
+
+**Claim ceiling:** a successful override run would establish only bounded local
+loading/logits feasibility under the observed host-memory pressure. It would
+not establish full-weight training fit, sustained stability, scorer validity,
+temporal behavior, or CSTG.
+
+## D-028 — Accept local inference and activate the tiny LoRA resume gate
+
+**Date:** 2026-08-20
+**Status:** accepted at bounded local inference level
+
+Accept the exact-head offline Pythia measurement as evidence that the immutable
+final checkpoint loads unquantized in FP16 on the RTX 2060 and produces finite
+logits for the frozen synthetic probe. The successful run loaded 1,011,781,632
+parameters in 2.5291 seconds, peaked at 2,042,486,784 allocated GPU bytes, and
+completed three measured forward passes at 1,294.30 predicted tokens/second.
+
+Advance to one five-step LoRA training/checkpoint/resume engineering smoke using
+only the verified offline snapshot and CC0 synthetic fixtures. Compare a planned
+step-three interruption plus explicit resume against an uninterrupted control.
+
+Do not attempt a device-resident full-weight AdamW step on this GPU. An
+optimistic FP16 lower bound for weights, gradients, and two same-dtype moments
+is 8,094,253,056 bytes, already 1,652,260,864 bytes above total device memory
+before activations and runtime overhead. Do not silently substitute CPU
+offload, quantization, another optimizer, or another model.
+
+**Reason:** inference viability clears the loader/runtime uncertainty, while the
+optimizer lower bound resolves full-weight device capacity without an
+intentional OOM. A tiny adapter smoke can now test the remaining trainer,
+backward, checkpoint, and resume plumbing without being misrepresented as the
+headline training method.
+
+**Claim ceiling:** the inference pass is engineering evidence on one synthetic
+prompt. A LoRA smoke, even if exact, proves only training infrastructure and
+does not justify PEFT for the causal claim or establish any model-behavior,
+temporal, or CSTG result.
+
+**Evidence:** `reports/stage0/pythia_local_inference_2026-08-20.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.
