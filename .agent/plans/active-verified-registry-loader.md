@@ -1,11 +1,12 @@
 # Verified Registry Tokenizer Loader
 
-**Status:** active — E5 passed; E6 evidence publication and exact-head CI pending
+**Status:** complete — E5 passed; E6 evidence publication and exact-head CI passed
 **Frozen baseline:** `fa809ed6a0337400088834a64f0718c85e7dd0fd`
 **Branch:** `feat/verified-registry-loader`
 **Target execution head:** `c57ce40e2b0fad6a3e1ad07a3eada7e9405ccb6d`
-**Write-active deliverable:** publish the accepted Pythia tokenizer evidence
-and require final exact-head CI on draft PR #33.
+**Evidence head:** `dd0b56471b55babe2a4eb273381deeef2f852d49`
+**Completed deliverable:** accepted Pythia tokenizer evidence published on
+draft PR #33 with all 18 exact-head checks passing.
 
 ## Objective
 
@@ -120,7 +121,7 @@ canonical Git inputs are stable-read and rebound before publication.
 - Require 12 items, 24 forms, 48 candidates, zero boundary/context/truncation
   failures, and no local path in either report.
 
-### E6 — Evidence publication (active)
+### E6 — Evidence publication (complete)
 
 - Preserve a bounded tracked aggregate report and a decision accepting or
   rejecting the tokenizer gate without changing registry content.
@@ -147,6 +148,11 @@ The bounded tracked result is
 unless the artifact revision, manifest tokenizer runtime identity, or
 Python/Transformers/tokenizers/huggingface-hub identity changes.
 
+Target execution remained at clean head `c57ce40`; it was not rerun. Evidence
+head `dd0b564` published the aggregate report, D-031, and reconciled state.
+Draft PR #33 remained unmerged and passed 18/18 checks at that exact evidence
+head.
+
 ## Stop conditions
 
 Stop and preserve the failure on any policy, canonical-path, revision,
@@ -169,7 +175,6 @@ ready.
 
 ## Delivery
 
-After E3, publish the implementation commit and require exact-head CI. After E5,
-reconcile `PROGRESS.md`, the Transformers scoring protocol, and the development
-evaluation limitation; publish the evidence-only commit on the same draft PR
-and require exact-head CI again. Never merge it.
+Delivery is complete at `dd0b564` on draft PR #33. Resume from
+`active-verified-registry-scoring.md`; do not rerun the tokenizer target unless
+its frozen artifact or runtime identity changes, and never merge PR #33.

@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current — publish accepted tokenizer evidence; next — bounded registry model scoring**
+**Active — bounded registry model scoring through the verified snapshot**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -23,8 +23,9 @@ attention. Its one versioned SDPA-MATH rescue subsequently completed the
 five-step uninterrupted and interruption/resume conditions with exact semantic
 state equality. The exact Pythia tokenizer now also passed two byte-identical
 12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
-loader. The next local gate is to integrate the model scorer with that same
-boundary, the accepted tokenizer identity, and fresh resource/load evidence;
+loader, and its evidence head passed exact-head CI. The active local gate
+integrates the model scorer with that same boundary, the accepted tokenizer
+identity, and fresh resource/load evidence;
 real-source scientific execution still requires the separate source evidence
 listed below.
 
@@ -123,8 +124,8 @@ listed below.
 
 ## Exact next action
 
-Publish the accepted tokenizer evidence on draft PR #33 and require exact-head
-CI. Then integrate only the existing registry model scorer with the reusable
+Implement only the existing registry model scorer against the reusable
 manifest/hash-verified offline snapshot and accepted tokenizer-audit identity,
-and run the bounded repeated Pythia development score. Bounded rights-qualified
-source samples remain a separate external blocker.
+publish it on a separate stacked draft PR after dependency-light validation,
+and require exact-head CI before the bounded repeated Pythia development score.
+Bounded rights-qualified source samples remain a separate external blocker.

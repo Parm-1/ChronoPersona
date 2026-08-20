@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T07:10:30-04:00
+**Last updated:** 2026-08-20T07:17:14-04:00
 
 ## Decision
 
@@ -15,10 +15,10 @@ integrated. Preserve the completed v0/v1 training evidence without rerunning it.
 
 ## Current objective
 
-Publish the bounded tokenizer evidence on draft PR #33 and require exact-head
-CI. Then integrate only the registry model scorer with the accepted snapshot
-and tokenizer identities, fresh resource/load evidence, and separate
-deterministic score versus runtime-receipt artifacts.
+Integrate only the Pythia registry model scorer with the accepted snapshot and
+tokenizer identities, fresh resource/load evidence, explicit CUDA FP16
+SDPA-MATH execution, and separate deterministic score versus runtime-receipt
+artifacts. Require two fresh score invocations to match byte for byte.
 
 ## Current verified boundary
 
@@ -57,6 +57,9 @@ deterministic score versus runtime-receipt artifacts.
   candidates with zero boundary/context/truncation failures. Both report and nested
   snapshot-receipt self-hashes validate; no local path or model deserialization
   occurred.
+- **Tokenizer delivery — Tested:** evidence head `dd0b564` is pushed on draft
+  PR #33 and all 18 exact-head checks passed. That head is the immutable baseline
+  for the separate scoring branch.
 
 ## Evidence
 
@@ -138,26 +141,27 @@ deterministic score versus runtime-receipt artifacts.
 ## Delivery state
 
 - Completed evidence branch: `feat/tiny-training-resume-gate`
-- Current isolated implementation branch: `feat/verified-registry-loader`
-  from exact tested base `fa809ed6a0337400088834a64f0718c85e7dd0fd`;
-  target execution head `c57ce40e2b0fad6a3e1ad07a3eada7e9405ccb6d`.
+- Completed tokenizer branch: `feat/verified-registry-loader` at green evidence
+  head `dd0b56471b55babe2a4eb273381deeef2f852d49`.
+- Current scorer branch: `feat/verified-registry-scoring`, created from exact
+  tokenizer evidence head `dd0b564`.
 - Current implementation worktree:
   `C:\Users\sandh\Documents\Codex\2026-08-20\chronopersona-verified-loader`.
 - Draft PR #32: `https://github.com/Parm-1/ChronoPersona/pull/32`
 - Draft PR #33: `https://github.com/Parm-1/ChronoPersona/pull/33`, stacked on
-  `feat/tiny-training-resume-gate`; 18/18 checks passed at the target head
-  before this evidence-only update.
+  `feat/tiny-training-resume-gate`; 18/18 checks passed at evidence head
+  `dd0b564`.
 - PR #31: externally merged at `f2568ab`; it does not contain the v1 rescue.
 - No merge by Codex, force push, release, repository-visibility change, paid
   operation, model/data publication, or third-party contact occurred.
 
 ## Next write-active deliverable
 
-1. Commit and push the bounded tokenizer evidence update to draft PR #33 and
-   require exact-head CI; do not rerun the passing target.
-2. Activate the separate model-scoring ExecPlan.
-3. Integrate the model provider/scorer with the accepted snapshot/tokenizer
-   identities, a fresh resource/load gate, and separate deterministic score and
-   runtime receipt artifacts before any development logits are inspected.
+1. Integrate the model provider/scorer with the accepted snapshot/tokenizer
+   identities, fresh resource/load gates, and separate deterministic score and
+   runtime receipt artifacts.
+2. Pass dependency-light adversarial tests, the full suite, and all validators.
+3. Push a stacked draft PR and require exact-head CI before any development
+   logits are inspected.
 
 Do not reopen or tune v0/v1. Do not infer a scientific result from this gate.

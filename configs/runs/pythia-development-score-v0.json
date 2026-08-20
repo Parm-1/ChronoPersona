@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "run_name": "pythia-1b-deduped-development-score-v0",
+  "run_kind": "verified-registry-development-score",
+  "status": "frozen",
+  "scientific_claim_authorized": false,
+  "network_allowed": false,
+  "external_spend_cad": 0,
+  "max_parallel_jobs": 1,
+  "artifact": {
+    "id": "pythia-1b-deduped-main",
+    "repository": "EleutherAI/pythia-1b-deduped",
+    "revision": "7199d8fc61a6d565cd1f3c62bf11525b563e13b2",
+    "model_safetensors_size_bytes": 2090701528,
+    "model_safetensors_sha256": "fdb3f09a4a4d30678e021247e71f5b160bdd147de2aedd2d7d25e01feecc8e13",
+    "snapshot_receipt_sha256": "26af3f07196f1f1f1e773fd6a36daa47a780e90b7141908cc1230f2fcbcdefcc"
+  },
+  "canonical_inputs": {
+    "manifest_path": "artifacts/manifests/MODEL_MANIFEST.json",
+    "manifest_git_blob": "2dbafc0d0fe10a717e1df3d5c7920e6af661138b",
+    "manifest_sha256": "f3a800e95887b96ec66a660efa51ab975b17b7ec1ada0f381f502e912d9cf4f6",
+    "registry_path": "evaluations/registry/development-v0.jsonl",
+    "registry_git_blob": "39a229ca8a29243bc457f42c5fdc69e303bb5361",
+    "registry_sha256": "5207bf0fd273196cc3cbd63342997ffbd1b3de9f6d0473423a8179da584ba41d"
+  },
+  "accepted_tokenizer_audit": {
+    "path": "artifacts/local/pythia-tokenizer-none-a-c57ce40.json",
+    "file_sha256": "ee11e4c99d6577fa2e3be5a53e4c17b626ff91bcdee877b295799dc5926c39bb",
+    "output_sha256": "6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523",
+    "backend_sha256": "1b0aca3746c0870daeb9137101cd89acbb38710fc433db83331287d5b0e47ee0",
+    "native_prefix_probe_sha256": "f2b89b376c56b7100ec3947ae1ccd3b468eceedcfbfe7031389bae0f8c327af1",
+    "prefix_policy": "none",
+    "prefix_token_ids": []
+  },
+  "registry_topology": {
+    "item_count": 12,
+    "form_count": 24,
+    "candidate_count": 48,
+    "forwarded_token_count": 2391,
+    "predicted_token_count": 2343,
+    "continuation_token_count": 839,
+    "maximum_full_token_count": 59,
+    "maximum_continuation_token_count": 20,
+    "maximum_within_form_token_difference": 3
+  },
+  "scoring": {
+    "scorer_version": "complete-continuation-transformers-v0",
+    "maximum_length": 2048,
+    "complete_continuations": true,
+    "log_softmax_dtype": "float32",
+    "exact_boundary_required": true,
+    "truncation_allowed": false
+  },
+  "model": {
+    "class": "GPTNeoXForCausalLM",
+    "model_type": "gpt_neox",
+    "parameter_count": 1011781632,
+    "vocabulary_size": 50304,
+    "device": "cuda:0",
+    "dtype": "float16",
+    "eval_mode": true,
+    "quantized": false,
+    "device_map": false,
+    "offload": false,
+    "autocast": false,
+    "trust_remote_code": false,
+    "use_safetensors": true,
+    "local_files_only": true
+  },
+  "determinism": {
+    "fresh_invocations": 2,
+    "exact_score_bytes_required": true,
+    "algorithms": true,
+    "cublas_workspace_config": ":4096:8",
+    "attention_implementation": "sdpa",
+    "sdpa_backends": [
+      "math"
+    ],
+    "sdpa_math_allow_fp16_reduction": false,
+    "tf32": false,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "use_cache": false,
+    "rescue_runs": 0
+  },
+  "runtime_identity": {
+    "python": "3.11.9",
+    "packages": {
+      "torch": "2.13.0+cu130",
+      "transformers": "5.15.1",
+      "tokenizers": "0.22.2",
+      "huggingface-hub": "1.28.0",
+      "accelerate": "1.14.0",
+      "safetensors": "0.8.0"
+    },
+    "cuda_runtime": "13.0",
+    "cuda_device_count": 1,
+    "cuda_device_index": 0,
+    "cuda_device_name": "NVIDIA GeForce RTX 2060",
+    "cuda_compute_capability": [
+      7,
+      5
+    ],
+    "cuda_total_memory_bytes": 6441992192
+  },
+  "resource_limits": {
+    "minimum_preload_free_vram_bytes": 3695181824,
+    "maximum_process_peak_reserved_bytes": 3158310912,
+    "minimum_postload_global_free_vram_bytes": 1610612736,
+    "minimum_staging_output_free_bytes": 2227034030,
+    "minimum_output_free_bytes": 134217728,
+    "maximum_invocation_wall_seconds": 900,
+    "ram_threshold_enforced": false
+  }
+}

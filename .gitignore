@@ -32,6 +32,7 @@ runs/
 !configs/runs/
 !configs/runs/pythia-lora-smoke-v0.json
 !configs/runs/pythia-lora-smoke-v1.json
+!configs/runs/pythia-development-score-v0.json
 wandb/
 mlruns/
 
