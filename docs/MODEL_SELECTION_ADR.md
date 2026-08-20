@@ -1,7 +1,7 @@
 # Model Selection ADR
 
-**Date:** 2026-08-17  
-**Status:** provisional; local benchmark pending  
+**Date:** 2026-08-20
+**Status:** provisional; local runtime preflight passed, model benchmark pending
 **Decision class:** Stage 0 model and compute architecture
 
 ## Decision
@@ -10,7 +10,7 @@ ChronoPersona will use different model sets for different scientific roles.
 
 ### Public observational audit
 
-1. **Primary family:** DatedGPT base checkpoints at approximately 2013, 2016, 2019, 2022, and 2024, after the model-weight license and every immutable revision are resolved.
+1. **Primary family:** DatedGPT base checkpoints at approximately 2013, 2016, 2019, 2022, and 2024, after the model-weight license is resolved. The selected revisions are now immutable.
 2. **Secondary family:** PIT 4B only when custom code is reviewed and confirmed hardware can run unquantized likelihood scoring.
 3. **Boundary cases:** ChronoGPT, TypewriterLM, and Kairos are analyzed separately and never pooled into one temporal trajectory.
 
@@ -48,9 +48,16 @@ Strengths:
 Blockers:
 
 - no explicit model-weight license was found in the inspected cards;
-- four selected revisions still need resolution to immutable commit SHAs;
 - crawl-year filtering is not document-publication time;
 - annual checkpoints are independent training runs.
+
+The selected 2013, 2016, 2019, 2022, and 2024 artifacts are pinned to
+`855538883fd62ae8138789c4858e1dcb708187dc`,
+`8f6d90155a97ae22dce3abf9e8234f528bee7e55`,
+`8fe891bd59e31c3666112dd00139c4ed7cee9dda`,
+`1e2f7b5d6a019e0eafffcac6bb3023c3662736dd`, and
+`ed8abac3e81ba4f964fc92cf9e9b412123f681f4`, respectively. Resolving
+identity does not resolve the missing model-weight license.
 
 Decision:
 
@@ -128,13 +135,15 @@ Metadata and conceptual boundary only unless license and hardware blockers are r
 Strengths:
 
 - direct sequential-versus-shuffled training design;
-- released code and reported weights/data licenses.
+- standard `LlamaForCausalLM` configuration at the inspected checkpoint;
+- immutable Hub revision
+  `e4d8791d8f2bfbd55e8ac8d6998bca7a515c6c95`;
+- card-reported CC-BY-SA-4.0 model license.
 
 Blockers:
 
-- 6B custom Helium architecture;
-- exact Hub revision and custom-code identity unresolved;
-- resource requirements exceed the current default path;
+- the root checkpoint is approximately 12.59 GB before activation overhead;
+- resource requirements exceed the current 6 GB local GPU path;
 - primary result concerns temporal factual knowledge rather than CSTG.
 
 Decision:
@@ -167,6 +176,12 @@ Blockers:
 - the original `allenai/OLMo` repository now identifies itself as inactive, so it should be used as immutable historical configuration evidence rather than the default execution environment;
 - straightforward full-weight AdamW training is not expected to fit the reported local machine without offload, sharding, optimizer changes, or a larger GPU.
 
+The Transformers-compatible `stage1-step20000-tokens42B` branch resolves to
+`f9dd86fb2eee6a7f0c79dc6fc2f671b58523cddb`. This is not the repository's
+default/main revision: the previously recorded `c70db05...` identity named
+main and contained different model-weight hashes. The manifest now binds the
+named early-training branch rather than conflating those artifacts.
+
 Decision:
 
 OLMo 2 remains the provisional scientific primary. Execution should use a pinned compatible OLMo-core version while preserving the original checkpoint/config identity.
@@ -190,14 +205,39 @@ Candidate insertion point:
 
 Blockers:
 
-- the `step20000` branch still needs resolution to an immutable Hub commit;
-- raw optimizer state is not publicly served for every intermediate step by default;
+- exact resume compatibility of the published optimizer state has not been
+  verified;
 - continuing with a newly initialized optimizer is a different intervention and must be declared;
 - Pythia is older and less capable than OLMo 2.
+
+The `step20000` branch resolves to
+`42c3ad398033019d65b051ba284f0994cee89134`. Hub metadata lists an
+approximately 2.02 GB safetensors format and a 12.20 GB `optimizer.pt` at that
+revision. File presence alone does not establish that the current training
+stack can resume the original optimizer and scheduler exactly.
 
 Decision:
 
 Pythia is the operational fallback, first loading benchmark, and plausible second-family replication. It is not silently promoted over OLMo because it is easier to run.
+
+## Local runtime preflight
+
+The 2026-08-20 no-model audit observed:
+
+- Windows with an NVIDIA GeForce RTX 2060, 6,144 MiB VRAM, and compute
+  capability 7.5;
+- 17.13 GB physical RAM and approximately 255 GB free storage at the sampled
+  time;
+- PyTorch `2.13.0+cu130`, compiled for CUDA 13.0, with CUDA available;
+- one benchmark-ready artifact: immutable final Pythia 1B deduped, with a
+  2.09 GB declared weight size and a 5.225 GB download safety margin;
+- no local Hugging Face model-weight cache, no model load, and no training.
+
+Free RAM and VRAM are transient and must be measured again on the exact clean
+benchmark commit. The benchmark runner now requires that clean, exact-commit,
+no-network resource audit and enforces CUDA-build and same-filesystem disk
+preflight before it can load a model. This is a tooling/runtime preflight, not
+evidence that the checkpoint fits or produces valid logits.
 
 ## Dose implication
 

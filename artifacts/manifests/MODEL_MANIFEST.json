@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "audit_date": "2026-08-17",
+  "audit_date": "2026-08-20",
   "status": "stage0-artifact-audit-v1",
   "policy": {
     "public_access_is_not_a_license": true,
@@ -67,9 +67,9 @@
       "role": "observational-primary",
       "family": "DatedGPT",
       "repository": "datedgpt/datedgpt-2016-base",
-      "revision": null,
-      "revision_kind": "unresolved",
-      "immutable": false,
+      "revision": "8f6d90155a97ae22dce3abf9e8234f528bee7e55",
+      "revision_kind": "git-sha",
+      "immutable": true,
       "checkpoint_ref": null,
       "architecture": "LlamaForCausalLM",
       "parameter_count": 1300000000,
@@ -85,17 +85,17 @@
         "sources": [
           "https://huggingface.co/datedgpt/datedgpt-2016-base"
         ],
-        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+        "note": "The immutable revision was resolved by metadata audit on 2026-08-20. The model-weight license remains unresolved."
       },
       "code_review": {
         "status": "not-required",
         "repository": null,
         "revision": null
       },
-      "execution_status": "blocked-revision",
+      "execution_status": "blocked-license",
       "intended_use": "Intermediate observational checkpoint.",
       "constraints": [
-        "License resolution is also required before execution."
+        "Public access is not treated as permission; license resolution is required before execution."
       ],
       "sources": [
         "https://arxiv.org/abs/2603.11838",
@@ -107,9 +107,9 @@
       "role": "observational-primary",
       "family": "DatedGPT",
       "repository": "datedgpt/datedgpt-2019-base",
-      "revision": null,
-      "revision_kind": "unresolved",
-      "immutable": false,
+      "revision": "8fe891bd59e31c3666112dd00139c4ed7cee9dda",
+      "revision_kind": "git-sha",
+      "immutable": true,
       "checkpoint_ref": null,
       "architecture": "LlamaForCausalLM",
       "parameter_count": 1300000000,
@@ -125,17 +125,17 @@
         "sources": [
           "https://huggingface.co/datedgpt/datedgpt-2019-base"
         ],
-        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+        "note": "The immutable revision was resolved by metadata audit on 2026-08-20. The model-weight license remains unresolved."
       },
       "code_review": {
         "status": "not-required",
         "repository": null,
         "revision": null
       },
-      "execution_status": "blocked-revision",
+      "execution_status": "blocked-license",
       "intended_use": "Intermediate observational checkpoint aligned with the provisional late era window.",
       "constraints": [
-        "License resolution is also required before execution."
+        "Public access is not treated as permission; license resolution is required before execution."
       ],
       "sources": [
         "https://arxiv.org/abs/2603.11838",
@@ -147,9 +147,9 @@
       "role": "observational-primary",
       "family": "DatedGPT",
       "repository": "datedgpt/datedgpt-2022-base",
-      "revision": null,
-      "revision_kind": "unresolved",
-      "immutable": false,
+      "revision": "1e2f7b5d6a019e0eafffcac6bb3023c3662736dd",
+      "revision_kind": "git-sha",
+      "immutable": true,
       "checkpoint_ref": null,
       "architecture": "LlamaForCausalLM",
       "parameter_count": 1300000000,
@@ -165,17 +165,17 @@
         "sources": [
           "https://huggingface.co/datedgpt/datedgpt-2022-base"
         ],
-        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+        "note": "The immutable revision was resolved by metadata audit on 2026-08-20. The model-weight license remains unresolved."
       },
       "code_review": {
         "status": "not-required",
         "repository": null,
         "revision": null
       },
-      "execution_status": "blocked-revision",
+      "execution_status": "blocked-license",
       "intended_use": "Intermediate observational checkpoint.",
       "constraints": [
-        "License resolution is also required before execution."
+        "Public access is not treated as permission; license resolution is required before execution."
       ],
       "sources": [
         "https://arxiv.org/abs/2603.11838",
@@ -187,9 +187,9 @@
       "role": "observational-primary",
       "family": "DatedGPT",
       "repository": "datedgpt/datedgpt-2024-base",
-      "revision": null,
-      "revision_kind": "unresolved",
-      "immutable": false,
+      "revision": "ed8abac3e81ba4f964fc92cf9e9b412123f681f4",
+      "revision_kind": "git-sha",
+      "immutable": true,
       "checkpoint_ref": null,
       "architecture": "LlamaForCausalLM",
       "parameter_count": 1300000000,
@@ -205,17 +205,17 @@
         "sources": [
           "https://huggingface.co/datedgpt/datedgpt-2024-base"
         ],
-        "note": "Resolve both the current immutable revision and the model-weight license before execution."
+        "note": "The immutable revision was resolved by metadata audit on 2026-08-20. The model-weight license remains unresolved."
       },
       "code_review": {
         "status": "not-required",
         "repository": null,
         "revision": null
       },
-      "execution_status": "blocked-revision",
+      "execution_status": "blocked-license",
       "intended_use": "Latest endpoint in the observational public-checkpoint audit.",
       "constraints": [
-        "License resolution is also required before execution."
+        "Public access is not treated as permission; license resolution is required before execution."
       ],
       "sources": [
         "https://arxiv.org/abs/2603.11838",
@@ -354,36 +354,37 @@
       "role": "boundary-case",
       "family": "Kairos",
       "repository": "kyutai/Sequential_Helium_6B",
-      "revision": null,
-      "revision_kind": "unresolved",
-      "immutable": false,
+      "revision": "e4d8791d8f2bfbd55e8ac8d6998bca7a515c6c95",
+      "revision_kind": "git-sha",
+      "immutable": true,
       "checkpoint_ref": null,
-      "architecture": "Helium custom causal language model",
+      "architecture": "LlamaForCausalLM",
       "parameter_count": 6000000000,
-      "context_length": null,
-      "tokenizer": "Helium tokenizer",
-      "precision": "unverified",
-      "weight_format": "custom/Transformers-compatible artifact requiring audit",
-      "weight_size_bytes": null,
-      "requires_remote_code": true,
+      "context_length": 4096,
+      "tokenizer": "Helium SentencePiece tokenizer, vocabulary 64000",
+      "precision": "bfloat16",
+      "weight_format": "safetensors with standard Llama configuration",
+      "weight_size_bytes": 12591867056,
+      "requires_remote_code": false,
       "license": {
-        "status": "mixed",
-        "identifier": "CC-BY-4.0 reported for weights; MIT code",
+        "status": "verified",
+        "identifier": "CC-BY-SA-4.0",
         "sources": [
           "https://github.com/kyutai-labs/kairos",
           "https://huggingface.co/kyutai/Sequential_Helium_6B"
         ],
-        "note": "Exact Hub revision and custom architecture files remain unresolved."
+        "note": "The exact model card and metadata identify CC-BY-SA-4.0 for the weights; the pinned configuration uses standard Transformers Llama loading without remote code."
       },
       "code_review": {
-        "status": "pending",
-        "repository": "kyutai-labs/kairos",
+        "status": "not-required",
+        "repository": null,
         "revision": null
       },
-      "execution_status": "blocked-revision",
+      "execution_status": "blocked-hardware-benchmark",
       "intended_use": "Ordering-method boundary case; not a default local model.",
       "constraints": [
-        "Six-billion-parameter execution is outside the current local-first default.",
+        "The 12.59 GB bfloat16 checkpoint is outside the RTX 2060 unquantized path.",
+        "The repository contains multiple full checkpoint subfolders totaling over 113 GB; never acquire it as an undifferentiated snapshot.",
         "The paper's primary outcome is temporal factual knowledge rather than CSTG."
       ],
       "sources": [
@@ -442,7 +443,7 @@
       "role": "causal-primary-candidate",
       "family": "OLMo 2",
       "repository": "allenai/OLMo-2-0425-1B-early-training",
-      "revision": "c70db05bba504a3bc7e9878db0e76b4b2de48013",
+      "revision": "f9dd86fb2eee6a7f0c79dc6fc2f671b58523cddb",
       "revision_kind": "git-sha",
       "immutable": true,
       "checkpoint_ref": "stage1-step20000-tokens42B",
@@ -526,9 +527,9 @@
       "role": "causal-fallback",
       "family": "Pythia",
       "repository": "EleutherAI/pythia-1b-deduped",
-      "revision": null,
-      "revision_kind": "unresolved",
-      "immutable": false,
+      "revision": "42c3ad398033019d65b051ba284f0994cee89134",
+      "revision_kind": "git-sha",
+      "immutable": true,
       "checkpoint_ref": "step20000, approximately 41.94B tokens",
       "architecture": "GPTNeoXForCausalLM",
       "parameter_count": 1011781632,
@@ -545,19 +546,19 @@
           "https://huggingface.co/EleutherAI/pythia-1b-deduped",
           "https://github.com/EleutherAI/pythia/blob/a19eecb807ec2c79a39ebf18108816e6ffffc1d5/LICENSE"
         ],
-        "note": "Resolve the step20000 branch to an immutable Hub commit before execution."
+        "note": "The step20000 branch was resolved by metadata audit on 2026-08-20. Model loading and optimizer-reset feasibility remain unmeasured."
       },
       "code_review": {
         "status": "not-required",
         "repository": "EleutherAI/pythia",
         "revision": "a19eecb807ec2c79a39ebf18108816e6ffffc1d5"
       },
-      "execution_status": "blocked-revision",
+      "execution_status": "blocked-hardware-benchmark",
       "intended_use": "Operationally lighter causal fallback with prior exposure comparable to the OLMo early checkpoint.",
       "constraints": [
         "Intermediate optimizer state is not publicly served at all steps by default.",
         "A fresh optimizer changes the continuation intervention and must be declared.",
-        "The branch name alone is not an immutable revision."
+        "The pinned revision exposes both inference weights and a 12.20 GB optimizer state; exact resumption compatibility remains unverified."
       ],
       "sources": [
         "https://huggingface.co/EleutherAI/pythia-1b-deduped",

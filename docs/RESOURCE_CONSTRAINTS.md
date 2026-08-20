@@ -6,9 +6,12 @@ This document is a binding design input. ChronoPersona should maximize scientifi
 
 ### Current machine
 
-- GPU: NVIDIA RTX 2060
-- System RAM: 16 GB
-- CPU, GPU VRAM variant, free storage, CUDA version, sustained thermals, and measured throughput: not yet recorded
+- GPU: NVIDIA GeForce RTX 2060, 6,144 MiB VRAM, compute capability 7.5
+- System RAM: 17.13 GB decimal (16 GiB class)
+- CPU: 12 logical processors
+- Sampled free storage on the intended local drive: approximately 255 GB
+- Runtime: PyTorch `2.13.0+cu130`, compiled CUDA 13.0, CUDA available
+- Sustained thermals and model loading/training throughput: not yet recorded
 
 ### Potential borrowed machine
 
@@ -16,7 +19,10 @@ This document is a binding design input. ChronoPersona should maximize scientifi
 - System RAM: 32 GB
 - Availability, GPU VRAM, free storage, software environment, and permission window: not assumed
 
-These are user-reported resources. The repository must measure the actual execution environment before planning a run.
+The current-machine values were measured by the no-network resource audit on
+2026-08-20; free RAM, VRAM, disk, and thermals remain live values that must be
+remeasured on the exact run head. The borrowed-machine values remain reported
+and unverified.
 
 ## User objective
 
@@ -177,4 +183,8 @@ Any request to increase compute must be presented as:
 
 ## Current resource decision
 
-The repository remains at Rungs 0–1. No external spend is authorized. The immediate work is audit, measurement, evaluation tooling, and a tiny safe logits/training benchmark—not the full naturalistic branch set.
+The repository remains at Rungs 0–1. No external spend is authorized. Runtime
+preflight is measured, but no model weights have been acquired and no model has
+been loaded or trained. The next eligible operation is a single pinned Pythia
+loading/logits benchmark after explicit acquisition authorization—not the full
+naturalistic branch set.

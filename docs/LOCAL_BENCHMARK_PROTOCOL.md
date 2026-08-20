@@ -56,6 +56,23 @@ Do not begin a download if the expected artifact plus a 2.5× safety margin does
 
 ```powershell
 python -m pip install -e ".[models]"
+python -m pip install --force-reinstall "torch==2.13.0" `
+  --index-url https://download.pytorch.org/whl/cu130
+python -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())"
+```
+
+The default PyPI Windows wheel can be CPU-only even on a CUDA-capable machine.
+The explicit official PyTorch CUDA index is therefore part of the measured
+Windows environment. Stop if the verification prints a `+cpu` build, no
+compiled CUDA version, or `False` for CUDA availability.
+
+Choose and create the explicit cache directory before the post-install audit so
+the measured disk belongs to the filesystem that will receive any later model
+download:
+
+```powershell
+$env:HF_HOME = "C:\hf-cache"
+New-Item -ItemType Directory -Force $env:HF_HOME
 ```
 
 Capture the environment again:
@@ -63,9 +80,13 @@ Capture the environment again:
 ```powershell
 python scripts/audit_local_resources.py `
   --repo . `
-  --path . `
+  --path $env:HF_HOME `
   --output artifacts/local/resource-audit-after-models.json
 ```
+
+Inspect the structured `torch_runtime` record in addition to `nvidia-smi`.
+Driver visibility alone does not prove that the installed Torch build can use
+CUDA.
 
 ## 5. Resolve Hub metadata without downloading weights
 
@@ -117,11 +138,10 @@ python scripts/benchmark_model.py `
 
 The first executable artifact is the immutable final Pythia 1B deduped checkpoint. It is used to measure the machine, not as the causal insertion point.
 
-Choose an explicit cache directory on a drive with enough space:
-
-```powershell
-$env:HF_HOME = "D:\hf-cache"
-```
+The explicit cache directory and post-model resource audit from section 4 are
+required. The benchmark rejects a dirty or different Git head, a CPU-only
+Torch audit for a CUDA run, a cache on a different filesystem, or less than the
+2.5x live and audited disk margin.
 
 First run, permitting the pinned download:
 
@@ -133,6 +153,7 @@ python scripts/benchmark_model.py `
   --device cuda `
   --dtype auto `
   --cache-dir $env:HF_HOME `
+  --resource-audit artifacts/local/resource-audit-after-models.json `
   --max-tokens 128 `
   --warmup 1 `
   --repeats 3 `
@@ -148,6 +169,7 @@ python scripts/benchmark_model.py `
   --device cuda `
   --dtype auto `
   --cache-dir $env:HF_HOME `
+  --resource-audit artifacts/local/resource-audit-after-models.json `
   --max-tokens 128 `
   --warmup 1 `
   --repeats 5 `
@@ -173,6 +195,7 @@ python scripts/benchmark_model.py `
   --device cpu `
   --dtype float32 `
   --cache-dir $env:HF_HOME `
+  --resource-audit artifacts/local/resource-audit-after-models.json `
   --max-tokens 64 `
   --warmup 0 `
   --repeats 1 `
@@ -194,7 +217,11 @@ Stop the benchmark sequence when any of these occurs:
 - thermal or driver instability appears;
 - output metadata is incomplete.
 
-Preserve errors rather than changing dtype, quantization, model, or revision silently.
+Preserve errors rather than changing dtype, quantization, model, or revision
+silently. When `--output` is supplied, the benchmark writes a structured
+failure artifact before returning nonzero; a download-permitted failure marks
+download completion as unknown rather than claiming that no partial cache was
+created.
 
 ## 9. Update the compute ledger
 

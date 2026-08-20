@@ -28,11 +28,27 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 
 ## Milestone 0B — Models and compute
 
-**Status:** externally blocked.
+**Status:** runtime and metadata preflight measured; model execution externally blocked.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
 Measure actual hardware, storage, runtime, load time, peak memory, complete-continuation throughput, tiny full-weight training throughput, checkpoint time, and recovery.
+
+Measured on 2026-08-20 without model weights:
+
+- the local PyTorch CUDA runtime recognizes the RTX 2060 and its 6 GB device;
+- selected Hub revisions and license metadata are bound fail-closed in the
+  manifest, including corrected OLMo early-step identity;
+- exactly one artifact, immutable final Pythia 1B deduped, is
+  `benchmark-ready`;
+- Windows peak-process memory, Torch CUDA identity, clean-commit resource
+  binding, disk margin, and structured benchmark failure evidence are covered
+  by the local benchmark protocol and tests.
+
+Still unmeasured: model load/logits, peak model memory, throughput, tiny legal
+continued pretraining, checkpoint/recovery, and derived cost. The first model
+load requires acquisition of the pinned 2.09 GB Pythia artifact; bulk model
+acquisition is outside the current authorization envelope.
 
 Pass when one common checkpoint and one fallback are legally accessible, immutable, capable, trainable, and supported by measured cost. Stop a path when capability, memory, artifact access, or authorized budget fails.
 
@@ -99,4 +115,8 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Stop. There is no further authorized repository-only scientific work on the critical path. Resume with an evidence-backed source/model feasibility decision only when bounded real-source access or measured local model/compute evidence becomes available.
+Preserve the model/compute preflight and stop before model weights. Resume
+Milestone 0B only after explicit authorization to acquire the single pinned
+Pythia benchmark artifact, then perform the clean-head loading/logits benchmark
+with no training. Source qualification remains independently externally
+blocked.

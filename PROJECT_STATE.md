@@ -1,12 +1,12 @@
 # Project State
 
-**Updated:** 2026-08-18  
+**Updated:** 2026-08-20
 **Design:** ChronoPersona / CSTG v1.0  
 **Working title:** *From Archive to Policy: A Prospective Test of Cross-Source Temporal Generalization in Language Models*
 
 ## Current phase
 
-**Stage 0 — development content-integrity gate passed; design v1.0 adopted; scientific execution externally blocked**
+**Stage 0 — development content-integrity gate passed; local model preflight measured; scientific execution externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,9 +14,12 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Externally blocked — bounded source and local model/compute evidence**
+**Externally blocked — bounded source evidence and authorized model execution**
 
-The design and repository-governance gates have passed. Scientific execution cannot begin until the source and model evidence listed below exists under the current authorization boundaries.
+The design and repository-governance gates have passed. A no-weight local
+runtime and model-metadata preflight is now measured. Scientific execution
+cannot begin until the source evidence and model-execution evidence listed
+below exist under the current authorization boundaries.
 
 ## Latest verified evidence
 
@@ -26,7 +29,18 @@ The design and repository-governance gates have passed. Scientific execution can
 - ProgressGym-aware design v1.0 was merged as `c2d2d0c3a5d67656e3dc3b2e3d903559b27ead2d` after CI passed on Python 3.11, 3.12, and 3.13 and the Content Integrity and Run Registry Smoke workflows passed on the exact PR head.
 - The development content-integrity gate passed on bounded redistributable fixtures.
 - The repository has deterministic manifests, scoring, synthetic-package generation, run identity/resumption, source metadata adapters, and bounded lexical content-integrity tooling.
-- No model has been trained and no real A/B/C corpus has been qualified.
+- PyTorch `2.13.0+cu130` reports CUDA 13.0 available on the local RTX 2060
+  (compute capability 7.5, 6,144 MiB VRAM).
+- Metadata-only Hub audits resolved the selected DatedGPT, Kairos, OLMo early,
+  and Pythia step-20 revisions. The corrected manifest validates with 13
+  artifacts and exactly one `benchmark-ready` artifact: immutable final Pythia
+  1B deduped.
+- The benchmark preflight now binds execution to a no-network resource audit
+  from the exact clean Git head, verifies the CUDA-enabled Torch runtime,
+  enforces the 2.5× same-filesystem disk margin before download, measures peak
+  process RAM on Windows, and preserves structured failure evidence.
+- No model weights were downloaded, no model was loaded or trained, and no real
+  A/B/C corpus was qualified.
 
 ### Reported by primary sources
 
@@ -60,8 +74,10 @@ The design and repository-governance gates have passed. Scientific execution can
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Exact RTX 2060 or other available-machine hardware, storage, CUDA, memory, logits, and tiny-training benchmarks.
-6. Immutable causal model/tokenizer artifacts and inspected loading code.
+5. Pinned-model load, logits, peak-memory, and tiny-training benchmarks on the
+   measured RTX 2060 runtime.
+6. An immutable causal starting artifact and inspected, compatible resume path;
+   metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
 8. Frozen meaningful-effect threshold and prospective estimator.
 
@@ -77,4 +93,8 @@ The design and repository-governance gates have passed. Scientific execution can
 
 ## Exact next action
 
-Stop repository execution. Resume only when bounded rights-qualified source samples or measured local model/compute evidence are available under the existing authorization boundaries. The first resumed deliverable is the evidence-backed source/model feasibility decision, not training.
+Stop before model-weight acquisition. With explicit authorization, acquire only
+the pinned 2.09 GB final Pythia benchmark artifact into the audited local cache,
+rerun the exact-clean-head resource gate, and measure loading/logits without
+training. Bounded rights-qualified source samples remain a separate external
+blocker.
