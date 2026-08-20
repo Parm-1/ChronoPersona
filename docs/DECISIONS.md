@@ -882,6 +882,58 @@ on the unchanged head. After delivery, the next scientific gate remains
 externally blocked on rights-qualified source evidence and explicit held-out
 source-C authorization.
 
+## D-039 — Advance to a bounded metadata-only source prequalification
+
+**Date:** 2026-08-20
+**Status:** accepted; result-blind metadata implementation gate
+
+Accept exact failure-observability delivery head
+`d669b4e3c36069398efdac831c8f1fec7036359c` as Tested and exact-head
+delivered on draft PR #37. All 18 push/pull-request checks passed across Python
+3.11–3.13. This closes D-038 without a state-only follow-up commit and without
+model execution. D-037 remains controlling: development-v1 attempt A is
+consumed, attempt B and an A retry remain prohibited, and no score recovery or
+threshold change is authorized.
+
+The next hard boundary has not yet been reached because the frozen source
+protocol explicitly authorizes CAD-$0 official documentation research,
+metadata queries, archive inventories/checksums, bounded metadata parser
+samples, and aggregate reports. Authorize one result-blind, metadata-only
+prequalification for provisional roles A=`wikimedia-article-additions`,
+B=`stackexchange-initial-nontechnical-posts`,
+C=`arxiv-cc-single-version-descriptive`, and backup
+C=`pmc-oa-cc-version-bounded`.
+
+Freeze one immutable `enwiki/20260801` dumpstatus inventory, one legacy
+company-attributed Stack Exchange item inventory, a deterministic 100-record
+time-stratified arXiv submitted-date metadata sample per provisional window with
+exact enrichment of all 100, and up to 100 upstream PMC Dublin Core records per
+OAI release/update-datestamp range, capped at ten responses per range. Keep
+native source-C identifiers and locators
+ignored/private. Publish only hashes and portable aggregates. Exact endpoints,
+limits, dates, categories, delays, input blobs, execution head, create-only
+outputs, privacy rules, and fail-fast group order must be fail-closed before
+live execution. The complete happy-path ceiling is 270 serial HTTP requests.
+
+This decision does not authorize separate archive/article-body/source-package
+retrieval, requester-pays arXiv access, source-C prose review, training, model scoring,
+role/era promotion, or temporal/CSTG inference. Wikimedia and Stack Exchange
+inventories cannot by themselves establish early/late record continuity or
+clean usable volume. PMC OAI dates remain release/update semantics and cannot
+promote the backup. Stop rather than substitute, shrink, unblind, or inspect
+content after a failed gate. arXiv/PMC metadata responses can inherently include
+prose; it may transit memory only for hash/count evidence and must not be
+displayed, persisted as prose, or human-reviewed.
+
+**Claim ceiling:** endpoint and metadata-yield prequalification only. Source
+roles, rights-qualified content, composition, exposure, historical
+reconstruction, and scientific feasibility remain unestablished.
+
+**Procedure:**
+`.agent/plans/active-source-metadata-qualification.md`,
+`docs/SOURCE_SAMPLE_PROTOCOL.md`, `docs/SOURCE_ADAPTER_PROTOCOL.md`, and
+`docs/SOURCE_METADATA_PROTOCOL.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

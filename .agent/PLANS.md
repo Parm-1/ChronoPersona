@@ -1,15 +1,22 @@
 # Active Plans
 
-One result-blind engineering ExecPlan is write-active:
+One result-blind source ExecPlan is write-active:
 
-- `.agent/plans/active-scoring-failure-observability.md` — preserve an exact
-  captured resident-resource observation in future failed scorer receipts
-  before threshold validation can raise. This is evidence-observability
-  hardening only: it does not reopen E4, authorize a model run, or imply the
-  consumed resource rejection was erroneous. Baseline `8fc16af`; branch
-  `fix/scoring-failure-observability`. Implementation and local validation are
-  Tested; the unchanged delivery head must pass every attached check. The plan
-  completes from that external result without a state-only follow-up commit.
+- `.agent/plans/active-source-metadata-qualification.md` — harden and execute
+  one no-cost metadata-only prequalification across provisional Wikimedia,
+  Stack Exchange, arXiv, and PMC roles. Raw identifiers remain private; no
+  archive/article body, source package, requester-pays object, model, or
+  behavioral outcome is in scope. Incidental API metadata prose is transient
+  hash/count-only. Baseline `d669b4e`; branch
+  `feat/live-source-metadata-qualification`. E0 is frozen; E1 implementation
+  is active.
+
+The latest engineering plan is complete:
+
+- `.agent/plans/active-scoring-failure-observability.md` — exact delivery head
+  `d669b4e` passed all 18 push/pull-request checks on draft PR #37. Future
+  failed scorer receipts now preserve the exact resident-resource observation
+  without weakening thresholds or reopening consumed E4 attempt A.
 
 The latest experiment plan is closed as a preserved failed gate:
 

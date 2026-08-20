@@ -191,8 +191,12 @@ Activity is not progress unless it creates evidence or a reusable artifact.
 The repository remains in Stage 0. The development content-integrity gate has
 passed; local model acquisition, bounded engineering training, the verified
 tokenizer boundary, and the deterministic registry scorer have completed their
-scoped engineering gates. The next real-content qualification gate is
-externally blocked.
+scoped engineering gates. The current gate is the D-039 bounded no-cost
+metadata-only source prequalification. Bulk archive text and source-C document
+bodies are externally blocked; incidental API metadata prose may only transit
+the D-039 machine path for hash/count evidence and must not be displayed,
+persisted as prose, or human-reviewed. Bounded no-cost A/B parser samples remain
+a later authorized gate under `docs/SOURCE_SAMPLE_PROTOCOL.md`.
 
 The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
 failure. Its single versioned v1 attention-policy rescue passed the bounded
@@ -210,8 +214,10 @@ score publication. Attempt A is consumed; no A score, B run, or coherence
 result exists, and no pole value was inspected. Do not rerun A, run B, lower
 thresholds, or recover transient scores. Current identities and the failure
 record live in `PROGRESS.md`; any new condition requires a separate recorded,
-result-blind implementation-defect decision. Evidence-bearing naturalistic
-execution still requires rights-qualified, historically version-bounded A/B
-samples and an explicitly authorized held-out source-C review packet. Paid
+result-blind implementation-defect decision. Metadata execution may use only
+the exact allowlisted inventory/API profile in the active plan, with raw
+source-C identifiers kept private. Evidence-bearing naturalistic execution
+still requires rights-qualified, historically version-bounded A/B samples and
+an explicitly authorized held-out source-C review packet. Paid
 compute, public model/data release, another repository-visibility change, and
 requester-pays retrieval remain outside the active gate.

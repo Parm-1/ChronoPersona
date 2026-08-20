@@ -47,7 +47,12 @@ post-score resident-VRAM gate before publication. Preserve that consumed
 failure and do not run B. The result-blind cause/defect-eligibility review is
 complete: it found a failed-audit observability gap but no evidence that the
 resource rejection was erroneous, so no rescue qualifies. The next local task
-is delivery of the Tested D-038 dependency-light hardening that retains a
-captured resident audit before validation raises; it does not authorize model
-execution. Evidence-bearing naturalistic execution remains blocked on external
-source qualification and later calibration/model-compute gates.
+was delivery of the Tested D-038 dependency-light hardening that retains a
+captured resident audit before validation raises; exact head `d669b4e` passed
+all 18 checks. The next authorized risk-reduction gate is D-039's bounded
+metadata-only source prequalification. It may measure interface availability,
+archive inventories, and license/version metadata yield without retrieving a
+document body or source package; incidental metadata prose is transient
+hash/count-only and may not be displayed, persisted as prose, or human-reviewed.
+Rights-qualified content, source-C review, requester-pays retrieval, and later
+calibration/model-compute gates remain blocked.

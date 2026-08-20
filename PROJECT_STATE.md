@@ -6,7 +6,7 @@
 
 ## Current phase
 
-**Stage 0 — development content-integrity gate passed; bounded local model engineering measured; development-v1 scoring stopped; real-source science externally blocked**
+**Stage 0 — model engineering gates closed; bounded live source-metadata prequalification active; bulk and source-C text externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — harden future failed-receipt observability; no further model execution is authorized**
+**Current gate — fail-closed live source-metadata prequalification; no document body, source package, or model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -38,11 +38,17 @@ no A score, B run, comparison, or coherence result exists, and no pole value
 was inspected. A result-blind receipt/code review found an observability gap
 but no evidence that the resource rejection was erroneous, so no rescue
 qualifies. Failure evidence is delivered and green at `8fc16af`. The active
-work is delivery of one dependency-light Tested observability fix so future
-resident-resource failures retain the exact captured audit; it is not another
-model run.
+failure-observability work is complete; future resident-resource failures now
+retain the exact captured audit without authorizing another model run.
 Real-source scientific execution still requires the separate source evidence
-listed below.
+listed below. D-038 failure-observability hardening is exact-head delivered at
+`d669b4e` after 18/18 checks passed on draft PR #37. D-039 now activates a
+no-cost metadata-only gate over the provisional Wikimedia, Stack Exchange,
+arXiv, and PMC interfaces. No evidence-bearing live request has run under that
+decision. Incidental API metadata prose may transit only for hash/count
+evidence; it may not be displayed, persisted as prose, or human-reviewed.
+Document bodies and source packages are not authorized, and the source roles
+remain unqualified.
 
 ## Latest verified evidence
 
@@ -157,10 +163,9 @@ listed below.
 
 ## Exact next action
 
-Deliver the Tested D-038 change on `fix/scoring-failure-observability`: commit,
-push, open one draft PR stacked on PR #36, and require every attached check to
-pass on the unchanged head. The implementation preserves the pending resident
-audit and the original fail-closed validator order without a model run. This
-does not authorize rerunning A or starting B. After that bounded delivery,
-rights-qualified source samples and any new scoring-condition decision are the
-hard boundaries.
+Freeze, implement, and test the D-039 metadata evidence contract on
+`feat/live-source-metadata-qualification` from exact head `d669b4e`. Require
+create-only portable outputs, exact Git/input binding, strict payload parsing,
+response hashes, final self-hashes, and source-C privacy before exact-head CI.
+Only then run the bounded metadata profile. Do not retrieve archive/article
+text, use requester-pays access, execute a model, or reopen consumed E4.

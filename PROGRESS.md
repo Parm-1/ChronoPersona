@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T17:28:04-04:00
+**Last updated:** 2026-08-20T17:43:51-04:00
 
 ## Decision
 
@@ -47,23 +47,40 @@ workflow tokens remain read-only, and secret scanning plus push protection are
 enabled. The prior zero-step billing blocker is empirically closed: draft PR
 #34 passed all 18 exact-head checks. No billing setting changed.
 
+Accept failure-observability delivery head
+`d669b4e3c36069398efdac831c8f1fec7036359c` as **Tested and exact-head
+delivered**. Draft PR #37 is open/draft and all 18 push/pull-request checks
+passed on that unchanged head. The scoped change preserves exact failed
+resident-resource observations without changing thresholds or reopening E4.
+
+The next hard boundary is not yet reached. The source protocols explicitly
+authorize CAD-$0 official metadata queries, archive inventories/checksums, and
+aggregate reports without document-body retrieval. D-039 therefore activates
+one bounded metadata-only prequalification across provisional Wikimedia,
+Stack Exchange, arXiv, and PMC roles. No evidence-bearing live query has run
+under D-039.
+
 ## Current objective and closure condition
 
-Deliver the Tested future-failure observability hardening from green baseline
-`8fc16af` on `fix/scoring-failure-observability`. The implementation preserves
-an exact resident-resource observation before threshold validation can raise,
-while retaining the original validator order, exception precedence, threshold,
-and successful receipt schema. This is result-blind observability work, not a
-rescue: do not run A or B, alter a threshold, or infer that the frozen resource
-rejection was erroneous. The plan completes if every attached check passes on
-the unchanged delivery head; a failure leaves the first failed delivery gate
-active. Do not create a post-green state-only closure commit.
+Freeze and deliver one fail-closed metadata-evidence contract on
+`feat/live-source-metadata-qualification`, based on exact green head
+`d669b4e`. After exact-head CI, execute only the predeclared no-cost metadata
+inventory/enrichment profile: pinned `enwiki/20260801`, the legacy
+company-attributed Stack Exchange item, one 100-record time-stratified arXiv
+sample plus exact enrichment of all 100 per provisional window, and up to 100
+upstream PMC Dublin Core records per release/update-datestamp range within a
+ten-response cap. Raw identifiers remain private; incidental metadata prose is
+hash/count-only and must not be displayed or human-reviewed. The gate closes
+with one portable independently replayed
+aggregate or one actionable failure, followed by exact-head CI on the evidence
+commit.
 
 ## Current verified boundary
 
 - **Development content-integrity gate — Target Verified:** bounded
-  redistributable fixtures passed. Real-source qualification remains
-  **externally blocked**.
+  redistributable fixtures passed. Live source metadata remains unverified but
+  is now the authorized local/network gate. Bounded no-cost A/B parser samples
+  remain a later authorized gate; bulk and source-C content remain blocked.
 - **Artifact/load — Target Verified:** immutable final Pythia 1B deduped at
   revision `7199d8fc61a6d565cd1f3c62bf11525b563e13b2` was hash verified,
   loaded offline in CUDA FP16, and produced finite logits under frozen
@@ -243,6 +260,9 @@ active. Do not create a post-green state-only closure commit.
   returned the unchanged eight-field resident-resource schema. Three focused
   regressions and the full offline suite (536 passed, two skipped) passed; no
   model import, deserialization, logits, or network action occurred.
+- Draft PR #37 exact delivery head `d669b4e`: 18/18 push/pull-request checks
+  passed across Python 3.11–3.13. The branch is synchronized and clean. This
+  externally closes D-038 without a follow-up state-only commit.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -277,10 +297,13 @@ active. Do not create a post-green state-only closure commit.
 
 - Repository: public by explicit user authorization; anonymous access and
   security settings verified.
-- Current branch: `feat/development-v1-scoring`, based on accepted E2 evidence
-  head `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`. Exact E3 closure / E4
-  execution head `e435c40` was clean and passed all 18 checks before the
-  consumed target attempt.
+- Current branch: `feat/live-source-metadata-qualification`, created cleanly
+  from exact PR #37 head
+  `d669b4e3c36069398efdac831c8f1fec7036359c`. D-039 and the E0 result-blind
+  freeze are recorded on this branch; no evidence-bearing live metadata query
+  has run.
+- Draft PR #37: `https://github.com/Parm-1/ChronoPersona/pull/37`, open and
+  draft. Exact head `d669b4e` passed all 18 checks and closes D-038.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
   draft. Its final E2 evidence head `dfa52a0` passed 18/18 checks and is the
   intended stack base for E3.
@@ -296,9 +319,12 @@ active. Do not create a post-green state-only closure commit.
 
 ## Next write-active deliverable
 
-Commit and push the Tested D-038 hardening, open one draft PR stacked on PR
-#36, and require every check to pass on the unchanged delivery head. Do not run
-B, rerun A, recover transient scores, change thresholds, or alter
-content/metrics. This fix cannot authorize a future scoring condition; after
-delivery, rights-qualified source evidence and any new scoring-condition
-decision are the hard boundaries.
+Implement and test the D-039 shared evidence contract before any live request:
+exact clean-head/input-blob
+binding, strict duplicate-key parsing, response hashes, create-only outputs,
+final self-hashes, portable paths, and source-C privacy checks. Deliver that
+implementation through exact-head CI before executing the bounded metadata
+profile. Do not display or human-review transient metadata prose, retrieve an
+archive/article body or source package, use requester-pays access, run a model,
+retry development-v1 E4, or alter roles/windows/categories after observing
+yields.
