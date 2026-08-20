@@ -58,6 +58,101 @@ def _sibling_record(sibling: Any) -> dict[str, Any]:
     }
 
 
+def _binary_size_summary(
+    siblings: list[dict[str, Any]],
+) -> dict[str, int | str | None]:
+    """Conservatively separate inference formats from training state."""
+
+    optimizer_markers = ("optimizer", "optim_state", "optim-state")
+    training_markers = (
+        "training_args",
+        "trainer_state",
+        "scheduler",
+        "rng_state",
+        "random_state",
+        "scaler",
+        "grad_scaler",
+        "zero_pp_rank",
+    )
+    binary_suffixes = (".safetensors", ".bin", ".pt", ".pth", ".ckpt")
+    model_bin_prefixes = (
+        "pytorch_model",
+        "model",
+        "adapter_model",
+        "diffusion_pytorch_model",
+    )
+    categories: dict[str, list[tuple[str, int]]] = {
+        "safetensors": [],
+        "pytorch_bin": [],
+        "optimizer": [],
+        "training_state": [],
+        "unclassified": [],
+    }
+
+    for sibling in siblings:
+        filename = sibling.get("filename")
+        size = sibling.get("size")
+        if not isinstance(filename, str) or not isinstance(size, int):
+            continue
+        normalized = filename.replace("\\", "/").lower()
+        if not normalized.endswith(binary_suffixes):
+            continue
+        basename = normalized.rsplit("/", 1)[-1]
+        if any(marker in normalized for marker in optimizer_markers):
+            categories["optimizer"].append((normalized, size))
+        elif any(marker in normalized for marker in training_markers):
+            categories["training_state"].append((normalized, size))
+        elif normalized.endswith(".safetensors") and basename.startswith(
+            model_bin_prefixes
+        ):
+            categories["safetensors"].append((normalized, size))
+        elif normalized.endswith(".bin") and basename.startswith(
+            model_bin_prefixes
+        ):
+            categories["pytorch_bin"].append((normalized, size))
+        else:
+            categories["unclassified"].append((normalized, size))
+
+    def total(category: str, *, root_only: bool = False) -> int:
+        return sum(
+            size
+            for filename, size in categories[category]
+            if not root_only or "/" not in filename
+        )
+
+    optimizer_bytes = total("optimizer")
+    other_training_state_bytes = total("training_state")
+    safetensors_bytes = total("safetensors")
+    pytorch_bin_bytes = total("pytorch_bin")
+    unclassified_bytes = total("unclassified")
+    model_binary_bytes = safetensors_bytes + pytorch_bin_bytes
+
+    root_format_sizes = [
+        amount
+        for amount in (
+            total("safetensors", root_only=True),
+            total("pytorch_bin", root_only=True),
+        )
+        if amount > 0
+    ]
+    return {
+        "model_binary_file_bytes": model_binary_bytes,
+        "optimizer_state_file_bytes": optimizer_bytes,
+        "other_training_state_file_bytes": other_training_state_bytes,
+        "training_state_file_bytes": (
+            optimizer_bytes + other_training_state_bytes
+        ),
+        "safetensors_file_bytes": safetensors_bytes,
+        "pytorch_bin_file_bytes": pytorch_bin_bytes,
+        "other_checkpoint_file_bytes": unclassified_bytes,
+        "unclassified_binary_file_bytes": unclassified_bytes,
+        "minimum_root_inference_format_bytes": (
+            min(root_format_sizes) if root_format_sizes else None
+        ),
+        "binary_classification": "known-filename-markers-v1",
+    }
+
+
 def audit_model(api: Any, spec: str) -> dict[str, Any]:
     repo_id, requested_revision = _parse_spec(spec)
     info = api.model_info(
@@ -75,15 +170,7 @@ def audit_model(api: Any, spec: str) -> dict[str, Any]:
         for sibling in siblings
         if isinstance(sibling.get("size"), int)
     )
-    weight_size = sum(
-        sibling["size"]
-        for sibling in siblings
-        if isinstance(sibling.get("size"), int)
-        and isinstance(sibling.get("filename"), str)
-        and sibling["filename"].endswith(
-            (".safetensors", ".bin", ".pt", ".pth", ".ckpt")
-        )
-    )
+    binary_sizes = _binary_size_summary(siblings)
     return {
         "repository": repo_id,
         "requested_revision": requested_revision,
@@ -100,7 +187,10 @@ def audit_model(api: Any, spec: str) -> dict[str, Any]:
         "card_data": card,
         "file_count": len(siblings),
         "total_file_bytes": total_size,
-        "weight_file_bytes": weight_size,
+        "weight_file_bytes": binary_sizes["model_binary_file_bytes"],
+        "weight_file_bytes_may_include_alternative_formats": True,
+        "unclassified_binary_files_excluded_from_weight_bytes": True,
+        **binary_sizes,
         "siblings": siblings,
     }
 

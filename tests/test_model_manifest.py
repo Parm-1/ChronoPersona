@@ -17,6 +17,28 @@ def test_committed_model_manifest_is_valid() -> None:
     assert validate_model_manifest(manifest) == ()
 
 
+def test_metadata_audited_artifact_identities_are_pinned() -> None:
+    manifest = load_model_manifest(MANIFEST)
+    expected = {
+        "datedgpt-2013-base": "855538883fd62ae8138789c4858e1dcb708187dc",
+        "datedgpt-2016-base": "8f6d90155a97ae22dce3abf9e8234f528bee7e55",
+        "datedgpt-2019-base": "8fe891bd59e31c3666112dd00139c4ed7cee9dda",
+        "datedgpt-2022-base": "1e2f7b5d6a019e0eafffcac6bb3023c3662736dd",
+        "datedgpt-2024-base": "ed8abac3e81ba4f964fc92cf9e9b412123f681f4",
+        "kairos-sequential-helium-6b": "e4d8791d8f2bfbd55e8ac8d6998bca7a515c6c95",
+        "olmo2-1b-early-step20000": "f9dd86fb2eee6a7f0c79dc6fc2f671b58523cddb",
+        "pythia-1b-deduped-main": "7199d8fc61a6d565cd1f3c62bf11525b563e13b2",
+        "pythia-1b-deduped-step20000": "42c3ad398033019d65b051ba284f0994cee89134",
+    }
+    actual = {
+        artifact["id"]: artifact["revision"]
+        for artifact in manifest["artifacts"]
+        if artifact["id"] in expected
+    }
+
+    assert actual == expected
+
+
 def test_artifact_ids_must_be_unique() -> None:
     manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
     manifest["artifacts"][1]["id"] = manifest["artifacts"][0]["id"]

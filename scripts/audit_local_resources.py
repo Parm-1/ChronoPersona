@@ -143,6 +143,50 @@ def _package_versions() -> dict[str, str | None]:
     return versions
 
 
+def _torch_runtime() -> dict[str, Any]:
+    """Describe the installed Torch/CUDA runtime without loading a model."""
+
+    try:
+        import torch
+    except (ImportError, OSError) as error:
+        return {
+            "available": False,
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+    runtime: dict[str, Any] = {
+        "available": True,
+        "version": getattr(torch, "__version__", None),
+        "compiled_cuda_version": getattr(torch.version, "cuda", None),
+        "cuda_available": bool(torch.cuda.is_available()),
+        "device_count": int(torch.cuda.device_count()),
+        "devices": [],
+        "errors": [],
+    }
+    if not runtime["cuda_available"]:
+        return runtime
+
+    for index in range(runtime["device_count"]):
+        try:
+            free_bytes, total_bytes = torch.cuda.mem_get_info(index)
+            runtime["devices"].append(
+                {
+                    "index": index,
+                    "name": torch.cuda.get_device_name(index),
+                    "capability": list(
+                        torch.cuda.get_device_capability(index)
+                    ),
+                    "free_memory_bytes": int(free_bytes),
+                    "total_memory_bytes": int(total_bytes),
+                }
+            )
+        except (OSError, RuntimeError) as error:
+            runtime["errors"].append(
+                f"device {index}: {type(error).__name__}: {error}"
+            )
+    return runtime
+
+
 def _parse_nvidia_smi() -> dict[str, Any]:
     query = (
         "index,name,uuid,memory.total,memory.free,driver_version,"
@@ -245,6 +289,7 @@ def build_audit(path: Path, repo: Path) -> dict[str, Any]:
         },
         "nvidia": _parse_nvidia_smi(),
         "packages": _package_versions(),
+        "torch_runtime": _torch_runtime(),
         "environment": {
             "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES"),
             "HF_HOME": os.environ.get("HF_HOME"),

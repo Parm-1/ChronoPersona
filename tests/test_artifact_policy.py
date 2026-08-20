@@ -46,14 +46,15 @@ def test_unlicensed_datedgpt_artifact_is_blocked() -> None:
         assert_tokenizer_ready(artifact)
 
 
-def test_mutable_intermediate_checkpoint_is_blocked() -> None:
+def test_pinned_intermediate_checkpoint_is_tokenizer_only() -> None:
     artifact = find_artifact(
         _manifest(),
         "pythia-1b-deduped-step20000",
     )
 
-    with pytest.raises(ArtifactPolicyError, match="pinned 40-character"):
-        assert_tokenizer_ready(artifact)
+    assert_tokenizer_ready(artifact)
+    with pytest.raises(ArtifactPolicyError, match="not benchmark-ready"):
+        assert_model_score_ready(artifact)
 
 
 def test_unknown_artifact_is_rejected() -> None:
