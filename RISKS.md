@@ -26,7 +26,7 @@
 | R-22 | AI-assisted design/code claims are unaudited | Medium | Maintain AI-use ledger and human verification record |
 | R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Frozen implementation/backend/reduction policy passed the sole v1 rescue; preserve v0/v1 and require the same explicit binding in later model execution |
 | R-24 | Registry scoring loads unverified bytes from a populated cache | High | The exact tokenizer and model stages now verify manifest-bound bytes, private copies, load identity, fresh resources, and final rebinding; preserve this Target Verified invariant and fail closed on any identity drift |
-| R-25 | Development item wording or continuation length changes score direction | High | Preserve the failed v0 reliability diagnosis; v1 passed blind pre-logits review and exact common-count tokenizer checks, but model-level eight-form coherence remains untested until the frozen scorer gate runs |
+| R-25 | Development item wording or continuation length changes score direction | High | Preserve the failed v0 reliability diagnosis; v1 passed blind pre-logits review and exact common-count tokenizer checks, but E4 attempt A failed operationally after all forwards and before score publication, so model-level eight-form coherence remains untested; no B or retry without a separately accepted result-blind defect rescue |
 
 ## Current highest risks
 
@@ -39,11 +39,14 @@
 
 ## Current risk decision
 
-The design is defensible; the bounded v1 resume gate, exact tokenizer boundary,
-and repeated registry-scorer path passed their engineering gates. Preserve
-those artifacts without tuning or rerunning them. The next local risk-reduction
-task is the versioned development-v1 scorer profile. Its blind pre-logits review
-and two exact 14-item/112-form tokenizer audits passed at `fb8cff1`; model
-execution remains blocked until E3 is delivered and exact-head CI is green.
-Evidence-bearing naturalistic execution remains blocked on external source
-qualification and later calibration/model-compute gates.
+The design is defensible; the bounded training-resume gate, exact tokenizer
+boundary, and repeated development-v0 registry-scorer path passed their scoped
+engineering gates. Preserve those artifacts without tuning or rerunning them.
+Development-v1 E4 attempt A completed all 224 canonical forwards but failed the
+post-score resident-VRAM gate before publication. Preserve that consumed
+failure and do not run B. The result-blind cause/defect-eligibility review is
+complete: it found a failed-audit observability gap but no evidence that the
+resource rejection was erroneous, so no rescue qualifies. The next local task
+is failure-evidence delivery and exact-head CI, not model execution. Evidence-
+bearing naturalistic execution remains blocked on external source qualification
+and later calibration/model-compute gates.

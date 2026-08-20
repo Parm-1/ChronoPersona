@@ -1,8 +1,16 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T16:39:31-04:00
+**Last updated:** 2026-08-20T17:04:48-04:00
 
 ## Decision
+
+Classify `development-v1` E4 as **Target Failed operationally** at exact clean
+execution head `e435c40f1b1b2c9e8be1c1f3bb6ecd1ea9c89aa0`. Attempt A
+`run-3aa8058dced36e7e88802079925500df` completed the frozen 224-forward
+canonical schedule, then failed `post-score-resource-check` below the frozen
+resident-VRAM floor before create-only score publication. Attempt A is
+consumed. No A score, B audit/run, comparison, or coherence artifact exists,
+and no item or pole value was inspected. Do not run B or retry A.
 
 Accept exact execution head
 `cee0f2fa436578bec2f90e57e7ae512f58335323` and run
@@ -18,20 +26,19 @@ primary total-logprob margin and the diagnostic mean-token margin. Preserve the
 score and primary metric; revise the instrument only under a separate
 predeclared development plan.
 
-Accept the exact `development-v1` scorer implementation as **Tested,
-pre-execution only**. It adds one closed v0/v1 profile allowlist,
+Accept the exact `development-v1` scorer implementation as **Tested and
+exact-head delivered**. It adds one closed v0/v1 profile allowlist,
 full canonical-versus-reverse provider scheduling with canonical score
 serialization, profile-bound receipts, and an integrated fail-closed repeat
-and coherence verifier. The implementation alone did not authorize E4; its
-remote delivery and exact-head CI are recorded separately below. No v1 model
-weights were deserialized and no v1 logits were inspected.
+and coherence verifier. E4's later operational failure does not invalidate that
+software evidence, but no deterministic v1 score pair or coherence result was
+published.
 
-Accept E3 delivery head
-`323dd0f72acf6bedc29ec68230a405214293f10d` as the exact implementation
+Accept E3 closure/execution head
+`e435c40f1b1b2c9e8be1c1f3bb6ecd1ea9c89aa0` as the exact implementation
 boundary. Draft PR #36 is open and draft, stacked on PR #35, and all 18
-push/pull-request checks passed. E4 is now authorized only after this canonical
-closure state is committed and green on its exact head, followed by a fresh
-clean-head resource audit. No score attempt has started.
+push/pull-request checks passed on that head before E4. D-037 now closes the
+consumed failure without a second invocation.
 
 The user explicitly authorized making `Parm-1/ChronoPersona` public to restore
 free standard GitHub-hosted Actions. The repository is public, anonymous access
@@ -42,11 +49,13 @@ enabled. The prior zero-step billing blocker is empirically closed: draft PR
 
 ## Current objective and closure condition
 
-Publish this E3 closure state on `feat/development-v1-scoring` and require all
-checks to pass on that exact head. Then begin E4 only if a fresh clean-head
-resource audit passes: attempt A in canonical order, full process/CUDA release,
-fresh audit, then attempt B in exact global reverse order. Preserve one
-complete comparison or one actionable failure; do not inspect partial poles.
+Publish D-037, the portable E4 failure report, failed ledger row, and closed
+execution state on `feat/development-v1-scoring`; require all checks to pass on
+that exact evidence head. The result-blind receipt/code review found an
+observability gap—the exact failing audit was not embedded—but no evidence that
+the frozen resource rejection was erroneous, so no rescue qualifies. Do not run
+A or B. A future scoring condition requires a new recorded decision and an
+independently demonstrated implementation defect unrelated to pole outcomes.
 
 ## Current verified boundary
 
@@ -80,11 +89,15 @@ complete comparison or one actionable failure; do not inspect partial poles.
   14/112/224 records passed with one common 10–18-token continuation count per
   item and zero failures. Internal semantic review and token coherence do not
   establish criterion or model-level reliability.
-- **Development-v1 scorer profile — Tested and delivered:** exact head
-  `323dd0f` passed all 18 PR #36 checks after one message-only portability-test
-  correction. Attempts are frozen as A=`canonical` and B=`reverse`, with
-  canonical serialization and no candidate deduplication. No target score or
-  v1 model-logit evidence exists yet.
+- **Development-v1 scorer profile — Tested and delivered:** exact closure head
+  `e435c40` passed all 18 PR #36 checks. Attempts were frozen as
+  A=`canonical` and B=`reverse`, with canonical serialization and no candidate
+  deduplication.
+- **Development-v1 E4 — Target Failed operationally:** attempt A loaded the
+  exact verified model and completed all 224 canonical forwards, then failed
+  the post-score resident-VRAM gate before publication. The failure receipt is
+  canonical and self-hash-valid; no score was retained or inspected. Attempt A
+  is consumed, B did not run, and model-level coherence remains unverified.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -109,7 +122,7 @@ complete comparison or one actionable failure; do not inspect partial poles.
   `reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`
 - training report:
   `reports/stage0/pythia_lora_resume_gate_2026-08-20.md`
-- decisions: D-029 through D-035 in `docs/DECISIONS.md`
+- decisions: D-029 through D-037 in `docs/DECISIONS.md`
 - v1 internal review: `evaluations/reviews/development-v1-internal.md`
 - v1 registry/criteria SHA-256:
   `81eb8e331d9fbd8d80ec675f209998e081e00834e5d1d141e2979b4f541c49ea` /
@@ -127,8 +140,20 @@ complete comparison or one actionable failure; do not inspect partial poles.
   `e4de6ef590939e156f862f452585678cdc21a7872b6d18c0aaf36464f984bb86`
 - E3 working-tree base: `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`
 - E3 accepted delivery head: `323dd0f72acf6bedc29ec68230a405214293f10d`
-- compute ledger: failed v0, completed v1 load/control/resume, and scorer A/B
-  rows in `COMPUTE_LEDGER.csv`
+- E3 closure / E4 execution head:
+  `e435c40f1b1b2c9e8be1c1f3bb6ecd1ea9c89aa0`
+- E4 attempt-A run ID: `run-3aa8058dced36e7e88802079925500df`
+- E4 topology: 224 canonical forwards; 18,672 forwarded, 18,448 predicted,
+  and 3,216 continuation tokens
+- E4 audit raw SHA-256:
+  `f10cf8d37c53dc30df3f04d16e3b3523215b09a503355945159fd4e57da1e1de`
+- E4 failure receipt raw/self SHA-256:
+  `19ded6dc8642fd661ac0451b529a52219df563802be6d8d714ce0068e29aa9a7` /
+  `79253400d524b883f41073d0be77aa9d0dd3339372ea22ed95e72f1541b8290b`
+- E4 failure report:
+  `reports/stage0/pythia_v1_scoring_failure_2026-08-20.md`
+- compute ledger: failed v0 training, completed v1 load/control/resume, completed
+  v0 scorer A/B, and failed v1 scorer A rows in `COMPUTE_LEDGER.csv`
 
 ## Artifacts
 
@@ -144,6 +169,14 @@ complete comparison or one actionable failure; do not inspect partial poles.
   `artifacts/local/pythia-v1-tokenizer-{a,b,verification}-fb8cff1.json`
 - All three ignored v1 tokenizer artifacts have a separate private
   hash-matched backup.
+- Ignored E4 failure evidence:
+  `artifacts/local/pythia-v1-score-resource-a-e435c40.json` and
+  `artifacts/local/pythia-v1-score-runtime-a-e435c40.json`. Both have a
+  hash-matched backup in a separate non-Git private directory outside every
+  public worktree. Their seven-character suffix deviates from the frozen
+  eight-character example, while each payload binds the full exact head;
+  preserve the original names.
+- No v1 score, attempt-B, comparison, or coherence artifact exists.
 - Ignored raw scorer evidence:
   `artifacts/local/pythia-score-{resource-a,resource-b,a,b,runtime-a,runtime-b,comparison}-cee0f2fa.json`
 - Raw audits and receipts remain untracked because they contain local paths,
@@ -187,6 +220,18 @@ complete comparison or one actionable failure; do not inspect partial poles.
   remained fail-closed. Head `323dd0f` made that test message-portable and
   passed 18/18 checks across Python 3.11–3.13 for push and pull-request events.
   No model import or scoring occurred in either delivery run.
+- PR #36 closure/execution head `e435c40` also passed 18/18 checks before E4.
+  Fresh audit A passed every pre-load threshold. Attempt A then loaded the
+  verified 1,011,781,632-parameter FP16 model and completed all 224 frozen
+  forwards before the post-score resident-VRAM check failed below the
+  1,610,612,736-byte floor. The output transaction rolled back. The 32,515-byte
+  failure receipt is canonical and self-hash-valid; no score file or outcome
+  payload exists. The exact failing free-VRAM value was not retained because
+  validation raised before the captured audit returned to the receipt.
+- A separate result-blind receipt/code audit confirmed all immutable bindings,
+  the 224-forward schedule, rollback, and stop rule. It classified the missing
+  failed-audit payload as an observability gap, not proof that the threshold
+  rejection was an implementation defect. No rescue is authorized.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -203,6 +248,10 @@ complete comparison or one actionable failure; do not inspect partial poles.
   sealed confirmation are not established.
 - The 60 MiB post-score VRAM margin is narrow. It does not authorize a larger
   model, a concurrent heavy process, or weaker resident-resource gates.
+- The longer v1 schedule crossed the frozen post-score resident-VRAM boundary
+  after completing its forwards. E4 is stopped, and the absent score means v1
+  coherence cannot be classified. The missing exact failing audit value is an
+  observability gap, not proof that the threshold failure was erroneous.
 - The five-step LoRA smoke does not establish sustained stability,
   broad-update feasibility, or causal-training adequacy.
 - Public visibility exposes branch history, issues, PRs, commit metadata, and
@@ -218,14 +267,16 @@ complete comparison or one actionable failure; do not inspect partial poles.
 - Repository: public by explicit user authorization; anonymous access and
   security settings verified.
 - Current branch: `feat/development-v1-scoring`, based on accepted E2 evidence
-  head `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`. The enclosing commit is the
-  scoped E3 delivery candidate; its remote PR/head/check state must be verified
-  live before E4.
+  head `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`. Exact E3 closure / E4
+  execution head `e435c40` was clean and passed all 18 checks before the
+  consumed target attempt.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
   draft. Its final E2 evidence head `dfa52a0` passed 18/18 checks and is the
   intended stack base for E3.
 - Draft PR #36: `https://github.com/Parm-1/ChronoPersona/pull/36`, open and
-  draft, stacked on PR #35. Exact E3 head `323dd0f` passed 18/18 checks.
+  draft, stacked on PR #35. Exact execution head `e435c40` passed 18/18 checks;
+  the portable failure-evidence commit and its checks are the remaining
+  delivery work.
 - Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, open and
   draft, green at final evidence head `a7dd27c`.
 - PR #32/#33 remain open draft delivery history. PR #31 was merged externally
@@ -235,7 +286,9 @@ complete comparison or one actionable failure; do not inspect partial poles.
 
 ## Next write-active deliverable
 
-Publish this E3 closure record and require green exact-head CI. Then execute
-the frozen E4 canonical/reverse pair only if each attempt's fresh resource
-audit passes. Do not reuse audits, inspect partial poles, change content or
-metrics, or continue after a consumed-attempt failure.
+Publish D-037, the portable E4 failure report, failed ledger row, and closed
+plan state; require green exact-head CI. The bounded result-blind review is
+complete and did not establish a rescue-qualifying defect. Do not run B, rerun
+A, recover transient scores, change thresholds, or alter content/metrics. A
+future condition requires a new decision and an independently demonstrated
+implementation defect unrelated to pole outcomes.

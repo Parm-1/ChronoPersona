@@ -291,12 +291,14 @@ nonfinite failures. See
 `reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`. Do not rerun this
 accepted gate to improve timing or presentation.
 
-## 7A. Versioned development-v1 coherence gate (predeclared, not run)
+## 7A. Versioned development-v1 coherence gate (attempt A consumed; gate stopped)
 
 The `development-v1` scorer profile is a separate, closed condition. E3 exact
 head `323dd0f` on draft PR #36 passed all 18 checks without deserializing the
-model or producing logits. Do not execute this section until the current
-closure head is also green and a fresh resource audit passes.
+model or producing logits. Closure/execution head `e435c40` subsequently passed
+all 18 checks and fresh audit A passed before the bounded target invocation.
+The commands below remain the frozen historical procedure; the observed stop
+record follows them.
 
 Frozen inputs:
 
@@ -413,11 +415,27 @@ python scripts/verify_measurement_reliability.py score `
   --output $coherence
 ```
 
-These commands are a frozen future procedure, not an observed result. A
-pre-load resource miss may wait for natural headroom and retry with a new
-audit. Any failure after model deserialization begins consumes the applicable
-attempt and invokes the plan's stop/rescue policy. Do not inspect or tune from
-partial pole results.
+Only audit A and attempt A ran. At exact clean head
+`e435c40f1b1b2c9e8be1c1f3bb6ecd1ea9c89aa0`, run
+`run-3aa8058dced36e7e88802079925500df` loaded the verified model and
+completed all 224 canonical forwards, then failed
+`post-score-resource-check` below the frozen resident-VRAM floor before
+publication. No score artifact was retained, no pole value was inspected, and
+audit/attempt B plus both verifiers did not run. Attempt A is consumed: do not
+rerun it or continue to B.
+
+The actual ignored audit/receipt names use suffix `e435c40`, while the frozen
+`--short=8` example would yield `e435c40f`. Both payloads bind the complete Git
+head. Preserve this filename-only, noncausal deviation and do not rename the
+evidence. See
+`reports/stage0/pythia_v1_scoring_failure_2026-08-20.md` and D-037.
+
+The general pre-load rule remains historical: a miss before deserialization
+could wait for natural headroom and retry with a new audit. It does not apply to
+this consumed post-deserialization attempt. Only a separately accepted
+correction of an independently demonstrated implementation defect unrelated to
+pole outcomes could define a new condition. Do not inspect or tune from
+transient results.
 
 ## 8. Score semantics
 

@@ -201,15 +201,17 @@ state equality; do not reopen either profile or infer scientific training
 adequacy. The exact Pythia tokenizer boundary path is Target Verified through
 the shared hash-verified snapshot loader. The bounded repeated registry scorer
 also passed with byte-identical deterministic outputs, but four development
-items were paraphrase-direction inconsistent. The active local gate is the
-`development-v1` measurement-coherence screen: blind internal semantic lock,
-dependency-light implementation, exact-head CI, and two clean-head tokenizer
-audits passed at `fb8cff1`. The next gate is its separately versioned scorer
-profile's bounded canonical/reverse target pair: E3 exact head `323dd0f`
-passed all 18 checks, while current implementation and run identities live in
-`PROGRESS.md`. Do not deserialize the model or inspect v1 logits until the
-current closure head and a fresh resource audit pass. Evidence-bearing naturalistic execution still
-requires rights-qualified, historically version-bounded A/B samples and an
-explicitly authorized held-out source-C review packet. Paid compute, public
-model/data release, another repository-visibility change, and requester-pays
-retrieval remain outside the active gate.
+items were paraphrase-direction inconsistent. The separate `development-v1`
+measurement-coherence screen passed blind semantic lock, dependency-light
+implementation, exact-head CI, and two clean-head tokenizer audits. Its E4
+attempt A at exact head `e435c40` loaded the verified model and completed all
+224 canonical forwards, then failed the post-score resident-VRAM gate before
+score publication. Attempt A is consumed; no A score, B run, or coherence
+result exists, and no pole value was inspected. Do not rerun A, run B, lower
+thresholds, or recover transient scores. Current identities and the failure
+record live in `PROGRESS.md`; any new condition requires a separate recorded,
+result-blind implementation-defect decision. Evidence-bearing naturalistic
+execution still requires rights-qualified, historically version-bounded A/B
+samples and an explicitly authorized held-out source-C review packet. Paid
+compute, public model/data release, another repository-visibility change, and
+requester-pays retrieval remain outside the active gate.

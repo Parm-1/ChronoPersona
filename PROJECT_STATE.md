@@ -6,7 +6,7 @@
 
 ## Current phase
 
-**Stage 0 — development content-integrity gate passed; local model execution authorized and active; real-source science externally blocked**
+**Stage 0 — development content-integrity gate passed; bounded local model engineering measured; development-v1 scoring stopped; real-source science externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — close E3 state, then run the frozen development-v1 E4 pair; no new logits yet**
+**Current gate — publish the consumed development-v1 E4 failure; no further model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -23,17 +23,23 @@ attention. Its one versioned SDPA-MATH rescue subsequently completed the
 five-step uninterrupted and interruption/resume conditions with exact semantic
 state equality. The exact Pythia tokenizer now also passed two byte-identical
 12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
-loader. The model scorer then completed two fresh exact-head invocations with
-byte-identical deterministic scores and complete verifier-valid receipts. The
+loader. The development-v0 model scorer then completed two fresh exact-head
+invocations with byte-identical deterministic scores and complete verifier-
+valid receipts. The
 containing E5 evidence head `a7dd27c` passed all 18 exact-head checks and
 closed the scorer plan. The separate versioned measurement-reliability plan
 then passed blind pre-logits review, dependency-light contract validation, and
 two exact clean-head 14-item/112-form/224-candidate tokenizer audits at
-`fb8cff1`. The E3 scorer profile is now Tested and delivered: draft PR #36
-exact head `323dd0f` passed all 18 checks. After this closure record passes on
-its exact head, the next gate is the frozen bounded E4 canonical/reverse pair
-under fresh resource audits. Real-source scientific execution still requires
-the separate source evidence listed below.
+`fb8cff1`. The E3 scorer profile is Tested and exact-head delivered. Draft PR
+#36 closure/execution head `e435c40` passed all 18 checks. E4 attempt A then
+loaded the exact model and completed all 224 canonical forwards, but failed the
+post-score resident-VRAM gate before score publication. Attempt A is consumed;
+no A score, B run, comparison, or coherence result exists, and no pole value
+was inspected. A result-blind receipt/code review found an observability gap
+but no evidence that the resource rejection was erroneous, so no rescue
+qualifies. The active work is failure publication, not another model run.
+Real-source scientific execution still requires the separate source evidence
+listed below.
 
 ## Latest verified evidence
 
@@ -72,6 +78,12 @@ the separate source evidence listed below.
   identical, covered all 14 items / 112 forms / 224 candidates with zero
   failures, and held one 10–18-token continuation count per item. No model
   weights were deserialized and no development-v1 logits were inspected.
+- Exact head `e435c40` passed 18/18 checks before development-v1 E4 attempt A.
+  Run `run-3aa8058dced36e7e88802079925500df` completed 224 canonical
+  forwards (18,672 forwarded / 18,448 predicted / 3,216 continuation tokens),
+  then failed `post-score-resource-check` below the frozen resident-VRAM floor.
+  The create-only transaction published no score; the canonical failure
+  receipt validates and no outcome was inspected. Attempt B did not run.
 - The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
   LoRA control and resumed condition each completed five optimizer steps on
   synthetic fixtures and independently verified exact final semantic state
@@ -115,8 +127,10 @@ the separate source evidence listed below.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. One bounded development-v1 canonical/reverse score pair, only after this
-   E3 closure head and every fresh pre-load resource gate pass.
+5. Development-v1 model-level coherence remains unresolved: the sole E4
+   attempt A was consumed by a post-score resource failure before publication.
+   No retry or B is authorized absent a separately accepted, result-blind
+   implementation-defect rescue.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -140,8 +154,8 @@ the separate source evidence listed below.
 
 ## Exact next action
 
-Publish this E3 closure record and require green exact-head CI. Then capture a
-fresh clean-head resource audit and run attempt A in canonical order; only
-after full process/CUDA release capture audit B and run exact global reverse
-order. Preserve one complete comparison or one actionable failure. Bounded
-rights-qualified source samples remain a separate external blocker.
+Publish D-037, the portable E4 failure report, failed ledger row, and closed
+plan state, then require green exact-head CI. The result-blind review is
+complete and did not establish a rescue-qualifying defect; do not rerun A or
+start B. Any future scoring condition requires a new recorded decision.
+Bounded rights-qualified source samples remain a separate external blocker.

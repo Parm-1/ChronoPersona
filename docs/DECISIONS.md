@@ -800,6 +800,52 @@ evidence, or CSTG.
 `configs/runs/pythia-development-score-v1.json`, and
 `docs/TRANSFORMERS_SCORING_PROTOCOL.md` section 7A.
 
+## D-037 — Preserve the consumed development-v1 attempt and stop E4
+
+**Date:** 2026-08-20
+**Status:** accepted; E4 Target Failed before publication
+
+Accept exact clean execution head
+`e435c40f1b1b2c9e8be1c1f3bb6ecd1ea9c89aa0` and run
+`run-3aa8058dced36e7e88802079925500df` as the one consumed attempt A for
+`development-v1-pythia-reliability-v0`. Draft PR #36 had passed all 18 checks
+on that exact head. The fresh audit and pre-import/load gates passed, the exact
+verified Pythia model loaded, and the canonical schedule completed all 224
+candidate forwards. The invocation then failed at
+`post-score-resource-check` because conservative global free VRAM fell below
+the frozen 1,610,612,736-byte resident floor.
+
+The output transaction rolled back: no valid score was published, no attempt-B
+audit or invocation occurred, and no item, form, pole, margin, or token-
+logprobability result was inspected. The canonical schedule/topology and timing
+metadata are admissible engineering failure evidence; they are not a semantic
+measurement result. The exact failing post-score free-VRAM value was not
+retained because validation raised before returning that audit to the failure
+receipt. Preserve that schema limitation rather than estimating the value.
+
+The raw audit and receipt filenames use seven-character suffix `e435c40`, while
+the frozen example would derive eight-character suffix `e435c40f`. Both
+payloads bind the complete head and the deviation did not cause the resource
+failure. Preserve the original names and record the deviation; do not rename or
+recreate the evidence.
+
+Attempt A is consumed under D-034 and the active plan. Do not run B, repeat A,
+lower the threshold, change content/metrics, or recover transient scores. The
+only possible rescue remains one separately accepted correction of an
+independently demonstrated implementation defect unrelated to pole outcomes.
+The current threshold breach is an observed resource failure, not by itself
+proof of such a defect. Any result-blind investigation must end in a new
+decision and versioned exact-head implementation before it can authorize a new
+condition.
+
+**Claim ceiling:** Target Failed for the exact E4 resource/publication gate.
+Model-level v1 coherence and measurement reliability remain unknown. This is
+not evidence for any model preference, temporal effect, causal result, or CSTG.
+
+**Evidence:**
+`reports/stage0/pythia_v1_scoring_failure_2026-08-20.md` and the failed v1 row
+in `COMPUTE_LEDGER.csv`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

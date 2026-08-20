@@ -213,3 +213,14 @@ at post-score; attempt B passed the reference throughout. This does not
 authorize a larger model, concurrent heavy process, sustained run, or broader
 training. Integrity, swapping, OOM, thermal, disk, and scientific stop rules
 remain.
+
+The separate `development-v1` E4 attempt A ran only after exact-head CI and a
+fresh resource audit passed. It loaded the same verified FP16 model and
+completed all 224 canonical forwards, then failed the post-score resident-VRAM
+check below the frozen 1,610,612,736-byte floor before score publication. The
+last successful resident audit recorded 1,707 MiB; the exact failing
+post-score value was not retained because validation raised before returning
+that audit. Attempt A is consumed and B is prohibited under the frozen stop
+rule. The user's RAM waiver does not waive VRAM, identity, or publication
+thresholds and does not authorize a retry, threshold reduction, larger model,
+or concurrent heavy process.

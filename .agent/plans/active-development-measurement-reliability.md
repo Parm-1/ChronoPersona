@@ -1,14 +1,14 @@
 # Development Measurement Reliability
 
-**Status:** active — E0–E3 accepted through green head `323dd0f`; E4 awaits the green closure head and fresh resource audit; no v1 logits observed
+**Status:** complete — E0–E3 accepted; E4 Target Failed at exact green head `e435c40` after the consumed canonical attempt completed 224 forwards and failed the post-score VRAM gate before publication
 **Started:** 2026-08-20
 **Frozen baseline:** `a7dd27c63179e87c8f585adde3e6e2902d72c5d3`
 **E3 stack base:** `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8` on draft PR #35
 **Branch:** `feat/development-v1-scoring`
-**Delivery:** draft PR #36 is open/draft and stacked on PR #35; exact E3 head `323dd0f` passed 18/18 checks
-**Write-active deliverable:** publish this closure record, require its exact
-head green, then run the frozen E4 canonical/reverse pair only under fresh
-resource audits and the predeclared stop policy.
+**Delivery:** draft PR #36 is open/draft and stacked on PR #35; exact execution head `e435c40` passed 18/18 checks before the failed target attempt
+**Write-active deliverable:** publish D-037, the portable failure report, ledger
+row, and closed-plan state; require that evidence head green. Do not run attempt
+B or rerun A.
 
 ## Objective and claim boundary
 
@@ -174,7 +174,7 @@ evidence. Freeze every byte before target scoring.
 - Pass focused tests, full Python 3.11–3.13 CI, all top-level validators,
   compilation, and diff checks on a separate draft PR stacked on PR #35.
 
-### E4 — Bounded target coherence score
+### E4 — Bounded target coherence score (Target Failed at `e435c40`)
 
 - Only after E1–E3 pass at one clean exact head, run the canonical and reverse
   attempts under fresh audits and the existing resource envelope.
@@ -182,12 +182,25 @@ evidence. Freeze every byte before target scoring.
 - Preserve one actionable failure or one complete equal comparison; do not
   rerun for presentation or timing.
 
-### E5 — Decision and next boundary
+Observed on 2026-08-20: attempt A at exact clean head `e435c40` passed the
+fresh audit, identity, tokenizer, snapshot, deserialization, and post-load
+resource gates. It completed all 224 canonical candidate forwards, then failed
+`post-score-resource-check` below the frozen 1,610,612,736-byte resident-VRAM
+floor. The transaction published no valid score, and no pole outcome was
+inspected. Attempt A is consumed; B did not run. The seven-character evidence
+suffix `e435c40` deviated from the frozen eight-character example `e435c40f`,
+but full-head payload bindings remained exact and the deviation was noncausal.
+
+### E5 — Decision and next boundary (completed by D-037)
 
 - Publish only portable bounded aggregates and hashes; keep machine-specific
   receipts/audits private.
 - If v1 passes, permit design of a multi-model development panel and expansion
   toward 24–40 items per primary domain. Do not freeze the instrument yet.
+- Because v1 failed before score publication, close this pair without B or a
+  rerun. A future condition requires a new recorded decision; only a result-
+  blind, independently demonstrated implementation defect can qualify for the
+  plan's one permitted rescue.
 - If v1 fails semantically, stop model execution and record the failed design.
 - Real-source qualification and causal training remain separately blocked.
 
@@ -250,8 +263,7 @@ evidence. Freeze every byte before target scoring.
   token IDs for identical text, and requires two distinct canonical
   byte-identical E2 reports.
 - Dependency-light registry, tokenizer, score-identity, evaluation-loader, and
-  verifier-CLI coverage currently passes 51 focused tests. Model scoring
-  remains blocked.
+  verifier-CLI coverage passed 51 focused tests before E3 implementation.
 - The full working-tree suite passes 494 tests with two platform-optional
   symlink skips. Generator reproduction, compilation, the three top-level
   validators, and diff checks pass. Draft PR #35 then passed all 18 exact-head
@@ -279,12 +291,19 @@ evidence. Freeze every byte before target scoring.
   error message. The message-portable correction at exact head `323dd0f`
   passed all 18 push/PR checks across Python 3.11–3.13. E3 is accepted; no
   model import, deserialization, or scoring occurred.
+- 2026-08-20: closure/execution head `e435c40` passed all 18 checks. Fresh
+  resource audit A passed, then run `run-3aa8058dced36e7e88802079925500df`
+  loaded the exact model and completed 224 canonical forwards. The post-score
+  resident-resource check failed before publication; the canonical receipt is
+  self-hash-valid, no score file exists, no outcome was inspected, and attempt
+  B was not started. D-037 closes E4 as Target Failed.
 
 ## Restart procedure
 
-1. Read `PROGRESS.md`, D-033/D-034, and this plan.
-2. Verify branch `feat/development-v1-scoring`, accepted E3 head `323dd0f`, and
-   unchanged v0/v1 identities.
-3. Publish the E3 closure record and require its exact head green. Then capture
-   fresh resource audit A and begin E4 exactly as frozen. Do not inspect partial
-   pole results or continue after a consumed-attempt failure.
+1. Read `PROGRESS.md`, D-034 through D-037, the portable E4 failure report, and
+   this plan.
+2. Verify branch `feat/development-v1-scoring`, execution head `e435c40`, the
+   absent A score/B artifacts, and the preserved private audit/receipt hashes.
+3. Publish the failure-evidence state and require its exact head green. Do not
+   run A or B. Any result-blind defect investigation or new scoring condition
+   must begin under a separate recorded decision and plan.
