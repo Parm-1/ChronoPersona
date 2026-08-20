@@ -20,10 +20,11 @@ conditions, or preserve one final actionable failure.
 
 ## Current verified boundary
 
-- **Repository implementation — Tested:** exact head
-  `f2568ab47d3162cf99eb445feac1b711980ff4f4` passed 344 tests with one
+- **Repository implementation — Tested:** exact rescue commit
+  `192b0d7edd751bdcee1a988e62022fdd51ae3d4c` passed 354 tests with one
   optional skip in a clean detached worktree. The pilot, model-manifest, and
-  development-evaluation validators and no-network training plan passed.
+  development-evaluation validators, diff checks, and no-network v1 training
+  plan passed.
 - **Delivery — Tested:** stacked draft PR #31 is open at `f2568ab`; all 18
   exact-head checks passed. Draft PR #30 remains green at the successful
   inference head. Agents are not authorized to merge either PR.
@@ -77,8 +78,9 @@ conditions, or preserve one final actionable failure.
 
 ## Validation
 
-- Current uncommitted v1 rescue focused suite: benchmark/training/CLI tests
-  pass; full exact-commit validation is pending the scoped commit.
+- Exact rescue commit `192b0d7`: 354 tests passed with one optional skip; all
+  three top-level validators, diff checks, and the self-hashed no-network v1
+  plan passed.
 - PyTorch minimum for model execution is now 2.5 because the frozen reduction-
   policy setter/getter is unavailable in 2.3–2.4. The installed target runtime
   is `2.13.0+cu130` with Transformers 5.15.1.
@@ -103,6 +105,7 @@ conditions, or preserve one final actionable failure.
 ## Delivery state
 
 - Branch: `feat/tiny-training-resume-gate`
+- Current local rescue commit: `192b0d7edd751bdcee1a988e62022fdd51ae3d4c`
 - Current published head: `f2568ab47d3162cf99eb445feac1b711980ff4f4`
 - Draft PR #31:
   `https://github.com/Parm-1/ChronoPersona/pull/31`

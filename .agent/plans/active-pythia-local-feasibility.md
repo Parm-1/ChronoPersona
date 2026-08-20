@@ -4,7 +4,7 @@
 **Started:** 2026-08-20T02:10:08-04:00
 **Last reconciled:** 2026-08-20T05:20:35-04:00
 **Successful inference head:** `76c2479738d137d33d59d526a1392d17ceffe09a`
-**Training implementation head:** `f2568ab47d3162cf99eb445feac1b711980ff4f4`
+**Training implementation head:** `192b0d7edd751bdcee1a988e62022fdd51ae3d4c`
 **Branch:** `feat/tiny-training-resume-gate`
 
 ## Objective and end state
@@ -315,6 +315,9 @@ authoritative result. Do not resume or overwrite them.
   without LoRA and across prefixes 16–128, and produced finite loss under
   automatic, MATH-only, and efficient SDPA. This consumes the one rescue for
   the explicit MATH-only v1 policy; other training variables stay frozen.
+- **2026-08-20T05:24:00-04:00:** exact rescue commit `192b0d7` passed 354
+  tests with one optional skip in the clean detached worktree. All three top-
+  level validators, diff checks, and the self-hashed v1 no-network plan passed.
 
 ## Decisions
 
