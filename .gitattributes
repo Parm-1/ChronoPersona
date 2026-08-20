@@ -1,0 +1,2 @@
+# Manifest-bound text fixtures are hashed byte-for-byte and must retain LF.
+tests/fixtures/content-integrity/documents/*.txt text eol=lf

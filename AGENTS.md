@@ -95,6 +95,18 @@ Continue safe, reversible, local work without repeated permission requests. Do n
 - recruit human participants;
 - perform irreversible external actions.
 
+### Standing GitHub delivery authorization
+
+The user has authorized agents working on this repository to stage scoped
+changes, create focused local commits, push feature branches, open or update
+draft pull requests, and address CI or review feedback when a coherent tested
+deliverable is ready. Do not request routine confirmation for those actions.
+
+This standing authorization does not include merging pull requests, force
+pushing, deleting remote branches, creating releases, changing repository
+visibility, spending money, or publishing models, datasets, or raw corpora.
+Those actions still require explicit user authorization.
+
 ## Experiment lifecycle
 
 Every experiment uses one of these states:
