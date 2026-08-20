@@ -26,7 +26,7 @@
 | R-22 | AI-assisted design/code claims are unaudited | Medium | Maintain AI-use ledger and human verification record |
 | R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Frozen implementation/backend/reduction policy passed the sole v1 rescue; preserve v0/v1 and require the same explicit binding in later model execution |
 | R-24 | Registry scoring loads unverified bytes from a populated cache | High | The exact tokenizer and model stages now verify manifest-bound bytes, private copies, load identity, fresh resources, and final rebinding; preserve this Target Verified invariant and fail closed on any identity drift |
-| R-25 | Development item wording or continuation length changes score direction | High | Four items disagreed across forms and three primary/diagnostic signs differed; preserve the primary metric, predeclare reliability criteria, revise before rescoring, and do not interpret `development-v0` scientifically |
+| R-25 | Development item wording or continuation length changes score direction | High | Preserve the failed v0 reliability diagnosis; v1 passed blind pre-logits review and exact common-count tokenizer checks, but model-level eight-form coherence remains untested until the frozen scorer gate runs |
 
 ## Current highest risks
 
@@ -42,8 +42,8 @@
 The design is defensible; the bounded v1 resume gate, exact tokenizer boundary,
 and repeated registry-scorer path passed their engineering gates. Preserve
 those artifacts without tuning or rerunning them. The next local risk-reduction
-task is measurement reliability: complete blind pre-logits review and exact
-tokenizer validation of the versioned 14-item/112-form registry before any new
-model score or evaluation freeze. Evidence-bearing naturalistic execution
-remains blocked on external source qualification and later calibration/model-
-compute gates.
+task is the versioned development-v1 scorer profile. Its blind pre-logits review
+and two exact 14-item/112-form tokenizer audits passed at `fb8cff1`; model
+execution remains blocked until E3 is delivered and exact-head CI is green.
+Evidence-bearing naturalistic execution remains blocked on external source
+qualification and later calibration/model-compute gates.

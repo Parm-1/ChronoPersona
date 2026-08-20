@@ -709,6 +709,46 @@ evidence, or CSTG.
 **Procedure:**
 `.agent/plans/active-development-measurement-reliability.md`.
 
+## D-035 — Accept the development-v1 tokenizer coherence gate
+
+**Date:** 2026-08-20
+**Status:** accepted; E3 scorer-profile implementation authorized
+
+Accept exact clean head
+`fb8cff1495fedef9c08d5426efbea53234339a29` as Target Verified tokenizer
+engineering evidence for `development-v1-pythia-reliability-v0`. Draft PR #35
+passed all 18 exact-head checks before two observed fresh offline tokenizer
+invocations. Their distinct 587,948-byte reports were byte-identical with raw
+SHA-256
+`acbb6fed70670c484e719c00775f95532f7282a76579c4c5d12804b5f3e2f76d`;
+the dependency-light verifier and a separate 5,824-assertion replay found no
+discrepancy.
+
+All 14 items, 112 forms, and 224 candidate occurrences passed. Each item has
+one exact continuation-token count from 10 through 18, all sequences fit within
+2,048 tokens, and no prompt, continuation, order, token-ID, index, truncation,
+identity, path, or publication failure occurred. Offline/local-only controls
+were enforced; traffic was not independently instrumented. The manifested
+2,090,701,528 safetensors bytes were rehashed for integrity but never
+deserialized. No development-v1 model logits were inspected.
+
+Authorize only E3: implement an exact allowlisted v1 scorer profile,
+canonical-versus-reverse provider scheduling, canonical serialization, and
+pre-import rejection of every cross-profile substitution. Do not run the model
+until that implementation is committed, delivered, and green at its exact
+head. Do not reinterpret tokenizer equality as prompt-order invariance,
+measurement reliability, criterion validity, temporal evidence, or CSTG.
+
+**Rejected alternatives:** do not reuse the v0 score profile implicitly, hand
+edit an accepted tokenizer report, treat one invocation as repeat evidence,
+skip exact-head delivery, change token-count bounds, or proceed directly to
+logits from this evidence commit.
+
+**Artifacts:**
+`reports/stage0/pythia_v1_tokenizer_coherence_gate_2026-08-20.md`,
+`evaluations/registry/development-v1.jsonl`, and
+`configs/evaluations/development-v1-reliability-v0.json`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

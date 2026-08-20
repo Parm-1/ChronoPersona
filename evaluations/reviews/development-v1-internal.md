@@ -67,7 +67,9 @@ change. The sealed generator SHA-256 is
   in seven items.
 - A tokenizer-only diagnostic found one common continuation-token count per
   item, ranging from 9 to 18 and within the predeclared 1–24 bound. This is not
-  the required two-run clean-head tokenizer acceptance evidence.
+  the required two-run clean-head tokenizer acceptance evidence. The later E2
+  exact-head reports found 10–18 tokens and supersede this diagnostic for
+  acceptance.
 - No model weights were deserialized and no development-v1 logits were
   inspected during wording review.
 

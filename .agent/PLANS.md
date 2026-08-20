@@ -4,8 +4,9 @@ One plan is write-active:
 
 - `.agent/plans/active-development-measurement-reliability.md` — replace the
   confounded two-form development instrument with a versioned, tokenizer-
-  matched eight-form coherence screen, validate it without weights, deliver it,
-  and only then permit one bounded exact-head Pythia score.
+  matched eight-form coherence screen. E0–E2 passed at `fb8cff1`; the active
+  deliverable is its exact scorer profile and only then one bounded exact-head
+  Pythia score.
 
 Completed plans remain under `.agent/plans/` as durable history. In particular,
 `active-pythia-local-feasibility.md` records the completed v0/v1 loading and

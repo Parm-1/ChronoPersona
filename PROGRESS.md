@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T15:14:11-04:00
+**Last updated:** 2026-08-20T15:29:00-04:00
 
 ## Decision
 
@@ -27,13 +27,11 @@ enabled. The prior zero-step billing blocker is empirically closed: draft PR
 
 ## Current objective and closure condition
 
-Deliver the sealed `development-v1` measurement-coherence contract without
-loading model weights. The final blind semantic lock accepted exactly 14 items,
-eight forms per item from two contexts x two templates x two explicit candidate
-orders, and exact 4/4 order balance. Finish adversarial contract review, push a
-focused draft PR, and require exact-head CI before two fresh offline tokenizer
-audits. Model scoring remains blocked until those reports pass and the v1
-scoring profile is separately frozen.
+Implement the exact allowlisted `development-v1` scorer profile without yet
+running it. Preserve v0, add canonical-versus-reverse provider scheduling with
+canonical serialization, and reject every cross-profile substitution before
+optional model import. Model execution remains blocked until this E3 change is
+committed, delivered, and green on its exact head.
 
 ## Current verified boundary
 
@@ -61,11 +59,12 @@ scoring profile is separately frozen.
   forms; four evidence-integration items had directional agreement `0.5`.
   The observed primary/diagnostic sign disagreements make reliability work the
   next local gate.
-- **Development-v1 pre-logits contract — Tested:** all 14 sealed items passed
-  internal blind semantic lock; the generated 14/112/224 topology, closed
-  criteria, tokenizer bindings, and failure paths pass focused tests. Internal
-  review is not criterion validation, and the required clean-head E2 tokenizer
-  pair has not run.
+- **Development-v1 tokenizer coherence — Target Verified:** exact clean head
+  `fb8cff1` passed all 18 PR checks, then two observed fresh offline tokenizer
+  invocations produced distinct byte-identical 587,948-byte reports. All
+  14/112/224 records passed with one common 10–18-token continuation count per
+  item and zero failures. Internal semantic review and token coherence do not
+  establish criterion or model-level reliability.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -90,11 +89,18 @@ scoring profile is separately frozen.
   `reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`
 - training report:
   `reports/stage0/pythia_lora_resume_gate_2026-08-20.md`
-- decisions: D-029 through D-034 in `docs/DECISIONS.md`
+- decisions: D-029 through D-035 in `docs/DECISIONS.md`
 - v1 internal review: `evaluations/reviews/development-v1-internal.md`
 - v1 registry/criteria SHA-256:
   `81eb8e331d9fbd8d80ec675f209998e081e00834e5d1d141e2979b4f541c49ea` /
   `d73b9d4d575f64587c5aea9acc18a6073a42bb1bd70491d29bd8422e95a73bca`
+- v1 tokenizer A/B raw SHA-256:
+  `acbb6fed70670c484e719c00775f95532f7282a76579c4c5d12804b5f3e2f76d`
+- v1 tokenizer report/verifier self-hashes:
+  `8c4f75718ed6da986e2f7c316a62e6c420069577e2fb39919972d91a5857f0bb` /
+  `64874e3dd26a150ca34a7000ced4bc52ddd5645cfea82edf05ab6f0cbfe60c72`
+- v1 tokenizer evidence report:
+  `reports/stage0/pythia_v1_tokenizer_coherence_gate_2026-08-20.md`
 - compute ledger: failed v0, completed v1 load/control/resume, and scorer A/B
   rows in `COMPUTE_LEDGER.csv`
 
@@ -106,6 +112,10 @@ scoring profile is separately frozen.
 - Sealed pre-logits registry/criteria:
   `evaluations/registry/development-v1.jsonl` and
   `configs/evaluations/development-v1-reliability-v0.json`
+- Ignored v1 tokenizer evidence:
+  `artifacts/local/pythia-v1-tokenizer-{a,b,verification}-fb8cff1.json`
+- All three ignored v1 tokenizer artifacts have a separate private
+  hash-matched backup.
 - Ignored raw scorer evidence:
   `artifacts/local/pythia-score-{resource-a,resource-b,a,b,runtime-a,runtime-b,comparison}-cee0f2fa.json`
 - Raw audits and receipts remain untracked because they contain local paths,
@@ -144,7 +154,16 @@ scoring profile is separately frozen.
   scoring profile, model deserialization, or logits exist yet.
 - The full working-tree suite passes 494 tests with two platform-optional
   symlink skips. Generator reproduction, compilation, all three top-level
-  validators, and diff checks pass. Exact-head CI remains the delivery gate.
+  validators, and diff checks pass. Exact-head CI then passed as recorded
+  below.
+- Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
+  across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
+  dependency-light verifier and an independent 5,824-assertion replay found no
+  discrepancy. A/B bytes, self-hashes, Git/blob identities, token boundaries,
+  common counts, and path/privacy controls all match.
+- Offline/local-only controls were enforced and downloads were disabled.
+  Traffic remained honestly `not-instrumented`. The 2,090,701,528 manifested
+  safetensors bytes were rehashed for integrity but never deserialized.
 
 ## Risks
 
@@ -170,6 +189,9 @@ scoring profile is separately frozen.
 - Current branch: `feat/development-measurement-reliability`, based on scorer
   evidence head `a7dd27c`. Its delivery head and exact-head CI status are live
   GitHub state and must not be inferred from this preserved base identity.
+- Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
+  draft. Implementation/E2 head `fb8cff1` passed 18/18 checks; evidence
+  publication changes must pass again before E3 begins.
 - Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, open and
   draft, green at final evidence head `a7dd27c`.
 - PR #32/#33 remain open draft delivery history. PR #31 was merged externally
@@ -179,7 +201,8 @@ scoring profile is separately frozen.
 
 ## Next write-active deliverable
 
-Complete E1 adversarial review and deliver the scoped implementation on a new
-draft PR. After exact-head CI passes, run the two distinct canonical
-byte-identical E2 Pythia tokenizer audits. Do not deserialize model weights or
-inspect v1 logits before the separate scorer-profile and exact-head CI gate.
+Implement E3 as a versioned exact scorer profile with canonical/reverse
+execution scheduling and canonical serialization. Preserve v0 compatibility
+and reject cross-profile substitutions before optional model import. Do not
+deserialize model weights or inspect v1 logits until E3 is delivered and green
+on its exact head.

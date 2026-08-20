@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — development measurement coherence, no new logits yet**
+**Current gate — versioned development-v1 scorer profile, no new logits yet**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -25,11 +25,13 @@ state equality. The exact Pythia tokenizer now also passed two byte-identical
 12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
 loader. The model scorer then completed two fresh exact-head invocations with
 byte-identical deterministic scores and complete verifier-valid receipts. The
-  containing E5 evidence head `a7dd27c` passed all 18 exact-head checks and
-  closed the scorer plan. A separate versioned measurement-reliability plan is
-  now active; its first deliverable is dependency-light registry and tokenizer
-  evidence, not another model score. Real-source scientific execution still
-  requires the separate source evidence listed below.
+containing E5 evidence head `a7dd27c` passed all 18 exact-head checks and
+closed the scorer plan. The separate versioned measurement-reliability plan
+then passed blind pre-logits review, dependency-light contract validation, and
+two exact clean-head 14-item/112-form/224-candidate tokenizer audits at
+`fb8cff1`. The next gate is E3 scorer-profile implementation and exact-head CI,
+not another model score. Real-source scientific execution still requires the
+separate source evidence listed below.
 
 ## Latest verified evidence
 
@@ -63,6 +65,11 @@ byte-identical deterministic scores and complete verifier-valid receipts. The
   truncation, or nonfinite failures. Four items were directionally inconsistent
   across forms, so this verifies the scorer path while instrument reliability
   remains unestablished.
+- Exact head `fb8cff1` passed 18/18 checks before two fresh development-v1
+  tokenizer invocations. Their distinct 587,948-byte reports were byte-
+  identical, covered all 14 items / 112 forms / 224 candidates with zero
+  failures, and held one 10–18-token continuation count per item. No model
+  weights were deserialized and no development-v1 logits were inspected.
 - The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
   LoRA control and resumed condition each completed five optimizer steps on
   synthetic fixtures and independently verified exact final semantic state
@@ -84,8 +91,8 @@ byte-identical deterministic scores and complete verifier-valid receipts. The
 - source-general era decodability;
 - a trainable causal checkpoint and insertion point;
 - sustained target-model training stability or broad-update feasibility;
-- development-item paraphrase, option-order, and metric invariance sufficient
-  for a frozen evaluation instrument;
+- model-level development-item paraphrase, prompt-order, and metric invariance
+  sufficient for a frozen evaluation instrument;
 - synthetic calibration sensitivity;
 - any temporal behavioral effect.
 
@@ -106,9 +113,8 @@ byte-identical deterministic scores and complete verifier-valid receipts. The
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Delivery and exact tokenizer validation of the pre-logits, versioned
-   14-item/112-form measurement-coherence contract, followed by its separately
-   frozen bounded score only if the no-weights gates pass.
+5. Delivery and exact-head CI for the versioned development-v1 scorer profile,
+   followed by its bounded score only if every pre-load gate passes.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -132,9 +138,9 @@ byte-identical deterministic scores and complete verifier-valid receipts. The
 
 ## Exact next action
 
-Complete the blind pre-logits review of the 14-item/112-form/224-candidate
-`development-v1` coherence contract, then run two exact offline Pythia
-tokenizer audits. Require one common continuation-token count per item and zero
-boundary failures. Do not load weights or inspect v1 logits until the versioned
-scorer profile is delivered and passes exact-head CI. Bounded rights-qualified
-source samples remain a separate external blocker.
+Implement the exact allowlisted development-v1 scorer profile with canonical-
+versus-reverse execution scheduling and canonical serialization. Preserve v0
+compatibility and reject cross-profile substitution before optional import. Do
+not load weights or inspect v1 logits until the profile is delivered and passes
+exact-head CI. Bounded rights-qualified source samples remain a separate
+external blocker.

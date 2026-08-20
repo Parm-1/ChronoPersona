@@ -1,13 +1,13 @@
 # Development Measurement Reliability
 
-**Status:** active — E0 recorded; E1 is Tested and awaits delivery/exact-head CI; no v1 model logits authorized
+**Status:** active — E0–E2 complete at `fb8cff1`; E3 scorer-profile implementation is next; no v1 model logits authorized
 **Started:** 2026-08-20
 **Frozen baseline:** `a7dd27c63179e87c8f585adde3e6e2902d72c5d3`
 **Branch:** `feat/development-measurement-reliability`
-**Parent delivery:** draft PR #34, 18/18 checks green at `a7dd27c`
-**Write-active deliverable:** a versioned `development-v1` registry, exact
-reliability contract, dependency-light verifier, and Pythia tokenizer evidence;
-do not load model weights during this deliverable.
+**Delivery:** draft PR #35, implementation/E2 head `fb8cff1`, 18/18 checks green
+**Write-active deliverable:** an exact allowlisted development-v1 scorer
+profile with canonical/reverse scheduling; do not load model weights until that
+deliverable passes exact-head CI.
 
 ## Objective and claim boundary
 
@@ -143,7 +143,7 @@ evidence. Freeze every byte before target scoring.
   logits.
 - Pin v0 bytes/topology in regression tests.
 
-### E1 — Dependency-light contract and registry
+### E1 — Dependency-light contract and registry (completed at `fb8cff1`)
 
 - Add `evaluations/registry/development-v1.jsonl` and an internal review record.
 - Add a closed, versioned criteria file plus
@@ -155,7 +155,7 @@ evidence. Freeze every byte before target scoring.
   criteria but not v0 model margins. Internal review is not independent peer
   review or criterion validation.
 
-### E2 — Exact Pythia tokenizer gate
+### E2 — Exact Pythia tokenizer gate (Target Verified at `fb8cff1`)
 
 - Generalize the exact-known registry selection without weakening v0.
 - Run two fresh offline tokenizer audits from the accepted hash-verified
@@ -231,7 +231,7 @@ evidence. Freeze every byte before target scoring.
 - 2026-08-20: a local tokenizer-only diagnostic on the accepted Pythia snapshot
   found one common continuation-token count for every current item. Counts are
   9 through 18 tokens, within the frozen 1–24 range. This is diagnostic wording
-  evidence only, not the required two clean-head E2 acceptance reports.
+  evidence only; the later clean-head E2 result supersedes it for acceptance.
 - 2026-08-20: the final blind semantic lock accepted all 14 items and found no
   explicit temporal, institutional, political, demographic, copied-survey, or
   pole-specific moral cues. The review saw no v0 outcomes, tokenizer outputs,
@@ -252,13 +252,21 @@ evidence. Freeze every byte before target scoring.
   remains blocked.
 - The full working-tree suite passes 494 tests with two platform-optional
   symlink skips. Generator reproduction, compilation, the three top-level
-  validators, and diff checks pass. This is pre-delivery Tested evidence, not
-  exact-head CI or tokenizer Target Verification.
+  validators, and diff checks pass. Draft PR #35 then passed all 18 exact-head
+  checks on Python 3.11–3.13 at `fb8cff1`.
+- 2026-08-20: two observed fresh offline tokenizer invocations at exact clean
+  head `fb8cff1` produced distinct 587,948-byte files with identical raw
+  SHA-256
+  `acbb6fed70670c484e719c00775f95532f7282a76579c4c5d12804b5f3e2f76d`.
+  All 14/112/224 records passed, common per-item continuation counts were
+  10–18, and the canonical verifier report passed with no errors. No model
+  weights were deserialized and no logits were inspected. The bounded report
+  is `reports/stage0/pythia_v1_tokenizer_coherence_gate_2026-08-20.md`.
 
 ## Restart procedure
 
 1. Read `PROGRESS.md`, D-033/D-034, and this plan.
-2. Verify branch `feat/development-measurement-reliability`, clean base
-   `a7dd27c`, and unchanged v0 registry/config hashes.
-3. Continue the earliest incomplete evidence gate; do not open model weights
-   while E0–E3 are incomplete.
+2. Verify branch `feat/development-measurement-reliability`, accepted E2 head
+   `fb8cff1`, and unchanged v0/v1 identities.
+3. Continue E3. Do not open model weights or inspect development-v1 logits
+   until the scorer profile is delivered and exact-head CI is green.
