@@ -367,6 +367,124 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                         "under portable filesystem semantics"
                     )
 
+        tokenizer_runtime = raw_artifact.get("tokenizer_runtime")
+        if tokenizer_runtime is not None:
+            runtime_location = f"{location}.tokenizer_runtime"
+            if not isinstance(tokenizer_runtime, Mapping):
+                errors.append(f"{runtime_location} must be an object")
+            else:
+                if not _is_nonempty_string(tokenizer_runtime.get("class")):
+                    errors.append(f"{runtime_location}.class must not be empty")
+                if tokenizer_runtime.get("is_fast") is not True:
+                    errors.append(f"{runtime_location}.is_fast must be true")
+                native_prefix = tokenizer_runtime.get("native_prefix_policy")
+                if native_prefix not in {"none", "bos"}:
+                    errors.append(
+                        f"{runtime_location}.native_prefix_policy must be none or bos"
+                    )
+                native_special_count = tokenizer_runtime.get(
+                    "native_special_tokens_to_add"
+                )
+                if (
+                    not isinstance(native_special_count, int)
+                    or isinstance(native_special_count, bool)
+                    or native_special_count < 0
+                ):
+                    errors.append(
+                        f"{runtime_location}.native_special_tokens_to_add must "
+                        "be a non-negative integer"
+                    )
+                elif native_prefix == "none" and native_special_count != 0:
+                    errors.append(
+                        f"{runtime_location} none prefix requires zero native "
+                        "special tokens"
+                    )
+                elif native_prefix == "bos" and native_special_count != 1:
+                    errors.append(
+                        f"{runtime_location} bos prefix requires exactly one "
+                        "native special token"
+                    )
+                for key in ("vocab_size", "tokenizer_length"):
+                    value = tokenizer_runtime.get(key)
+                    if (
+                        not isinstance(value, int)
+                        or isinstance(value, bool)
+                        or value <= 0
+                    ):
+                        errors.append(
+                            f"{runtime_location}.{key} must be a positive integer"
+                        )
+                runtime_tokens = tokenizer_runtime.get("special_tokens")
+                expected_token_keys = {
+                    "bos_token",
+                    "eos_token",
+                    "pad_token",
+                    "unk_token",
+                }
+                if not isinstance(runtime_tokens, Mapping) or set(
+                    runtime_tokens
+                ) != expected_token_keys:
+                    errors.append(
+                        f"{runtime_location}.special_tokens must contain exact "
+                        "BOS/EOS/PAD/UNK keys"
+                    )
+                elif not all(
+                    value is None or _is_nonempty_string(value)
+                    for value in runtime_tokens.values()
+                ):
+                    errors.append(
+                        f"{runtime_location}.special_tokens values must be "
+                        "non-empty strings or null"
+                    )
+                runtime_ids = tokenizer_runtime.get("special_token_ids")
+                expected_id_keys = {
+                    "bos_token_id",
+                    "eos_token_id",
+                    "pad_token_id",
+                    "unk_token_id",
+                }
+                if not isinstance(runtime_ids, Mapping) or set(
+                    runtime_ids
+                ) != expected_id_keys:
+                    errors.append(
+                        f"{runtime_location}.special_token_ids must contain "
+                        "exact BOS/EOS/PAD/UNK keys"
+                    )
+                elif not all(
+                    value is None
+                    or (
+                        isinstance(value, int)
+                        and not isinstance(value, bool)
+                        and value >= 0
+                    )
+                    for value in runtime_ids.values()
+                ):
+                    errors.append(
+                        f"{runtime_location}.special_token_ids values must be "
+                        "non-negative integers or null"
+                    )
+                if native_prefix == "bos" and (
+                    not isinstance(runtime_tokens, Mapping)
+                    or not _is_nonempty_string(runtime_tokens.get("bos_token"))
+                    or not isinstance(runtime_ids, Mapping)
+                    or not isinstance(runtime_ids.get("bos_token_id"), int)
+                    or isinstance(runtime_ids.get("bos_token_id"), bool)
+                    or runtime_ids.get("bos_token_id") < 0
+                ):
+                    errors.append(
+                        f"{runtime_location} bos prefix requires an exact BOS "
+                        "token and ID"
+                    )
+                backend_sha = tokenizer_runtime.get("backend_sha256")
+                if not (
+                    isinstance(backend_sha, str)
+                    and _SHA256.fullmatch(backend_sha)
+                ):
+                    errors.append(
+                        f"{runtime_location}.backend_sha256 must be a "
+                        "64-character lowercase digest"
+                    )
+
         if execution_status == "benchmark-ready":
             if not isinstance(required_files, list) or not required_files:
                 errors.append(
@@ -377,6 +495,11 @@ def validate_model_manifest(manifest: Mapping[str, Any]) -> tuple[str, ...]:
                 errors.append(
                     f"{location} cannot be benchmark-ready without a pinned "
                     "safetensors file"
+                )
+            if not isinstance(tokenizer_runtime, Mapping):
+                errors.append(
+                    f"{location} cannot be benchmark-ready without exact "
+                    "tokenizer_runtime expectations"
                 )
             if (
                 isinstance(weight_size, int)

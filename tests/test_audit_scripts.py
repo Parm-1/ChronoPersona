@@ -701,7 +701,9 @@ def test_snapshot_acquisition_verifies_revision_allowlist_and_config(
     (snapshot / "model.safetensors").write_bytes(weight)
     (snapshot / "config.json").write_bytes(config)
     artifact = {
+        "id": "fixture-model",
         "repository": "owner/model",
+        "revision": revision,
         "model_type": "gpt_neox",
         "architecture": "GPTNeoXForCausalLM",
         "required_files": [

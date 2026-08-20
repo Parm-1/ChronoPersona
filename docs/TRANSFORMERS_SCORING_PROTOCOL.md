@@ -23,10 +23,12 @@ Model scoring additionally requires:
 - the local memory and storage gates in `LOCAL_BENCHMARK_PROTOCOL.md`.
 
 The scripts never set `trust_remote_code=True` and contain no quantization path.
-Their execution modes are temporarily fail-closed: direct repository or cache
-loading is disabled until the provider consumes a reusable local-snapshot
-verifier that enforces the manifest file allowlist, sizes, hashes, config, and
-revision. Plan mode remains available.
+Tokenizer execution consumes only an explicit local snapshot after the shared
+verifier enforces the canonical manifest, repository/revision cache layout,
+complete file allowlist, sizes, hashes, config, and cache-contained targets.
+Direct repository lookup and download-on-load remain disabled. Model scoring is
+still fail-closed until its separate live-resource and exact-load gate is
+integrated. Plan mode remains available for both operations.
 
 ## 2. Install the smallest dependency set first
 
@@ -42,7 +44,10 @@ Full model scoring later:
 python -m pip install -e ".[models]"
 ```
 
-Tokenizer audits therefore do not require PyTorch or model weights.
+Tokenizer audits do not import PyTorch or deserialize model weights. The current
+complete-snapshot integrity contract does require the already-acquired Pythia
+snapshot and streams every manifested file, including safetensors, through
+SHA-256 verification before and after tokenizer construction.
 
 ## 3. Plan before network access
 
@@ -72,18 +77,44 @@ DatedGPT should currently report a license blocker. That is expected and must no
 
 ## 4. Tokenizer-only audit execution gate
 
-Tokenizer execution is deliberately blocked at present. A populated Hugging
-Face cache is not proof that the tokenizer files match the manifest, and
-`--allow-download` is rejected with guidance to the separate acquisition
-command. `benchmark_model.py --acquire-only` can create and verify the exact
-Pythia snapshot, but the tokenizer provider must first be changed to consume
-that verified local snapshot rather than an owner/name cache lookup.
+Execution requires a clean exact Git head, the canonical committed manifest and
+development registry, explicit absolute cache/snapshot paths, and a new output
+path outside the cache. `--allow-download` remains rejected.
 
-When that reusable loader is implemented and tested, run both prefix policies
-during development when a model has a BOS token. The chosen execution command,
-snapshot/report binding, and result paths must be added here before use.
+Pythia's development audit freezes `prefix-policy=none` before any registry
+logits are inspected. The canonical manifest pins zero native special tokens;
+the provider must also prove that the exact backend produces identical probe
+IDs with `add_special_tokens=True` and `False`. Run it twice from fresh
+invocations:
 
-The chosen policy must be frozen before confirmatory scoring. Do not select it based on which policy produces the preferred temporal result. Selection is based on the model's native evaluation convention, development reliability, and explicit documentation.
+```powershell
+$cache = (Resolve-Path "artifacts/local/hf-cache").Path
+$revision = "7199d8fc61a6d565cd1f3c62bf11525b563e13b2"
+$snapshot = (Resolve-Path (Join-Path $cache "models--EleutherAI--pythia-1b-deduped/snapshots/$revision")).Path
+
+python scripts/audit_registry_tokenizer.py `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --execute `
+  --output artifacts/local/pythia-tokenizer-none-a.json
+
+python scripts/audit_registry_tokenizer.py `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --execute `
+  --output artifacts/local/pythia-tokenizer-none-b.json
+```
+
+Both reports must pass all 12 items, 24 forms, and 48 candidates, validate their
+final self-hashes, contain no absolute local path, and have identical canonical
+`output_sha256` values. A different prefix policy is a new documented
+development condition; do not select one based on a preferred model score.
 
 ## 5. Tokenizer audit output
 
@@ -92,6 +123,8 @@ The deterministic report records:
 - registry SHA-256;
 - artifact and immutable revision;
 - tokenizer class, vocabulary, maximum length, and special-token IDs;
+- canonical Git/manifest/registry and portable snapshot-receipt identities;
+- a fast-backend semantic fingerprint and post-load snapshot re-verification;
 - explicit prefix policy and prefix token IDs;
 - prompt and continuation token counts;
 - continuation start and prediction positions;
@@ -99,6 +132,13 @@ The deterministic report records:
 - candidate token-count differences within every form;
 - all boundary, truncation, and prompt-context failures;
 - a canonical output hash.
+
+The report records the enforced offline variables, local-only/trust settings,
+and absence of any download-capable provider path. Network traffic is labelled
+`not-instrumented`, not falsely presented as independently observed. The report
+also states that no files were downloaded and no model weights were
+deserialized, and records how many safetensor bytes were rehashed for integrity.
+Absolute cache and snapshot paths are intentionally excluded.
 
 The audit fails when:
 
@@ -131,9 +171,9 @@ Scoring execution remains blocked until all of these are true:
 
 1. the local resource audit passes;
 2. immutable Pythia acquisition and loading/logits benchmarks succeed;
-3. the provider consumes the exact hash-verified local snapshot and rechecks it
-   before loading;
-4. tokenizer audit passes through the same verified-snapshot layer;
+3. the model provider consumes the exact hash-verified local snapshot and
+   rechecks it before loading;
+4. the exact Pythia tokenizer audit has passed through that snapshot layer;
 5. the cache has sufficient storage and the exact Git commit is recorded.
 
 No scoring command may download or load directly by repository/revision. After

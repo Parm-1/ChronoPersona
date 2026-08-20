@@ -37,7 +37,11 @@ def resolve_prefix_token_ids(
     )
 
 
-def _tokenizer_metadata(tokenizer: Any) -> dict[str, Any]:
+def _tokenizer_metadata(
+    tokenizer: Any,
+    *,
+    portable_identity: str | None = None,
+) -> dict[str, Any]:
     special_ids = {
         name: getattr(tokenizer, name, None)
         for name in (
@@ -49,7 +53,11 @@ def _tokenizer_metadata(tokenizer: Any) -> dict[str, Any]:
     }
     return {
         "class": tokenizer.__class__.__name__,
-        "name_or_path": getattr(tokenizer, "name_or_path", None),
+        "name_or_path": (
+            portable_identity
+            if portable_identity is not None
+            else getattr(tokenizer, "name_or_path", None)
+        ),
         "vocab_size": getattr(tokenizer, "vocab_size", None),
         "model_max_length": getattr(tokenizer, "model_max_length", None),
         "special_token_ids": special_ids,
@@ -65,6 +73,7 @@ def audit_evaluation_tokenizer(
     artifact_revision: str,
     prefix_policy: str,
     max_length: int,
+    tokenizer_identity: str | None = None,
 ) -> dict[str, Any]:
     """Audit every prompt/candidate boundary without loading model weights."""
 
@@ -77,6 +86,10 @@ def audit_evaluation_tokenizer(
     ):
         if not isinstance(value, str) or not value:
             raise TokenizerAuditError(f"{label} must not be empty")
+    if tokenizer_identity is not None and (
+        not isinstance(tokenizer_identity, str) or not tokenizer_identity
+    ):
+        raise TokenizerAuditError("tokenizer_identity must not be empty")
 
     prefix_ids = resolve_prefix_token_ids(tokenizer, prefix_policy)
     item_outputs: list[dict[str, Any]] = []
@@ -204,7 +217,10 @@ def audit_evaluation_tokenizer(
             "id": artifact_id,
             "revision": artifact_revision,
         },
-        "tokenizer": _tokenizer_metadata(tokenizer),
+        "tokenizer": _tokenizer_metadata(
+            tokenizer,
+            portable_identity=tokenizer_identity,
+        ),
         "prefix_policy": prefix_policy,
         "prefix_token_ids": list(prefix_ids),
         "max_length": max_length,

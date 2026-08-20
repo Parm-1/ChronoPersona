@@ -33,6 +33,7 @@ def test_tokenizer_audit_defaults_to_no_network_plan() -> None:
     assert report["weights_downloaded"] is False
     assert report["tokenizer_files_downloaded"] is False
     assert report["policy"]["allowed"] is True
+    assert report["policy"]["snapshot_execution_allowed"] is True
 
 
 def test_model_score_defaults_to_no_network_plan() -> None:
@@ -114,7 +115,7 @@ def test_direct_download_flags_are_disabled() -> None:
         assert "verified acquisition workflow" in model.stderr
 
 
-def test_ready_execution_requires_verified_snapshot_loader() -> None:
+def test_tokenizer_execution_requires_paths_and_model_remains_blocked() -> None:
     tokenizer = _run(
         "scripts/audit_registry_tokenizer.py",
         "--artifact",
@@ -136,5 +137,5 @@ def test_ready_execution_requires_verified_snapshot_loader() -> None:
 
     assert tokenizer.returncode == 1
     assert model.returncode == 1
-    assert "manifest-hash-verified local snapshot" in tokenizer.stderr
-    assert "manifest-hash-verified local snapshot" in model.stderr
+    assert "explicit --cache-dir and --snapshot-path" in tokenizer.stderr
+    assert "clean-head live-resource" in model.stderr

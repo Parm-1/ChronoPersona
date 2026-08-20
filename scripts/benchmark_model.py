@@ -57,6 +57,7 @@ from chronopersona.model_snapshot import (  # noqa: E402
     verify_model_config as _verify_model_config,
     verify_required_files as _verify_required_files,
     verify_snapshot_identity as _verify_snapshot_identity,
+    verify_snapshot as _verify_snapshot,
 )
 
 
@@ -900,17 +901,12 @@ def _acquire_snapshot(
     acquisition_seconds = time.perf_counter() - acquisition_start
 
     _set_failure_stage(args, "artifact-integrity")
-    _verify_snapshot_identity(snapshot_path, args.cache_dir, revision)
-    verified_files = _verify_required_files(snapshot_path, artifact)
-    verified_config = _verify_model_config(snapshot_path, artifact)
-    artifact_integrity = {
-        "status": "verified",
-        "snapshot_path": str(snapshot_path.resolve(strict=True)),
-        "resolved_revision": revision,
-        "required_download_bytes": _required_download_bytes(artifact),
-        "files": verified_files,
-        "config": verified_config,
-    }
+    artifact_integrity = _verify_snapshot(
+        snapshot_path,
+        args.cache_dir,
+        artifact,
+        revision,
+    )
     setattr(args, "_artifact_integrity", artifact_integrity)
     return snapshot_path, acquisition_seconds, artifact_integrity
 

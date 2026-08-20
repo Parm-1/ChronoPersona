@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T05:44:48-04:00
+**Last updated:** 2026-08-20T06:59:19-04:00
 
 ## Decision
 
@@ -11,14 +11,15 @@ semantic state equality. Close this rescue without a v2 and preserve the v0
 eager-attention failure as separate immutable evidence.
 
 The next local engineering deliverable is a reusable manifest/hash-verified
-snapshot loader for registry tokenizer/scorer execution. Evidence-bearing
-real-source work remains externally blocked.
+snapshot loader for registry tokenizer execution. Keep model scoring blocked
+until its separate live-resource and exact-load gate is integrated.
 
 ## Current objective
 
-Publish the v1 target evidence on draft PR #32, require exact-head CI, then
-integrate the existing registry tokenizer/scorer consumers with the verified
-offline snapshot layer without reintroducing repository/cache loading bypasses.
+Implement the tokenizer-first verified-snapshot gate on the isolated stacked
+branch `feat/verified-registry-loader`, run the exact offline Pythia boundary
+audit twice, and require deterministic portable results before opening its
+draft PR. Do not load model weights or run registry scoring in this workstream.
 
 ## Current verified boundary
 
@@ -29,7 +30,7 @@ offline snapshot layer without reintroducing repository/cache loading bypasses.
   no-network plan and its self-hash validated from both run identities.
 - **Delivery — Tested:** draft PR #32 is open from
   `feat/tiny-training-resume-gate` to `main`; all 18 exact-head checks passed
-  at `3f03885`. PR #31 was merged externally at the preserved v0 head
+  at evidence head `fa809ed`. PR #31 was merged externally at the preserved v0 head
   `f2568ab`. Agents did not merge either PR and are not authorized to merge
   PR #32.
 - **Artifact — Tested:** the exact five-file Pythia snapshot at revision
@@ -52,6 +53,10 @@ offline snapshot layer without reintroducing repository/cache loading bypasses.
 - **Scientific boundary — Externally blocked:** the v1 result is engineering
   evidence only. No real-source qualification, model-behavior result,
   temporal effect, PEFT-adequacy result, or CSTG evidence exists.
+- **Tokenizer loader — Tested, not yet delivered:** the isolated implementation
+  worktree passed 390 tests with two optional skips, all three top-level
+  validators, compile checks, and diff checks. Target audit evidence remains
+  pending a scoped commit and exact-head CI.
 
 ## Evidence
 
@@ -102,7 +107,8 @@ offline snapshot layer without reintroducing repository/cache loading bypasses.
 - The smoke is only five steps on one GPU/runtime and does not establish
   sustained stability, broad-update capacity, or scientific training adequacy.
 - Direct registry tokenizer/scorer loading remains deliberately disabled until
-  it consumes a reusable verified-snapshot interface. A populated cache is not
+  it consumes a reusable verified-snapshot interface. Tokenizer integration is
+  now write-active; scorer execution remains blocked. A populated cache is not
   proof of content integrity.
 - Rights-qualified, historically bounded A/B/C source samples, source-role
   feasibility, evaluation sealing, synthetic calibration, and branch-level
@@ -113,9 +119,11 @@ offline snapshot layer without reintroducing repository/cache loading bypasses.
 
 ## Delivery state
 
-- Branch: `feat/tiny-training-resume-gate`
-- Target execution head and last green PR #32 head before the evidence update:
-  `3f03885b0237933ffb2b2f2a68bcf0e8f168a5d3`
+- Completed evidence branch: `feat/tiny-training-resume-gate`
+- Current isolated implementation branch: `feat/verified-registry-loader`
+  from exact tested base `fa809ed6a0337400088834a64f0718c85e7dd0fd`.
+- Current implementation worktree:
+  `C:\Users\sandh\Documents\Codex\2026-08-20\chronopersona-verified-loader`.
 - Draft PR #32: `https://github.com/Parm-1/ChronoPersona/pull/32`
 - PR #31: externally merged at `f2568ab`; it does not contain the v1 rescue.
 - No merge by Codex, force push, release, repository-visibility change, paid
@@ -123,12 +131,12 @@ offline snapshot layer without reintroducing repository/cache loading bypasses.
 
 ## Next write-active deliverable
 
-1. Require green exact-head CI for the scoped evidence commit on draft PR #32.
-2. After that delivery gate passes, freeze a small plan for the shared
-   manifest/hash-verified snapshot loader.
-3. Integrate tokenizer and model consumers without network-on-load or an
-   unverified-cache path.
-4. Run dependency-light regression tests, then bounded offline tokenizer and
-   registry-scoring target checks on the verified Pythia snapshot.
+1. Commit and push the tested implementation, open its stacked draft PR, and require
+   exact-head CI.
+2. Run two fresh-invocation Pythia
+   `prefix-policy=none` audits. Require all 12 items, 24 forms, and 48
+   candidates to pass with identical output hashes and no machine paths.
+3. Preserve a bounded tracked report, update the same draft PR, and require
+   exact-head CI again. Keep model scoring as the next plan.
 
 Do not reopen or tune v0/v1. Do not infer a scientific result from this gate.
