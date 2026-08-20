@@ -11,6 +11,8 @@ import re
 import stat
 from typing import Any
 
+from .file_integrity import stable_read_unchanged
+
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _PORTABLE_PART = re.compile(r"^[A-Za-z0-9._-]+$")
@@ -190,14 +192,13 @@ def _stable_file_bytes(
     )
     link_after = os.lstat(path)
     path_after = os.stat(path)
-    identities = {
-        _path_identity(path_before),
-        _path_identity(handle_before),
-        _path_identity(handle_after),
-        _path_identity(path_after),
-    }
     if (
-        len(identities) != 1
+        not stable_read_unchanged(
+            path_before,
+            handle_before,
+            handle_after,
+            path_after,
+        )
         or _path_identity(link_before) != _path_identity(link_after)
         or target_before != target_after
     ):
@@ -234,14 +235,13 @@ def _stable_file_digest(
     )
     link_after = os.lstat(path)
     path_after = os.stat(path)
-    identities = {
-        _path_identity(path_before),
-        _path_identity(handle_before),
-        _path_identity(handle_after),
-        _path_identity(path_after),
-    }
     if (
-        len(identities) != 1
+        not stable_read_unchanged(
+            path_before,
+            handle_before,
+            handle_after,
+            path_after,
+        )
         or _path_identity(link_before) != _path_identity(link_after)
         or target_before != target_after
     ):

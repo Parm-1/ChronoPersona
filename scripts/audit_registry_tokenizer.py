@@ -29,6 +29,7 @@ from chronopersona.evaluation import (  # noqa: E402
     sha256_file,
     validate_evaluation_registry,
 )
+from chronopersona.file_integrity import stable_read_unchanged  # noqa: E402
 from chronopersona.model_manifest import (  # noqa: E402
     load_model_manifest,
     validate_model_manifest,
@@ -113,17 +114,7 @@ def _stable_file_bytes(path: Path) -> bytes:
         payload = handle.read()
         opened_after = os.fstat(handle.fileno())
     after = path.stat()
-    identities = {
-        (
-            int(info.st_dev),
-            int(info.st_ino),
-            int(info.st_size),
-            int(info.st_mtime_ns),
-            int(info.st_ctime_ns),
-        )
-        for info in (before, opened_before, opened_after, after)
-    }
-    if len(identities) != 1:
+    if not stable_read_unchanged(before, opened_before, opened_after, after):
         raise RuntimeError(f"canonical input changed while reading: {path.name}")
     return payload
 

@@ -26,6 +26,7 @@ from .artifact_policy import (
     assert_tokenizer_snapshot_ready,
     find_artifact,
 )
+from .file_integrity import stable_read_unchanged
 from .model_manifest import validate_model_manifest
 from .model_snapshot import verify_snapshot
 from .attention_policy import (
@@ -147,17 +148,7 @@ def _stable_file_bytes(path: Path) -> bytes:
         payload = handle.read()
         opened_after = os.fstat(handle.fileno())
     after = path.stat()
-    identities = {
-        (
-            int(info.st_dev),
-            int(info.st_ino),
-            int(info.st_size),
-            int(info.st_mtime_ns),
-            int(info.st_ctime_ns),
-        )
-        for info in (before, opened_before, opened_after, after)
-    }
-    if len(identities) != 1:
+    if not stable_read_unchanged(before, opened_before, opened_after, after):
         raise TransformersProviderError(
             "canonical model manifest changed while it was being read"
         )

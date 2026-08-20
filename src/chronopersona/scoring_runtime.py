@@ -14,6 +14,7 @@ from statistics import fmean, stdev
 from typing import Any
 
 from .evaluation import canonical_json_sha256
+from .file_integrity import stable_read_unchanged
 from .run_registry import build_run_identity
 
 
@@ -344,17 +345,7 @@ def _stable_bytes(path: Path, label: str) -> bytes:
         payload = handle.read()
         opened_after = os.fstat(handle.fileno())
     after = path.stat()
-    identities = {
-        (
-            int(info.st_dev),
-            int(info.st_ino),
-            int(info.st_size),
-            int(info.st_mtime_ns),
-            int(info.st_ctime_ns),
-        )
-        for info in (before, opened_before, opened_after, after)
-    }
-    if len(identities) != 1:
+    if not stable_read_unchanged(before, opened_before, opened_after, after):
         raise ScoringRunError(f"{label} changed while it was being read")
     return payload
 
