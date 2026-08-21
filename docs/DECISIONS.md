@@ -1094,10 +1094,12 @@ B, alter C, inspect model behavior, or support a source/scientific claim.
 The execution profile may select at most four child revisions in each existing
 two-year candidate window (eight child/parent pairs total), make at most 32
 read-only, unauthenticated, no-cost Wikimedia requests, and publish only a
-sanitized aggregate and receipt. No retries, source substitution, bulk
-download, public text/identifiers, model execution, or source-C access are
-authorized. A failed or incomplete sample is preserved as feasibility evidence,
-not repaired by changing selection after results.
+sanitized aggregate and receipt. Before execution it must separately freeze a
+bounded retry/transport-diagnostic policy that records no response body or
+source text, and cannot change selection after a failure. Source substitution,
+bulk download, public text/identifiers, model execution, and source-C access
+are not authorized. A failed or incomplete sample is preserved as feasibility
+evidence, not repaired by changing selection after results.
 
 The alternate-B audit must evaluate at least one non-Q&A, independently
 produced, timestamp-native candidate against official access terms, item-level

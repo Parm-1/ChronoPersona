@@ -26,7 +26,8 @@ or an independently reviewed compliant access contract is later recorded.
 - Maximum retained child revisions: four per window; every child requires its
   exact immediate parent. Maximum retained pairs: eight.
 - Maximum live requests: 32 total, no authentication, no account, no charge,
-  no retry, and no source substitution.
+  and no source substitution. The profile must freeze its bounded retry and
+  sanitized transport-diagnostic policy before execution.
 - Public output: canonical aggregate counts, byte totals, closed disposition
   counts, profile/source hashes, and receipt hashes only. IDs, page titles,
   contributor fields, URLs, raw wikitext, normalized prose, and request details
@@ -54,6 +55,11 @@ or an independently reviewed compliant access contract is later recorded.
 **Acceptance:** no real record has been opened; profile, fixtures, and runner
 pass isolated validation and bind exact source/config/runtime inputs.
 
+**Current evidence:** the result-blind official access preflight is recorded at
+`reports/stage0/d042_wikimedia_access_preflight_2026-08-21.md`. It confirms a
+technical Action API path only; the closed profile and synthetic fixtures remain
+the next implementation unit.
+
 ## E1 — Wikimedia A feasibility execution
 
 1. Enumerate metadata only under the frozen profile; select by a deterministic,
@@ -63,8 +69,9 @@ pass isolated validation and bind exact source/config/runtime inputs.
    identity-mismatched results.
 3. Run the D-041 conservative added-span parser. Preserve parse failures,
    unresolved lineage, rights/attribution gaps, and zero-yield cells.
-4. Stop immediately on any transport, cap, binding, or containment failure.
-   Publish no aggregate unless every frozen request and terminal rebind pass.
+4. Apply only the frozen bounded retry/transport policy. Stop on its terminal
+   transport condition or any cap, binding, or containment failure. Publish no
+   aggregate unless every frozen request and terminal rebind pass.
 
 **Acceptance:** a valid aggregate may report feasibility counts only. It must
 not declare Wikimedia qualified, set source A, select source B/C, or expose any
@@ -89,8 +96,8 @@ Stop before or during execution on a payment, account/terms acceptance,
 credential requirement, unfrozen endpoint/selection/order, request or byte cap,
 bulk retrieval, non-Wikimedia real text, Stack Exchange access, source-C path,
 portable private-data leak, model operation, or any attempt to select a source
-from behavioral direction. Do not recover a failed E1 run by retrying,
-substituting, or changing the selection.
+from behavioral direction. Do not recover a terminal failed E1 run by
+substituting or changing the selection.
 
 ## Restart procedure
 
