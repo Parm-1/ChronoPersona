@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "run_name": "pythia-1b-deduped-development-score-v1",
+  "run_kind": "verified-registry-development-score",
+  "status": "frozen",
+  "scientific_claim_authorized": false,
+  "network_allowed": false,
+  "external_spend_cad": 0,
+  "max_parallel_jobs": 1,
+  "artifact": {
+    "id": "pythia-1b-deduped-main",
+    "repository": "EleutherAI/pythia-1b-deduped",
+    "revision": "7199d8fc61a6d565cd1f3c62bf11525b563e13b2",
+    "model_safetensors_size_bytes": 2090701528,
+    "model_safetensors_sha256": "fdb3f09a4a4d30678e021247e71f5b160bdd147de2aedd2d7d25e01feecc8e13",
+    "snapshot_receipt_sha256": "26af3f07196f1f1f1e773fd6a36daa47a780e90b7141908cc1230f2fcbcdefcc"
+  },
+  "canonical_inputs": {
+    "manifest_path": "artifacts/manifests/MODEL_MANIFEST.json",
+    "manifest_git_blob": "2dbafc0d0fe10a717e1df3d5c7920e6af661138b",
+    "manifest_sha256": "f3a800e95887b96ec66a660efa51ab975b17b7ec1ada0f381f502e912d9cf4f6",
+    "registry_path": "evaluations/registry/development-v1.jsonl",
+    "registry_git_blob": "97ff9353f4c509c413936d3d3279f738aeb047e0",
+    "registry_sha256": "81eb8e331d9fbd8d80ec675f209998e081e00834e5d1d141e2979b4f541c49ea"
+  },
+  "accepted_tokenizer_audit": {
+    "path": "artifacts/local/pythia-v1-tokenizer-a-fb8cff1.json",
+    "file_sha256": "acbb6fed70670c484e719c00775f95532f7282a76579c4c5d12804b5f3e2f76d",
+    "output_sha256": "8c4f75718ed6da986e2f7c316a62e6c420069577e2fb39919972d91a5857f0bb",
+    "backend_sha256": "1b0aca3746c0870daeb9137101cd89acbb38710fc433db83331287d5b0e47ee0",
+    "native_prefix_probe_sha256": "f2b89b376c56b7100ec3947ae1ccd3b468eceedcfbfe7031389bae0f8c327af1",
+    "scoring_token_matrix_sha256": "58bdb31e0e010db3630f46c4ed0361c309e89e43d412ef8db60a1be620161d47",
+    "prefix_policy": "none",
+    "prefix_token_ids": []
+  },
+  "registry_topology": {
+    "item_count": 14,
+    "form_count": 112,
+    "candidate_count": 224,
+    "forwarded_token_count": 18672,
+    "predicted_token_count": 18448,
+    "continuation_token_count": 3216,
+    "maximum_full_token_count": 127,
+    "maximum_continuation_token_count": 18,
+    "maximum_within_form_token_difference": 0
+  },
+  "scoring": {
+    "scorer_version": "complete-continuation-v0",
+    "maximum_length": 2048,
+    "complete_continuations": true,
+    "log_softmax_dtype": "float32",
+    "exact_boundary_required": true,
+    "truncation_allowed": false
+  },
+  "model": {
+    "class": "GPTNeoXForCausalLM",
+    "model_type": "gpt_neox",
+    "parameter_count": 1011781632,
+    "vocabulary_size": 50304,
+    "device": "cuda:0",
+    "dtype": "float16",
+    "eval_mode": true,
+    "quantized": false,
+    "device_map": false,
+    "offload": false,
+    "autocast": false,
+    "trust_remote_code": false,
+    "use_safetensors": true,
+    "local_files_only": true
+  },
+  "determinism": {
+    "fresh_invocations": 2,
+    "exact_score_bytes_required": true,
+    "algorithms": true,
+    "cublas_workspace_config": ":4096:8",
+    "attention_implementation": "sdpa",
+    "sdpa_backends": [
+      "math"
+    ],
+    "sdpa_math_allow_fp16_reduction": false,
+    "tf32": false,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "use_cache": false,
+    "rescue_runs": 0
+  },
+  "runtime_identity": {
+    "python": "3.11.9",
+    "packages": {
+      "torch": "2.13.0+cu130",
+      "transformers": "5.15.1",
+      "tokenizers": "0.22.2",
+      "huggingface-hub": "1.28.0",
+      "accelerate": "1.14.0",
+      "safetensors": "0.8.0"
+    },
+    "cuda_runtime": "13.0",
+    "cuda_device_count": 1,
+    "cuda_device_index": 0,
+    "cuda_device_name": "NVIDIA GeForce RTX 2060",
+    "cuda_compute_capability": [
+      7,
+      5
+    ],
+    "cuda_total_memory_bytes": 6441992192
+  },
+  "resource_limits": {
+    "minimum_preload_free_vram_bytes": 3695181824,
+    "maximum_process_peak_reserved_bytes": 3158310912,
+    "minimum_postload_global_free_vram_bytes": 1610612736,
+    "minimum_staging_output_free_bytes": 2227034030,
+    "minimum_output_free_bytes": 134217728,
+    "maximum_invocation_wall_seconds": 900,
+    "ram_threshold_enforced": false
+  },
+  "measurement_reliability": {
+    "profile_id": "development-v1-pythia-reliability-v0",
+    "criteria_path": "configs/evaluations/development-v1-reliability-v0.json",
+    "criteria_git_blob": "cc2f72232a82dc0d69dc9173203c2ddd9b3d7333",
+    "criteria_file_sha256": "565cda6bd992aca329a650ab058591af031e0329016bed95e1ce3247c89bb143",
+    "criteria_sha256": "d73b9d4d575f64587c5aea9acc18a6073a42bb1bd70491d29bd8422e95a73bca",
+    "tokenizer_audit_git_head": "fb8cff1495fedef9c08d5426efbea53234339a29",
+    "loaded_validation_sha256": "e4128adadf87e0b6250e39b8c5409db704d968deee6dd8da671dcda02da875eb",
+    "runtime_identity_sha256": "62d2bf7a6341ad42fd3f7042f35d05c2942a56a569a39303df5e3c81cd8c1156",
+    "attempt_execution_modes": {
+      "a": "canonical",
+      "b": "reverse"
+    },
+    "required_execution_modes": [
+      "canonical",
+      "reverse"
+    ],
+    "require_exact_score_byte_equality": true,
+    "claim_ceiling": "One-checkpoint development coherence only; not stable reliability, criterion validity, confirmation readiness, temporal evidence, causal evidence, or CSTG."
+  }
+}

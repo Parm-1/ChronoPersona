@@ -180,6 +180,9 @@ def test_pmc_fixture_command_emits_no_synthetic_or_confirmed_dates(
         "https://pmc.ncbi.nlm.nih.gov/api/oai/v1/mh/"
     )
     assert report["adapter"]["publication_date_confirmation_required"] is True
+    assert report["adapter"]["oai_from_date"] is None
+    assert report["adapter"]["oai_until_date"] is None
+    assert report["adapter"]["oai_query_bounds_verified"] is False
     assert (
         report["adapter"]["parser_diagnostics"][
             "skipped_missing_lifecycle_date"

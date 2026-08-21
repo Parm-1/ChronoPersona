@@ -15,6 +15,14 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "artifacts" / "manifests" / "MODEL_MANIFEST.json"
 DEFAULT_REGISTRY = ROOT / "evaluations" / "registry" / "development-v0.jsonl"
+V1_REGISTRY = ROOT / "evaluations" / "registry" / "development-v1.jsonl"
+V1_RELIABILITY_CRITERIA = (
+    ROOT
+    / "configs"
+    / "evaluations"
+    / "development-v1-reliability-v0.json"
+)
+EXECUTABLE_REGISTRIES = (DEFAULT_REGISTRY, V1_REGISTRY)
 sys.path.insert(0, str(ROOT / "src"))
 
 from chronopersona.artifact_policy import (  # noqa: E402
@@ -25,11 +33,17 @@ from chronopersona.artifact_policy import (  # noqa: E402
 )
 from chronopersona.evaluation import (  # noqa: E402
     canonical_json_sha256,
-    load_evaluation_registry,
+    load_evaluation_registry_with_sha256,
+    parse_evaluation_registry_bytes,
     sha256_file,
     validate_evaluation_registry,
 )
 from chronopersona.file_integrity import stable_read_unchanged  # noqa: E402
+from chronopersona.measurement_reliability import (  # noqa: E402
+    load_reliability_criteria,
+    validate_registry_against_criteria,
+    validate_tokenizer_audit_against_criteria,
+)
 from chronopersona.model_manifest import (  # noqa: E402
     load_model_manifest,
     validate_model_manifest,
@@ -71,6 +85,13 @@ def _parser() -> argparse.ArgumentParser:
         "--snapshot-path",
         type=Path,
         help="exact already-acquired Hugging Face snapshot directory",
+    )
+    parser.add_argument(
+        "--reliability-criteria",
+        type=Path,
+        help=(
+            "required exact criteria file when executing development-v1"
+        ),
     )
     parser.add_argument(
         "--execute",
@@ -136,6 +157,7 @@ def _git_hash_payload(relative: str, payload: bytes) -> str:
 
 
 def _execution_git_binding(
+    registry_path: Path = DEFAULT_REGISTRY,
     extra_inputs: tuple[tuple[str, Path], ...] = (),
 ) -> tuple[dict[str, object], dict[str, bytes]]:
     head = _git("rev-parse", "HEAD")
@@ -149,7 +171,7 @@ def _execution_git_binding(
     payloads: dict[str, bytes] = {}
     for label, path in (
         ("model_manifest", DEFAULT_MANIFEST),
-        ("development_registry", DEFAULT_REGISTRY),
+        ("development_registry", registry_path),
         *extra_inputs,
     ):
         relative = path.relative_to(ROOT).as_posix()
@@ -165,6 +187,16 @@ def _execution_git_binding(
     return bindings, payloads
 
 
+def _selected_executable_registry(path: Path) -> Path:
+    resolved = path.resolve(strict=True)
+    for candidate in EXECUTABLE_REGISTRIES:
+        if resolved == candidate.resolve(strict=True):
+            return candidate
+    raise ValueError(
+        "tokenizer execution requires an exact allowlisted development registry"
+    )
+
+
 def _manifest_from_bytes(payload: bytes) -> dict[str, object]:
     try:
         value = json.loads(payload.decode("utf-8"))
@@ -177,25 +209,11 @@ def _manifest_from_bytes(payload: bytes) -> dict[str, object]:
 
 def _registry_from_bytes(payload: bytes) -> list[dict[str, object]]:
     try:
-        text = payload.decode("utf-8")
-    except UnicodeDecodeError as error:
-        raise ValueError(f"canonical development registry is invalid: {error}") from error
-    records: list[dict[str, object]] = []
-    for line_number, line in enumerate(text.splitlines(), start=1):
-        if not line.strip():
-            continue
-        try:
-            record = json.loads(line)
-        except json.JSONDecodeError as error:
-            raise ValueError(
-                f"canonical development registry line {line_number} is invalid: {error}"
-            ) from error
-        if not isinstance(record, dict):
-            raise ValueError(
-                f"canonical development registry line {line_number} is not an object"
-            )
-        records.append(record)
-    return records
+        return list(parse_evaluation_registry_bytes(payload))
+    except ValueError as error:
+        raise ValueError(
+            f"canonical development registry is invalid: {error}"
+        ) from error
 
 
 def _preflight_output(path: Path | None) -> None:
@@ -256,17 +274,42 @@ def main() -> int:
                 DEFAULT_MANIFEST,
                 "model manifest",
             )
-            _require_canonical_path(
-                args.registry,
-                DEFAULT_REGISTRY,
-                "development registry",
-            )
+            selected_registry = _selected_executable_registry(args.registry)
+            reliability_criteria = None
+            extra_inputs: tuple[tuple[str, Path], ...] = ()
+            if selected_registry == V1_REGISTRY:
+                if args.reliability_criteria is None:
+                    raise ValueError(
+                        "development-v1 execution requires "
+                        "--reliability-criteria"
+                    )
+                _require_canonical_path(
+                    args.reliability_criteria,
+                    V1_RELIABILITY_CRITERIA,
+                    "measurement reliability criteria",
+                )
+                reliability_criteria = load_reliability_criteria(
+                    args.reliability_criteria
+                )
+                extra_inputs = (
+                    (
+                        "measurement_reliability_criteria",
+                        V1_RELIABILITY_CRITERIA,
+                    ),
+                )
+            elif args.reliability_criteria is not None:
+                raise ValueError(
+                    "--reliability-criteria is valid only with development-v1"
+                )
             _require_output_outside_snapshot(
                 args.output,
                 cache_dir=args.cache_dir,
                 snapshot_path=args.snapshot_path,
             )
-            git_binding, input_payloads = _execution_git_binding()
+            git_binding, input_payloads = _execution_git_binding(
+                selected_registry,
+                extra_inputs,
+            )
             manifest_payload = input_payloads["model_manifest"]
             registry_payload = input_payloads["development_registry"]
             manifest = _manifest_from_bytes(manifest_payload)
@@ -274,17 +317,59 @@ def main() -> int:
             manifest_sha256 = hashlib.sha256(manifest_payload).hexdigest()
             registry_sha256 = hashlib.sha256(registry_payload).hexdigest()
         else:
+            selected_registry = args.registry
+            reliability_criteria = (
+                load_reliability_criteria(args.reliability_criteria)
+                if args.reliability_criteria is not None
+                else None
+            )
             manifest = load_model_manifest(args.manifest)
-            registry = load_evaluation_registry(args.registry)
+            registry, registry_sha256 = load_evaluation_registry_with_sha256(
+                args.registry
+            )
             manifest_sha256 = sha256_file(args.manifest)
-            registry_sha256 = sha256_file(args.registry)
         manifest_errors = validate_model_manifest(manifest)
         if manifest_errors:
             raise ValueError("; ".join(manifest_errors))
         artifact = find_artifact(manifest, args.artifact)
         registry_errors = validate_evaluation_registry(registry)
+        if reliability_criteria is not None:
+            registry_errors = (
+                *registry_errors,
+                *validate_registry_against_criteria(
+                    registry,
+                    reliability_criteria,
+                    registry_sha256=registry_sha256,
+                ),
+            )
         if registry_errors:
             raise ValueError("; ".join(registry_errors))
+        if reliability_criteria is not None:
+            frozen_tokenizer = reliability_criteria["tokenizer"]
+            expected_artifact = {
+                "id": frozen_tokenizer["artifact_id"],
+                "repository": frozen_tokenizer["repository"],
+                "revision": frozen_tokenizer["revision"],
+            }
+            observed_artifact = {
+                key: artifact.get(key) for key in expected_artifact
+            }
+            if manifest_sha256 != frozen_tokenizer["model_manifest_sha256"]:
+                raise ValueError(
+                    "model manifest identity differs from the frozen reliability profile"
+                )
+            if observed_artifact != expected_artifact:
+                raise ValueError(
+                    "model artifact identity differs from the frozen reliability profile"
+                )
+            if args.prefix_policy != frozen_tokenizer["prefix_policy"]:
+                raise ValueError(
+                    "prefix policy differs from the frozen reliability profile"
+                )
+            if args.max_length != frozen_tokenizer["max_length"]:
+                raise ValueError(
+                    "maximum length differs from the frozen reliability profile"
+                )
 
         if not args.execute:
             report = {
@@ -334,6 +419,7 @@ def main() -> int:
                 tokenizer_identity=(
                     f"{loaded.repository}@{loaded.revision}"
                 ),
+                include_text_bindings=reliability_criteria is not None,
             )
             report.pop("output_sha256", None)
             weight_bytes_verified = sum(
@@ -370,12 +456,41 @@ def main() -> int:
                     **git_binding,
                 }
             )
-            final_binding, final_payloads = _execution_git_binding()
+            if reliability_criteria is not None:
+                common_counts = {
+                    item["item_id"]: item["forms"][0]["candidates"][0][
+                        "continuation_token_count"
+                    ]
+                    for item in report["items"]
+                }
+                report["measurement_reliability"] = {
+                    "profile_id": reliability_criteria["profile_id"],
+                    "criteria_sha256": reliability_criteria[
+                        "criteria_sha256"
+                    ],
+                    "common_continuation_token_counts": common_counts,
+                    "claim_ceiling": reliability_criteria["claim_ceiling"],
+                }
+            final_binding, final_payloads = _execution_git_binding(
+                selected_registry,
+                extra_inputs,
+            )
             if final_binding != git_binding or final_payloads != input_payloads:
                 raise RuntimeError(
                     "Git head or canonical inputs changed during tokenizer audit"
                 )
             report["output_sha256"] = canonical_json_sha256(report)
+            if reliability_criteria is not None:
+                reliability_errors = (
+                    validate_tokenizer_audit_against_criteria(
+                        report,
+                        reliability_criteria,
+                        registry,
+                        expected_git_head=str(git_binding["git_head"]),
+                    )
+                )
+                if reliability_errors:
+                    raise RuntimeError("; ".join(reliability_errors))
     except Exception as error:
         print(f"error: {error}", file=sys.stderr)
         return 1

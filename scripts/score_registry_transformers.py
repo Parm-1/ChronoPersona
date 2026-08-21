@@ -41,11 +41,18 @@ from chronopersona.evaluation import (  # noqa: E402
 )
 from chronopersona.model_manifest import validate_model_manifest  # noqa: E402
 from chronopersona.model_snapshot import verify_snapshot  # noqa: E402
+from chronopersona.path_policy import (  # noqa: E402
+    PortablePathError,
+    portable_path_identity,
+    portable_relative_path,
+)
 from chronopersona.run_registry import RunLock, build_run_identity  # noqa: E402
-from chronopersona.scoring import score_evaluation_registry  # noqa: E402
+from chronopersona.scoring import (  # noqa: E402
+    execution_trace_for_registry,
+    score_evaluation_registry,
+)
 from chronopersona.scoring_runtime import (  # noqa: E402
-    FROZEN_CONFIG_GIT_BLOB,
-    FROZEN_RUN_SPEC_SHA256,
+    V1_SCORING_PROFILE,
     ScoringRunError,
     create_only_json,
     expected_tokenizer_id,
@@ -54,6 +61,10 @@ from chronopersona.scoring_runtime import (  # noqa: E402
     load_scoring_config,
     pretty_json_bytes,
     receipt_with_self_hash,
+    scoring_profile,
+    scoring_profile_for_relative_path,
+    scoring_run_identity_payload,
+    expected_execution_mode,
     validate_complete_receipt,
     validate_score_artifact,
     validate_scoring_config,
@@ -102,8 +113,31 @@ def _set_stage(args: argparse.Namespace, stage: str) -> None:
 
 
 def _require_canonical_path(path: Path, expected: Path, label: str) -> None:
-    if path.resolve(strict=True) != expected.resolve(strict=True):
+    if any(part in {".", ".."} for part in path.parts):
+        raise ScoringRunError(f"{label} contains a path-normalization alias")
+    raw_candidate = path if path.is_absolute() else Path.cwd() / path
+    raw_expected = expected if expected.is_absolute() else Path.cwd() / expected
+    if str(raw_candidate) != str(raw_expected):
         raise ScoringRunError(f"scoring execution requires the canonical {label}")
+    candidate = Path(os.path.abspath(path))
+    canonical = Path(os.path.abspath(expected))
+    if candidate != canonical or path.resolve(strict=True) != expected.resolve(
+        strict=True
+    ):
+        raise ScoringRunError(f"scoring execution requires the canonical {label}")
+
+
+def _selected_profile(config_path: Path):
+    candidate = Path(os.path.abspath(config_path))
+    for relative in (
+        "configs/runs/pythia-development-score-v0.json",
+        "configs/runs/pythia-development-score-v1.json",
+    ):
+        expected = ROOT / relative
+        if candidate == Path(os.path.abspath(expected)):
+            _require_canonical_path(config_path, expected, "scoring config")
+            return scoring_profile_for_relative_path(relative)
+    raise ScoringRunError("scoring config path is not allowlisted")
 
 
 def _preflight_output(path: Path | None, label: str) -> None:
@@ -117,9 +151,15 @@ def _require_output_location(
     cache_dir: Path | None,
     snapshot_path: Path | None,
     label: str,
-) -> None:
+) -> tuple[str, ...]:
     if any(part in {".", ".."} for part in output.parts):
         raise ScoringRunError(f"{label} contains a path-normalization alias")
+    raw_candidate = output if output.is_absolute() else Path.cwd() / output
+    raw_root = (
+        LOCAL_OUTPUT_ROOT
+        if LOCAL_OUTPUT_ROOT.is_absolute()
+        else Path.cwd() / LOCAL_OUTPUT_ROOT
+    )
     candidate = Path(os.path.abspath(output))
     lexical_root = Path(os.path.abspath(LOCAL_OUTPUT_ROOT))
     root_info = os.lstat(LOCAL_OUTPUT_ROOT)
@@ -137,6 +177,17 @@ def _require_output_location(
         raise ScoringRunError(
             f"{label} must be a new file under the canonical artifacts/local root"
         )
+    try:
+        relative = raw_candidate.relative_to(raw_root)
+    except ValueError as error:
+        raise ScoringRunError(
+            f"{label} must be a new file under the canonical artifacts/local root"
+        ) from error
+    try:
+        portable = portable_relative_path(relative.as_posix(), label=label)
+    except PortablePathError as error:
+        raise ScoringRunError(str(error)) from error
+    portable_identity = portable_path_identity(portable.as_posix(), label=label)
     current = lexical_root
     relative_parent = candidate.parent.relative_to(lexical_root)
     for part in relative_parent.parts:
@@ -151,6 +202,14 @@ def _require_output_location(
             )
         ):
             raise ScoringRunError(f"{label} parent traverses a linked directory")
+    for sibling in candidate.parent.iterdir():
+        if (
+            sibling.name != candidate.name
+            and sibling.name.casefold() == candidate.name.casefold()
+        ):
+            raise ScoringRunError(
+                f"{label} collides under portable filesystem semantics"
+            )
     resolved_candidate = candidate.resolve(strict=False)
     if not resolved_candidate.is_relative_to(local_root):
         raise ScoringRunError(f"{label} resolves outside canonical artifacts/local")
@@ -162,6 +221,7 @@ def _require_output_location(
     for root, root_label in roots:
         if resolved_candidate.is_relative_to(root):
             raise ScoringRunError(f"{label} must be outside the {root_label}")
+    return portable_identity
 
 
 def _output_storage_observation(
@@ -371,15 +431,24 @@ class _OutputPairReservation:
             )
 
 
-def _bound_execution_inputs() -> tuple[dict[str, Any], dict[str, bytes]]:
+def _bound_execution_inputs(profile) -> tuple[dict[str, Any], dict[str, bytes]]:
+    extra_inputs: list[tuple[str, Path]] = [
+        ("scoring_config", ROOT / profile.config_path)
+    ]
+    if profile.criteria_path is not None:
+        extra_inputs.append(
+            ("measurement_reliability_criteria", ROOT / profile.criteria_path)
+        )
     binding, payloads = tokenizer_cli._execution_git_binding(
-        (("scoring_config", DEFAULT_CONFIG),)
+        registry_path=ROOT / profile.registry_path,
+        extra_inputs=tuple(extra_inputs),
     )
     return dict(binding), payloads
 
 
 def _execution_inputs(
     args: argparse.Namespace,
+    profile,
 ) -> tuple[
     dict[str, Any],
     dict[str, Any],
@@ -390,10 +459,14 @@ def _execution_inputs(
     str,
     str,
 ]:
-    _require_canonical_path(args.config, DEFAULT_CONFIG, "scoring config")
+    _require_canonical_path(
+        args.config, ROOT / profile.config_path, "scoring config"
+    )
     _require_canonical_path(args.manifest, DEFAULT_MANIFEST, "model manifest")
-    _require_canonical_path(args.registry, DEFAULT_REGISTRY, "development registry")
-    binding, payloads = _bound_execution_inputs()
+    _require_canonical_path(
+        args.registry, ROOT / profile.registry_path, "development registry"
+    )
+    binding, payloads = _bound_execution_inputs(profile)
     try:
         config_raw = json.loads(payloads["scoring_config"])
     except json.JSONDecodeError as error:
@@ -404,6 +477,8 @@ def _execution_inputs(
     if errors:
         raise ScoringRunError("; ".join(errors))
     config = dict(config_raw)
+    if scoring_profile(config) != profile:
+        raise ScoringRunError("scoring config/profile selection mismatch")
     manifest = tokenizer_cli._manifest_from_bytes(payloads["model_manifest"])
     registry = tokenizer_cli._registry_from_bytes(payloads["development_registry"])
     manifest_errors = validate_model_manifest(manifest)
@@ -414,7 +489,7 @@ def _execution_inputs(
         raise ScoringRunError("; ".join(registry_errors))
     artifact = dict(find_artifact(manifest, config["artifact"]["id"]))
     assert_model_score_ready(artifact)
-    config_sha256 = FROZEN_RUN_SPEC_SHA256
+    config_sha256 = profile.run_spec_sha256
     manifest_sha256 = hashlib.sha256(payloads["model_manifest"]).hexdigest()
     registry_sha256 = hashlib.sha256(payloads["development_registry"]).hexdigest()
     canonical = config["canonical_inputs"]
@@ -434,11 +509,44 @@ def _execution_inputs(
         (
             "scoring config Git blob",
             binding["scoring_config_git_blob"],
-            FROZEN_CONFIG_GIT_BLOB,
+            profile.config_git_blob,
         ),
     ):
         if observed != expected:
             raise ScoringRunError(f"frozen {label} mismatch")
+    if profile.criteria_path is not None:
+        reliability = config.get("measurement_reliability")
+        criteria_payload = payloads.get("measurement_reliability_criteria")
+        if not isinstance(reliability, Mapping) or not isinstance(
+            criteria_payload, bytes
+        ):
+            raise ScoringRunError("measurement-reliability criteria are missing")
+        if (
+            hashlib.sha256(criteria_payload).hexdigest()
+            != reliability["criteria_file_sha256"]
+            or binding.get("measurement_reliability_criteria_git_blob")
+            != reliability["criteria_git_blob"]
+        ):
+            raise ScoringRunError("frozen measurement-reliability criteria mismatch")
+        try:
+            criteria = json.loads(criteria_payload)
+        except json.JSONDecodeError as error:
+            raise ScoringRunError(
+                f"measurement-reliability criteria are invalid: {error}"
+            ) from error
+        if not isinstance(criteria, Mapping):
+            raise ScoringRunError("measurement-reliability criteria root is invalid")
+        criteria_body = dict(criteria)
+        observed_self_hash = criteria_body.pop("criteria_sha256", None)
+        if (
+            observed_self_hash != reliability["criteria_sha256"]
+            or canonical_json_sha256(criteria_body) != observed_self_hash
+            or criteria.get("profile_id") != reliability["profile_id"]
+            or criteria.get("registry", {}).get("sha256") != registry_sha256
+        ):
+            raise ScoringRunError(
+                "measurement-reliability criteria identity mismatch"
+            )
     return (
         config,
         artifact,
@@ -453,13 +561,17 @@ def _execution_inputs(
 
 def _pre_execution_policy(
     args: argparse.Namespace,
-) -> tuple[dict[str, Any], Path]:
+) -> tuple[dict[str, Any], Path, Any]:
     """Fail on canonical path, artifact policy, and arguments before Git work."""
 
-    _require_canonical_path(args.config, DEFAULT_CONFIG, "scoring config")
+    profile = _selected_profile(args.config)
     _require_canonical_path(args.manifest, DEFAULT_MANIFEST, "model manifest")
-    _require_canonical_path(args.registry, DEFAULT_REGISTRY, "development registry")
+    _require_canonical_path(
+        args.registry, ROOT / profile.registry_path, "development registry"
+    )
     config = load_scoring_config(args.config)
+    if scoring_profile(config) != profile:
+        raise ScoringRunError("scoring config/profile selection mismatch")
     manifest = tokenizer_cli._manifest_from_bytes(args.manifest.read_bytes())
     errors = validate_model_manifest(manifest)
     if errors:
@@ -467,7 +579,7 @@ def _pre_execution_policy(
     requested_artifact = find_artifact(manifest, args.artifact)
     assert_model_score_ready(requested_artifact)
     tokenizer_audit_path = _validate_execution_arguments(args, config)
-    return config, tokenizer_audit_path
+    return config, tokenizer_audit_path, profile
 
 
 def _validate_execution_arguments(
@@ -499,8 +611,11 @@ def _validate_execution_arguments(
         )
     configured_audit = ROOT / config["accepted_tokenizer_audit"]["path"]
     selected_audit = args.tokenizer_audit or configured_audit
-    if selected_audit.resolve(strict=True) != configured_audit.resolve(strict=True):
-        raise ScoringRunError("accepted tokenizer audit path differs from the frozen config")
+    _require_canonical_path(
+        selected_audit,
+        configured_audit,
+        "accepted tokenizer audit",
+    )
     assert args.output is not None and args.runtime_output is not None
     if args.output.resolve(strict=False) == args.runtime_output.resolve(strict=False):
         raise ScoringRunError("score and runtime outputs must be distinct")
@@ -508,18 +623,22 @@ def _validate_execution_arguments(
     runtime_path = args.runtime_output.resolve(strict=False)
     if score_path in runtime_path.parents or runtime_path in score_path.parents:
         raise ScoringRunError("score and runtime outputs must not contain one another")
-    _require_output_location(
+    score_identity = _require_output_location(
         args.output,
         cache_dir=args.cache_dir,
         snapshot_path=args.snapshot_path,
         label="score output",
     )
-    _require_output_location(
+    runtime_identity = _require_output_location(
         args.runtime_output,
         cache_dir=args.cache_dir,
         snapshot_path=args.snapshot_path,
         label="runtime output",
     )
+    if score_identity == runtime_identity:
+        raise ScoringRunError(
+            "score and runtime outputs collide under portable filesystem semantics"
+        )
     setattr(
         args,
         "_output_storage_preflight",
@@ -651,17 +770,41 @@ def _resident_resource_check(
     minimum = config["resource_limits"][
         "minimum_postload_global_free_vram_bytes"
     ]
-    validation = model_benchmark._validate_execution_resources(
-        reference,
-        observed,
-        artifact,
-        require_cuda=True,
-        enforce_ram_threshold=False,
-        minimum_free_vram_bytes=minimum,
-    )
+    pending_resource = {
+        "label": label,
+        "audit_sha256": observed_sha256,
+        "audit_semantic_sha256": canonical_json_sha256(observed),
+        "captured_at": observed.get("captured_at"),
+        "age_seconds": age,
+        "minimum_free_vram_bytes": minimum,
+        "audit": observed,
+    }
+    state["pending_resident_resource_check"] = pending_resource
+    try:
+        validation = model_benchmark._validate_execution_resources(
+            reference,
+            observed,
+            artifact,
+            require_cuda=True,
+            enforce_ram_threshold=False,
+            minimum_free_vram_bytes=minimum,
+        )
+    except Exception:
+        try:
+            pending_resource["conservative_vram"] = (
+                model_benchmark._conservative_vram(observed)
+            )
+        except Exception as observation_error:
+            pending_resource["conservative_vram_error"] = {
+                "error_type": type(observation_error).__name__,
+                "error": str(observation_error),
+            }
+        raise
     conservative = model_benchmark._conservative_vram(observed)
+    pending_resource["conservative_vram"] = conservative
     if conservative["conservative_free_bytes"] < minimum:
         raise ScoringRunError(f"{label} global free VRAM is below the frozen threshold")
+    state.pop("pending_resident_resource_check", None)
     return {
         "label": label,
         "audit_sha256": observed_sha256,
@@ -677,6 +820,7 @@ def _resident_resource_check(
 def _final_integrity_rebind(
     args: argparse.Namespace,
     *,
+    profile: Any,
     artifact: Mapping[str, Any],
     snapshot_receipt: Mapping[str, Any],
     git_binding: Mapping[str, Any],
@@ -689,7 +833,7 @@ def _final_integrity_rebind(
     final_snapshot = verify_snapshot(args.snapshot_path, args.cache_dir, artifact)
     if final_snapshot["portable_receipt"] != snapshot_receipt:
         raise ScoringRunError("snapshot changed during registry scoring")
-    final_binding, final_payloads = _bound_execution_inputs()
+    final_binding, final_payloads = _bound_execution_inputs(profile)
     if final_binding != git_binding or final_payloads != input_payloads:
         raise ScoringRunError("Git head or canonical inputs changed during scoring")
     final_tokenizer_audit, final_tokenizer_sha = load_accepted_tokenizer_audit(
@@ -713,7 +857,7 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
         {"started_at": started_at, "process_id": os.getpid()},
     )
     _set_stage(args, "artifact-policy-and-options")
-    initial_config, tokenizer_audit_path = _pre_execution_policy(args)
+    initial_config, tokenizer_audit_path, profile = _pre_execution_policy(args)
     _set_stage(args, "canonical-input-binding")
     (
         config,
@@ -724,7 +868,7 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
         config_sha256,
         manifest_sha256,
         registry_sha256,
-    ) = _execution_inputs(args)
+    ) = _execution_inputs(args, profile)
     if config != initial_config:
         raise ScoringRunError("scoring config changed before canonical binding")
     assert args.output is not None and args.runtime_output is not None
@@ -741,6 +885,9 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
             },
         }
     )
+    execution_mode = expected_execution_mode(config, str(args.attempt))
+    if execution_mode is not None:
+        args._failure_context["execution_mode"] = execution_mode
     _set_stage(args, "accepted-tokenizer-audit")
     tokenizer_audit, tokenizer_audit_file_sha256 = load_accepted_tokenizer_audit(
         tokenizer_audit_path, config
@@ -750,16 +897,7 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
         "output_sha256": tokenizer_audit["output_sha256"],
     }
     identity = build_run_identity(
-        {
-            "run_kind": config["run_kind"],
-            "git_head": git_binding["git_head"],
-            "run_spec_sha256": config_sha256,
-            "artifact": config["artifact"],
-            "registry_sha256": registry_sha256,
-            "accepted_tokenizer_output_sha256": config[
-                "accepted_tokenizer_audit"
-            ]["output_sha256"],
-        }
+        scoring_run_identity_payload(config, str(git_binding["git_head"]))
     )
     setattr(args, "_run_id", identity["run_id"])
     reservation_storage = _output_storage_observation(
@@ -863,6 +1001,7 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
             _require_wall_headroom(args, config, "candidate post-forward")
             return evidence
 
+        execution_trace: list[dict[str, Any]] = []
         base_score = score_evaluation_registry(
             registry,
             bounded_provider,
@@ -871,7 +1010,24 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
             model_revision=loaded_model.revision,
             tokenizer_id=expected_tokenizer_id(config),
             scorer_version=config["scoring"]["scorer_version"],
+            execution_mode=execution_mode or "canonical",
+            execution_trace=execution_trace,
         )
+        expected_trace = execution_trace_for_registry(
+            registry, execution_mode or "canonical"
+        )
+        if execution_trace != expected_trace:
+            raise ScoringRunError("provider execution trace differs from the freeze")
+        execution_schedule = None
+        if execution_mode is not None:
+            execution_schedule = {
+                "profile_id": profile.profile_id,
+                "mode": execution_mode,
+                "candidate_count": len(execution_trace),
+                "trace_sha256": canonical_json_sha256(execution_trace),
+                "canonical_serialization": True,
+            }
+            args._failure_context["execution_schedule"] = execution_schedule
         provider.assert_model_unchanged()
         score = finalize_score_artifact(
             base_score,
@@ -937,6 +1093,7 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
         _set_stage(args, "final-integrity-rebind")
         _final_integrity_rebind(
             args,
+            profile=profile,
             artifact=artifact,
             snapshot_receipt=loaded_evidence["snapshot_verification"],
             git_binding=git_binding,
@@ -973,8 +1130,7 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
             ],
             "final_wall_limit_passed": True,
         }
-        receipt = receipt_with_self_hash(
-            {
+        receipt_body = {
                 "schema_version": 1,
                 "receipt_type": "registry-score-runtime",
                 "status": "complete",
@@ -1036,11 +1192,14 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
                     "output_sha256": score["output_sha256"],
                 },
             }
-        )
+        if execution_schedule is not None:
+            receipt_body["execution_schedule"] = execution_schedule
+        receipt = receipt_with_self_hash(receipt_body)
         receipt_errors = validate_complete_receipt(
             receipt,
             config,
             tokenizer_audit=tokenizer_audit,
+            registry=registry,
         )
         if receipt_errors:
             raise ScoringRunError("; ".join(receipt_errors))
@@ -1067,10 +1226,12 @@ def _execute(args: argparse.Namespace) -> dict[str, Any]:
 def _failure_receipt(args: argparse.Namespace, error: Exception) -> dict[str, Any]:
     context = dict(getattr(args, "_failure_context", {}))
     resource_state = getattr(args, "_resource_state", None)
-    if isinstance(resource_state, dict) and isinstance(
-        resource_state.get("preflight"), dict
-    ):
-        context["resource_preflight"] = resource_state["preflight"]
+    if isinstance(resource_state, dict):
+        if isinstance(resource_state.get("preflight"), dict):
+            context["resource_preflight"] = resource_state["preflight"]
+        pending_resource = resource_state.get("pending_resident_resource_check")
+        if isinstance(pending_resource, Mapping):
+            context["failed_resident_resource_check"] = dict(pending_resource)
     provider = getattr(args, "_provider", None)
     metrics = getattr(provider, "runtime_metrics", None)
     if callable(metrics):
@@ -1138,7 +1299,14 @@ def _preserve_failure_receipt(
 
 
 def _plan(args: argparse.Namespace) -> dict[str, Any]:
+    profile = _selected_profile(args.config)
+    _require_canonical_path(args.manifest, DEFAULT_MANIFEST, "model manifest")
+    _require_canonical_path(
+        args.registry, ROOT / profile.registry_path, "development registry"
+    )
     config = load_scoring_config(args.config)
+    if scoring_profile(config) != profile:
+        raise ScoringRunError("scoring config/profile selection mismatch")
     manifest = tokenizer_cli._manifest_from_bytes(args.manifest.read_bytes())
     registry = tokenizer_cli._registry_from_bytes(args.registry.read_bytes())
     manifest_errors = validate_model_manifest(manifest)
@@ -1148,6 +1316,21 @@ def _plan(args: argparse.Namespace) -> dict[str, Any]:
     if registry_errors:
         raise ScoringRunError("; ".join(registry_errors))
     artifact = find_artifact(manifest, args.artifact)
+    frozen_profile = {
+        "profile_id": profile.profile_id,
+        "run_name": config["run_name"],
+        "artifact": config["artifact"],
+        "prefix_policy": config["accepted_tokenizer_audit"]["prefix_policy"],
+        "device": config["model"]["device"],
+        "dtype": config["model"]["dtype"],
+        "maximum_length": config["scoring"]["maximum_length"],
+        "determinism": config["determinism"],
+        "resource_limits": config["resource_limits"],
+    }
+    if profile is V1_SCORING_PROFILE:
+        frozen_profile["measurement_reliability"] = config[
+            "measurement_reliability"
+        ]
     return {
         "schema_version": 1,
         "mode": "plan",
@@ -1159,16 +1342,7 @@ def _plan(args: argparse.Namespace) -> dict[str, Any]:
         "requested_device": args.device,
         "requested_dtype": args.dtype,
         "requested_max_length": args.max_length,
-        "frozen_profile": {
-            "run_name": config["run_name"],
-            "artifact": config["artifact"],
-            "prefix_policy": config["accepted_tokenizer_audit"]["prefix_policy"],
-            "device": config["model"]["device"],
-            "dtype": config["model"]["dtype"],
-            "maximum_length": config["scoring"]["maximum_length"],
-            "determinism": config["determinism"],
-            "resource_limits": config["resource_limits"],
-        },
+        "frozen_profile": frozen_profile,
         "policy": operation_plan(artifact, "model-score"),
     }
 

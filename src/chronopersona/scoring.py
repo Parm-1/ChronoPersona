@@ -102,6 +102,54 @@ class CalibratedScore:
 
 
 ScoreProvider = Callable[[str, str], CandidateEvidence]
+EXECUTION_MODES = frozenset({"canonical", "reverse"})
+
+
+def _candidate_occurrences(
+    items: Sequence[Mapping[str, Any]],
+) -> list[tuple[tuple[int, int, int], dict[str, Any], str, str]]:
+    """Flatten candidate occurrences without deduplicating repeated text."""
+
+    occurrences: list[
+        tuple[tuple[int, int, int], dict[str, Any], str, str]
+    ] = []
+    for item_index, item in enumerate(items):
+        item_id = str(item["item_id"])
+        for form_index, form in enumerate(item["forms"]):
+            form_id = str(form["form_id"])
+            prompt = str(form["prompt"])
+            for candidate_index, candidate in enumerate(form["candidates"]):
+                pole = str(candidate["pole"])
+                occurrences.append(
+                    (
+                        (item_index, form_index, candidate_index),
+                        {
+                            "item_id": item_id,
+                            "form_id": form_id,
+                            "candidate_index": candidate_index,
+                            "pole": pole,
+                        },
+                        prompt,
+                        str(candidate["text"]),
+                    )
+                )
+    return occurrences
+
+
+def execution_trace_for_registry(
+    items: Sequence[Mapping[str, Any]],
+    execution_mode: str,
+) -> list[dict[str, Any]]:
+    """Return the exact provider-call trace for one execution mode."""
+
+    if execution_mode not in EXECUTION_MODES:
+        raise ScoringIntegrityError(
+            f"unsupported candidate execution mode: {execution_mode!r}"
+        )
+    occurrences = _candidate_occurrences(items)
+    if execution_mode == "reverse":
+        occurrences.reverse()
+    return [dict(identity) for _, identity, _, _ in occurrences]
 
 
 def _finite(value: Any, label: str) -> float:
@@ -322,6 +370,8 @@ def score_evaluation_registry(
     model_revision: str,
     tokenizer_id: str,
     scorer_version: str = "complete-continuation-v0",
+    execution_mode: str = "canonical",
+    execution_trace: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Score a validated registry with a model-specific token provider.
 
@@ -340,23 +390,45 @@ def score_evaluation_registry(
         if not isinstance(value, str) or not value:
             raise ScoringIntegrityError(f"{label} must not be empty")
 
+    if execution_mode not in EXECUTION_MODES:
+        raise ScoringIntegrityError(
+            f"unsupported candidate execution mode: {execution_mode!r}"
+        )
+    occurrences = _candidate_occurrences(items)
+    scheduled = list(occurrences)
+    if execution_mode == "reverse":
+        scheduled.reverse()
+    scored_occurrences: dict[tuple[int, int, int], CandidateScore] = {}
+    observed_trace: list[dict[str, Any]] = []
+    for key, identity, prompt, continuation in scheduled:
+        if key in scored_occurrences:
+            raise ScoringIntegrityError("candidate occurrence identity is duplicated")
+        evidence = provider(prompt, continuation)
+        scored_occurrences[key] = score_candidate(identity["pole"], evidence)
+        observed_trace.append(dict(identity))
+    if execution_trace is not None:
+        execution_trace.extend(observed_trace)
+
     item_outputs: list[dict[str, Any]] = []
-    for item in items:
+    for item_index, item in enumerate(items):
         item_id = str(item["item_id"])
         reference_pole = str(item["reference_pole"])
         form_outputs: list[dict[str, Any]] = []
         pairwise_forms: list[PairwiseScore] = []
 
-        for form in item["forms"]:
-            prompt = str(form["prompt"])
+        for form_index, form in enumerate(item["forms"]):
             candidate_scores: list[CandidateScore] = []
             display_order: list[str] = []
-            for candidate in form["candidates"]:
+            for candidate_index, candidate in enumerate(form["candidates"]):
                 pole = str(candidate["pole"])
-                continuation = str(candidate["text"])
                 display_order.append(pole)
-                evidence = provider(prompt, continuation)
-                candidate_scores.append(score_candidate(pole, evidence))
+                key = (item_index, form_index, candidate_index)
+                try:
+                    candidate_scores.append(scored_occurrences[key])
+                except KeyError as error:
+                    raise ScoringIntegrityError(
+                        "candidate occurrence was not scored"
+                    ) from error
 
             comparison = pairwise_score(
                 candidate_scores,

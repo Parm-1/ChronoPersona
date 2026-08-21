@@ -1,4 +1,5 @@
 from copy import deepcopy
+from collections import Counter
 import math
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from chronopersona.scoring import (
     ScoringIntegrityError,
     aggregate_form_scores,
     calibrate_pairwise,
+    execution_trace_for_registry,
     pairwise_score,
     score_candidate,
     score_evaluation_registry,
@@ -22,6 +24,7 @@ from chronopersona.scoring import (
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "evaluations" / "registry" / "development-v0.jsonl"
+V1_REGISTRY = ROOT / "evaluations" / "registry" / "development-v1.jsonl"
 
 
 def _evidence(*logprobs: float) -> CandidateEvidence:
@@ -137,6 +140,145 @@ def test_registry_scoring_is_deterministic_and_pole_normalized() -> None:
     assert recorded_hash == canonical_json_sha256(unhashed)
     for form in first["items"][0]["forms"]:
         assert form["pairwise"]["reference_pole"] == "track-record"
+
+
+def test_registry_scoring_reverses_calls_but_serializes_canonically() -> None:
+    items = [deepcopy(load_evaluation_registry(REGISTRY)[0])]
+    arguments = {
+        "registry_sha256": sha256_file(REGISTRY),
+        "model_id": "synthetic-provider",
+        "model_revision": "fixture-v1",
+        "tokenizer_id": "whitespace-v1",
+    }
+
+    def provider(prompt: str, continuation: str) -> CandidateEvidence:
+        return CandidateEvidence(
+            prompt_token_ids=tuple(range(1, len(prompt.split()) + 1)),
+            continuation_token_ids=tuple(
+                range(100, 100 + len(continuation.split()))
+            ),
+            token_logprobs=tuple(-0.25 for _ in continuation.split()),
+        )
+
+    canonical_trace: list[dict] = []
+    reverse_trace: list[dict] = []
+    canonical = score_evaluation_registry(
+        items,
+        provider,
+        execution_mode="canonical",
+        execution_trace=canonical_trace,
+        **arguments,
+    )
+    reverse = score_evaluation_registry(
+        items,
+        provider,
+        execution_mode="reverse",
+        execution_trace=reverse_trace,
+        **arguments,
+    )
+
+    assert canonical == reverse
+    assert canonical_trace == execution_trace_for_registry(items, "canonical")
+    assert reverse_trace == execution_trace_for_registry(items, "reverse")
+    assert reverse_trace == list(reversed(canonical_trace))
+    assert len(canonical_trace) == sum(
+        len(form["candidates"])
+        for item in items
+        for form in item["forms"]
+    )
+
+
+def test_stateful_provider_exposes_execution_order_dependence() -> None:
+    items = [deepcopy(load_evaluation_registry(REGISTRY)[0])]
+    arguments = {
+        "registry_sha256": sha256_file(REGISTRY),
+        "model_id": "stateful-provider",
+        "model_revision": "fixture-v1",
+        "tokenizer_id": "whitespace-v1",
+    }
+
+    def run(mode: str) -> dict:
+        calls = 0
+
+        def provider(prompt: str, continuation: str) -> CandidateEvidence:
+            nonlocal calls
+            calls += 1
+            words = continuation.split()
+            return CandidateEvidence(
+                prompt_token_ids=tuple(range(1, len(prompt.split()) + 1)),
+                continuation_token_ids=tuple(range(100, 100 + len(words))),
+                token_logprobs=tuple(-0.1 * calls for _ in words),
+            )
+
+        return score_evaluation_registry(
+            items,
+            provider,
+            execution_mode=mode,
+            **arguments,
+        )
+
+    assert run("canonical") != run("reverse")
+
+
+def test_v1_scoring_calls_every_candidate_occurrence_without_deduplication() -> None:
+    items = load_evaluation_registry(V1_REGISTRY)
+    def run(mode: str) -> tuple[dict, list[tuple[str, str]], list[dict]]:
+        calls: list[tuple[str, str]] = []
+        trace: list[dict] = []
+
+        def provider(prompt: str, continuation: str) -> CandidateEvidence:
+            calls.append((prompt, continuation))
+            return CandidateEvidence(
+                prompt_token_ids=(1,),
+                continuation_token_ids=(2,),
+                token_logprobs=(-0.25,),
+            )
+
+        score = score_evaluation_registry(
+            items,
+            provider,
+            registry_sha256=sha256_file(V1_REGISTRY),
+            model_id="synthetic-provider",
+            model_revision="fixture-v1",
+            tokenizer_id="fixture-tokenizer",
+            execution_mode=mode,
+            execution_trace=trace,
+        )
+        return score, calls, trace
+
+    canonical, canonical_calls, canonical_trace = run("canonical")
+    reverse, reverse_calls, reverse_trace = run("reverse")
+
+    assert canonical == reverse
+    assert len(canonical_calls) == len(reverse_calls) == 224
+    assert canonical_trace == execution_trace_for_registry(items, "canonical")
+    assert reverse_trace == list(reversed(canonical_trace))
+    assert reverse_calls == list(reversed(canonical_calls))
+    assert len(Counter(canonical_calls)) == 112
+    assert set(Counter(canonical_calls).values()) == {2}
+    assert Counter(reverse_calls) == Counter(canonical_calls)
+
+
+def test_registry_scoring_rejects_unknown_execution_mode_before_provider() -> None:
+    items = [deepcopy(load_evaluation_registry(REGISTRY)[0])]
+    reached = False
+
+    def provider(_prompt: str, _continuation: str) -> CandidateEvidence:
+        nonlocal reached
+        reached = True
+        return _evidence(-0.1)
+
+    with pytest.raises(ScoringIntegrityError, match="execution mode"):
+        score_evaluation_registry(
+            items,
+            provider,
+            registry_sha256=sha256_file(REGISTRY),
+            model_id="fixture",
+            model_revision="fixture",
+            tokenizer_id="fixture",
+            execution_mode="unknown",
+        )
+    assert reached is False
 
 
 def test_candidate_token_and_logprob_lengths_must_match() -> None:

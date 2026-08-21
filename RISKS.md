@@ -26,7 +26,10 @@
 | R-22 | AI-assisted design/code claims are unaudited | Medium | Maintain AI-use ledger and human verification record |
 | R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Frozen implementation/backend/reduction policy passed the sole v1 rescue; preserve v0/v1 and require the same explicit binding in later model execution |
 | R-24 | Registry scoring loads unverified bytes from a populated cache | High | The exact tokenizer and model stages now verify manifest-bound bytes, private copies, load identity, fresh resources, and final rebinding; preserve this Target Verified invariant and fail closed on any identity drift |
-| R-25 | Development item wording or continuation length changes score direction | High | Four items disagreed across forms and three primary/diagnostic signs differed; preserve the primary metric, predeclare reliability criteria, revise before rescoring, and do not interpret `development-v0` scientifically |
+| R-25 | Development item wording or continuation length changes score direction | High | Preserve the failed v0 reliability diagnosis; v1 passed blind pre-logits review and exact common-count tokenizer checks, but E4 attempt A failed operationally after all forwards and before score publication, so model-level eight-form coherence remains untested; no B or retry without a separately accepted result-blind defect rescue |
+| R-26 | A metadata transport failure is mistaken for source infeasibility or silently retried | Critical | Preserve the authenticated partial evidence; distinguish transport from source eligibility/yield; prohibit same-profile retry, continuation, query change, or backup substitution; require a separately frozen, versioned, result-blind transport-adjudication decision before another request |
+| R-27 | Synthetic parser fixtures are promoted to real-source qualification | Critical | Label E0–E3 as offline parser engineering only; keep live access disabled; require a later exact selection/access/license decision and Target Verified micro-sample before any claim about format prevalence, yield, rights, authorship, continuity, or suitability |
+| R-28 | A synthetic POSIX output rollback is treated as safe against an actively hostile same-UID namespace mutator or reused for live private evidence | High | D-041 assumes the namespace becomes quiescent after failure; retain retryable ownership on detected drift, use exact Windows handles on the target host, and require a separately frozen containment design before any live/private POSIX publication |
 
 ## Current highest risks
 
@@ -36,13 +39,41 @@
    sustained stability and broad-update feasibility remain unmeasured.
 4. The project may identify ecological source composition rather than a residual temporal component.
 5. A/B discovery may fail prospective C transport; that is a valid falsification, not a reason to replace C.
+6. A consumed metadata transport stop may be overread as source infeasibility
+   or used to justify an unplanned retry; D-040 explicitly forbids both.
+7. Passing A/B parser fixtures could be mistaken for evidence about real
+   archives; D-041 fixes the claim ceiling at Tested offline engineering.
+8. Linux cannot conditionally unlink an already verified inode by open file
+   description; D-041 does not claim protection from continuous same-UID
+   final-component substitution during rollback.
 
 ## Current risk decision
 
-The design is defensible; the bounded v1 resume gate, exact tokenizer boundary,
-and repeated registry-scorer path passed their engineering gates. Preserve
-those artifacts without tuning or rerunning them. The next local risk-reduction
-task is measurement reliability: revise the four inconsistent items and test
-predeclared paraphrase, ordering, and metric invariance before any evaluation
-freeze. Evidence-bearing naturalistic execution remains blocked on external
-source qualification and later calibration/model-compute gates.
+The design is defensible; the bounded training-resume gate, exact tokenizer
+boundary, and repeated development-v0 registry-scorer path passed their scoped
+engineering gates. Preserve those artifacts without tuning or rerunning them.
+Development-v1 E4 attempt A remains a consumed post-score resource failure;
+no B or rescue qualifies. D-038 failure-observability hardening is delivered at
+exact head `d669b4e` after all 18 checks passed.
+
+D-039 implementation head `eb0f794` passed all 30 draft PR #38 checks. Its one
+live invocation completed the Wikimedia and Stack Exchange inventory prefix,
+then failed on the first arXiv candidate-count request at HTTP-status transport.
+The authenticated receipt records three attempts, two completed responses,
+zero retries, five later groups not started, matched final binding, and no
+aggregate. The numeric status, response detail, and private URL were
+deliberately withheld, so neither an upstream-only cause nor a request-shape
+defect is proven. Preserve the partial evidence and do not retry, continue,
+substitute PMC, or infer arXiv/source infeasibility. Rights-qualified content,
+source-C review, requester-pays retrieval, and later calibration/model-compute
+gates remain blocked; any new request requires a separate versioned,
+result-blind adjudication.
+
+The settled D-041 E1/E2 candidate is Tested offline across Python 3.11–3.13;
+E3 exact-head draft-PR delivery is next. It improves deterministic
+parent/initial-version reconstruction code, but it cannot qualify a source or
+authorize live access. Its POSIX cleanup contract assumes a quiescent namespace
+after failure and must not be reused for live/private publication without a
+separately frozen containment design. Stop on any network path, non-synthetic
+input, current-snapshot/body fallback, portable prose/ID leakage, or attempt to
+infer real-source yield or eligibility.

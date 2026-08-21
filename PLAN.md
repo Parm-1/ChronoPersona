@@ -33,9 +33,10 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 ## Milestone 0B — Models and compute
 
 **Status:** final-Pythia acquisition/inference, bounded training resume,
-verified tokenizer boundary, and repeated registry scoring measured; v0
-failure preserved; sole v1 rescue passed; measurement reliability remains
-open.
+verified tokenizer boundary, and repeated development-v0 registry scoring
+measured; training v0 failure preserved and sole training v1 rescue passed.
+Development-v1 E4 failed its post-score resource gate before publication, so
+measurement reliability remains unresolved.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
@@ -68,6 +69,10 @@ Measured on 2026-08-20:
   receipts, and zero boundary, truncation, or nonfinite failures. Four items
   changed direction across forms, so scorer execution passed while instrument
   reliability remains unestablished.
+- the separate development-v1 attempt completed its frozen 224-forward
+  canonical schedule but failed the post-score resident-VRAM gate before a
+  score artifact was published. The consumed attempt provides execution
+  telemetry only; no v1 pole outcome was inspected and attempt B did not run.
 
 Still unmeasured: sustained training stability, broad-update capacity,
 development-item reliability/invariance, and derived branch-set cost. The one
@@ -87,8 +92,10 @@ Pass when two discovery sources and one confirmatory source are viable, distinct
 
 ## Milestone 1 — Measurement
 
-**Status:** development reliability work is active; source-exposure and
-confirmatory validation remain blocked by 0C and later gates.
+**Status:** the first development-v1 target gate failed operationally before
+publication. Further reliability work requires a new recorded decision;
+source-exposure and confirmatory validation remain blocked by 0C and later
+gates.
 
 Expand factorial evidence-integration and procedural-policy item families. Create separate development and sealed confirmation partitions. Validate complete-continuation scoring, option/label/paraphrase/template invariance, tokenizer boundaries, capability, factual/register probes, malformed/refusal handling, and domain exposure.
 
@@ -139,8 +146,12 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Accept the exact Pythia tokenizer and repeated scorer-path gates while rejecting
-instrument readiness. Publish their evidence without rerunning, then revise the
-four directionally inconsistent items and diagnose the three primary-versus-
-diagnostic sign disagreements under predeclared reliability criteria. Source
-qualification remains independently externally blocked.
+Accept the exact Pythia tokenizer and repeated v0 scorer-path gates while
+rejecting instrument readiness. Preserve the development-v1 registry,
+criteria, tokenizer gate, and delivered scorer implementation, but classify
+E4 as an actionable operational failure: exact green head `e435c40` completed
+224 canonical forwards and then failed the post-score resident-VRAM gate before
+publication. No semantic v1 result exists. Do not rerun A or run B; only a
+separately recorded, result-blind proof of an implementation defect may qualify
+for the plan's one rescue. Source qualification remains independently
+externally blocked.

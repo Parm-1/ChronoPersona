@@ -1,6 +1,6 @@
 # Verified Registry Model Scoring
 
-**Status:** completion pending — E0-E4 complete; E5 closes when the containing evidence head passes exact-head CI
+**Status:** complete — E0-E5 passed; exact evidence head `a7dd27c` passed all 18 required checks
 **Started:** 2026-08-20T07:17:14-04:00
 **Frozen baseline:** `dd0b56471b55babe2a4eb273381deeef2f852d49`
 **Branch:** `feat/verified-registry-scoring`

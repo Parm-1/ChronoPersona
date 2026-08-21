@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import hashlib
 from typing import Any
 
 from .evaluation import canonical_json_sha256
@@ -74,6 +75,7 @@ def audit_evaluation_tokenizer(
     prefix_policy: str,
     max_length: int,
     tokenizer_identity: str | None = None,
+    include_text_bindings: bool = False,
 ) -> dict[str, Any]:
     """Audit every prompt/candidate boundary without loading model weights."""
 
@@ -142,8 +144,7 @@ def audit_evaluation_tokenizer(
                     len(prepared.continuation_token_ids)
                 )
                 full_counts.append(len(prepared.full_token_ids))
-                candidate_outputs.append(
-                    {
+                candidate_output = {
                         "pole": candidate["pole"],
                         "status": "passed",
                         "prompt_token_count": len(
@@ -166,7 +167,21 @@ def audit_evaluation_tokenizer(
                             prepared.continuation_token_ids
                         ),
                     }
-                )
+                if include_text_bindings:
+                    candidate_output.update(
+                        {
+                            "prompt_sha256": hashlib.sha256(
+                                str(form["prompt"]).encode("utf-8")
+                            ).hexdigest(),
+                            "continuation_sha256": hashlib.sha256(
+                                str(candidate["text"]).encode("utf-8")
+                            ).hexdigest(),
+                            "prompt_token_ids": list(
+                                prepared.prompt_token_ids
+                            ),
+                        }
+                    )
+                candidate_outputs.append(candidate_output)
 
             prompt_context_match = (
                 len(prompt_contexts) == 2

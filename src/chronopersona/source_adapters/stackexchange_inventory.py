@@ -9,9 +9,12 @@ claim that Archive.org is the current official delivery mechanism.
 from __future__ import annotations
 
 from collections.abc import Mapping
+import hashlib
 import re
 from typing import Any
 from urllib.parse import quote
+
+from ..path_policy import PortablePathError, portable_relative_path
 
 
 class StackExchangeInventoryError(ValueError):
@@ -36,19 +39,25 @@ def _safe_id(value: str) -> str:
 
 def _company_attributed(metadata: Mapping[str, Any]) -> bool:
     creators = _string_values(metadata.get("creator"))
-    return any("stack exchange" in creator.lower() for creator in creators)
+    normalized_creators = [" ".join(creator.split()) for creator in creators]
+    return any("stack exchange" in creator.lower() for creator in normalized_creators)
 
 
 def _file_mtime(raw_file: Mapping[str, Any], file_name: str) -> int | None:
     raw_mtime = raw_file.get("mtime")
     if raw_mtime in {None, ""}:
         return None
-    try:
-        mtime = int(raw_mtime)
-    except (TypeError, ValueError) as error:
+    if isinstance(raw_mtime, bool) or not (
+        type(raw_mtime) is int
+        or (
+            isinstance(raw_mtime, str)
+            and re.fullmatch(r"0|[1-9]\d*", raw_mtime) is not None
+        )
+    ):
         raise StackExchangeInventoryError(
             f"invalid mtime for {file_name!r}: {raw_mtime!r}"
-        ) from error
+        )
+    mtime = int(raw_mtime)
     if mtime < 0:
         raise StackExchangeInventoryError(
             f"archive file {file_name!r} has negative mtime"
@@ -73,6 +82,7 @@ def parse_stackexchange_archive_metadata(
 
     identifier = str(metadata.get("identifier") or "stackexchange")
     creators = _string_values(metadata.get("creator"))
+    normalized_creators = [" ".join(creator.split()) for creator in creators]
     company_attributed = _company_attributed(metadata)
 
     selected_files: list[tuple[Mapping[str, Any], str, int, int | None]] = []
@@ -84,23 +94,50 @@ def parse_stackexchange_archive_metadata(
             continue
         if file_name.startswith("__"):
             continue
-        raw_size = raw_file.get("size")
         try:
-            size = int(raw_size)
-        except (TypeError, ValueError) as error:
+            relative_name = portable_relative_path(
+                file_name,
+                label="Stack Exchange archive file",
+                suffix=".7z",
+            )
+        except PortablePathError as error:
+            raise StackExchangeInventoryError(str(error)) from error
+        if len(relative_name.parts) != 1:
+            raise StackExchangeInventoryError(
+                "Stack Exchange archive file must be one canonical leaf"
+            )
+        raw_size = raw_file.get("size")
+        if isinstance(raw_size, bool) or not (
+            type(raw_size) is int
+            or (
+                isinstance(raw_size, str)
+                and re.fullmatch(r"0|[1-9]\d*", raw_size) is not None
+            )
+        ):
             raise StackExchangeInventoryError(
                 f"invalid size for {file_name!r}: {raw_size!r}"
-            ) from error
+            )
+        size = int(raw_size)
         if size <= 0:
             raise StackExchangeInventoryError(
                 f"archive file {file_name!r} has non-positive size"
             )
         mtime = _file_mtime(raw_file, file_name)
+        raw_format = raw_file.get("format")
+        if raw_format != "7z":
+            raise StackExchangeInventoryError(
+                f"archive file {file_name!r} format is not exact"
+            )
         selected_files.append((raw_file, file_name, size, mtime))
 
     if not selected_files:
         raise StackExchangeInventoryError(
             "archive metadata contains no .7z site dumps"
+        )
+    selected_names = [file_name.casefold() for _, file_name, _, _ in selected_files]
+    if len(selected_names) != len(set(selected_names)):
+        raise StackExchangeInventoryError(
+            "Stack Exchange archive file names collide case-insensitively"
         )
 
     mtimes = [mtime for _, _, _, mtime in selected_files if mtime is not None]
@@ -129,7 +166,7 @@ def parse_stackexchange_archive_metadata(
             )
         locator = (
             f"https://archive.org/download/{quote(identifier, safe='')}/"
-            + quote(file_name)
+            + quote(file_name, safe="")
         )
         site_slug = file_name[:-3]
         records.append(
@@ -148,11 +185,14 @@ def parse_stackexchange_archive_metadata(
                 "source_metadata": {
                     "site_slug": site_slug,
                     "archive_item_identifier": identifier,
-                    "archive_item_creators": creators,
+                    "archive_item_creator_count": len(normalized_creators),
+                    "archive_item_creators_sha256": hashlib.sha256(
+                        "\n".join(normalized_creators).encode("utf-8")
+                    ).hexdigest(),
                     "company_attributed_archive_item": company_attributed,
                     "delivery_status": "legacy-archive; not current official delivery",
                     "archive_metadata_locator": source_locator,
-                    "format": raw_file.get("format"),
+                    "format": "7z",
                     "mtime": mtime,
                     "snapshot_basis": snapshot_basis,
                 },

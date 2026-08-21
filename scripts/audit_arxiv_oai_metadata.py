@@ -225,6 +225,12 @@ def main() -> int:
                     windows=windows,
                     allowed_category_prefixes=allowed,
                     forbidden_category_prefixes=forbidden,
+                    expected_base_identifier=identifier,
+                    expected_request_attributes={
+                        "verb": "GetRecord",
+                        "metadataPrefix": "arXivRaw",
+                        "identifier": f"oai:arXiv.org:{identifier}",
+                    },
                 )
                 if token:
                     raise ValueError(
@@ -233,10 +239,6 @@ def main() -> int:
                 if len(parsed) != 1:
                     raise ValueError(
                         f"GetRecord for {identifier!r} returned {len(parsed)} records"
-                    )
-                if not str(parsed[0]["native_item_id"]).startswith(identifier):
-                    raise ValueError(
-                        f"GetRecord identity mismatch for {identifier!r}"
                     )
                 records.extend(parsed)
                 _merge_diagnostics(diagnostics, page_diagnostics)

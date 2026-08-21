@@ -41,8 +41,10 @@ The remaining contribution is the prospective identification and transport of an
 
 The **development content-integrity gate is passed**. The bounded local
 snapshot, tokenizer, training-resume, and registry-scorer engineering paths are
-Target Verified; measurement development remains active. Scientific execution
-is **externally blocked**.
+Target Verified within their recorded scopes. The separate development-v1
+coherence attempt failed its operational resource gate before publication;
+measurement reliability remains unresolved. Scientific execution is
+**externally blocked**.
 
 No evidence-bearing scientific model training or real-source qualification has
 occurred. One local engineering-only tiny-LoRA control failed before backward;
@@ -51,7 +53,10 @@ interruption/resume gate with exact final semantic state equality. This is
 trainer/checkpoint engineering evidence only. The exact Pythia scorer also
 reproduced byte-identical scores across two fresh invocations, but four of
 twelve development items changed direction across paraphrases. The scorer path
-passed; measurement reliability is not established. Source roles, era windows,
+passed; measurement reliability is not established. A later development-v1
+attempt completed all 224 canonical forwards but failed the post-score
+resident-VRAM gate before publishing a score. Attempt A is consumed, B did not
+run, and no v1 pole result was inspected. Source roles, era windows,
 causal checkpoint, dose, confirmation evaluation, meaningful-effect threshold, and
 prospective estimator remain unfrozen.
 
@@ -59,8 +64,9 @@ External blockers include:
 
 - bounded rights-qualified, historically versioned real-source samples;
 - source continuity, composition, overlap, and exposure measurements;
-- predeclared development-item reliability, ordering, and metric-invariance
-  criteria followed by instrument revision;
+- a new recorded decision on whether a result-blind implementation defect can
+  justify any future development-v1 scoring condition; the failed A/B pair may
+  not be resumed or rerun;
 - sustained training and broad-update cost evidence for any later branch plan;
 - expanded development and sealed confirmation evaluation partitions.
 

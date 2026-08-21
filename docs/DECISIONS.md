@@ -634,6 +634,421 @@ does not authorize a larger or concurrent local model job.
 **Evidence:**
 `reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`.
 
+## D-034 — Replace the confounded two-form seed with one strict v1 coherence screen
+
+**Date:** 2026-08-20
+**Status:** accepted for pre-logits development
+
+Preserve `development-v0` and its exact scorer evidence. Create a new
+`development-v1` registry with 14 items and eight forms per item: two contexts
+crossed with two continuation templates and two explicit candidate orders,
+with exact 4/4 order balance. The first inheritance-oriented draft was rejected
+by blind internal semantic review before tokenizer acceptance or model logits;
+the current neutral constructs were rewritten from those pre-logits findings.
+This is a new development identity, not a repaired or relabeled v0 result.
+
+For each item, require all sixteen Pythia continuation records to have one
+common token count between 1 and 24 before model scoring. This makes the primary
+total-logprob margin and mean-token diagnostic algebraically proportional for
+every form and aggregate. After the wording, tokenizer evidence, run profile,
+and hashes are sealed, require eight nonzero same-sign margins for every item,
+zero primary/diagnostic sign disagreements, and byte-identical scores from
+fresh canonical-order and reverse-execution attempts. All 14 items must pass;
+no failed form, item, or domain may be removed after inspection.
+
+**Observed basis:** v0's two forms simultaneously changed scenario, prompt,
+candidate wording, and candidate array order. Four items reversed direction,
+so those factors cannot be identified separately. Unequal continuation lengths
+mathematically permitted the two form-level and one aggregate primary/diagnostic
+sign disagreements, while equal lengths did not prevent every reversal. Length
+is therefore a controlled defect channel, not a complete causal explanation.
+Candidate array order is not model-visible in the current independent-
+continuation scorer; reverse execution tests engineering state/order
+invariance, not behavioral label-position effects. Blind review of the initial
+candidate draft found dominance or template defects in eleven of fourteen
+items; that draft was discarded before acceptance evidence or logits, rather
+than patched after observing pole scores.
+
+The final blind pre-logits lock accepted all fourteen rewritten items and found
+no explicit temporal, institutional, political, demographic, copied-survey, or
+pole-specific moral cues. The accepted generated registry SHA-256 is
+`81eb8e331d9fbd8d80ec675f209998e081e00834e5d1d141e2979b4f541c49ea`;
+the criteria SHA-256 is
+`d73b9d4d575f64587c5aea9acc18a6073a42bb1bd70491d29bd8422e95a73bca`.
+The review remains internal and direct-exposure/contamination checks remain
+pending. Its bounded evidence is preserved in
+`evaluations/reviews/development-v1-internal.md`.
+
+Prompt mention order is not independently counterbalanced in this small screen.
+The v1 claim is therefore coherence under one prompt presentation, not prompt-
+order invariance, an unbiased direction estimate, or criterion validity. The
+model-input projection remains limited to prompt plus one continuation; pole
+IDs, `reference_pole`, and `direction_note` are scoring metadata and must not be
+passed to the provider.
+
+**Rejected alternatives:** do not rewrite only the four inconsistent items,
+select wording that restores a preferred pole, switch to mean-token scoring,
+introduce a score-derived deadband, discard capability-like anchors after
+seeing their values, run a third tie-breaker, or overwrite v0. Do not claim that
+eight forms or one public checkpoint estimates stable psychometric reliability.
+
+**Failure and rescue:** before logits, wording may change only from construct
+review and tokenizer evidence. After freeze, any form reversal, exact-zero
+margin, metric-sign mismatch, incomplete coverage, identity drift, nonfinite
+value, truncation, or non-determinism fails the whole gate. The sole permitted
+rescue is one independently demonstrated implementation correction unrelated
+to pole outcomes; there is no alternate content rescue. A semantic failure
+requires a new recorded design decision.
+
+**Claim ceiling:** a pass is one-checkpoint small-set coherence evidence. It may
+authorize a later multi-model development panel and expansion toward 24–40
+items per primary domain. It does not establish criterion validity, a
+meaningful-effect threshold, confirmation readiness, a temporal result, causal
+evidence, or CSTG.
+
+**Procedure:**
+`.agent/plans/active-development-measurement-reliability.md`.
+
+## D-035 — Accept the development-v1 tokenizer coherence gate
+
+**Date:** 2026-08-20
+**Status:** accepted; E3 scorer-profile implementation authorized
+
+Accept exact clean head
+`fb8cff1495fedef9c08d5426efbea53234339a29` as Target Verified tokenizer
+engineering evidence for `development-v1-pythia-reliability-v0`. Draft PR #35
+passed all 18 exact-head checks before two observed fresh offline tokenizer
+invocations. Their distinct 587,948-byte reports were byte-identical with raw
+SHA-256
+`acbb6fed70670c484e719c00775f95532f7282a76579c4c5d12804b5f3e2f76d`;
+the dependency-light verifier and a separate 5,824-assertion replay found no
+discrepancy.
+
+All 14 items, 112 forms, and 224 candidate occurrences passed. Each item has
+one exact continuation-token count from 10 through 18, all sequences fit within
+2,048 tokens, and no prompt, continuation, order, token-ID, index, truncation,
+identity, path, or publication failure occurred. Offline/local-only controls
+were enforced; traffic was not independently instrumented. The manifested
+2,090,701,528 safetensors bytes were rehashed for integrity but never
+deserialized. No development-v1 model logits were inspected.
+
+Authorize only E3: implement an exact allowlisted v1 scorer profile,
+canonical-versus-reverse provider scheduling, canonical serialization, and
+pre-import rejection of every cross-profile substitution. Do not run the model
+until that implementation is committed, delivered, and green at its exact
+head. Do not reinterpret tokenizer equality as prompt-order invariance,
+measurement reliability, criterion validity, temporal evidence, or CSTG.
+
+**Rejected alternatives:** do not reuse the v0 score profile implicitly, hand
+edit an accepted tokenizer report, treat one invocation as repeat evidence,
+skip exact-head delivery, change token-count bounds, or proceed directly to
+logits from this evidence commit.
+
+**Artifacts:**
+`reports/stage0/pythia_v1_tokenizer_coherence_gate_2026-08-20.md`,
+`evaluations/registry/development-v1.jsonl`, and
+`configs/evaluations/development-v1-reliability-v0.json`.
+
+## D-036 — Accept the profile-bound development-v1 scorer delivery
+
+**Date:** 2026-08-20
+**Status:** accepted; bounded E4 authorized after the closure head and fresh resource gate pass
+
+Accept exact E3 delivery head
+`323dd0f72acf6bedc29ec68230a405214293f10d` on draft PR #36. It is stacked
+on PR #35 at `dfa52a0` and passed all 18 push/pull-request checks across Python
+3.11–3.13. The first E3 head `e3bd52b` passed 12/18 checks; all six CI failures
+were one platform-specific expected-error-message assertion while both alias
+paths remained fail-closed. The message-portable regression correction was the
+only change in the accepted head.
+
+The delivered scorer has one exact closed v0/v1 profile allowlist. The v1
+profile binds config Git blob
+`967868cb1e4f23b7992e88b0fb9e604bcfdeba5c` and canonical run-spec SHA-256
+`e4de6ef590939e156f862f452585678cdc21a7872b6d18c0aaf36464f984bb86`,
+the sealed registry and criteria, and the accepted E2 tokenizer report. Attempt
+A must execute all 224 candidate occurrences in canonical order; attempt B
+must execute the exact global reverse order. Neither may deduplicate the 112
+text-identical duplicate pairs, and both must serialize canonical registry
+order. Complete profile-bound receipts and raw resource audits are required
+before the integrated repeat/coherence verifier can authorize a result.
+
+Dependency-light adversarial review confirmed that v0 evidence remains
+verifier-equal while v0/v1 prompt, candidate-text, config, registry,
+tokenizer-audit, schedule, receipt, run-ID, and portable-path substitutions
+fail closed. The offline working-tree suite collected 536 tests and passed 534
+with two platform-optional symlink skips; focused E3 coverage passed 142 tests,
+production modules compiled, all top-level validators passed, and the no-import
+v1 plan froze A=`canonical`, B=`reverse`, downloads disabled, and no scientific
+claim. No model weights were deserialized and no development-v1 logits were
+inspected.
+
+Authorize only the frozen E4 pair after this closure record is green at its
+exact head and a fresh clean-head resource audit passes. Attempt A must fully
+exit and release CUDA, private staging, and the shared heavy-job lock before
+audit B. Preserve one complete comparison or one actionable failure; do not
+inspect partial poles, reuse an audit, change content or metrics, add a third
+run, or continue after a consumed-attempt failure.
+
+**Claim ceiling:** Tested and exact-head-delivered scorer engineering only.
+This does not establish model-level item coherence, measurement reliability,
+criterion validity, a meaningful-effect threshold, temporal behavior, causal
+evidence, or CSTG.
+
+**Procedure:**
+`.agent/plans/active-development-measurement-reliability.md`,
+`configs/runs/pythia-development-score-v1.json`, and
+`docs/TRANSFORMERS_SCORING_PROTOCOL.md` section 7A.
+
+## D-037 — Preserve the consumed development-v1 attempt and stop E4
+
+**Date:** 2026-08-20
+**Status:** accepted; E4 Target Failed before publication
+
+Accept exact clean execution head
+`e435c40f1b1b2c9e8be1c1f3bb6ecd1ea9c89aa0` and run
+`run-3aa8058dced36e7e88802079925500df` as the one consumed attempt A for
+`development-v1-pythia-reliability-v0`. Draft PR #36 had passed all 18 checks
+on that exact head. The fresh audit and pre-import/load gates passed, the exact
+verified Pythia model loaded, and the canonical schedule completed all 224
+candidate forwards. The invocation then failed at
+`post-score-resource-check` because conservative global free VRAM fell below
+the frozen 1,610,612,736-byte resident floor.
+
+The output transaction rolled back: no valid score was published, no attempt-B
+audit or invocation occurred, and no item, form, pole, margin, or token-
+logprobability result was inspected. The canonical schedule/topology and timing
+metadata are admissible engineering failure evidence; they are not a semantic
+measurement result. The exact failing post-score free-VRAM value was not
+retained because validation raised before returning that audit to the failure
+receipt. Preserve that schema limitation rather than estimating the value.
+
+The raw audit and receipt filenames use seven-character suffix `e435c40`, while
+the frozen example would derive eight-character suffix `e435c40f`. Both
+payloads bind the complete head and the deviation did not cause the resource
+failure. Preserve the original names and record the deviation; do not rename or
+recreate the evidence.
+
+Attempt A is consumed under D-034 and the active plan. Do not run B, repeat A,
+lower the threshold, change content/metrics, or recover transient scores. The
+only possible rescue remains one separately accepted correction of an
+independently demonstrated implementation defect unrelated to pole outcomes.
+The current threshold breach is an observed resource failure, not by itself
+proof of such a defect. Any result-blind investigation must end in a new
+decision and versioned exact-head implementation before it can authorize a new
+condition.
+
+**Claim ceiling:** Target Failed for the exact E4 resource/publication gate.
+Model-level v1 coherence and measurement reliability remain unknown. This is
+not evidence for any model preference, temporal effect, causal result, or CSTG.
+
+**Evidence:**
+`reports/stage0/pythia_v1_scoring_failure_2026-08-20.md` and the failed v1 row
+in `COMPUTE_LEDGER.csv`.
+
+## D-038 — Preserve future failed resident audits without reopening E4
+
+**Date:** 2026-08-20
+**Status:** accepted; result-blind implementation gate
+
+The consumed E4 attempt exposed one bounded evidence-schema defect: the scorer
+captures a live resident-resource audit, but shared threshold validation can
+raise before the caller stores that audit in the failure context. The failure
+receipt therefore preserved the rejection and all prior bindings but not the
+exact observation that triggered it.
+
+Harden future scorer failures by storing a clearly partial resident-resource
+observation in the existing mutable resource state before validation. Bind the
+phase label, raw and semantic audit hashes, capture time, age, frozen threshold,
+conservative VRAM, and complete audit. If validation raises, copy that pending
+record into the private failed receipt. Remove it after a fully successful
+resident check. Do not change the validator, threshold, score, successful
+receipt schema, or output transaction.
+
+This correction is evidence-observability hardening, not a scoring rescue. It
+cannot reconstruct attempt A's missing value, establish that its resource
+rejection was wrong, recover a score, authorize attempt B, or authorize an A
+retry. D-037 remains controlling for E4. Validate this change only with
+dependency-light injected audits, the offline test suite, and exact-head CI;
+do not load a model or inspect logits.
+
+**Claim ceiling:** Tested failure-evidence preservation for future scorer
+failures. No model-behavior, measurement-reliability, temporal, causal, or CSTG
+claim is authorized.
+
+**Next gate:** deliver the Tested scoped observability fix from green baseline
+`8fc16af` on `fix/scoring-failure-observability` and require every check green
+on the unchanged head. After delivery, the next scientific gate remains
+externally blocked on rights-qualified source evidence and explicit held-out
+source-C authorization.
+
+## D-039 — Advance to a bounded metadata-only source prequalification
+
+**Date:** 2026-08-20
+**Status:** accepted; result-blind metadata implementation gate
+
+Accept exact failure-observability delivery head
+`d669b4e3c36069398efdac831c8f1fec7036359c` as Tested and exact-head
+delivered on draft PR #37. All 18 push/pull-request checks passed across Python
+3.11–3.13. This closes D-038 without a state-only follow-up commit and without
+model execution. D-037 remains controlling: development-v1 attempt A is
+consumed, attempt B and an A retry remain prohibited, and no score recovery or
+threshold change is authorized.
+
+The next hard boundary has not yet been reached because the frozen source
+protocol explicitly authorizes CAD-$0 official documentation research,
+metadata queries, archive inventories/checksums, bounded metadata parser
+samples, and aggregate reports. Authorize one result-blind, metadata-only
+prequalification for provisional roles A=`wikimedia-article-additions`,
+B=`stackexchange-initial-nontechnical-posts`,
+C=`arxiv-cc-single-version-descriptive`, and backup
+C=`pmc-oa-cc-version-bounded`.
+
+Freeze one immutable `enwiki/20260801` dumpstatus inventory, one legacy
+company-attributed Stack Exchange item inventory, a deterministic 100-record
+time-stratified arXiv submitted-date metadata sample per provisional window with
+exact enrichment of all 100, and up to 100 upstream PMC Dublin Core records per
+OAI release/update-datestamp range, capped at ten responses per range. Keep
+native source-C identifiers and locators
+ignored/private. Publish only hashes and portable aggregates. Exact endpoints,
+limits, dates, categories, delays, input blobs, execution head, create-only
+outputs, privacy rules, and fail-fast group order must be fail-closed before
+live execution. The complete happy-path ceiling is 270 serial HTTP requests.
+
+This decision does not authorize separate archive/article-body/source-package
+retrieval, requester-pays arXiv access, source-C prose review, training, model scoring,
+role/era promotion, or temporal/CSTG inference. Wikimedia and Stack Exchange
+inventories cannot by themselves establish early/late record continuity or
+clean usable volume. PMC OAI dates remain release/update semantics and cannot
+promote the backup. Stop rather than substitute, shrink, unblind, or inspect
+content after a failed gate. arXiv/PMC metadata responses can inherently include
+prose; it may transit memory only for hash/count evidence and must not be
+displayed, persisted as prose, or human-reviewed.
+
+**Claim ceiling:** endpoint and metadata-yield prequalification only. Source
+roles, rights-qualified content, composition, exposure, historical
+reconstruction, and scientific feasibility remain unestablished.
+
+**Procedure:**
+`.agent/plans/active-source-metadata-qualification.md`,
+`docs/SOURCE_SAMPLE_PROTOCOL.md`, `docs/SOURCE_ADAPTER_PROTOCOL.md`, and
+`docs/SOURCE_METADATA_PROTOCOL.md`.
+
+**Result-blind privacy amendment (2026-08-20, before E1 delivery or live
+execution):** adversarial implementation review established that the original
+public SHA-256 sampler seed, published page-start evidence, and unkeyed hashes
+of C-family URLs or identifiers would allow third parties to replay the public
+endpoints or dictionary-test the 200 identifiers that this decision requires to
+remain private. No evidence-bearing live request, identifier, yield, or model
+outcome had been observed when this defect was found.
+
+Amend D-039 to use one precommitted 32-byte private key for domain-separated
+HMAC-SHA256. The arXiv block sampler is now
+`HMAC-SHA256(key, ASCII(domain) + NUL + UTF8(cell_id + NUL + slot_decimal))`;
+C-family exact response bytes, requested/final URLs, ordered identifier lists,
+private artifact bytes, and failure detail use separately domain-tagged HMACs.
+Exact C-family response and private-artifact byte lengths are represented as
+null in portable evidence, because unkeyed lengths are also enumerable
+dictionary fingerprints; exact lengths remain available only in the private
+local files/process state.
+Public Wikimedia/Stack Exchange response evidence remains exact-byte SHA-256.
+The complete sanitized success or failure receipt is also authenticated under
+the separate `source-receipt` domain before its public self-hash is computed.
+Only the decoded key commitment
+`314b9f8e9ef018fcc8f33ff310079e1f42253e04a553e2a0c288124e917d1aca`
+is versioned; two byte-identical, non-aliased key copies remain outside every
+Git worktree under owner-restricted access. The earlier precommitted key was
+rotated result-blind before E1 delivery because its inherited local ACL did not
+establish that confidentiality boundary; it is not accepted by this profile.
+This amendment changes deterministic sample ranks, so it is part
+of the pre-execution freeze rather than a post-result security patch. It does
+not change roles, windows, categories, group order, request ceilings, claim
+ceiling, or the prohibition on source-C prose review.
+
+## D-040 — Preserve the consumed metadata run and stop at source-C transport
+
+**Date:** 2026-08-20
+**Status:** accepted; D-039 E4 Target Failed operationally, root cause unresolved
+
+Accept exact clean execution head
+`eb0f7949c552e0e733f33c63dd33b9e9d603d83b` and run
+`source-metadata-v0-eb0f7949` as the one consumed D-039 E4 invocation. Draft PR
+#38 had passed all 30 push/pull-request checks across Python 3.11–3.13 on that
+unchanged head. The runner completed the Wikimedia and Stack Exchange
+inventory groups, then the first `arxiv-early-candidate-sample` count request
+failed before response acceptance with `metadata-transport-failed` /
+`transport` / `http-status`. The run made three request attempts, completed two
+responses, retried zero times, preserved the completed prefix, marked every
+later group `not-started`, and published no aggregate.
+
+The canonical failure receipt passed its public self-hash, private full-receipt
+HMAC, exact-head/input/runtime binding, privacy schema, group-prefix, and
+create-only mirror validation. Its raw/self SHA-256 values are
+`765acc89ce4cf0128cc2c385c684c2ccb0edc3332edabfbb076a1fda5e9471ec` /
+`62c260fec086f8f593f15e56ae5eb878ff133a94009ed50603e329df5c94d72f`.
+The two completed inventory files and receipt have byte-identical protected
+private backups. No response prose or native source-C identifier was displayed
+or human-reviewed, and no arXiv, PMC, or aggregate artifact exists.
+
+Under the predeclared stop rule, do not resume later groups, retry the failed
+request, shrink the sample, substitute PMC, change the URL/query after the
+failure, or infer yield from the completed prefix. The receipt deliberately
+withholds the exact private URL, response body, and HTTP status code, so static
+review cannot distinguish upstream service policy or throttling from a
+request-shape incompatibility. No implementation defect is independently
+proven. A new metadata request requires a separately frozen and versioned
+transport-adjudication decision supported by new result-blind evidence or an
+explicit material user choice.
+
+**Claim ceiling:** Target Failed operationally for the exact D-039 metadata
+prequalification gate. The failure does not qualify or reject any source role,
+establish arXiv infeasibility, measure source-C yield, or support temporal,
+behavioral, causal, or CSTG claims.
+
+**Evidence:**
+`reports/stage0/source_metadata_qualification_failure_2026-08-20.md` and the
+ignored mirrored run directory `source-metadata-v0-eb0f7949`.
+
+## D-041 — Freeze offline A/B parser engineering before real source content
+
+**Date:** 2026-08-20
+**Status:** accepted; E0 result-blind offline freeze
+
+Accept D-039 E5 evidence head
+`c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` as the exact green baseline. Draft
+PR #38 remained open/draft and passed all 24 attached checks across Python
+3.11–3.13. D-040 continues to prohibit another D-039/source-C request.
+
+The project has not reached a hard boundary because
+`docs/SOURCE_SAMPLE_PROTOCOL.md` separately authorizes bounded no-cost A/B
+parser samples. Before any real record is opened, freeze one offline engineering
+gate for two source-specific representations:
+
+- Wikimedia namespace-0 revision histories must resolve an exact child and
+  parent, clean both wikitext versions conservatively, and derive candidate
+  added spans without treating a current page snapshot as historical text;
+- Stack Exchange dump records must reconstruct the initial question/answer
+  title/body from `PostHistory` and must never fall back to current
+  `Posts.Body` or `Posts.Title`.
+
+E0–E3 use synthetic official-shape fixtures only. They may add a closed config,
+dependency-light parsers, an isolated fixture runner, private parsed records,
+portable count-only aggregates, canonical receipts, adversarial tests, and
+exact-head delivery. They may not access the network, open D-039 private
+inventories, retrieve an archive or real source record, inspect source C, infer
+rights/human/bot eligibility, execute a model, or support source/scientific
+claims. Every successfully parsed candidate remains
+`accepted-for-parser-audit` or unresolved, never scientifically eligible;
+explicit exclusions and parser failures remain preserved as such.
+
+**Claim ceiling:** Tested offline parser engineering only. A live micro-sample
+requires a later result-blind decision that independently freezes official
+no-cost access, selection identities, the Stack Exchange site panel and license
+schedule, Wikimedia page/revision selection, request/byte ceilings, private
+publication, zero-retry order, and stop rules.
+
+**Plan:** `.agent/plans/active-ab-parser-sample-engineering.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.
