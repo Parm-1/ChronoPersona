@@ -9,7 +9,9 @@
 Use the following provisional source-family architecture for metadata and small-sample qualification:
 
 - **Source A:** Wikimedia article-revision added-text deltas.
-- **Source B:** initial versions of posts from a frozen, nontechnical Stack Exchange site panel.
+- **Source B:** paused. The former provisional Stack Exchange panel requires
+  explicit authorization or a later independently reviewed compliant access
+  contract; D-042 audits alternate non-Q&A candidates without selecting one.
 - **Source C:** single-version, item-level CC0 or CC BY arXiv source text from narrowly selected descriptive-science strata.
 - **Predeclared backup C:** version-bounded item-level CC0 or CC BY PMC Open Access full text.
 - **Rejected headline source:** Federal Register/GovInfo official documents, retained only as a possible direct-exposure boundary condition.

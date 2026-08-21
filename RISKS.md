@@ -30,6 +30,7 @@
 | R-26 | A metadata transport failure is mistaken for source infeasibility or silently retried | Critical | Preserve the authenticated partial evidence; distinguish transport from source eligibility/yield; prohibit same-profile retry, continuation, query change, or backup substitution; require a separately frozen, versioned, result-blind transport-adjudication decision before another request |
 | R-27 | Synthetic parser fixtures are promoted to real-source qualification | Critical | Label E0–E3 as offline parser engineering only; keep live access disabled; require a later exact selection/access/license decision and Target Verified micro-sample before any claim about format prevalence, yield, rights, authorship, continuity, or suitability |
 | R-28 | A synthetic POSIX output rollback is treated as safe against an actively hostile same-UID namespace mutator or reused for live private evidence | High | D-041 assumes the namespace becomes quiescent after failure; retain retryable ownership on detected drift, use exact Windows handles on the target host, and require a separately frozen containment design before any live/private POSIX publication |
+| R-29 | Stack Exchange access/licensing is mistaken for authorization to automate AI/ML research | Critical | Keep Stack dormant. Require express written authorization or an independently reviewed compliant access contract with contribution-level license and attribution handling before any Stack record is opened. |
 
 ## Current highest risks
 
@@ -69,11 +70,17 @@ source-C review, requester-pays retrieval, and later calibration/model-compute
 gates remain blocked; any new request requires a separate versioned,
 result-blind adjudication.
 
-The settled D-041 E1/E2 candidate is Tested offline across Python 3.11–3.13;
-E3 exact-head draft-PR delivery is next. It improves deterministic
-parent/initial-version reconstruction code, but it cannot qualify a source or
-authorize live access. Its POSIX cleanup contract assumes a quiescent namespace
-after failure and must not be reused for live/private publication without a
-separately frozen containment design. Stop on any network path, non-synthetic
-input, current-snapshot/body fallback, portable prose/ID leakage, or attempt to
-infer real-source yield or eligibility.
+D-041 E1/E2 is Tested offline across Python 3.11–3.13 and its E3 PR #39 head
+`846e040` passed 21 checks before integration into `main`. It improves
+deterministic parent/initial-version reconstruction code, but it cannot qualify
+a source or authorize live access. Its POSIX cleanup contract assumes a
+quiescent namespace after failure and must not be reused for live/private
+publication without a separately frozen containment design. Stop on any network
+path, non-synthetic input, current-snapshot/body fallback, portable prose/ID
+leakage, or attempt to infer real-source yield or eligibility.
+
+D-042 deliberately pauses Stack Exchange because the current automated
+AI/ML-access boundary is unresolved. Its Wikimedia-only sample is a feasibility
+instrument, not a source designation; it remains blocked behind a closed,
+synthetic-tested selection/transport/containment profile. Alternate-B work is
+documentation and metadata only until a later decision.

@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-21T01:44:09-04:00
+**Last updated:** 2026-08-21T06:15:00-04:00
 
 ## Decision
 
@@ -80,7 +80,7 @@ does not open private D-039 inventories, retrieve real source content, inspect
 source C, or qualify a source.
 
 Accept the settled D-041 E1/E2 candidate as **Tested offline synthetic parser
-engineering**, not yet exact-head delivered. The byte-stable candidate scope
+engineering**. The byte-stable candidate scope
 `80cb6c77fb52735089813a148845e08c7b661b9e71bdd98918f686287dee78dc`
 passed the 162-test focused suite and the 787-test full suite on Python
 3.11–3.13, with five and seven platform-optional skips respectively. It made no
@@ -89,13 +89,15 @@ record, ran no model, and incurred no spend.
 
 ## Current objective and closure condition
 
-Deliver the settled D-041 E1/E2 candidate through E3: record the tested state,
-create one scoped clean commit, push the authorized feature branch, open one
-draft PR stacked on PR #38, and require every attached check green on one
-unchanged head. No live flag or real content path may exist under this plan. A
-later live micro-sample requires its own frozen decision after official access,
-selection, site/license, request/byte, private-output, and zero-retry contracts
-are resolved.
+D-041 E3 is complete: PR #39 delivered its unchanged head
+`846e040a9926c7b2b518823eb6b9bcb55be838ea` with 21 attached checks green, and
+the reviewed source-feasibility stack was integrated into `main` at
+`55a8e4f76f18c9d72cd1e9b36ae6d879ecd20da9`. No live flag or real content path
+exists under D-041. D-042 pauses Stack Exchange pending explicit authorization
+or a compliant-dump review. It authorizes a bounded Wikimedia-only feasibility
+sample after an exact synthetic-tested execution profile, and an
+official-documentation/metadata-only alternate-B audit; it freezes no source
+roles and permits no source-C access or model work.
 
 ## Current verified boundary
 
@@ -154,10 +156,14 @@ are resolved.
 - **D-039 E5 closure — exact-head delivered:** evidence head `c245e7a` passed
   all 24 attached checks. The failure record is preserved without a retry or
   post-green state-only commit.
-- **D-041 A/B parser engineering — Tested offline / E3 pending:** exact
+- **D-041 A/B parser engineering — Tested offline / E3 delivered:** exact
   official-shape synthetic fixtures, closed validators, deterministic evidence,
   and fail-closed publication passed locally across Python 3.11–3.13. No
   real-source Target Verified claim is possible in E0–E3.
+- **D-042 Wikimedia A feasibility / alternate-B audit — Authorized design:**
+  Stack Exchange is paused. No real record may be opened until a synthetic-tested
+  profile binds deterministic selection, request/byte limits, private output,
+  and stop rules. Alternate-B work is official documentation/metadata only.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -427,33 +433,20 @@ are resolved.
   operationally. Exact E5 evidence head `c245e7a` contains D-040 and the
   sanitized failure record, is synchronized to PR #38, and passed every
   attached check without a post-green state-only commit.
-- Draft PR #38: `https://github.com/Parm-1/ChronoPersona/pull/38`, open and
-  draft, stacked on PR #37. Execution head `eb0f794` passed 30/30 checks; E5
-  evidence head `c245e7a` passed all 24 attached checks and closes D-039.
-- Current write branch: `feat/ab-parser-sample-engineering`, created from exact
-  green D-039 E5 head `c245e7a`. D-041 E0 is frozen at `3c49e2a`; the settled
-  E1/E2 implementation is locally Tested and awaiting one clean E3 delivery
-  commit/draft PR. No live access is included.
-- Draft PR #37: `https://github.com/Parm-1/ChronoPersona/pull/37`, open and
-  draft. Exact head `d669b4e` passed all 18 checks and closes D-038.
-- Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
-  draft. Its final E2 evidence head `dfa52a0` passed 18/18 checks and is the
-  intended stack base for E3.
-- Draft PR #36: `https://github.com/Parm-1/ChronoPersona/pull/36`, open and
-  draft, stacked on PR #35. Exact execution head `e435c40` passed 18/18 checks;
-  failure-evidence head `8fc16af` also passed all 18 checks.
-- Draft PR #34: `https://github.com/Parm-1/ChronoPersona/pull/34`, open and
-  draft, green at final evidence head `a7dd27c`.
-- PR #32/#33 remain open draft delivery history. PR #31 was merged externally
-  at the preserved v0 head; Codex performed no merge.
+- PRs #34, #37, and #39 were reviewed as three conceptual groups, then
+  integrated without rewriting their reviewed commits. Recovery PR #40 merged
+  the complete stack into `main` at `55a8e4f`; the former stack branches and
+  obsolete draft PRs are closed. No open PR remains.
+- D-041 exact delivery head `846e040` passed all 21 attached checks on PR #39.
+  It remains an offline synthetic-fixture parser result, not real-source
+  qualification.
 - No force push, release, paid operation, model/data publication, or
   third-party contact occurred.
 
 ## Next write-active deliverable
 
-Commit the settled D-041 E1/E2 candidate, push the authorized feature branch,
-open its stacked draft PR, and require all E3 checks green on one unchanged
-head. Preserve the ignored D-039 receipt/inventories and no-retry boundary. Do
-not open them, issue a network request, retrieve a real archive/record, inspect
-source C, infer real-source eligibility, execute a model, or incur cost. Stop
-after E3: any live A/B micro-sample requires a separate result-blind decision.
+Implement and validate the D-042 local execution profile and synthetic API
+fixtures. Preserve the ignored D-039 receipt/inventories and no-retry boundary.
+Do not open them, make a Stack Exchange/source-C request, retrieve a bulk
+archive, infer source roles, execute a model, or incur cost. Wikimedia real
+records remain blocked until that exact profile passes its E0 acceptance gate.

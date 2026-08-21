@@ -203,13 +203,21 @@ machine path for hash/count evidence and must not be displayed, persisted as
 prose, or human-reviewed. Bounded no-cost A/B parser samples remain a later
 authorized gate under `docs/SOURCE_SAMPLE_PROTOCOL.md`.
 
-The current local gate is D-041 E3 exact-head delivery from exact green D-039 E5
-head `c245e7a`. E1/E2 Wikimedia parent/child added-span parsing and Stack
-Exchange initial-version reconstruction are Tested only on synthetic official-
-shape fixtures. Do not open D-039 private inventories, add a live flag, retrieve
-a real record/archive, inspect source C, infer rights/authorship/source
+D-041 E3 is complete: its offline synthetic-fixture parser head `846e040`
+passed 21 checks and the reviewed stack is integrated into `main` at `55a8e4f`.
+E1/E2 Wikimedia parent/child added-span parsing and Stack Exchange
+initial-version reconstruction remain Tested only on synthetic official-shape
+fixtures. Do not open D-039 private inventories, add a live flag, retrieve a
+real record/archive, inspect source C, infer rights/authorship/source
 eligibility, execute a model, or claim Target Verified source behavior. A live
-micro-sample requires a separate frozen decision.
+micro-sample requires a separate frozen D-042 decision.
+
+D-042 now pauses Stack Exchange pending explicit written authorization or an
+independently reviewed compliant-dump contract. It authorizes only a bounded
+Wikimedia historical-version feasibility sample after an exact synthetic-tested
+execution profile, plus an official-documentation/metadata-only alternate-B
+audit. Do not freeze A/B/C roles, retrieve Stack Exchange/source-C text, or
+promote feasibility counts into source qualification.
 
 The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
 failure. Its single versioned v1 attention-policy rescue passed the bounded

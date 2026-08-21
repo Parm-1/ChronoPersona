@@ -1,14 +1,20 @@
 # Active Plans
 
-One result-blind offline source-engineering ExecPlan is write-active:
+One result-blind source-feasibility ExecPlan is write-active:
+
+- `.agent/plans/active-wikimedia-a-feasibility-and-alternate-b-audit.md` —
+  D-042 pauses Stack Exchange pending explicit authorization, permits only a
+  tiny Wikimedia historical-version feasibility sample after a synthetic-tested
+  execution profile, and audits alternate B candidates through official
+  documentation/metadata only. It freezes no A/B/C role.
 
 - `.agent/plans/active-ab-parser-sample-engineering.md` — E1/E2 Wikimedia
   parent/child added-span parsing and Stack Exchange initial-version
-  reconstruction are Tested on synthetic official-shape fixtures; E3 exact-head
-  draft-PR delivery is active. Baseline `c245e7a`; E0 commit `3c49e2a`; branch
-  `feat/ab-parser-sample-engineering`. No network, D-039 private artifact, real
-  source content, source C, model, or scientific outcome is in scope; a live
-  micro-sample needs a later plan and decision.
+  reconstruction are Tested on synthetic official-shape fixtures and E3
+  delivered at `846e040`; the reviewed stack is integrated into `main` at
+  `55a8e4f`. Baseline `c245e7a`; E0 commit `3c49e2a`. No network, D-039 private
+  artifact, real source content, source C, model, or scientific outcome is in
+  scope; a live micro-sample needs a later plan and decision.
 
 The latest source-execution plan is closed as a preserved failed gate:
 

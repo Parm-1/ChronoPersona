@@ -1049,6 +1049,68 @@ publication, zero-retry order, and stop rules.
 
 **Plan:** `.agent/plans/active-ab-parser-sample-engineering.md`.
 
+**Delivery result (2026-08-21):** PR #39 exact head
+`846e040a9926c7b2b518823eb6b9bcb55be838ea` passed all 21 attached checks across
+Python 3.11–3.13. The reviewed source-feasibility stack was subsequently
+integrated into `main` at `55a8e4f76f18c9d72cd1e9b36ae6d879ecd20da9`. This
+delivers E3 only; it does not authorize a source request, real record, or a
+scientific source claim. The next live-sample proposal remains a separate
+result-blind D-042 decision.
+
+## D-042 — Pause Stack Exchange and qualify Wikimedia A without freezing roles
+
+**Date:** 2026-08-21
+**Status:** accepted; result-blind feasibility authorization
+
+Pause the proposed Stack Exchange source-B micro-sample. The current official
+[Stack Exchange Acceptable Use Policy](https://stackoverflow.com/legal/acceptable-use-policy)
+prohibits automated collection for developing, training, testing, benchmarking,
+or improving AI/ML systems absent express prior written consent. The
+[Public Network Terms](https://stackoverflow.com/legal/terms-of-service/public)
+incorporate that policy, while the [per-revision license
+guidance](https://stackoverflow.com/help/licensing) identifies different
+CC BY-SA versions by contribution date. Those facts do not establish an
+approved automated AI-research access path, an attribution implementation, or
+a downstream model-use conclusion. Do not retrieve, parse, retain, or manually
+review Stack Exchange records without explicit written authorization or a later
+independently reviewed compliant-dump contract.
+
+Authorize two strictly separated D-042 activities:
+
+1. a bounded, Wikimedia-only feasibility sample; and
+2. a result-blind, documentation-and-metadata-only audit of alternate B
+   candidates.
+
+The Wikimedia activity may use the read-only Action API documented at
+[API:Tutorial](https://www.mediawiki.org/wiki/API:Tutorial) and
+[API:Revisions](https://www.mediawiki.org/wiki/API:Revisions), but only after a
+committed D-042 execution profile and synthetic contract tests freeze the exact
+candidate enumeration, deterministic selection, request order, User-Agent,
+byte/request ceilings, private-output root, aggregate schema, and stop rules.
+Its only permitted outcome is a parser/yield/rights/attribution/storage
+feasibility report. It does not freeze Wikimedia as source A, select a source
+B, alter C, inspect model behavior, or support a source/scientific claim.
+
+The execution profile may select at most four child revisions in each existing
+two-year candidate window (eight child/parent pairs total), make at most 32
+read-only, unauthenticated, no-cost Wikimedia requests, and publish only a
+sanitized aggregate and receipt. Before execution it must separately freeze a
+bounded retry/transport-diagnostic policy that records no response body or
+source text, and cannot change selection after a failure. Source substitution,
+bulk download, public text/identifiers, model execution, and source-C access
+are not authorized. A failed or incomplete sample is preserved as feasibility
+evidence, not repaired by changing selection after results.
+
+The alternate-B audit must evaluate at least one non-Q&A, independently
+produced, timestamp-native candidate against official access terms, item-level
+rights/attribution evidence, historical-version integrity, direct-exposure
+risks, and bounded token yield. It may use official documentation and metadata
+only; it may not open candidate text, choose a source for expected behavioral
+direction, or freeze A/B/C roles. Global Voices is a documentation-audit lead,
+not a selected source or a license conclusion.
+
+**Plan:** `.agent/plans/active-wikimedia-a-feasibility-and-alternate-b-audit.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.
