@@ -429,6 +429,211 @@ temporal, or CSTG result.
 
 **Evidence:** `reports/stage0/pythia_local_inference_2026-08-20.md`.
 
+## D-029 — Consume the one tiny-training rescue for explicit SDPA MATH
+
+**Date:** 2026-08-20
+**Status:** executed and passed at bounded engineering level
+
+The first frozen tiny-LoRA control at exact head `f2568ab` and run
+`run-b035b9becad60b6dc55ff3fd6fba6016` failed on its first forward with
+non-finite loss. It completed zero steps and zero training tokens; no backward
+or optimizer update occurred. Preserve that v0 run as failed evidence and do
+not resume, overwrite, or reinterpret it.
+
+A bounded, offline, no-update discriminator used the same immutable model and
+first 128-token block. Eager attention produced non-finite logits both with
+zero-initialized LoRA wrappers and after removing them, and at every tested
+prefix from 16 through 128 tokens. SDPA produced finite logits and loss across
+evaluation, training, and gradient-checkpointing modes. Explicit MATH-only and
+efficient SDPA were each finite. This observes an attention-implementation
+cause; FP16 eager-attention overflow is a plausible but not independently
+proven intermediate mechanism.
+
+Consume the single predeclared rescue by creating v1. Relative to v0, change
+only the run name and the full attention policy: load with Transformers
+`attn_implementation="sdpa"`, constrain PyTorch SDPA to `SDPBackend.MATH`
+through forward and checkpoint-recomputed backward, and disable reduced-
+precision FP16/BF16 math-SDPA reduction. Bind and verify all three fields in
+the configuration, plan identity, successful exact-head load report, runtime
+summary, and failure evidence. The diagnostic is preserved in
+`reports/stage0/pythia_lora_attention_diagnostic_2026-08-20.json`.
+
+**Rejected alternatives:** do not change LoRA geometry, learning rate,
+optimizer, loss scaler, dtype, data, token packing, sequence length, model, or
+offload/quantization. Those variables occur after or outside the observed
+eager-forward failure and would confound the rescue.
+
+**Stop rule:** if the exact v1 control fails any integrity, finite-value,
+memory, update, wall-time, or stability gate, stop this local training path.
+There is no second tuning rescue.
+
+**Claim ceiling:** a v1 pass would prove only the bounded trainer/checkpoint/
+resume engineering gate on this exact runtime. It would not validate PEFT for
+the causal design or establish temporal, behavioral, or CSTG evidence.
+
+**Observed result:** exact clean head `3f03885` completed the sole v1 rescue.
+Uninterrupted control and planned step-three interruption/resume run
+`run-1b8f0867fbd6038265f609b3595ae93d` each completed five optimizer steps.
+Both independent verifiers passed, and the comparator returned exact equality
+for adapter, optimizer, scheduler, scaler, CPU/CUDA RNG, counters, losses, and
+complete state. The shared final-manifest SHA-256 is
+`78ae0dd9272e6d046c237cf2b10243691098c70234a8b3db2f1c353b347f365a`.
+The rescue is closed; do not create v2 or tune v0/v1.
+
+**Evidence:**
+`reports/stage0/pythia_lora_resume_gate_2026-08-20.md`.
+
+## D-030 — Accept the bounded resume gate and close the training rescue
+
+**Date:** 2026-08-20
+**Status:** accepted at Target Verified engineering level
+
+Accept exact clean head `3f03885` and run
+`run-1b8f0867fbd6038265f609b3595ae93d` as evidence that the frozen local
+Pythia LoRA path can perform backward and optimizer updates, publish and verify
+an atomic step-three checkpoint, resume in a fresh process, and reproduce the
+uninterrupted final semantic state exactly. The control and resumed conditions
+each completed five unique optimizer steps, 640 input tokens, and 635 causal
+targets. Independent verification passed and comparison returned `equal` for
+adapter, optimizer, scheduler, scaler, CPU/CUDA RNG, counters, losses, and
+complete state.
+
+Close E5 and the one-rescue path. Preserve the failed eager v0 and successful
+SDPA-MATH v1 artifacts; do not rerun them to improve timing, create v2, or tune
+another training variable. The next local engineering decision is whether the
+existing registry tokenizer/scorer consumers can use a shared manifest/hash-
+verified offline snapshot interface without trusting arbitrary cache contents.
+
+**Rejected alternatives:** do not treat the five-step smoke as evidence that
+LoRA is scientifically adequate, that a full-width causal branch fits, or that
+sustained operation has passed. Do not unblock real-source or temporal claims
+from an engineering equality result.
+
+**Claim ceiling:** Target Verified for this bounded trainer/checkpoint/resume
+path on the exact RTX 2060, software stack, model revision, fixtures, and
+training profile only. No model-behavior, temporal, causal-training, or CSTG
+claim is authorized.
+
+**Evidence:**
+`reports/stage0/pythia_lora_resume_gate_2026-08-20.md`.
+
+## D-031 — Accept the verified Pythia tokenizer boundary and freeze native no-prefix execution
+
+**Date:** 2026-08-20
+**Status:** accepted at Target Verified engineering level
+
+Accept exact clean head `c57ce40` as evidence that the canonical Pythia
+tokenizer can be constructed only from a private copy of manifest/hash-verified
+local snapshot files and can audit all 12 `development-v0` items, 24 forms, and
+48 candidates without a boundary, context, or truncation failure. Two fresh
+invocations produced byte-identical reports with canonical output SHA-256
+`6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523`.
+
+Freeze `prefix-policy=none` before any registry logits are inspected. The
+manifest-bound tokenizer reports zero native special tokens and the exact
+backend's pre-logits probe produced identical token IDs with and without native
+special-token insertion. A BOS condition is therefore not the native path and
+must not be selected later because it yields preferred scores.
+
+**Rejected alternatives:** do not trust an arbitrary populated cache, load by
+repository/name, enable downloads during tokenizer construction, accept a
+slow/custom tokenizer fallback, add an item-specific tokenizer adapter, or run
+both prefix policies and select after model scoring. Do not treat hashing the
+safetensors file as model deserialization.
+
+**Claim ceiling:** Target Verified for this exact Pythia tokenizer,
+snapshot/runtime identity, and development-registry boundary path only. No
+model score, reliability result, calibration result, temporal effect, or CSTG
+claim is authorized. Model scoring remains blocked until its separate
+clean-head resource, exact-load, verified-snapshot, and deterministic-output
+gate passes.
+
+Revisit this decision before scoring if the artifact revision, manifest
+`tokenizer_runtime` identity, or Python/Transformers/tokenizers/huggingface-hub
+identity changes. Otherwise preserve the passing reports without rerunning
+them.
+
+**Evidence:**
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`.
+
+## D-032 — Use public repository visibility for standard hosted CI
+
+**Date:** 2026-08-20
+**Status:** accepted and applied by explicit user authorization
+
+Change `Parm-1/ChronoPersona` from private to public so its existing standard
+GitHub-hosted Actions workflows can use GitHub's free public-repository
+capacity without changing billing or spending settings. Treat visibility as a
+delivery mechanism only: it does not authorize merging, releases, a reuse
+license, paid compute, or publication of models, datasets, or raw corpora.
+
+Before exposure, scan the current tree, all reachable Git history, GitHub
+issues/PRs/comments, Actions configuration, repository secrets and variables,
+and publication surfaces. The audit found no credentials, private keys,
+repository secrets, tracked model weights, raw corpora, releases, deployments,
+Pages site, environments, or self-hosted runners. Existing workflows use
+standard hosted runners, read-only default tokens, and no privileged fork
+trigger.
+
+**Accepted disclosure:** public visibility exposes every remote branch,
+reachable commit, issue, PR, retained Actions log, one personal email in commit
+metadata, and historical local workspace strings. These disclosures and the
+fact that returning to private cannot recall third-party copies were stated
+before the change. No history rewrite, force push, or remote branch deletion
+was authorized or performed. The repository has no license, so public access
+is not a reuse grant.
+
+**Observed result:** GitHub reports `PUBLIC`, anonymous API and Git access work,
+main and draft PR #32/#33/#34 heads are unchanged, and the fork network remains
+empty. Actions remain enabled with read-only default workflow permissions;
+every external contributor's fork workflow now requires approval. Secret
+scanning and push protection are enabled. No billing setting changed.
+
+**Revisit rule:** another visibility change requires explicit user
+authorization. A private rollback restores GitHub access control only; it does
+not retract public clones, copied logs, or indexed commit metadata.
+
+## D-033 — Accept the repeated registry scorer path and reject instrument readiness
+
+**Date:** 2026-08-20
+**Status:** accepted at Target Verified engineering level
+
+Accept exact clean head `cee0f2fa436578bec2f90e57e7ae512f58335323` and run
+`run-25453ff5b41cda00b30ac23b046f6a5e` as evidence that the frozen Pythia
+provider can load the manifest/hash-verified private snapshot stage, bind the
+accepted tokenizer identity, compute finite complete-continuation log
+probabilities for all 48 `development-v0` candidates, publish deterministic
+scores separately from runtime evidence, and reproduce the score bytes exactly
+in a second fresh process. The verifier returned `equal`; score file SHA-256 is
+`c3cc112c2aa7f082858ccf60b827290893b488e7adc834293bb8054d15e1cecb`
+and comparison self-hash is
+`fcf155c5414bdcda7ce9cbdd12e1723da35b268d05bc3d96c369401f7850e687`.
+
+Do not accept the development instrument as reliable. Eight of twelve items
+had the same pole direction across both forms, but four of six
+evidence-integration items had directional agreement 0.5. Treat this as a
+pre-freeze development signal requiring controlled wording/order diagnosis,
+revision, and retesting under predeclared reliability criteria. One item
+aggregate and two forms also had opposite signs under the frozen primary
+total-logprob margin and diagnostic mean-token margin. Preserve the primary
+metric; do not select items, poles, phrasing, or the diagnostic metric to
+obtain a preferred model-behavior narrative.
+
+**Rejected alternatives:** do not round or tolerance-compare the two score
+files, run a third tie-breaker, switch dtype/device/attention backend, shorten
+the registry, publish machine-specific receipts, or interpret this public final
+checkpoint as a causal insertion checkpoint or historical condition. Do not
+rerun the passing scorer gate merely to improve timing or presentation.
+
+**Claim ceiling:** Target Verified for the exact scorer/snapshot/tokenizer/
+runtime/resource path only. The item-level output is measurement-development
+evidence, not a temporal contrast, calibration result, model-representativeness
+claim, causal effect, or CSTG evidence. The 60 MiB post-score VRAM margin also
+does not authorize a larger or concurrent local model job.
+
+**Evidence:**
+`reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

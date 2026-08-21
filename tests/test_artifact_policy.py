@@ -6,6 +6,7 @@ from chronopersona.artifact_policy import (
     ArtifactPolicyError,
     assert_model_score_ready,
     assert_tokenizer_ready,
+    assert_tokenizer_snapshot_ready,
     find_artifact,
     operation_plan,
 )
@@ -24,6 +25,7 @@ def test_pythia_final_is_ready_for_tokenizer_and_model_scoring() -> None:
     artifact = find_artifact(_manifest(), "pythia-1b-deduped-main")
 
     assert_tokenizer_ready(artifact)
+    assert_tokenizer_snapshot_ready(artifact)
     assert_model_score_ready(artifact)
     assert operation_plan(artifact, "model-score")["allowed"] is True
 
@@ -35,8 +37,13 @@ def test_olmo_early_tokenizer_is_allowed_before_model_hardware_gate() -> None:
     )
 
     assert_tokenizer_ready(artifact)
+    with pytest.raises(ArtifactPolicyError, match="snapshot manifest"):
+        assert_tokenizer_snapshot_ready(artifact)
     with pytest.raises(ArtifactPolicyError, match="not benchmark-ready"):
         assert_model_score_ready(artifact)
+    plan = operation_plan(artifact, "tokenizer-audit")
+    assert plan["allowed"] is True
+    assert plan["snapshot_execution_allowed"] is False
 
 
 def test_unlicensed_datedgpt_artifact_is_blocked() -> None:

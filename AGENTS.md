@@ -86,7 +86,7 @@ Continue safe, reversible, local work without repeated permission requests. Do n
 
 - rent or purchase compute;
 - accept paid licenses;
-- make the repository public;
+- change repository visibility again;
 - push or publish branches outside the requested GitHub workflow;
 - release models, datasets, or raw corpora;
 - register a study;
@@ -104,8 +104,18 @@ deliverable is ready. Do not request routine confirmation for those actions.
 
 This standing authorization does not include merging pull requests, force
 pushing, deleting remote branches, creating releases, changing repository
-visibility, spending money, or publishing models, datasets, or raw corpora.
+visibility again, spending money, or publishing models, datasets, or raw
+corpora.
 Those actions still require explicit user authorization.
+
+## GitHub collaboration
+
+Use public `Parm-1/ChronoPersona`, one gate per draft PR. Public visibility is
+an Actions-delivery decision, not a license grant or authorization to publish
+models, datasets, or raw corpora. Bind review to the
+exact base/head and omitted local state; a material commit is stale. Review is
+advisory and CI does not prove CSTG, license, or publication claims. Standing
+delivery authority still excludes the actions above.
 
 ## Experiment lifecycle
 
@@ -168,16 +178,31 @@ Every material report includes:
 
 Activity is not progress unless it creates evidence or a reusable artifact.
 
+## Code Review Rules
+
+- Block weakened run identity, weights/holdouts, source authorization,
+  provenance, containment, fail-loud behavior, secrets/private data, silent
+  fallback, hidden exclusion, or claims above evidence.
+- Require exact-head integrity tests and honest evidence labels. Review cannot
+  authorize spending, release, registration, or outreach.
+
 ## Current boundary
 
-The repository is in Stage 0. The development content-integrity gate has
-passed, local model acquisition and bounded training measurement are authorized
-and active, and the next bounded real-content qualification gate remains
-externally blocked.
+The repository remains in Stage 0. The development content-integrity gate has
+passed, local model acquisition and bounded engineering training are authorized
+and active. The next real-content qualification gate is externally blocked.
 
-Acquire and measure one pinned, license-cleared model at a time under the
-resource and integrity gates. Evidence-bearing naturalistic execution still
-requires small rights-qualified, historically version-bounded A/B samples and
-an explicitly authorized held-out source-C review packet. No requester-pays
-retrieval, paid compute, public model/data release, or evidence-bearing
-naturalistic run is part of the active local gate.
+The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
+failure. Its single versioned v1 attention-policy rescue passed the bounded
+five-step control/interruption/resume engineering gate with exact semantic
+state equality; do not reopen either profile or infer scientific training
+adequacy. The exact Pythia tokenizer boundary path is Target Verified through
+the shared hash-verified snapshot loader. The bounded repeated registry scorer
+also passed with byte-identical deterministic outputs, but four development
+items were paraphrase-direction inconsistent; the next local gate is
+predeclared measurement reliability and invariance, not scientific
+interpretation. Evidence-bearing naturalistic execution still
+requires rights-qualified, historically version-bounded A/B samples and an
+explicitly authorized held-out source-C review packet. Paid compute, public
+model/data release, another repository-visibility change, and requester-pays
+retrieval remain outside the active gate.

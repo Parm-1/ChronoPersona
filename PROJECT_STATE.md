@@ -14,13 +14,21 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Active — immutable final-Pythia acquisition and local loading/logits measurement**
+**Current transition — E5 closes on green exact-head CI; next is measurement reliability**
 
-The design and repository-governance gates have passed. A no-weight local
-runtime and model-metadata preflight is measured, and the user authorized model
-downloads and training on 2026-08-20. The active gate now measures one pinned
-licensed model before any training. Real-source scientific execution still
-requires the separate source evidence listed below.
+The design and repository-governance gates have passed. The immutable final-
+Pythia snapshot was acquired, verified, and loaded offline with finite logits.
+The first frozen tiny-LoRA control failed before backward under forced eager
+attention. Its one versioned SDPA-MATH rescue subsequently completed the
+five-step uninterrupted and interruption/resume conditions with exact semantic
+state equality. The exact Pythia tokenizer now also passed two byte-identical
+12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
+loader. The model scorer then completed two fresh exact-head invocations with
+byte-identical deterministic scores and complete verifier-valid receipts. The
+containing E5 evidence head closes this scorer plan when all exact-head checks
+pass; after that condition, development measurement reliability is the next
+local gate. Real-source scientific execution still requires the separate
+source evidence listed below.
 
 ## Latest verified evidence
 
@@ -44,13 +52,24 @@ requires the separate source evidence listed below.
   2,092,816,302 bytes, separates allowlisted acquisition from offline loading,
   rehashes the snapshot, validates config/model/logits identity, and captures a
   fresh live resource audit immediately before load.
-- Direct Transformers tokenizer/scorer repository or cache loading is
-  deliberately disabled until those consumers use the same reusable
-  manifest/hash-verified snapshot layer.
-- No model weights were downloaded, no model was loaded or trained, and no real
-  A/B/C corpus was qualified.
-- The preceding no-weight statement is the verified baseline before the newly
-  authorized acquisition; `PROGRESS.md` is the current run-state authority.
+- The Transformers tokenizer now loads only from a private copy of exact
+  manifest/hash-verified snapshot files. Its two fresh `development-v0` audits
+  were byte-identical and passed all 48 candidates with zero failures. Direct
+  repository/cache loading remains disabled.
+- Exact scorer head `cee0f2fa` completed two fresh 48-forward invocations over
+  12 items and 24 forms. The 124,555-byte deterministic score artifacts were
+  byte-identical and the repeat verifier returned `equal`, with zero boundary,
+  truncation, or nonfinite failures. Four items were directionally inconsistent
+  across forms, so this verifies the scorer path while instrument reliability
+  remains unestablished.
+- The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
+  LoRA control and resumed condition each completed five optimizer steps on
+  synthetic fixtures and independently verified exact final semantic state
+  equality. This is engineering evidence only.
+- No public model/data release, paid compute, or real A/B/C corpus
+  qualification occurred.
+- Exact run and delivery state lives in `PROGRESS.md`; historical no-weight
+  preflight reports remain valid only for their recorded commits.
 
 ### Reported by primary sources
 
@@ -63,7 +82,9 @@ requires the separate source evidence listed below.
 - final era windows;
 - source-general era decodability;
 - a trainable causal checkpoint and insertion point;
-- reliable real-model scoring on local hardware;
+- sustained target-model training stability or broad-update feasibility;
+- development-item paraphrase, option-order, and metric invariance sufficient
+  for a frozen evaluation instrument;
 - synthetic calibration sensitivity;
 - any temporal behavioral effect.
 
@@ -84,8 +105,9 @@ requires the separate source evidence listed below.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
-5. Pinned-model load, logits, peak-memory, and tiny-training benchmarks on the
-   measured RTX 2060 runtime.
+5. Predeclared measurement-reliability criteria plus revision and retest of the
+   four directionally inconsistent items and three primary/diagnostic sign
+   disagreements.
 6. An immutable causal starting artifact and inspected, compatible resume path;
    metadata identity alone is insufficient.
 7. Expanded development and sealed confirmation evaluations.
@@ -99,8 +121,9 @@ requires the separate source evidence listed below.
   2026-08-20.
 - The active gate requires one pinned licensed artifact at a time, measured
   headroom, and preserved stop/failure evidence.
-- No paid license, cloud rental, requester-pays operation, public model/data
-  release, or repository visibility change is needed or inferred.
+- No paid license, cloud rental, requester-pays operation, or public model/data
+  release is needed or inferred. The repository is public only by the user's
+  explicit authorization to restore standard hosted Actions capacity.
 
 ## Claim level
 
@@ -108,8 +131,9 @@ requires the separate source evidence listed below.
 
 ## Exact next action
 
-Commit the authorization and integrity changes, capture a fresh exact-clean-head
-audit, acquire and verify only the pinned five-file final-Pythia snapshot, then
-capture a second audit and measure offline float16 CUDA loading/logits. Review
-that result before implementing or running the tiny training/resume benchmark.
-Bounded rights-qualified source samples remain a separate external blocker.
+If the containing E5 head is not yet green, publish the repeated-scorer evidence
+and Windows/Python 3.13 stable-read fix on draft PR #34 and require exact-head
+CI. Once that condition is met, open a separate measurement-development plan
+with frozen reliability and invariance criteria before revising or rescoring
+any item. Bounded rights-qualified source samples remain a separate external
+blocker.

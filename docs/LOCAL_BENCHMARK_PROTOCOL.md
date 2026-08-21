@@ -2,7 +2,9 @@
 
 This protocol captures the resource evidence that cannot be measured from GitHub or a browser session. It is designed for the reported Windows machine with an RTX 2060 and 16 GB RAM, but it records actual values rather than assuming the GPU variant or available storage.
 
-No command below starts evidence-bearing training.
+No command below starts a scientific or naturalistic training branch. Section
+11 runs one deliberately tiny synthetic-fixture LoRA engineering smoke after
+the loading gate has passed.
 
 ## 1. Obtain the branch
 
@@ -291,25 +293,189 @@ commit.
 ## 10. What remains after the loading benchmark
 
 A successful inference benchmark proves only that the verified model
-loading/logits path can run. Registry scoring remains unverified until the
-provider uses the same verified-snapshot layer, tokenizer audit passes, and an
-explicit registry execution completes. Issue #2 still requires a tiny
-continued-pretraining benchmark measuring:
+loading/logits path can run. The exact Pythia tokenizer subsequently passed two
+byte-identical `development-v0` boundary audits through a private verified-
+snapshot stage. Exact scorer head `cee0f2fa` then completed two fresh
+48-forward registry invocations with byte-identical deterministic score files,
+complete verifier-valid resource/runtime receipts, and zero boundary,
+truncation, or nonfinite failures. See
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md` and
+`reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`.
 
-- forward and backward memory;
-- optimizer-state memory;
-- activation checkpointing;
-- tokens per second;
-- checkpoint write size and time;
-- safe interruption and resumption;
-- full-weight versus PEFT modes.
+That pass verifies the exact engineering path, not the instrument: four items
+changed direction across their two forms and three primary/diagnostic margin
+signs disagreed. The bounded continued-training prerequisite also passed under
+the frozen v1 LoRA profile in Section 11, including forward/backward/update
+memory, throughput, checkpoint round-trip, planned interruption, and exact
+resume equality. Measurement reliability is not established; sustained
+stability, full-width/broad-update feasibility, and branch-set cost remain
+unmeasured.
 
-That training benchmark should be implemented only after the model-loading result identifies the actual local envelope. It must use a tiny redistributable fixture and cannot be interpreted scientifically.
+## 11. Run the frozen tiny LoRA checkpoint/resume gate
 
-## 11. Borrowed RTX 5070 machine
+The original frozen v0 control at commit `f2568ab` failed before backward or
+an optimizer update: eager attention produced non-finite logits on the first
+exact 128-token block. Preserve its `run-b035b9becad60b6dc55ff3fd6fba6016`
+run tree and reports; never resume, overwrite, or relabel it. A bounded
+diagnostic changed only attention execution, reproduced the eager failure with
+and without LoRA wrappers, and found finite logits under SDPA. The self-hashed
+diagnostic is preserved in
+`reports/stage0/pythia_lora_attention_diagnostic_2026-08-20.json`.
+
+The sole predeclared rescue is the separately versioned committed training
+configuration `configs/runs/pythia-lora-smoke-v1.json`. It is limited to five batch-one,
+sequence-128 optimizer updates over the two eligible CC0 synthetic fixture
+records. It uses rank-4 FP32 LoRA adapters over the frozen FP16 base, targets
+the 16 fused GPT-NeoX `query_key_value` projections, and has exactly 524,288
+trainable parameters. AdamW and dynamic-loss-scaler defaults are expanded into
+explicit frozen fields in the config rather than inherited from library
+defaults. Relative to v0, only the run name and complete attention policy
+change: Transformers `sdpa`, PyTorch `SDPBackend.MATH`, and disabled reduced-
+precision FP16/BF16 math-SDPA reduction. The MATH-only context remains active
+through backward because activation checkpointing recomputes attention there.
+This is trainer/checkpoint evidence only. If v1 fails, stop this local rescue
+path; do not change sequence length, LoRA, optimizer, scaler, dtype, or data.
+
+First inspect the no-network plan:
+
+```powershell
+python scripts/benchmark_lora_training.py plan `
+  --output artifacts/local/pythia-lora-v1-plan.json
+```
+
+The runner deliberately has no download option. Use the already verified
+snapshot and construct its explicit path:
+
+```powershell
+$snapshot = Join-Path $env:HF_HOME `
+  "models--EleutherAI--pythia-1b-deduped\snapshots\7199d8fc61a6d565cd1f3c62bf11525b563e13b2"
+```
+
+Real execution requires the canonical `runs/pythia-lora-smoke-v1` output root
+and also holds one fixed host-temporary training lock, independent of run ID or
+condition. A stale lock is never removed automatically; inspect it before any
+manual recovery. This keeps control and resumed invocations, alternate run
+identities, and separate worktrees from loading concurrent heavy jobs.
+
+Commit and validate the complete training implementation first. Then capture a
+fresh audit and repeat Section 7's offline loading/logits command at that exact
+clean training head, writing
+`artifacts/local/pythia-main-cuda-training-v1-head.json`. The benchmark must
+report the same explicit SDPA MATH policy as v1. The resulting successful
+inference report is an immutable input to the training run identity; do not
+reuse either the older `76c2479` report or the automatic-SDPA `f2568ab` report.
+
+Capture a fresh cache-bound audit immediately before the uninterrupted
+operational reference, then run it:
+
+```powershell
+python scripts/audit_local_resources.py `
+  --repo . `
+  --path $env:HF_HOME `
+  --output artifacts/local/resource-audit-lora-v1-control.json
+
+python scripts/benchmark_lora_training.py run `
+  --condition control `
+  --cache-dir $env:HF_HOME `
+  --snapshot-path $snapshot `
+  --resource-audit artifacts/local/resource-audit-lora-v1-control.json `
+  --load-report artifacts/local/pythia-main-cuda-training-v1-head.json `
+  --output-root runs/pythia-lora-smoke-v1 `
+  --output artifacts/local/pythia-lora-v1-control.json
+```
+
+Capture another fresh audit and execute the declared step-three interruption.
+Exit code 75 is expected only after the immutable checkpoint, runtime-step
+artifact, progress event, attempt report, and `failed` event have been written:
+
+```powershell
+python scripts/audit_local_resources.py `
+  --repo . `
+  --path $env:HF_HOME `
+  --output artifacts/local/resource-audit-lora-v1-interrupt.json
+
+python scripts/benchmark_lora_training.py run `
+  --condition resumed `
+  --interrupt-after 3 `
+  --cache-dir $env:HF_HOME `
+  --snapshot-path $snapshot `
+  --resource-audit artifacts/local/resource-audit-lora-v1-interrupt.json `
+  --load-report artifacts/local/pythia-main-cuda-training-v1-head.json `
+  --output-root runs/pythia-lora-smoke-v1 `
+  --output artifacts/local/pythia-lora-v1-interrupted.json
+```
+
+Capture one more fresh audit, then authorize the explicit resume. The runner
+rehashes the snapshot before model import, verifies the checkpoint bytes before
+`torch.load(weights_only=True)`, checks its step-three event binding, restores
+adapter/optimizer/scheduler/scaler state, and restores CPU/CUDA RNG last:
+
+```powershell
+python scripts/audit_local_resources.py `
+  --repo . `
+  --path $env:HF_HOME `
+  --output artifacts/local/resource-audit-lora-v1-resume.json
+
+python scripts/benchmark_lora_training.py run `
+  --condition resumed `
+  --resume `
+  --cache-dir $env:HF_HOME `
+  --snapshot-path $snapshot `
+  --resource-audit artifacts/local/resource-audit-lora-v1-resume.json `
+  --load-report artifacts/local/pythia-main-cuda-training-v1-head.json `
+  --output-root runs/pythia-lora-smoke-v1 `
+  --output artifacts/local/pythia-lora-v1-resumed.json
+```
+
+Finally verify each condition and require exact semantic equality:
+
+```powershell
+$runId = (Get-Content artifacts/local/pythia-lora-v1-control.json -Raw |
+  ConvertFrom-Json).run_id
+$control = Join-Path "runs/pythia-lora-smoke-v1/control" $runId
+$resumed = Join-Path "runs/pythia-lora-smoke-v1/resumed" $runId
+
+python scripts/benchmark_lora_training.py verify `
+  --run-root $control `
+  --output artifacts/local/pythia-lora-v1-control-verify.json
+python scripts/benchmark_lora_training.py verify `
+  --run-root $resumed `
+  --output artifacts/local/pythia-lora-v1-resumed-verify.json
+python scripts/benchmark_lora_training.py compare `
+  --control-root $control `
+  --resumed-root $resumed `
+  --output artifacts/local/pythia-lora-v1-comparison.json
+```
+
+The frozen resource gates require at least 3,695,181,824 bytes conservative
+free VRAM before each load, at least 1,610,612,736 bytes global free VRAM after
+load, no more than 3,158,310,912 process-reserved GPU bytes, 128 MiB output
+headroom, a checkpoint no larger than 16 MiB, and at most 15 minutes per
+condition cumulatively; the interrupted and resumed attempts share that
+15-minute budget. Each attempt records elapsed wall time. Available host RAM is
+recorded but is not a threshold under the user's instruction. Per-step evidence
+separates forward, backward, and optimizer CUDA allocation/reservation peaks,
+optimizer-state tensor bytes, and input-token throughput. Allocation failure,
+severe paging or desktop instability, driver/thermal instability, a nonfinite
+value, a skipped optimizer update, or any integrity mismatch still stops the
+gate.
+
+**Observed 2026-08-20 result:** exact clean head `3f03885` completed the v1
+control and planned interruption/resume under run
+`run-1b8f0867fbd6038265f609b3595ae93d`. Both verifiers passed and the
+comparator returned exact semantic equality with final-manifest SHA-256
+`78ae0dd9272e6d046c237cf2b10243691098c70234a8b3db2f1c353b347f365a`.
+The gate is closed; never rerun these immutable output names or create v2.
+See `reports/stage0/pythia_lora_resume_gate_2026-08-20.md`.
+
+The full-weight AdamW path is not attempted. Even the optimistic FP16
+weights/gradients/two-FP16-moment lower bound is 8,094,253,056 bytes, exceeding
+the 6,441,992,192-byte GPU by 1,652,260,864 bytes before activations.
+
+## 12. Borrowed RTX 5070 machine
 
 Do not plan around the borrowed machine until access is confirmed. When available, repeat the same resource and immutable Pythia benchmark protocol there before using OLMo or running training. Record it under a separate machine label; never merge measurements from the two computers.
 
-## 12. Paid compute
+## 13. Paid compute
 
 No command in this protocol authorizes paid compute. A later paid-compute proposal must use measured local throughput and state the exact model, branches, dose, storage, failure allowance, CAD cost, scientific decision, and stop rule.

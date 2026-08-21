@@ -1,10 +1,11 @@
 # Active ExecPlan — Pythia Local Feasibility
 
-**Status:** active — inference passed; tiny training gate in implementation
+**Status:** complete — v0 failure preserved; sole v1 SDPA rescue passed
 **Started:** 2026-08-20T02:10:08-04:00
-**Last reconciled:** 2026-08-20T03:19:29-04:00
+**Last reconciled:** 2026-08-20T05:44:48-04:00
 **Successful inference head:** `76c2479738d137d33d59d526a1392d17ceffe09a`
-**Branch:** `fix/model-feasibility-gates`
+**Training execution head:** `3f03885b0237933ffb2b2f2a68bcf0e8f168a5d3`
+**Branch:** `feat/tiny-training-resume-gate`
 
 ## Objective and end state
 
@@ -28,32 +29,48 @@ time, and exact resume behavior before any scientific training branch.
 
 - Exact detached execution worktree is clean at inference commit `76c2479`;
   unrelated concurrent primary-worktree edits are excluded.
-- PRs #28 and #29 were merged externally after passing their reported checks.
-  Draft PR #30 covers the hardening head and all 18 `76c2479` checks passed.
+- PRs #28, #29, #30, and #31 were merged externally after their reported
+  checks. PR #31 merged the preserved v0 head `f2568ab`. Draft PR #32 covers
+  the v1 rescue through exact execution head `3f03885`; all 18 exact-head
+  checks passed. Agents did not merge these PRs and are not authorized to
+  merge PR #32.
 - CPython 3.11.9 virtual environment with PyTorch `2.13.0+cu130`, Transformers
   5.15.1, Hugging Face Hub 1.28.0, and Accelerate 1.14.0.
 - CUDA 13.0 available; RTX 2060 compute capability 7.5 and 6,144 MiB VRAM.
-- At reconciliation: 3,792 MiB free VRAM, approximately 6.9 GB available RAM,
-  and approximately 255 GB free disk.
+- Before the v1 resume attempt: 3,729 MiB free VRAM, approximately 2.95 GB
+  available RAM, and approximately 251 GB free disk. The explicit RAM
+  threshold override was used; VRAM/disk/integrity gates passed.
 - Explicit cache `artifacts/local/hf-cache` contains the exact verified five-
   file Pythia snapshot at the pinned revision.
 - Manifest: 13 artifacts, one benchmark-ready final Pythia revision
   `7199d8fc61a6d565cd1f3c62bf11525b563e13b2`.
 - Exact required inference set: five files totaling 2,092,816,302 bytes;
   exact 2.5x disk margin: 5,232,040,755 bytes.
-- Exact implementation suite: 303 passed, one skipped; all three top-level
-  validators and the no-download acquisition plan passed.
+- Exact clean training execution suite: 354 passed, one skipped; all three
+  top-level validators and diff checks passed. The stored frozen no-network
+  training plan and self-hash validated from both run identities.
 - User explicitly authorized model downloads and training on 2026-08-20.
 - The no-download plan at the tested commit resolved the exact required bytes
   and disk margin without acquiring weights.
 - The verified snapshot loaded in CUDA FP16 and produced finite logits. Peak
   allocated VRAM was 2,042,486,784 bytes and peak process RSS was
   2,810,875,904 bytes.
+- The first exact v0 training control is a preserved target failure:
+  `run-b035b9becad60b6dc55ff3fd6fba6016` completed zero steps/tokens because
+  its forced eager-attention forward produced non-finite logits/loss before
+  backward or an optimizer update.
+- A no-update exact-block discriminator changed only attention execution.
+  Eager remained non-finite with LoRA removed and across prefix lengths
+  16–128; automatic, MATH-only, and efficient SDPA produced finite outputs.
+- The sole v1 rescue completed uninterrupted and planned interruption/resume
+  conditions under run `run-1b8f0867fbd6038265f609b3595ae93d`; both
+  verifiers passed and the comparator returned exact semantic equality.
 
-## Active deliverable and evidence gate
+## Completed deliverable and evidence gate
 
-The single write-active deliverable is now the deterministic tiny LoRA
-training/checkpoint/resume engineering gate plus its durable decision update.
+The deterministic tiny LoRA training/checkpoint/resume engineering gate and
+its durable decision update are complete. The next local deliverable is owned
+by a successor plan for verified-snapshot registry integration.
 
 The gate decides whether to advance to a tiny training benchmark:
 
@@ -97,8 +114,8 @@ processes to manufacture headroom.
 The download is partial, resolves a different revision, or lacks the required
 safe inference files.
 
-Falsified at the acquisition layer by the complete exact-file, revision, hash,
-and config verification. Model loading remains a separate unresolved gate.
+Falsified by complete exact-file, revision, hash, config, offline model load,
+and finite-logits verification.
 
 ## Scope and ownership
 
@@ -211,7 +228,7 @@ and config verification. Model loading remains a separate unresolved gate.
 full-weight AdamW lower bound fails analytically, so E5 is explicitly LoRA
 infrastructure evidence rather than a substitute headline method.
 
-### E5 — Tiny LoRA training, checkpoint, and exact resume
+### E5-v0 — Tiny LoRA training, checkpoint, and exact resume
 
 - **Question:** can the verified Pythia base complete deterministic backward and
   optimizer plumbing, atomically checkpoint at step three, resume explicitly,
@@ -230,12 +247,45 @@ infrastructure evidence rather than a substitute headline method.
 - **Pass:** both conditions complete five unique optimizer steps; final adapter,
   optimizer, scheduler, loss sequence, token count, and cursor semantic hashes
   match exactly; all checkpoint file hashes and the event chain verify.
-- **Stop:** snapshot/load-report/audit drift; under 1 GiB post-load GPU headroom;
+- **Stop:** snapshot/load-report/audit drift; under 1,610,612,736 bytes post-load
+  global GPU headroom;
   nonfinite loss or gradient; skipped update; CUDA OOM; 15-minute wall limit;
   severe instability; incomplete metrics; checkpoint corruption; or resume
   divergence.
 - **Claim ceiling:** engineering smoke only. It does not justify PEFT for the
   headline causal claim or establish any behavioral result.
+
+**Observed result:** failed before step one under forced eager attention. The
+immutable v0 config, run, events, CLI report, and failed attempt remain the
+authoritative result. Do not resume or overwrite them.
+
+### E5-R1 — Sole attention-policy rescue
+
+- **Question:** does the unchanged v0 training profile complete when the one
+  diagnosed pre-backward variable is replaced by an explicitly reproducible
+  finite attention path?
+- **Preserved inputs:** exact model revision/files, token matrix, fixtures,
+  sequence length, LoRA geometry, optimizer, scheduler, scaler, precision,
+  seed, step count, resource limits, control/interruption/resume topology, and
+  claim ceiling.
+- **Changed variable:** new v1 run name plus the complete attention policy:
+  Transformers `sdpa`, PyTorch `SDPBackend.MATH`, and reduced-precision
+  FP16/BF16 math-SDPA reduction disabled.
+- **Binding:** the policy must appear identically in config, plan/run identity,
+  exact-head load report, and runtime summary. The MATH-only context spans
+  forward and backward because activation checkpointing recomputes attention.
+- **Diagnostic evidence:**
+  `reports/stage0/pythia_lora_attention_diagnostic_2026-08-20.json`.
+- **Pass:** the original E5 equality gate passes under a new v1 run ID.
+- **Stop:** any v1 failure ends this local training path. No second rescue or
+  tuning change is allowed.
+
+**Observed result:** passed at exact clean head `3f03885`. Both conditions
+completed five optimizer steps and 640 input tokens. Independent verification
+and comparison found exact final adapter, optimizer, scheduler, scaler,
+CPU/CUDA RNG, counter, loss, and complete-state equality. The final-manifest
+SHA-256 is
+`78ae0dd9272e6d046c237cf2b10243691098c70234a8b3db2f1c353b347f365a`.
 
 ## Observed results
 
@@ -262,6 +312,36 @@ infrastructure evidence rather than a substitute headline method.
   2,042,486,784 allocated GPU bytes, produced finite `[1,20,50304]` logits,
   and averaged 1,294.30 predicted tokens/second across three repeats. The RAM
   override was requested but the ordinary threshold passed, so it was unused.
+- **2026-08-20T04:49:51-04:00:** E5 implementation commit `7b6398f` passed
+  344 tests with one optional skip in a clean detached worktree. All three
+  top-level validators, diff checks, and the self-hashed no-network plan
+  passed. The 40-test training/CLI subset covers exact checkpoint/resume
+  equality, corruption, Windows junction escape, global locking, structured
+  OOM/nonfinite failure, and transactional late-timeout rollback. No model was
+  loaded during this validation.
+- **2026-08-20T04:59:09-04:00:** exact training head `f2568ab`, v0 control
+  `run-b035b9becad60b6dc55ff3fd6fba6016`, failed on the first eager-attention
+  forward with non-finite loss. It completed zero steps/tokens; no backward or
+  optimizer update ran. The structured failure and run tree are immutable.
+- **2026-08-20T05:01:10-04:00 onward:** a bounded offline discriminator found
+  the exact token block and embeddings valid, reproduced eager non-finiteness
+  without LoRA and across prefixes 16–128, and produced finite loss under
+  automatic, MATH-only, and efficient SDPA. This consumes the one rescue for
+  the explicit MATH-only v1 policy; other training variables stay frozen.
+- **2026-08-20T05:24:00-04:00:** exact rescue commit `192b0d7` passed 354
+  tests with one optional skip in the clean detached worktree. All three top-
+  level validators, diff checks, and the self-hashed v1 no-network plan passed.
+- **2026-08-20T05:37:55-04:00:** exact clean head `3f03885` passed a fresh
+  cache-bound resource audit and explicit SDPA-MATH offline load/logits probe.
+  The model identity, all snapshot hashes, attention policy, parameter count,
+  dtype, and finite `[1,20,50304]` logits verified.
+- **2026-08-20T05:39:12-04:00:** the uninterrupted v1 control completed five
+  steps. The planned resumed condition then stopped cleanly after its atomic
+  step-three checkpoint.
+- **2026-08-20T05:42:05-04:00:** a fresh audited process verified and restored
+  the checkpoint, completed steps four and five, and published the same final
+  manifest as control. Both run verifiers passed; comparison status was
+  `equal` across every frozen semantic state component.
 
 ## Decisions
 
@@ -281,6 +361,15 @@ infrastructure evidence rather than a substitute headline method.
 - Keep registry tokenizer/scoring execution blocked until the provider consumes
   a reusable manifest/hash-verified snapshot loader. Benchmark acquisition does
   not automatically authorize a separate unverified cache-loading path.
+- Preserve the failed v0 spec and run. Implement exactly one versioned v1
+  rescue changing only the attention policy. If v1 fails, stop rather than
+  adjusting training hyperparameters or model execution again.
+- Accept the passing v1 result only as bounded trainer/checkpoint/resume
+  engineering evidence. Close the rescue without v2; do not infer PEFT
+  adequacy or a temporal/model-behavior result.
+- Activate reusable manifest/hash-verified snapshot integration as the next
+  local engineering gate so registry tokenizer/scorer execution cannot trust
+  arbitrary cache contents.
 
 ## Required validation
 
@@ -300,21 +389,26 @@ infrastructure evidence rather than a substitute headline method.
 3. E2 acquisition result preserved and verified — complete.
 4. E3 offline CUDA load/logits result preserved — complete.
 5. State and decision updated; E5 training gate activated — complete.
-6. E5 implementation, exact-head validation, and local control/resume run.
-7. E5 evidence, compute ledger, and advance/stop decision published.
+6. E5 implementation and exact-head local validation — complete.
+7. Stacked draft PR and exact-head CI for v0 — complete; the v0 CUDA control
+   produced a preserved actionable failure.
+8. Versioned v1 SDPA-MATH rescue implementation, validation, push, and CI —
+   complete at `3f03885` / draft PR #32.
+9. Fresh exact-head MATH-policy load report and one v1 control/interruption/
+   resume/verify/compare gate — complete and equal.
+10. E5 evidence, compute ledger, and advance/stop decision published —
+    complete in the follow-up evidence commit.
 
 ## Exact restart procedure
 
-Read `PROGRESS.md`, confirm this is the sole active plan, inspect branch/cache/
-resource reality, and resume the first incomplete milestone. Never reconstruct
-authorization or run identity from chat alone. Before E2, require a clean head,
-fresh audit, existing explicit cache, and all E1 stop conditions passing. Before
-E3, require complete E2 integrity, a second fresh audit, explicit offline mode,
-no conflicting heavy job, and all non-RAM E3 headroom checks passing. Record
-the user-authorized RAM-threshold override explicitly.
+This plan is complete. Read `PROGRESS.md`, preserve both v0 and v1 run trees,
+and do not rerun or tune them. Resume local engineering from a successor plan
+for reusable verified-snapshot registry integration. Draft PR #32 must receive
+green exact-head CI after the evidence commit and must not be merged by agents.
 
 ## Completion classification
 
-Complete this plan only after E5 has a preserved control/resume result and the
-training advance/stop decision is recorded. The successful inference result is
-complete for its bounded gate but does not complete the trainer objective.
+Complete. E5 has a preserved control/resume result, exact comparison, compute-
+ledger entries, and a recorded close decision. The outcome is Target Verified
+only for the bounded engineering objective and does not complete any scientific
+training or CSTG objective.

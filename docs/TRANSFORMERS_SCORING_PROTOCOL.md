@@ -23,10 +23,15 @@ Model scoring additionally requires:
 - the local memory and storage gates in `LOCAL_BENCHMARK_PROTOCOL.md`.
 
 The scripts never set `trust_remote_code=True` and contain no quantization path.
-Their execution modes are temporarily fail-closed: direct repository or cache
-loading is disabled until the provider consumes a reusable local-snapshot
-verifier that enforces the manifest file allowlist, sizes, hashes, config, and
-revision. Plan mode remains available.
+Tokenizer execution consumes only an explicit local snapshot after the shared
+verifier enforces the canonical manifest, repository/revision cache layout,
+complete file allowlist, sizes, hashes, config, and cache-contained targets.
+Direct repository lookup and download-on-load remain disabled. Model scoring is
+implemented only through the frozen exact-snapshot, accepted-tokenizer,
+live-resource, exact-load, and deterministic-output gate below. Exact Pythia
+target execution passed that gate twice at head `cee0f2fa`; other artifacts and
+any changed identity remain blocked until their own exact-head resource and
+load evidence passes. Plan mode remains available for both operations.
 
 ## 2. Install the smallest dependency set first
 
@@ -36,13 +41,16 @@ Tokenizer-only audit:
 python -m pip install -e ".[tokenizers]"
 ```
 
-Full model scoring later:
+Full model-scoring environment:
 
 ```powershell
 python -m pip install -e ".[models]"
 ```
 
-Tokenizer audits therefore do not require PyTorch or model weights.
+Tokenizer audits do not import PyTorch or deserialize model weights. The current
+complete-snapshot integrity contract does require the already-acquired Pythia
+snapshot and streams every manifested file, including safetensors, through
+SHA-256 verification before and after tokenizer construction.
 
 ## 3. Plan before network access
 
@@ -72,18 +80,52 @@ DatedGPT should currently report a license blocker. That is expected and must no
 
 ## 4. Tokenizer-only audit execution gate
 
-Tokenizer execution is deliberately blocked at present. A populated Hugging
-Face cache is not proof that the tokenizer files match the manifest, and
-`--allow-download` is rejected with guidance to the separate acquisition
-command. `benchmark_model.py --acquire-only` can create and verify the exact
-Pythia snapshot, but the tokenizer provider must first be changed to consume
-that verified local snapshot rather than an owner/name cache lookup.
+Execution requires a clean exact Git head, the canonical committed manifest and
+development registry, explicit absolute cache/snapshot paths, and a new output
+path outside the cache. `--allow-download` remains rejected.
 
-When that reusable loader is implemented and tested, run both prefix policies
-during development when a model has a BOS token. The chosen execution command,
-snapshot/report binding, and result paths must be added here before use.
+Pythia's development audit freezes `prefix-policy=none` before any registry
+logits are inspected. The canonical manifest pins zero native special tokens;
+the provider must also prove that the exact backend produces identical probe
+IDs with `add_special_tokens=True` and `False`. Run it twice from fresh
+invocations:
 
-The chosen policy must be frozen before confirmatory scoring. Do not select it based on which policy produces the preferred temporal result. Selection is based on the model's native evaluation convention, development reliability, and explicit documentation.
+```powershell
+$cache = (Resolve-Path "artifacts/local/hf-cache").Path
+$revision = "7199d8fc61a6d565cd1f3c62bf11525b563e13b2"
+$snapshot = (Resolve-Path (Join-Path $cache "models--EleutherAI--pythia-1b-deduped/snapshots/$revision")).Path
+
+python scripts/audit_registry_tokenizer.py `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --execute `
+  --output artifacts/local/pythia-tokenizer-none-a.json
+
+python scripts/audit_registry_tokenizer.py `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --execute `
+  --output artifacts/local/pythia-tokenizer-none-b.json
+```
+
+Both reports must pass all 12 items, 24 forms, and 48 candidates, validate their
+final self-hashes, contain no absolute local path, and have identical canonical
+`output_sha256` values. A different prefix policy is a new documented
+development condition; do not select one based on a preferred model score.
+
+**Observed 2026-08-20 result:** exact clean head `c57ce40` ran both commands
+from fresh invocations. Both reports were byte-identical, passed 12 items, 24
+forms, and 48 candidates with zero failures, and shared canonical output
+SHA-256
+`6011fc00271a549deaf88f1b7eae84c29b193865f4659e1046762b12683c6523`.
+The accepted prefix remains `none`; no model was loaded. See
+`reports/stage0/pythia_tokenizer_boundary_gate_2026-08-20.md`.
 
 ## 5. Tokenizer audit output
 
@@ -92,6 +134,8 @@ The deterministic report records:
 - registry SHA-256;
 - artifact and immutable revision;
 - tokenizer class, vocabulary, maximum length, and special-token IDs;
+- canonical Git/manifest/registry and portable snapshot-receipt identities;
+- a fast-backend semantic fingerprint and post-load snapshot re-verification;
 - explicit prefix policy and prefix token IDs;
 - prompt and continuation token counts;
 - continuation start and prediction positions;
@@ -99,6 +143,13 @@ The deterministic report records:
 - candidate token-count differences within every form;
 - all boundary, truncation, and prompt-context failures;
 - a canonical output hash.
+
+The report records the enforced offline variables, local-only/trust settings,
+and absence of any download-capable provider path. Network traffic is labelled
+`not-instrumented`, not falsely presented as independently observed. The report
+also states that no files were downloaded and no model weights were
+deserialized, and records how many safetensor bytes were rehashed for integrity.
+Absolute cache and snapshot paths are intentionally excluded.
 
 The audit fails when:
 
@@ -115,10 +166,11 @@ Before loading weights:
 
 ```powershell
 python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v0.json `
   --artifact pythia-1b-deduped-main `
   --prefix-policy none `
-  --device cuda `
-  --dtype auto `
+  --device cuda:0 `
+  --dtype float16 `
   --max-length 2048 `
   --output artifacts/local/pythia-score-plan.json
 ```
@@ -127,20 +179,117 @@ The plan performs no network access and does not import PyTorch.
 
 ## 7. First development score gate
 
-Scoring execution remains blocked until all of these are true:
+Do not run this section until the implementation commit is clean, pushed, and
+green in exact-head CI. Scoring then remains fail-closed unless all of these are
+true:
 
 1. the local resource audit passes;
 2. immutable Pythia acquisition and loading/logits benchmarks succeed;
-3. the provider consumes the exact hash-verified local snapshot and rechecks it
-   before loading;
-4. tokenizer audit passes through the same verified-snapshot layer;
+3. the model provider consumes the exact hash-verified local snapshot and
+   rechecks it before loading;
+4. the accepted exact Pythia tokenizer audit is bound by report hash through
+   that snapshot layer;
 5. the cache has sufficient storage and the exact Git commit is recorded.
 
-No scoring command may download or load directly by repository/revision. After
-the shared loader exists, add an offline, explicit-float16 command here and
-require deterministic repeated score artifacts with identical canonical
-`output_sha256` values. Hardware/runtime metadata remains in the separate run
-and compute ledgers.
+No scoring command may download or load directly by repository/revision. The
+only accepted target procedure is two fresh invocations with separate fresh
+resource audits and a dependency-light offline verifier. Every named output is
+create-only and must not already exist.
+
+Use the existing hash-verified cache. In an isolated worktree without its own
+cache, set `$cache` to the absolute existing cache directory; do not create a
+junction or symlink. The commands below use a worktree-local cache only as the
+portable example.
+
+```powershell
+$cache = (Resolve-Path "artifacts/local/hf-cache").Path
+$revision = "7199d8fc61a6d565cd1f3c62bf11525b563e13b2"
+$snapshot = (Resolve-Path (Join-Path $cache "models--EleutherAI--pythia-1b-deduped/snapshots/$revision")).Path
+$tokenizerAudit = (Resolve-Path "artifacts/local/pythia-tokenizer-none-a-c57ce40.json").Path
+$head = (git rev-parse --short=8 HEAD).Trim()
+$auditA = "artifacts/local/pythia-score-resource-a-$head.json"
+$scoreA = "artifacts/local/pythia-score-a-$head.json"
+$receiptA = "artifacts/local/pythia-score-runtime-a-$head.json"
+$auditB = "artifacts/local/pythia-score-resource-b-$head.json"
+$scoreB = "artifacts/local/pythia-score-b-$head.json"
+$receiptB = "artifacts/local/pythia-score-runtime-b-$head.json"
+$comparison = "artifacts/local/pythia-score-comparison-$head.json"
+
+python scripts/audit_local_resources.py `
+  --path $cache `
+  --repo (Get-Location) `
+  --output $auditA
+
+python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v0.json `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --device cuda:0 `
+  --dtype float16 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --resource-audit $auditA `
+  --tokenizer-audit $tokenizerAudit `
+  --attempt a `
+  --allow-low-ram `
+  --execute `
+  --output $scoreA `
+  --runtime-output $receiptA
+
+python scripts/audit_local_resources.py `
+  --path $cache `
+  --repo (Get-Location) `
+  --output $auditB
+
+python scripts/score_registry_transformers.py `
+  --config configs/runs/pythia-development-score-v0.json `
+  --artifact pythia-1b-deduped-main `
+  --prefix-policy none `
+  --max-length 2048 `
+  --device cuda:0 `
+  --dtype float16 `
+  --cache-dir $cache `
+  --snapshot-path $snapshot `
+  --resource-audit $auditB `
+  --tokenizer-audit $tokenizerAudit `
+  --attempt b `
+  --allow-low-ram `
+  --execute `
+  --output $scoreB `
+  --runtime-output $receiptB
+
+python scripts/verify_registry_scores.py `
+  --config configs/runs/pythia-development-score-v0.json `
+  --score-a $scoreA `
+  --receipt-a $receiptA `
+  --resource-audit-a $auditA `
+  --score-b $scoreB `
+  --receipt-b $receiptB `
+  --resource-audit-b $auditB `
+  --output $comparison
+```
+
+Attempt A must fully release its lock, CUDA state, and private staging before
+audit B is captured. The verifier requires distinct process IDs, distinct raw
+resource audits, ordered timestamps, exact clean-head identity, complete
+resource/runtime receipts, and byte-identical score artifacts. Hardware and
+runtime measurements remain outside the deterministic score identity. A
+pre-import resource failure is pending and may be retried only after resources
+naturally return and a new audit is captured; any failure after deserialization
+starts consumes the sole attempt and stops this gate.
+
+**Observed 2026-08-20 result:** exact clean head `cee0f2fa` completed attempts
+A and B under separate fresh resource audits and processes. Run
+`run-25453ff5b41cda00b30ac23b046f6a5e` produced two byte-identical
+124,555-byte score files with raw SHA-256
+`c3cc112c2aa7f082858ccf60b827290893b488e7adc834293bb8054d15e1cecb`.
+The verifier returned `equal` with comparison self-hash
+`fcf155c5414bdcda7ce9cbdd12e1723da35b268d05bc3d96c369401f7850e687`.
+All 48 candidate forwards completed with zero boundary, truncation, or
+nonfinite failures. See
+`reports/stage0/pythia_registry_scoring_gate_2026-08-20.md`. Do not rerun this
+accepted gate to improve timing or presentation.
 
 ## 8. Score semantics
 
@@ -186,6 +335,13 @@ It cannot establish:
 - naturalistic calibration sensitivity.
 
 The final Pythia checkpoint is not the causal insertion checkpoint.
+
+The observed first score showed full form-direction agreement for eight of
+twelve items. Four evidence-integration items had agreement `0.5`. One item
+aggregate and two individual forms also had opposite signs under the frozen
+primary total-logprob margin and diagnostic mean-token margin. These are
+development reliability signals, not substantive findings or permission to
+switch the primary metric after inspection.
 
 ## 10. Failure policy
 

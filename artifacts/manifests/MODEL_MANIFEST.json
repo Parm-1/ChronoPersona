@@ -494,6 +494,27 @@
       "parameter_count": 1011781632,
       "context_length": 2048,
       "tokenizer": "GPT-NeoX-20B tokenizer",
+      "tokenizer_runtime": {
+        "class": "GPTNeoXTokenizer",
+        "is_fast": true,
+        "native_prefix_policy": "none",
+        "native_special_tokens_to_add": 0,
+        "vocab_size": 50254,
+        "tokenizer_length": 50277,
+        "special_tokens": {
+          "bos_token": "<|endoftext|>",
+          "eos_token": "<|endoftext|>",
+          "pad_token": "<|padding|>",
+          "unk_token": "<|endoftext|>"
+        },
+        "special_token_ids": {
+          "bos_token_id": 0,
+          "eos_token_id": 0,
+          "pad_token_id": 1,
+          "unk_token_id": 0
+        },
+        "backend_sha256": "1b0aca3746c0870daeb9137101cd89acbb38710fc433db83331287d5b0e47ee0"
+      },
       "precision": "float16 weights",
       "weight_format": "safetensors available",
       "weight_size_bytes": 2090701528,

@@ -24,15 +24,25 @@
 | R-20 | Positive-result search after failed gates | Critical | One-rescue rules; frozen C; preserve every seed/failure; stop at failed C |
 | R-21 | Temporary recovery/publisher machinery contaminates Git evidence | High | Permanent repository-state tests; merge only exact clean heads |
 | R-22 | AI-assisted design/code claims are unaudited | Medium | Maintain AI-use ledger and human verification record |
+| R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Frozen implementation/backend/reduction policy passed the sole v1 rescue; preserve v0/v1 and require the same explicit binding in later model execution |
+| R-24 | Registry scoring loads unverified bytes from a populated cache | High | The exact tokenizer and model stages now verify manifest-bound bytes, private copies, load identity, fresh resources, and final rebinding; preserve this Target Verified invariant and fail closed on any identity drift |
+| R-25 | Development item wording or continuation length changes score direction | High | Four items disagreed across forms and three primary/diagnostic signs differed; preserve the primary metric, predeclare reliability criteria, revise before rescoring, and do not interpret `development-v0` scientifically |
 
 ## Current highest risks
 
 1. Source roles cannot yet be qualified or frozen.
 2. Evaluation remains a small development instrument rather than a sealed powered benchmark.
-3. Real-model capability, logits, memory, throughput, and broad-update feasibility are unmeasured.
+3. Target-model backward/checkpoint/resume passed only a five-step LoRA smoke;
+   sustained stability and broad-update feasibility remain unmeasured.
 4. The project may identify ecological source composition rather than a residual temporal component.
 5. A/B discovery may fail prospective C transport; that is a valid falsification, not a reason to replace C.
 
 ## Current risk decision
 
-The design is defensible, but evidence-bearing execution is not authorized. Merge the design only on a clean green exact head, then stop until external source and model/compute evidence exists.
+The design is defensible; the bounded v1 resume gate, exact tokenizer boundary,
+and repeated registry-scorer path passed their engineering gates. Preserve
+those artifacts without tuning or rerunning them. The next local risk-reduction
+task is measurement reliability: revise the four inconsistent items and test
+predeclared paraphrase, ordering, and metric invariance before any evaluation
+freeze. Evidence-bearing naturalistic execution remains blocked on external
+source qualification and later calibration/model-compute gates.

@@ -6,6 +6,8 @@ from collections.abc import Mapping
 import re
 from typing import Any
 
+from .model_snapshot import required_files
+
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
@@ -85,6 +87,37 @@ def assert_tokenizer_ready(artifact: Mapping[str, Any]) -> None:
         )
 
 
+def assert_tokenizer_snapshot_ready(artifact: Mapping[str, Any]) -> None:
+    """Require tokenizer policy plus an exact executable snapshot manifest."""
+
+    assert_tokenizer_ready(artifact)
+    try:
+        files = required_files(artifact)
+    except ValueError as error:
+        raise ArtifactPolicyError(
+            f"artifact {artifact.get('id', '<unknown>')!r} has no exact "
+            f"tokenizer snapshot manifest: {error}"
+        ) from error
+    filenames = {item["filename"] for item in files}
+    required_tokenizer_files = {
+        "config.json",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+    }
+    missing = sorted(required_tokenizer_files - filenames)
+    if missing:
+        raise ArtifactPolicyError(
+            f"artifact {artifact.get('id', '<unknown>')!r} has no exact "
+            "tokenizer snapshot manifest; missing " + ", ".join(missing)
+        )
+    if not isinstance(artifact.get("tokenizer_runtime"), Mapping):
+        raise ArtifactPolicyError(
+            f"artifact {artifact.get('id', '<unknown>')!r} has no exact "
+            "tokenizer runtime expectation"
+        )
+
+
 def assert_model_score_ready(artifact: Mapping[str, Any]) -> None:
     """Require all tokenizer gates plus explicit benchmark-ready status."""
 
@@ -116,7 +149,7 @@ def operation_plan(
     except ArtifactPolicyError as error:
         allowed = False
         blocker = str(error)
-    return {
+    plan = {
         "artifact_id": artifact.get("id"),
         "operation": operation,
         "allowed": allowed,
@@ -131,3 +164,14 @@ def operation_plan(
         ),
         "requires_remote_code": artifact.get("requires_remote_code"),
     }
+    if operation == "tokenizer-audit":
+        snapshot_allowed = True
+        snapshot_blocker: str | None = None
+        try:
+            assert_tokenizer_snapshot_ready(artifact)
+        except ArtifactPolicyError as error:
+            snapshot_allowed = False
+            snapshot_blocker = str(error)
+        plan["snapshot_execution_allowed"] = snapshot_allowed
+        plan["snapshot_blocker"] = snapshot_blocker
+    return plan

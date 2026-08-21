@@ -32,13 +32,16 @@ Reopen only if equivalent prior work is found that already performs common-weigh
 
 ## Milestone 0B — Models and compute
 
-**Status:** runtime and metadata preflight measured; final-Pythia acquisition and model execution active.
+**Status:** final-Pythia acquisition/inference, bounded training resume,
+verified tokenizer boundary, and repeated registry scoring measured; v0
+failure preserved; sole v1 rescue passed; measurement reliability remains
+open.
 
 Audit exact artifacts for ProgressGym baselines, DatedGPT, PIT, ChronoGPT, TypewriterLM, OLMo 2, one cheap calibration model, and one alternate causal family.
 
 Measure actual hardware, storage, runtime, load time, peak memory, complete-continuation throughput, tiny full-weight training throughput, checkpoint time, and recovery.
 
-Measured on 2026-08-20 without model weights:
+Measured on 2026-08-20:
 
 - the local PyTorch CUDA runtime recognizes the RTX 2060 and its 6 GB device;
 - selected Hub revisions and license metadata are bound fail-closed in the
@@ -48,11 +51,27 @@ Measured on 2026-08-20 without model weights:
 - Windows peak-process memory, Torch CUDA identity, clean-commit resource
   binding, disk margin, and structured benchmark failure evidence are covered
   by the local benchmark protocol and tests.
+- the exact final-Pythia snapshot loaded in CUDA FP16 and produced finite
+  logits; load time, peak memory, and bounded forward throughput were recorded;
+- the first tiny-LoRA v0 control failed before backward because forced eager
+  attention produced non-finite logits; an attention-only discriminator
+  supported one explicit SDPA-MATH v1 rescue;
+- the v1 control and planned step-three interruption/resume each completed five
+  optimizer steps, and independent verification found exact semantic equality
+  across final adapter, optimizer, scheduler, scaler, RNG, counters, and loss
+  state.
+- the exact Pythia tokenizer loaded through the private verified-snapshot stage
+  and passed two byte-identical 12-item/24-form/48-candidate boundary audits
+  with zero failures under the predeclared native no-prefix policy.
+- the same exact snapshot/tokenizer identity completed two fresh registry-score
+  invocations with byte-identical deterministic scores, complete verifier-valid
+  receipts, and zero boundary, truncation, or nonfinite failures. Four items
+  changed direction across forms, so scorer execution passed while instrument
+  reliability remains unestablished.
 
-Still unmeasured: model load/logits, peak model memory, throughput, tiny legal
-continued pretraining, checkpoint/recovery, and derived cost. The first active
-gate acquires only the pinned 2.09 GB final Pythia artifact and measures loading
-before any training implementation or run.
+Still unmeasured: sustained training stability, broad-update capacity,
+development-item reliability/invariance, and derived branch-set cost. The one
+v1 rescue is closed; no second tuning rescue is allowed.
 
 Pass when one common checkpoint and one fallback are legally accessible, immutable, capable, trainable, and supported by measured cost. Stop a path when capability, memory, artifact access, or authorized budget fails.
 
@@ -68,7 +87,8 @@ Pass when two discovery sources and one confirmatory source are viable, distinct
 
 ## Milestone 1 — Measurement
 
-**Status:** blocked by 0B and 0C for real-model and source-exposure validation.
+**Status:** development reliability work is active; source-exposure and
+confirmatory validation remain blocked by 0C and later gates.
 
 Expand factorial evidence-integration and procedural-policy item families. Create separate development and sealed confirmation partitions. Validate complete-continuation scoring, option/label/paraphrase/template invariance, tokenizer boundaries, capability, factual/register probes, malformed/refusal handling, and domain exposure.
 
@@ -119,7 +139,8 @@ Channel work runs only to explain positive CSTG, strong source-specific effects,
 
 ## Current decision
 
-Run the exact-clean-head final-Pythia acquisition and CUDA loading/logits
-benchmark under the active plan. Preserve success or failure before deciding
-whether a tiny deterministic training/resume benchmark is viable. Source
+Accept the exact Pythia tokenizer and repeated scorer-path gates while rejecting
+instrument readiness. Publish their evidence without rerunning, then revise the
+four directionally inconsistent items and diagnose the three primary-versus-
+diagnostic sign disagreements under predeclared reliability criteria. Source
 qualification remains independently externally blocked.

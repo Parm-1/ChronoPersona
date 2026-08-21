@@ -156,6 +156,43 @@ def test_benchmark_ready_requires_exact_model_identity() -> None:
     assert any("exact parameter_count" in error for error in errors)
 
 
+def test_benchmark_ready_requires_exact_tokenizer_runtime_identity() -> None:
+    manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
+    artifact = next(
+        item
+        for item in manifest["artifacts"]
+        if item["id"] == "pythia-1b-deduped-main"
+    )
+    artifact.pop("tokenizer_runtime")
+
+    errors = validate_model_manifest(manifest)
+
+    assert any("tokenizer_runtime expectations" in error for error in errors)
+
+
+def test_bos_native_prefix_requires_exactly_one_special_token() -> None:
+    manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
+    artifact = next(
+        item
+        for item in manifest["artifacts"]
+        if item["id"] == "pythia-1b-deduped-main"
+    )
+    artifact["tokenizer_runtime"]["native_prefix_policy"] = "bos"
+    artifact["tokenizer_runtime"]["native_special_tokens_to_add"] = 2
+
+    errors = validate_model_manifest(manifest)
+
+    assert any("bos prefix requires exactly one" in error for error in errors)
+
+    artifact["tokenizer_runtime"]["native_special_tokens_to_add"] = 1
+    artifact["tokenizer_runtime"]["special_tokens"]["bos_token"] = None
+    artifact["tokenizer_runtime"]["special_token_ids"]["bos_token_id"] = None
+
+    errors = validate_model_manifest(manifest)
+
+    assert any("bos prefix requires an exact BOS" in error for error in errors)
+
+
 def test_required_files_reject_download_pattern_metacharacters() -> None:
     manifest = deepcopy(dict(load_model_manifest(MANIFEST)))
     artifact = next(

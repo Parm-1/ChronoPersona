@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "diagnostic_type": "pythia-lora-step-zero-attention-discriminator",
+  "recorded_at": "2026-08-20T09:20:35.1907182Z",
+  "evidence_scope": "diagnosis-only; not a training result or scientific result",
+  "source_git_commit": "f2568ab47d3162cf99eb445feac1b711980ff4f4",
+  "source_config_git_blob": "12f3b13f15df24cc0e6cfa03868ac4051d7ef79b",
+  "failed_run": {
+    "run_id": "run-b035b9becad60b6dc55ff3fd6fba6016",
+    "plan_sha256": "c97329c4c64f0fedd37f940eae37bfb061e949fbb8527557c4014fa23e2dcf0d",
+    "config_sha256": "c7f7e4195675f136f6de098b58aa2c466048ba330d448145396b4013268aa241",
+    "status": "failed",
+    "completed_steps": 0,
+    "tokens_seen": 0,
+    "error": "training loss is non-finite",
+    "attempt_report_sha256": "84ab0221299779a66d6a44196382a0edb8358274f440df87f68d0b4b0d86c2ad",
+    "attempt_file_sha256": "e9be995c08affa71e73343c80844756329150031cc5cf96338a7e5dc3e8aceaf",
+    "cli_report_sha256": "6405a6e68138250c39fb70988075e1cbe39a7b7bbf495e3b5a2e74f3ae67c347",
+    "backward_performed": false,
+    "optimizer_update_performed": false
+  },
+  "artifact": {
+    "id": "pythia-1b-deduped-main",
+    "repository": "EleutherAI/pythia-1b-deduped",
+    "revision": "7199d8fc61a6d565cd1f3c62bf11525b563e13b2",
+    "model_safetensors_sha256": "fdb3f09a4a4d30678e021247e71f5b160bdd147de2aedd2d7d25e01feecc8e13",
+    "parameter_count": 1011781632,
+    "base_dtype": "torch.float16"
+  },
+  "input": {
+    "token_matrix_sha256": "e7ecab791e9e736c980e61639b20a1cf9bfd7701c81c1757ed51a49e644683ea",
+    "tested_block_index": 0,
+    "sequence_length": 128,
+    "maximum_token_id": 35430,
+    "all_token_ids_in_vocabulary": true
+  },
+  "observations": {
+    "original_eager_zero_lora": {
+      "attention_implementation": "eager",
+      "lora_wrappers_present": true,
+      "logits_finite": false,
+      "loss_finite": false
+    },
+    "eager_without_lora_wrappers": {
+      "attention_implementation": "eager",
+      "lora_wrappers_present": false,
+      "logits_finite": false,
+      "loss_finite": false
+    },
+    "eager_prefix_sweep": {
+      "prefix_lengths": [
+        16,
+        20,
+        32,
+        48,
+        64,
+        80,
+        96,
+        112,
+        128
+      ],
+      "all_logits_nonfinite": true,
+      "all_losses_nonfinite": true
+    },
+    "automatic_sdpa_modes": {
+      "modes": [
+        "eval",
+        "train",
+        "gradient-checkpointing"
+      ],
+      "all_logits_finite": true,
+      "all_losses_finite": true,
+      "loss": 5.391441345214844
+    },
+    "explicit_sdpa_backends": [
+      {
+        "backend": "math",
+        "available": true,
+        "logits_finite": true,
+        "loss_finite": true,
+        "loss": 5.393095970153809
+      },
+      {
+        "backend": "efficient",
+        "available": true,
+        "logits_finite": true,
+        "loss_finite": true,
+        "loss": 5.391441345214844
+      },
+      {
+        "backend": "flash",
+        "available": false,
+        "logits_finite": null,
+        "loss_finite": null,
+        "loss": null
+      },
+      {
+        "backend": "math-and-efficient-auto-selection",
+        "available": true,
+        "logits_finite": true,
+        "loss_finite": true,
+        "loss": null
+      }
+    ],
+    "embedding_and_selected_rows_finite": true
+  },
+  "runtime": {
+    "python": "3.11.9",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.15.1",
+    "compiled_cuda": "13.0",
+    "gpu": "NVIDIA GeForce RTX 2060",
+    "gpu_capability": [
+      7,
+      5
+    ],
+    "driver_version": "591.86"
+  },
+  "failed_attempt_runtime": {
+    "model_load_seconds": 1.5424853000440635,
+    "postload_conservative_free_vram_bytes": 1751121920,
+    "prestep_conservative_free_vram_bytes": 1751121920,
+    "process_max_rss_bytes": 2800697344,
+    "load_baseline_peak_allocated_bytes": 2025661440,
+    "load_baseline_peak_reserved_bytes": 2063597568,
+    "failed_forward_peak_was_not_recorded": true
+  },
+  "execution_controls": {
+    "network_access_performed": false,
+    "backward_performed": false,
+    "optimizer_update_performed": false,
+    "model_or_checkpoint_files_modified": false
+  },
+  "conclusion": {
+    "observed": "The eager attention implementation is the first discriminator that changes the exact-block result from non-finite to finite.",
+    "inferred": "FP16 eager-attention arithmetic is the likely mechanism; the diagnostic does not by itself prove a specific overflowing intermediate.",
+    "authorized_rescue": "Create one new frozen v1 run that changes only the attention policy to explicit SDPA with the MATH backend and reduced-precision math reduction disabled."
+  },
+  "diagnostic_sha256": "01e2af3c69110c29b091f18290a04ea2aab01a5a0c6b6efdbdd06ddadcf93e75"
+}

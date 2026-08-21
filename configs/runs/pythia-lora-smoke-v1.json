@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "run_name": "pythia-1b-deduped-lora-smoke-v1",
+  "run_kind": "tiny-lora-training-smoke",
+  "status": "frozen",
+  "scientific_claim_authorized": false,
+  "network_allowed": false,
+  "external_spend_cad": 0,
+  "max_parallel_jobs": 1,
+  "artifact_id": "pythia-1b-deduped-main",
+  "device": "cuda",
+  "base_dtype": "float16",
+  "adapter_dtype": "float32",
+  "seed": 17,
+  "batch_size": 1,
+  "sequence_length": 128,
+  "steps": 5,
+  "checkpoint_after_step": 3,
+  "source": {
+    "manifest": "tests/fixtures/content-integrity/manifest.jsonl",
+    "content_root": "tests/fixtures/content-integrity/documents",
+    "record_ids": [
+      "control-neutral",
+      "calibration-neutral"
+    ],
+    "append_eos": true,
+    "cycle_to_fit": true
+  },
+  "lora": {
+    "rank": 4,
+    "alpha": 8,
+    "dropout": 0.0,
+    "bias": "none",
+    "target_template": "gpt_neox.layers.{layer}.attention.query_key_value",
+    "target_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "target_count": 16,
+    "trainable_parameters": 524288
+  },
+  "optimizer": {
+    "name": "AdamW",
+    "learning_rate": 0.0001,
+    "betas": [
+      0.9,
+      0.999
+    ],
+    "epsilon": 1e-8,
+    "weight_decay": 0.0,
+    "amsgrad": false,
+    "maximize": false,
+    "foreach": false,
+    "capturable": false,
+    "differentiable": false,
+    "fused": false
+  },
+  "scheduler": {
+    "name": "constant",
+    "factor": 1.0
+  },
+  "gradient": {
+    "max_norm": 1.0,
+    "checkpointing": true,
+    "checkpointing_use_reentrant": false,
+    "loss_scaling": "dynamic-fp16",
+    "scaler_init_scale": 65536.0,
+    "scaler_growth_factor": 2.0,
+    "scaler_backoff_factor": 0.5,
+    "scaler_growth_interval": 2000,
+    "scaler_enabled": true
+  },
+  "determinism": {
+    "algorithms": true,
+    "cublas_workspace_config": ":4096:8",
+    "attention_implementation": "sdpa",
+    "sdpa_backends": [
+      "math"
+    ],
+    "sdpa_math_allow_fp16_reduction": false,
+    "tf32": false,
+    "cudnn_benchmark": false,
+    "shuffle": false,
+    "workers": 0
+  },
+  "resource_limits": {
+    "minimum_preload_free_vram_bytes": 3695181824,
+    "maximum_process_peak_reserved_bytes": 3158310912,
+    "minimum_postload_global_free_vram_bytes": 1610612736,
+    "minimum_output_free_bytes": 134217728,
+    "maximum_checkpoint_bytes": 16777216,
+    "maximum_condition_wall_seconds": 900,
+    "ram_threshold_enforced": false
+  }
+}
