@@ -425,6 +425,7 @@ def test_exact_artifact_constructor_post_open_interrupt_cleans_reservation(
     run_dir.mkdir()
     leaves = ("private-records.jsonl", "aggregate.json", "receipt.json")
     original_fstat = gate.os.fstat
+    original_stat = gate.os.stat
     original_lstat = gate.Path.lstat
     original_predicate = gate._plain_file_identity
     injected = False
@@ -443,6 +444,19 @@ def test_exact_artifact_constructor_post_open_interrupt_cleans_reservation(
             raise KeyboardInterrupt
         return original_lstat(path)
 
+    def interrupting_stat(path, *args, **kwargs):
+        nonlocal injected
+        if (
+            failure_point == "lstat"
+            and path == leaves[0]
+            and kwargs.get("dir_fd") is not None
+            and kwargs.get("follow_symlinks") is False
+            and not injected
+        ):
+            injected = True
+            raise KeyboardInterrupt
+        return original_stat(path, *args, **kwargs)
+
     def interrupting_predicate(info):
         nonlocal injected
         if failure_point == "predicate" and not injected:
@@ -451,6 +465,7 @@ def test_exact_artifact_constructor_post_open_interrupt_cleans_reservation(
         return original_predicate(info)
 
     monkeypatch.setattr(gate.os, "fstat", interrupting_fstat)
+    monkeypatch.setattr(gate.os, "stat", interrupting_stat)
     monkeypatch.setattr(gate.Path, "lstat", interrupting_lstat)
     monkeypatch.setattr(gate, "_plain_file_identity", interrupting_predicate)
     with pytest.raises(KeyboardInterrupt):
