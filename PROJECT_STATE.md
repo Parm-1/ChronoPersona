@@ -6,7 +6,7 @@
 
 ## Current phase
 
-**Stage 0 — model engineering gates closed; D-039 preserved failed; offline A/B parser engineering Tested with E3 delivery active; bulk and source-C text externally blocked**
+**Stage 0 — model engineering gates closed; D-039 preserved failed; offline A/B parser engineering delivered; bulk and source-C text externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — D-041 exact-head delivery of the Tested synthetic-fixture A/B parser; no network, real source record, source C, or model execution is authorized**
+**Current gate — a separate D-042 result-blind access decision; no network, real source record, source C, or model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -59,8 +59,9 @@ closed that failed gate without a state-only commit. D-041 froze an offline-only
 engineering path for Wikimedia parent/child added spans and Stack Exchange
 initial-version reconstruction using synthetic official-shape fixtures. Its
 settled E1/E2 candidate passed focused and full suites on Python 3.11–3.13; E3
-exact-head draft-PR delivery remains. No live access or scientific source claim
-is part of E0–E3.
+delivered its exact PR #39 head `846e040` with 21 checks green before the
+reviewed stack was integrated into `main` at `55a8e4f`. No live access or
+scientific source claim is part of E0–E3.
 
 ## Latest verified evidence
 
@@ -155,10 +156,9 @@ is part of E0–E3.
 
 ## Remaining blockers and active gates
 
-Immediate delivery gate: commit and deliver the settled D-041 candidate through
-one unchanged E3 draft-PR head. The subsequent live A/B micro-sample remains
-unauthorized and requires a separate result-blind access/license/containment
-decision.
+Immediate decision gate: determine whether a compliant A/B live micro-sample
+can be frozen under a separate result-blind D-042 access/license/containment
+decision. D-041 is complete and does not authorize live access.
 
 1. Bounded rights-qualified, historically versioned samples from at least four source candidates.
    D-039 produced only a provisional A/B metadata inventory prefix; its first
@@ -194,10 +194,9 @@ decision.
 
 ## Exact next action
 
-Commit the settled D-041 E1/E2 candidate, push the authorized feature branch,
-open its draft PR stacked on PR #38, and require all attached E3 checks green on
-one unchanged head. Preserve the ignored D-039 evidence and do not rerun D-039,
-open a private inventory, make a network request, retrieve real archive/article
-text, inspect source C, use requester-pays access, execute a model, or reopen
-the consumed development-v1 E4. A live A/B micro-sample requires a later
-decision.
+Preserve the merged D-041 evidence and ignored D-039 artifacts. Do not rerun
+D-039, open a private inventory, make a network request, retrieve real
+archive/article text, inspect source C, use requester-pays access, execute a
+model, or reopen the consumed development-v1 E4. Ask the user to choose the
+D-042 direction: a compliant A/B micro-sample path, or a pause/redesign pending
+source-B authorization.

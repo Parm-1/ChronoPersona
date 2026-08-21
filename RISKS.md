@@ -69,11 +69,11 @@ source-C review, requester-pays retrieval, and later calibration/model-compute
 gates remain blocked; any new request requires a separate versioned,
 result-blind adjudication.
 
-The settled D-041 E1/E2 candidate is Tested offline across Python 3.11–3.13;
-E3 exact-head draft-PR delivery is next. It improves deterministic
-parent/initial-version reconstruction code, but it cannot qualify a source or
-authorize live access. Its POSIX cleanup contract assumes a quiescent namespace
-after failure and must not be reused for live/private publication without a
-separately frozen containment design. Stop on any network path, non-synthetic
-input, current-snapshot/body fallback, portable prose/ID leakage, or attempt to
-infer real-source yield or eligibility.
+D-041 E1/E2 is Tested offline across Python 3.11–3.13 and its E3 PR #39 head
+`846e040` passed 21 checks before integration into `main`. It improves
+deterministic parent/initial-version reconstruction code, but it cannot qualify
+a source or authorize live access. Its POSIX cleanup contract assumes a
+quiescent namespace after failure and must not be reused for live/private
+publication without a separately frozen containment design. Stop on any network
+path, non-synthetic input, current-snapshot/body fallback, portable prose/ID
+leakage, or attempt to infer real-source yield or eligibility.

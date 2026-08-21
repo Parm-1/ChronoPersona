@@ -1,14 +1,16 @@
 # A/B Parser-Sample Engineering
 
-**Status:** E0 result-blind offline freeze active; no real source content or
-network access authorized by this plan
+**Status:** complete — E3 exact-head delivery passed; no real source content or
+network access was authorized by this plan
 **Started:** 2026-08-20
 **Baseline:** `c245e7aaa16b2be35293fc5ca4d965efb7f5b84e`
 **Branch:** `feat/ab-parser-sample-engineering`
-**Stack base:** draft PR #38 / `feat/live-source-metadata-qualification`
-**Write-active deliverable:** build and adversarially validate dependency-light
-Wikimedia parent/child added-span parsing and Stack Exchange initial-version
-reconstruction using synthetic official-shape fixtures only.
+**Delivery:** PR #39 exact head `846e040a9926c7b2b518823eb6b9bcb55be838ea`
+passed 21 attached checks and the reviewed stack was integrated into `main` at
+`55a8e4f76f18c9d72cd1e9b36ae6d879ecd20da9`.
+**Completed deliverable:** dependency-light Wikimedia parent/child added-span
+parsing and Stack Exchange initial-version reconstruction using synthetic
+official-shape fixtures only.
 
 ## Objective and claim boundary
 
@@ -319,11 +321,10 @@ isolated plan mode, `git diff --check`, and independent adversarial review.
 
 ### E3 — Exact-head delivery
 
-- Commit and push one scoped branch stacked on exact green PR #38 head.
-- Open one draft PR and require every attached check green on one unchanged
-  head across Python 3.11–3.13.
-- Freeze implementation state in the delivery commit; external green checks
-  fulfill E3 without a post-green state-only commit.
+- Completed: PR #39 exact head `846e040` passed all 21 attached checks across
+  Python 3.11–3.13.
+- The reviewed stack was integrated into `main` at `55a8e4f`; no post-green
+  state-only commit was used to claim E3 completion.
 
 ### E4 — Future live micro-sample, not authorized here
 
@@ -358,6 +359,7 @@ source suitability, era choice, or behavioral effect from fixture results.
    `DATA_SOURCE_ADR.md`.
 2. Verify branch `feat/ab-parser-sample-engineering` has exact baseline
    `c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` and frozen E0 commit.
-3. Resume only the offline E1/E2 implementation or E3 delivery gate.
+3. Do not resume E1/E2/E3. D-041 is complete; a live micro-sample requires a
+   separately frozen D-042 decision.
 4. Do not open D-039 private inventories, issue a source request, retrieve a
    real archive/document, inspect source C, run a model, or incur external cost.

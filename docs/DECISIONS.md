@@ -1049,6 +1049,14 @@ publication, zero-retry order, and stop rules.
 
 **Plan:** `.agent/plans/active-ab-parser-sample-engineering.md`.
 
+**Delivery result (2026-08-21):** PR #39 exact head
+`846e040a9926c7b2b518823eb6b9bcb55be838ea` passed all 21 attached checks across
+Python 3.11–3.13. The reviewed source-feasibility stack was subsequently
+integrated into `main` at `55a8e4f76f18c9d72cd1e9b36ae6d879ecd20da9`. This
+delivers E3 only; it does not authorize a source request, real record, or a
+scientific source claim. The next live-sample proposal remains a separate
+result-blind D-042 decision.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.
