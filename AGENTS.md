@@ -212,6 +212,13 @@ real record/archive, inspect source C, infer rights/authorship/source
 eligibility, execute a model, or claim Target Verified source behavior. A live
 micro-sample requires a separate frozen D-042 decision.
 
+D-042 now pauses Stack Exchange pending explicit written authorization or an
+independently reviewed compliant-dump contract. It authorizes only a bounded
+Wikimedia historical-version feasibility sample after an exact synthetic-tested
+execution profile, plus an official-documentation/metadata-only alternate-B
+audit. Do not freeze A/B/C roles, retrieve Stack Exchange/source-C text, or
+promote feasibility counts into source qualification.
+
 The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
 failure. Its single versioned v1 attention-policy rescue passed the bounded
 five-step control/interruption/resume engineering gate with exact semantic

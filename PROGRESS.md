@@ -93,9 +93,11 @@ D-041 E3 is complete: PR #39 delivered its unchanged head
 `846e040a9926c7b2b518823eb6b9bcb55be838ea` with 21 attached checks green, and
 the reviewed source-feasibility stack was integrated into `main` at
 `55a8e4f76f18c9d72cd1e9b36ae6d879ecd20da9`. No live flag or real content path
-exists under D-041. The next gate is a separate result-blind D-042 decision;
-it must resolve official access, selection, site/license, request/byte,
-private-output, and stop contracts before any real record is opened.
+exists under D-041. D-042 pauses Stack Exchange pending explicit authorization
+or a compliant-dump review. It authorizes a bounded Wikimedia-only feasibility
+sample after an exact synthetic-tested execution profile, and an
+official-documentation/metadata-only alternate-B audit; it freezes no source
+roles and permits no source-C access or model work.
 
 ## Current verified boundary
 
@@ -158,6 +160,10 @@ private-output, and stop contracts before any real record is opened.
   official-shape synthetic fixtures, closed validators, deterministic evidence,
   and fail-closed publication passed locally across Python 3.11–3.13. No
   real-source Target Verified claim is possible in E0–E3.
+- **D-042 Wikimedia A feasibility / alternate-B audit — Authorized design:**
+  Stack Exchange is paused. No real record may be opened until a synthetic-tested
+  profile binds deterministic selection, request/byte limits, private output,
+  and stop rules. Alternate-B work is official documentation/metadata only.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -439,9 +445,8 @@ private-output, and stop contracts before any real record is opened.
 
 ## Next write-active deliverable
 
-Stop after D-041 E3. Preserve the ignored D-039 receipt/inventories and
-no-retry boundary. Do not open them, issue a network request, retrieve a real
-archive/record, inspect source C, infer real-source eligibility, execute a
-model, or incur cost. The next write-active deliverable can begin only after a
-separate result-blind D-042 decision resolves whether a compliant A/B live
-micro-sample is possible.
+Implement and validate the D-042 local execution profile and synthetic API
+fixtures. Preserve the ignored D-039 receipt/inventories and no-retry boundary.
+Do not open them, make a Stack Exchange/source-C request, retrieve a bulk
+archive, infer source roles, execute a model, or incur cost. Wikimedia real
+records remain blocked until that exact profile passes its E0 acceptance gate.

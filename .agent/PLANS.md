@@ -1,6 +1,12 @@
 # Active Plans
 
-No write-active source-engineering ExecPlan is authorized.
+One result-blind source-feasibility ExecPlan is write-active:
+
+- `.agent/plans/active-wikimedia-a-feasibility-and-alternate-b-audit.md` —
+  D-042 pauses Stack Exchange pending explicit authorization, permits only a
+  tiny Wikimedia historical-version feasibility sample after a synthetic-tested
+  execution profile, and audits alternate B candidates through official
+  documentation/metadata only. It freezes no A/B/C role.
 
 - `.agent/plans/active-ab-parser-sample-engineering.md` — E1/E2 Wikimedia
   parent/child added-span parsing and Stack Exchange initial-version

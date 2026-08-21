@@ -6,7 +6,7 @@
 
 ## Current phase
 
-**Stage 0 — model engineering gates closed; D-039 preserved failed; offline A/B parser engineering delivered; bulk and source-C text externally blocked**
+**Stage 0 — model engineering gates closed; D-039 preserved failed; D-042 Wikimedia-only feasibility design active; Stack/source-C and bulk text externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — a separate D-042 result-blind access decision; no network, real source record, source C, or model execution is authorized**
+**Current gate — D-042 synthetic-tested Wikimedia feasibility profile and alternate-B documentation audit; Stack/source-C records and model execution are unauthorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -62,6 +62,12 @@ settled E1/E2 candidate passed focused and full suites on Python 3.11–3.13; E3
 delivered its exact PR #39 head `846e040` with 21 checks green before the
 reviewed stack was integrated into `main` at `55a8e4f`. No live access or
 scientific source claim is part of E0–E3.
+
+D-042 pauses Stack Exchange source work because current automated AI-use access
+is not unambiguously authorized. It permits a tiny Wikimedia-only feasibility
+sample only after a closed synthetic-tested profile freezes selection,
+containment, limits, and stop behavior, plus a documentation/metadata-only
+audit of alternate non-Q&A B candidates. It freezes no source role.
 
 ## Latest verified evidence
 
@@ -156,9 +162,10 @@ scientific source claim is part of E0–E3.
 
 ## Remaining blockers and active gates
 
-Immediate decision gate: determine whether a compliant A/B live micro-sample
-can be frozen under a separate result-blind D-042 access/license/containment
-decision. D-041 is complete and does not authorize live access.
+Immediate implementation gate: build the D-042 synthetic-tested Wikimedia
+selection/transport/containment profile and perform the alternate-B official
+documentation audit. D-042 does not authorize Stack Exchange, source-C, bulk,
+or model work.
 
 1. Bounded rights-qualified, historically versioned samples from at least four source candidates.
    D-039 produced only a provisional A/B metadata inventory prefix; its first
@@ -194,9 +201,8 @@ decision. D-041 is complete and does not authorize live access.
 
 ## Exact next action
 
-Preserve the merged D-041 evidence and ignored D-039 artifacts. Do not rerun
-D-039, open a private inventory, make a network request, retrieve real
-archive/article text, inspect source C, use requester-pays access, execute a
-model, or reopen the consumed development-v1 E4. Ask the user to choose the
-D-042 direction: a compliant A/B micro-sample path, or a pause/redesign pending
-source-B authorization.
+Build and validate the D-042 local profile and synthetic fixtures. Preserve the
+merged D-041 evidence and ignored D-039 artifacts. Do not rerun D-039, open a
+private inventory, make a Stack Exchange/source-C request, retrieve bulk text,
+use requester-pays access, execute a model, or reopen the consumed
+development-v1 E4.
