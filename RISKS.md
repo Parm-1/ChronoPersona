@@ -27,6 +27,7 @@
 | R-23 | Unbound attention backend changes numerical behavior or resume identity | High | Frozen implementation/backend/reduction policy passed the sole v1 rescue; preserve v0/v1 and require the same explicit binding in later model execution |
 | R-24 | Registry scoring loads unverified bytes from a populated cache | High | The exact tokenizer and model stages now verify manifest-bound bytes, private copies, load identity, fresh resources, and final rebinding; preserve this Target Verified invariant and fail closed on any identity drift |
 | R-25 | Development item wording or continuation length changes score direction | High | Preserve the failed v0 reliability diagnosis; v1 passed blind pre-logits review and exact common-count tokenizer checks, but E4 attempt A failed operationally after all forwards and before score publication, so model-level eight-form coherence remains untested; no B or retry without a separately accepted result-blind defect rescue |
+| R-26 | A metadata transport failure is mistaken for source infeasibility or silently retried | Critical | Preserve the authenticated partial evidence; distinguish transport from source eligibility/yield; prohibit same-profile retry, continuation, query change, or backup substitution; require a separately frozen, versioned, result-blind transport-adjudication decision before another request |
 
 ## Current highest risks
 
@@ -36,24 +37,27 @@
    sustained stability and broad-update feasibility remain unmeasured.
 4. The project may identify ecological source composition rather than a residual temporal component.
 5. A/B discovery may fail prospective C transport; that is a valid falsification, not a reason to replace C.
+6. A consumed metadata transport stop may be overread as source infeasibility
+   or used to justify an unplanned retry; D-040 explicitly forbids both.
 
 ## Current risk decision
 
 The design is defensible; the bounded training-resume gate, exact tokenizer
 boundary, and repeated development-v0 registry-scorer path passed their scoped
 engineering gates. Preserve those artifacts without tuning or rerunning them.
-Development-v1 E4 attempt A completed all 224 canonical forwards but failed the
-post-score resident-VRAM gate before publication. Preserve that consumed
-failure and do not run B. The result-blind cause/defect-eligibility review is
-complete: it found a failed-audit observability gap but no evidence that the
-resource rejection was erroneous, so no rescue qualifies. The next local task
-was delivery of the Tested D-038 dependency-light hardening that retains a
-captured resident audit before validation raises; exact head `d669b4e` passed
-all 18 checks. The D-039 metadata execution contract is locally Tested; E4
-requires accepted exact-head delivery, private-boundary revalidation, and one
-bounded live run. That prequalification may measure interface availability,
-archive inventories, and license/version metadata yield without retrieving a
-document body or source package; incidental metadata prose is transient
-hash/count-only and may not be displayed, persisted as prose, or human-reviewed.
-Rights-qualified content, source-C review, requester-pays retrieval, and later
-calibration/model-compute gates remain blocked.
+Development-v1 E4 attempt A remains a consumed post-score resource failure;
+no B or rescue qualifies. D-038 failure-observability hardening is delivered at
+exact head `d669b4e` after all 18 checks passed.
+
+D-039 implementation head `eb0f794` passed all 30 draft PR #38 checks. Its one
+live invocation completed the Wikimedia and Stack Exchange inventory prefix,
+then failed on the first arXiv candidate-count request at HTTP-status transport.
+The authenticated receipt records three attempts, two completed responses,
+zero retries, five later groups not started, matched final binding, and no
+aggregate. The numeric status, response detail, and private URL were
+deliberately withheld, so neither an upstream-only cause nor a request-shape
+defect is proven. Preserve the partial evidence and do not retry, continue,
+substitute PMC, or infer arXiv/source infeasibility. Rights-qualified content,
+source-C review, requester-pays retrieval, and later calibration/model-compute
+gates remain blocked; any new request requires a separate versioned,
+result-blind adjudication.

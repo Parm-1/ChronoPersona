@@ -965,6 +965,50 @@ of the pre-execution freeze rather than a post-result security patch. It does
 not change roles, windows, categories, group order, request ceilings, claim
 ceiling, or the prohibition on source-C prose review.
 
+## D-040 — Preserve the consumed metadata run and stop at source-C transport
+
+**Date:** 2026-08-20
+**Status:** accepted; D-039 E4 Target Failed operationally, root cause unresolved
+
+Accept exact clean execution head
+`eb0f7949c552e0e733f33c63dd33b9e9d603d83b` and run
+`source-metadata-v0-eb0f7949` as the one consumed D-039 E4 invocation. Draft PR
+#38 had passed all 30 push/pull-request checks across Python 3.11–3.13 on that
+unchanged head. The runner completed the Wikimedia and Stack Exchange
+inventory groups, then the first `arxiv-early-candidate-sample` count request
+failed before response acceptance with `metadata-transport-failed` /
+`transport` / `http-status`. The run made three request attempts, completed two
+responses, retried zero times, preserved the completed prefix, marked every
+later group `not-started`, and published no aggregate.
+
+The canonical failure receipt passed its public self-hash, private full-receipt
+HMAC, exact-head/input/runtime binding, privacy schema, group-prefix, and
+create-only mirror validation. Its raw/self SHA-256 values are
+`765acc89ce4cf0128cc2c385c684c2ccb0edc3332edabfbb076a1fda5e9471ec` /
+`62c260fec086f8f593f15e56ae5eb878ff133a94009ed50603e329df5c94d72f`.
+The two completed inventory files and receipt have byte-identical protected
+private backups. No response prose or native source-C identifier was displayed
+or human-reviewed, and no arXiv, PMC, or aggregate artifact exists.
+
+Under the predeclared stop rule, do not resume later groups, retry the failed
+request, shrink the sample, substitute PMC, change the URL/query after the
+failure, or infer yield from the completed prefix. The receipt deliberately
+withholds the exact private URL, response body, and HTTP status code, so static
+review cannot distinguish upstream service policy or throttling from a
+request-shape incompatibility. No implementation defect is independently
+proven. A new metadata request requires a separately frozen and versioned
+transport-adjudication decision supported by new result-blind evidence or an
+explicit material user choice.
+
+**Claim ceiling:** Target Failed operationally for the exact D-039 metadata
+prequalification gate. The failure does not qualify or reject any source role,
+establish arXiv infeasibility, measure source-C yield, or support temporal,
+behavioral, causal, or CSTG claims.
+
+**Evidence:**
+`reports/stage0/source_metadata_qualification_failure_2026-08-20.md` and the
+ignored mirrored run directory `source-metadata-v0-eb0f7949`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

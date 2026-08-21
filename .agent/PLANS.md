@@ -1,17 +1,17 @@
 # Active Plans
 
-One result-blind source ExecPlan is write-active:
+One source ExecPlan is at its final external closure gate:
 
-- `.agent/plans/active-source-metadata-qualification.md` — harden and execute
-  one no-cost metadata-only prequalification across provisional Wikimedia,
-  Stack Exchange, arXiv, and PMC roles. Raw identifiers remain private; no
-  archive/article body, source package, requester-pays object, model, or
-  behavioral outcome is in scope. Incidental API metadata prose is transient
-  hash/count-only. Baseline `d669b4e`; branch
-  `feat/live-source-metadata-qualification`. E0 is frozen; E1/E2 are locally
-  Tested in the delivery candidate. E3 closes only when that exact commit is
-  the synchronized draft-PR head and every attached check is green. No
-  evidence-bearing live request has run.
+- `.agent/plans/active-source-metadata-qualification.md` — preserve and deliver
+  the one consumed no-cost metadata-only prequalification. E0–E3 are complete
+  at exact green execution head `eb0f794`; E4 completed the Wikimedia and Stack
+  Exchange inventory prefix, then failed at the first arXiv HTTP-status
+  transport boundary with no aggregate. D-040 prohibits resume, retry, or
+  substitution. E5 is the sanitized failure-record closure candidate and is
+  complete only when its unchanged commit is the synchronized draft-PR head and
+  every attached check is green. Raw identifiers, receipt, inventories, and
+  keys remain private; no archive/article body, source package, requester-pays
+  object, model, or behavioral outcome is in scope.
 
 The latest engineering plan is complete:
 

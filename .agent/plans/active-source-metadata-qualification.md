@@ -1,15 +1,15 @@
 # Bounded Live Source-Metadata Qualification
 
-**Status:** E0 result-blind freeze and privacy amendment complete; E1/E2 locally Tested; E3 closes only on exact-head CI; no evidence-bearing live query has run
+**Status:** E0–E3 complete; E4 consumed at the first arXiv transport failure; E5 closes only when this unchanged evidence commit passes exact-head CI; no retry authorized
 **Started:** 2026-08-20
 **Baseline:** `d669b4e3c36069398efdac831c8f1fec7036359c`
 **Branch:** `feat/live-source-metadata-qualification`
 **Stack base:** draft PR #37 / `fix/scoring-failure-observability`
-**Write-active deliverable:** harden, deliver, and execute one bounded no-cost
-metadata-only prequalification across provisional source roles A, B, C, and
-backup C. Retrieve no archive, article body, or source package; incidental API
-metadata prose is transient hash/count-only. Keep native source-C identifiers
-outside tracked evidence.
+**Write-active deliverable:** publish the sanitized failure report, D-040, and
+reconciled state on one exact-head E5 evidence commit. Preserve the private
+receipt and completed-prefix inventories without inspection or publication.
+Do not retry, resume, substitute, retrieve an archive/article body or source
+package, or expose a native source-C identifier.
 
 ## Objective and claim boundary
 
@@ -271,13 +271,12 @@ unchanged.
   content firewalls, host allowlists, ceilings, or delays.
 - Keep fixture parse mode useful and no-network by default.
 
-**Result:** locally Tested in the delivery candidate. The implementation adds
+**Result:** complete and exact-head delivered. The implementation adds
 the exact frozen profile, clean-head/input/runtime binding, lazy direct-origin
 network boundary, ordered state machine, strict private/public schemas,
 source-C HMAC privacy, create-only mirrored publication, and authenticated
-success/failure receipts. Delivery is accepted only if the exact commit that
-contains this record becomes the synchronized draft-PR head and passes every
-attached check; no live request has used it.
+success/failure receipts. Exact head `eb0f794` passed all 30 draft PR #38
+checks and was then used by the sole D-039 invocation recorded under E4.
 
 ### E2 — Dependency-light validation
 
@@ -321,6 +320,13 @@ candidate on top of frozen E0 commit `2c4d397`. E3 is fulfilled externally only
 when that unchanged commit is synchronized to the branch and draft PR and every
 attached check is green. Do not create a post-green state-only commit.
 
+**Result:** complete. Exact implementation/execution head
+`eb0f7949c552e0e733f33c63dd33b9e9d603d83b` is synchronized on draft PR #38,
+which passed 30/30 push/pull-request checks across five workflows and Python
+3.11–3.13 before E4. The local branch was clean and synchronized, the two
+private key copies and output roots passed the protected-boundary preflight,
+and every create-only run name was absent.
+
 ### E4 — Bounded live metadata execution
 
 Before E4, reverify that both replacement commitment-key copies and the two
@@ -342,13 +348,39 @@ be absent before execution and keep the machine-specific ACL audit private.
   with every required exact-head, create-only output, outside-Git backup, and
   dual commitment-key argument; the script must reject any weaker startup.
 
+**Result:** consumed operational failure. Run
+`source-metadata-v0-eb0f7949` completed the Wikimedia and Stack Exchange
+inventory groups, then the first arXiv early candidate-count request failed
+before response acceptance with `metadata-transport-failed` / `transport` /
+`http-status`. The run made three attempts, completed two responses, retried
+zero times, left exactly five later groups `not-started`, matched its final
+binding, and published no aggregate. Every prohibited-boundary flag remained
+false: no archive/article body, source package, requester-pays object, model,
+displayed/reviewed/persisted prose, or scientific claim. D-040 consumes the run;
+no resume, retry, query revision, or PMC substitution is authorized.
+
 ### E5 — Portable evidence publication
 
 - Independently replay all hashes, schemas, counts, privacy scans, and claim
   boundaries without displaying or human-reviewing transient metadata prose.
-- Publish only the sanitized aggregate report and a bounded D-040 decision.
+- Publish only the sanitized failure report and a bounded D-040 decision; this
+  run produced no aggregate.
 - Preserve private raw artifacts and hash-matched backup, then deliver the
   evidence commit through exact-head CI.
+
+**Acceptance:** independent replay must validate the receipt's canonical bytes,
+raw/self hashes, keyed full-payload HMAC, exact bindings, privacy schema, group
+prefix, and exact mirrored file sets without opening private inventories. The
+scoped commit containing D-040, the sanitized failure report, and reconciled
+state must become draft PR #38's synchronized head and pass every attached
+check. External green checks fulfill E5; do not create a post-green state-only
+commit.
+
+**Candidate evidence:** the private receipt and its mirror are byte-
+identical, canonical, self-hash-valid, and full-HMAC-valid; the production
+validator reports zero errors. The exact three-file local/backup sets match and
+remain owner-restricted. No aggregate or source-C artifact exists. The portable
+record is ready for exact-head delivery; CI remains the external closure gate.
 
 ## Stop conditions
 
@@ -382,12 +414,16 @@ externally blocked. No model execution or scientific claim is authorized.
 
 ## Restart procedure
 
-1. Read `PROGRESS.md`, D-037 through D-039, this plan, and the three source
+1. Read `PROGRESS.md`, D-037 through D-040, this plan, and the three source
    protocols.
-2. Verify branch `feat/live-source-metadata-qualification` has exact stack base
-   `d669b4e`, frozen E0 commit `2c4d397`, and only the scoped E1/E2 diff.
-3. Deliver E3 and require exact-head CI before preparing E4. Before E4, verify
-   the protected private key/output boundary and absent create-only names.
-4. Do not human-inspect transient metadata prose, retrieve an archive/article
+2. Verify branch `feat/live-source-metadata-qualification` retains stack base
+   `d669b4e`, frozen E0 commit `2c4d397`, and execution head `eb0f794`.
+3. Deliver only the E5 sanitized failure closure and require exact-head CI. Do
+   not issue another D-039 request or create a post-green state-only commit.
+4. After E5 closes, audit the separately authorized A/B parser-sample gate. Any
+   new source-C metadata request requires a separate frozen, versioned,
+   result-blind transport-adjudication decision or explicit material user
+   choice.
+5. Do not human-inspect transient metadata prose, retrieve an archive/article
    body/source package, execute a model, rerun development-v1 E4, or incur
    external cost.

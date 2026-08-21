@@ -6,7 +6,7 @@
 
 ## Current phase
 
-**Stage 0 — model engineering gates closed; bounded live source-metadata prequalification active; bulk and source-C text externally blocked**
+**Stage 0 — model engineering gates closed; D-039 metadata run consumed at source-C transport; portable failure closure active; bulk and source-C text externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — fail-closed live source-metadata prequalification; no document body, source package, or model execution is authorized**
+**Current gate — D-039 operational failure preserved; E5 closes when its unchanged evidence commit passes exact-head CI; no retry, document body, source package, or model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -43,10 +43,13 @@ retain the exact captured audit without authorizing another model run.
 Real-source scientific execution still requires the separate source evidence
 listed below. D-038 failure-observability hardening is exact-head delivered at
 `d669b4e` after 18/18 checks passed on draft PR #37. D-039's no-cost
-metadata-only execution contract is locally Tested on the frozen E0 branch.
-Its delivery is accepted externally only when the unchanged candidate commit is
-the synchronized draft-PR head and exact-head CI is green. No evidence-bearing
-live request has run under that decision. Incidental API metadata prose may transit only for hash/count
+metadata-only implementation is exact-head delivered at `eb0f794` after 30/30
+checks passed on draft PR #38. Its one E4 invocation completed the Wikimedia
+and Stack Exchange inventory groups, then stopped on the first arXiv early
+candidate-count request with an authenticated HTTP-status transport failure.
+Five later groups did not start, the final binding matched, and no aggregate was
+published. D-040 consumes that run; a same-profile retry or substitution is not
+authorized. Incidental API metadata prose may transit only for hash/count
 evidence; it may not be displayed, persisted as prose, or human-reviewed.
 Document bodies and source packages are not authorized, and the source roles
 remain unqualified.
@@ -94,6 +97,13 @@ remain unqualified.
   then failed `post-score-resource-check` below the frozen resident-VRAM floor.
   The create-only transaction published no score; the canonical failure
   receipt validates and no outcome was inspected. Attempt B did not run.
+- Exact head `eb0f794` passed 30/30 draft PR #38 checks before D-039 E4. Run
+  `source-metadata-v0-eb0f7949` made three serial metadata request attempts, completed
+  the Wikimedia and Stack Exchange responses, retried zero times, and stopped
+  before accepting the first arXiv candidate-count response. Its canonical,
+  authenticated failure receipt passed validation, preserved matched final
+  bindings, and published no aggregate. No arXiv/PMC yield was observed; no
+  source-C identifier or prose was displayed or human-reviewed.
 - The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
   LoRA control and resumed condition each completed five optimizer steps on
   synthetic fixtures and independently verified exact final semantic state
@@ -134,6 +144,9 @@ remain unqualified.
 ## Remaining blockers and active gates
 
 1. Bounded rights-qualified, historically versioned samples from at least four source candidates.
+   D-039 produced only a provisional A/B metadata inventory prefix; its first
+   source-C request failed at transport and cannot be retried without a new
+   result-blind, versioned transport-adjudication decision.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
@@ -164,9 +177,10 @@ remain unqualified.
 
 ## Exact next action
 
-Deliver the locally Tested D-039 metadata evidence contract on
-`feat/live-source-metadata-qualification` from stack base `d669b4e` through
-exact-head CI. Reverify the owner-restricted private key/output locations and
-absent create-only names, then run the bounded metadata profile exactly once.
-Do not retrieve archive/article
-text, use requester-pays access, execute a model, or reopen consumed E4.
+Deliver D-040, the sanitized D-039 failure report, and reconciled project state
+on one scoped E5 evidence commit through draft PR #38 exact-head CI. Preserve
+the ignored authenticated receipt, completed-prefix inventories, mirrors, and
+private key boundary. Do not rerun or resume D-039, substitute PMC, retrieve
+archive/article text, use requester-pays access, execute a model, or reopen the
+consumed development-v1 E4. After exact-head closure, audit the separately
+authorized A/B parser-sample gate before freezing any new live request.

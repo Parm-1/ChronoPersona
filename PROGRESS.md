@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T21:29:06-04:00
+**Last updated:** 2026-08-20T22:09:40-04:00
 
 ## Decision
 
@@ -53,36 +53,40 @@ delivered**. Draft PR #37 is open/draft and all 18 push/pull-request checks
 passed on that unchanged head. The scoped change preserves exact failed
 resident-resource observations without changing thresholds or reopening E4.
 
-The next hard boundary is not yet reached. D-039's fail-closed metadata
-execution contract and dependency-light validation are now **Tested locally**
-in the delivery candidate on `feat/live-source-metadata-qualification`, whose
-frozen E0 commit is `2c4d397`. Delivery is accepted only when the exact commit
-containing this record is synchronized to the draft PR and CI is green. No
-evidence-bearing live query has run under D-039.
+Accept D-039 implementation/execution head
+`eb0f7949c552e0e733f33c63dd33b9e9d603d83b` as **Tested and exact-head
+delivered**. Draft PR #38 passed all 30 push/pull-request checks across Python
+3.11–3.13 on that unchanged head before execution.
+
+Classify run `source-metadata-v0-eb0f7949` as **Target Failed operationally**
+at the source-C transport gate. The exact invocation completed the Wikimedia
+and Stack Exchange inventory groups, then stopped on the first arXiv early
+candidate-count request with `metadata-transport-failed` / `transport` /
+`http-status`. It made three attempts, completed two responses, retried zero
+times, left exactly five later groups not started, matched its final binding,
+and published no aggregate. D-040 consumes the run. Do not resume, retry,
+substitute PMC, or infer arXiv or source-role feasibility from this stop.
 
 ## Current objective and closure condition
 
-Deliver the locally Tested fail-closed metadata-evidence contract on
-`feat/live-source-metadata-qualification`, based on exact green stack base
-`d669b4e` and frozen E0 commit `2c4d397`, through one focused draft PR and
-exact-head CI. Only after that unchanged head is clean and synchronized, execute
-the predeclared no-cost metadata
-inventory/enrichment profile: pinned `enwiki/20260801`, the legacy
-company-attributed Stack Exchange item, one 100-record time-stratified arXiv
-sample plus exact enrichment of all 100 per provisional window, and up to 100
-upstream PMC Dublin Core records per release/update-datestamp range within a
-ten-response cap. Raw identifiers remain private; incidental metadata prose is
-hash/count-only and must not be displayed or human-reviewed. The gate closes
-with one portable independently replayed
-aggregate or one actionable failure, followed by exact-head CI on the evidence
-commit.
+The exact scoped commit containing the sanitized D-040 failure record, state
+reconciliation, and no-retry decision is the E5 closure candidate. It fulfills
+E5 when synchronized as draft PR #38's head with every attached check green;
+do not create a post-green state-only commit. This closure performs no network
+request and does not publish the private receipt or inventories.
+
+After E5 is green, audit the next authorized evidence gate. D-039 itself cannot
+issue another request: any source-C metadata rerun requires a separately
+frozen, versioned, result-blind transport-adjudication decision or an explicit
+material user choice. Bounded no-cost A/B parser samples remain separately
+authorized by `docs/SOURCE_SAMPLE_PROTOCOL.md`, but require their own frozen
+plan before execution.
 
 ## Current verified boundary
 
 - **Development content-integrity gate — Target Verified:** bounded
-  redistributable fixtures passed. Live source metadata remains unverified but
-  is now the authorized local/network gate. Bounded no-cost A/B parser samples
-  remain a later authorized gate; bulk and source-C content remain blocked.
+  redistributable fixtures passed. Bounded no-cost A/B parser samples remain a
+  later authorized gate; bulk and source-C content remain blocked.
 - **Artifact/load — Target Verified:** immutable final Pythia 1B deduped at
   revision `7199d8fc61a6d565cd1f3c62bf11525b563e13b2` was hash verified,
   loaded offline in CUDA FP16, and produced finite logits under frozen
@@ -119,13 +123,19 @@ commit.
   the post-score resident-VRAM gate before publication. The failure receipt is
   canonical and self-hash-valid; no score was retained or inspected. Attempt A
   is consumed, B did not run, and model-level coherence remains unverified.
-- **D-039 metadata execution contract — Tested locally, not delivered:** the
-  frozen profile, exact clean-head/input/runtime binding, no-proxy/no-redirect
-  network envelope, strict parser and privacy schemas, ordered 270-request
-  state machine, create-only mirrored output transaction, and authenticated
-  success/failure receipts pass the current dependency-light and offline
-  suites. No network request was made; this claim remains local-Tested until
-  the exact delivery commit passes CI.
+- **D-039 metadata implementation — Tested and delivered:** exact head
+  `eb0f794` passed all 30 PR #38 checks. All frozen profile, parser/privacy,
+  state-machine, transaction, and authenticated-receipt contracts passed the
+  offline suites. The live run exercised exact bindings, the no-proxy/no-
+  redirect envelope, Wikimedia/Stack Exchange parsing, the arXiv transport-
+  failure path, ordered stopping, mirrored failure publication, and receipt
+  authentication; arXiv response parsing and PMC execution did not run.
+- **D-039 metadata execution — Target Failed operationally:** Wikimedia and
+  Stack Exchange inventory acquisition are Target Verified within the narrow
+  metadata-only claim ceiling. The first arXiv candidate-count attempt failed
+  at HTTP-status transport before response acceptance; five later groups did
+  not start, and no aggregate was published. No A/B content or source role is
+  qualified, and no arXiv/PMC yield was observed.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -182,6 +192,17 @@ commit.
   `reports/stage0/pythia_v1_scoring_failure_2026-08-20.md`
 - failure-evidence delivery head:
   `8fc16af35b27089b1f0bde68c249d0313e8f0e9e` (18/18 checks passed)
+- D-039 implementation/execution head:
+  `eb0f7949c552e0e733f33c63dd33b9e9d603d83b` (30/30 checks passed before E4)
+- D-039 run: `source-metadata-v0-eb0f7949`; three attempts, two completed
+  responses, zero retries; final binding `matched`; no aggregate
+- D-039 receipt raw/self SHA-256:
+  `765acc89ce4cf0128cc2c385c684c2ccb0edc3332edabfbb076a1fda5e9471ec` /
+  `62c260fec086f8f593f15e56ae5eb878ff133a94009ed50603e329df5c94d72f`
+- D-039 receipt full-payload HMAC:
+  `6b888165641f18b2ee50135449c5f3678f35823704bfc59b26c3d698856c94e5`
+- D-040 failure report:
+  `reports/stage0/source_metadata_qualification_failure_2026-08-20.md`
 - compute ledger: failed v0 training, completed v1 load/control/resume, completed
   v0 scorer A/B, and failed v1 scorer A rows in `COMPUTE_LEDGER.csv`
 
@@ -200,6 +221,13 @@ commit.
   `314b9f8e9ef018fcc8f33ff310079e1f42253e04a553e2a0c288124e917d1aca`.
   Its two preimage copies remain private, distinct, byte-identical, and
   owner-restricted; the earlier key is preserved but rejected by the profile.
+- Ignored D-039 failure evidence: the canonical receipt plus completed
+  Wikimedia and Stack Exchange inventories under the create-only run directory
+  `source-metadata-v0-eb0f7949`. The exact three-file set has a byte-identical,
+  owner-restricted backup outside Git. No aggregate, arXiv, or PMC artifact
+  exists; do not stage or inspect the private inventory payloads.
+- Sanitized D-040 report:
+  `reports/stage0/source_metadata_qualification_failure_2026-08-20.md`
 - Sealed pre-logits registry/criteria:
   `evaluations/registry/development-v1.jsonl` and
   `configs/evaluations/development-v1-reliability-v0.json`
@@ -282,12 +310,19 @@ commit.
 - Draft PR #37 exact delivery head `d669b4e`: 18/18 push/pull-request checks
   passed across Python 3.11–3.13. The branch is synchronized and clean. This
   externally closes D-038 without a follow-up state-only commit.
-- D-039 E1/E2 working-tree validation: 186/186 dependency-light source tests
-  passed; the full offline repository suite collected 627 tests and passed 625
-  with two platform-optional skips. The isolated `python -I -S` plan exited 0,
-  reported zero filesystem writes and no network permission, and left Git
-  status unchanged. Relevant modules compile and `git diff --check` passes
-  apart from line-ending warnings. This is local pre-delivery evidence.
+- D-039 E1/E2 validation: 186/186 dependency-light source tests passed; the
+  full offline repository suite collected 627 tests and passed 625 with two
+  platform-optional skips. The isolated `python -I -S` plan exited 0, reported
+  zero filesystem writes and no network permission, and left Git status
+  unchanged. Relevant modules compiled and `git diff --check` passed apart
+  from line-ending warnings. Exact head `eb0f794` then passed all 30 attached
+  PR #38 checks across five workflows, two events, and Python 3.11–3.13.
+- D-039 E4 receipt validation: canonical bytes, raw/self hashes, the keyed
+  full-receipt HMAC, exact clean-head bindings, privacy schema, group prefix,
+  and local/backup three-file equality all passed. The private roots and files
+  retained their protected owner/recovery-principal ACL boundary. The run made
+  no retry, accepted no source-C response, published no aggregate, displayed no
+  source prose or native identifier, ran no model, and incurred no spend.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -310,6 +345,10 @@ commit.
   observability gap, not proof that the threshold failure was erroneous.
 - The five-step LoRA smoke does not establish sustained stability,
   broad-update feasibility, or causal-training adequacy.
+- The D-039 HTTP-status evidence deliberately withholds the numeric status,
+  response body, and private URL. It cannot distinguish upstream throttling or
+  service policy from request-shape incompatibility. That uncertainty is not
+  authority to retry and is not evidence that arXiv is unsuitable.
 - Public visibility exposes branch history, issues, PRs, commit metadata, and
   retained Actions logs. A personal commit email and historical local path
   strings are public; returning the repository to private cannot recall copies.
@@ -326,9 +365,13 @@ commit.
   from exact PR #37 head
   `d669b4e3c36069398efdac831c8f1fec7036359c`. D-039 and the E0 result-blind
   freeze are recorded at `2c4d3972436935d4279d41c9f0c1bd4395092128`.
-  E1/E2 are locally Tested in the delivery candidate. The exact commit that
-  contains this record must become the synchronized draft-PR head and pass all
-  attached checks before E4. No evidence-bearing live metadata query has run.
+  E1/E2/E3 are complete at exact execution head `eb0f794`, which passed 30/30
+  checks on draft PR #38 before E4. D-039 E4 is consumed and failed
+  operationally. The exact scoped commit containing D-040 and the sanitized
+  failure record is the E5 closure candidate; it must become the synchronized
+  PR head and pass all attached checks without a post-green state-only commit.
+- Draft PR #38: `https://github.com/Parm-1/ChronoPersona/pull/38`, open and
+  draft, stacked on PR #37. Execution head `eb0f794` passed 30/30 checks.
 - Draft PR #37: `https://github.com/Parm-1/ChronoPersona/pull/37`, open and
   draft. Exact head `d669b4e` passed all 18 checks and closes D-038.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
@@ -346,14 +389,14 @@ commit.
 
 ## Next write-active deliverable
 
-The scoped commit containing this record is the D-039 E3 delivery candidate.
-E3 closes only when that unchanged commit is pushed, is the draft-PR head
-stacked on PR #37, and has all attached checks green; do not add a post-green
-state-only commit. The earlier precommitted key was rotated result-blind; its two
-replacement copies and both future private-output inheritance roots are
-owner-restricted and must be reverified immediately before E4, with all
-create-only run names absent. Only then execute the frozen bounded metadata
-profile once. Do not display or human-review transient metadata prose, retrieve an
-archive/article body or source package, use requester-pays access, run a model,
-retry development-v1 E4, or alter roles/windows/categories after observing
-yields.
+The scoped commit containing this record is the D-039 E5 failure-evidence
+closure candidate. E5 closes only when that unchanged commit is pushed, is
+draft PR #38's synchronized head, and has every attached check green; do not add
+a post-green state-only commit. Preserve the ignored receipt, two private
+inventories, their exact mirrors, and the owner-restricted key boundary. Do not
+resume or retry D-039, display or human-review transient metadata prose,
+retrieve an archive/article body or source package, use requester-pays access,
+run a model, substitute PMC, or infer source feasibility from the transport
+stop. After exact-head closure, audit the separately authorized A/B parser-
+sample gate and stop for a new frozen decision before any further network
+request.
