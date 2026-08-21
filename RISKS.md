@@ -49,8 +49,9 @@ complete: it found a failed-audit observability gap but no evidence that the
 resource rejection was erroneous, so no rescue qualifies. The next local task
 was delivery of the Tested D-038 dependency-light hardening that retains a
 captured resident audit before validation raises; exact head `d669b4e` passed
-all 18 checks. The next authorized risk-reduction gate is D-039's bounded
-metadata-only source prequalification. It may measure interface availability,
+all 18 checks. The D-039 metadata execution contract is locally Tested; E4
+requires accepted exact-head delivery, private-boundary revalidation, and one
+bounded live run. That prequalification may measure interface availability,
 archive inventories, and license/version metadata yield without retrieving a
 document body or source package; incidental metadata prose is transient
 hash/count-only and may not be displayed, persisted as prose, or human-reviewed.

@@ -1,6 +1,6 @@
 # Bounded Live Source-Metadata Qualification
 
-**Status:** E0 result-blind freeze complete in this plan commit; E1 active; no evidence-bearing live query has run
+**Status:** E0 result-blind freeze and privacy amendment complete; E1/E2 locally Tested; E3 closes only on exact-head CI; no evidence-bearing live query has run
 **Started:** 2026-08-20
 **Baseline:** `d669b4e3c36069398efdac831c8f1fec7036359c`
 **Branch:** `feat/live-source-metadata-qualification`
@@ -137,12 +137,16 @@ requests in slot order. Preserve records within each sample page in exact Atom
 response-entry order `0` through `4`.
 
 Let `B = floor(T / 5)`, the number of complete disjoint five-record blocks.
-Because `T >= 25`, require `B >= 5`. For slots `0` through `4` in ascending
-order, serialize the slot as ASCII base-10 with no sign and no leading zero,
-compute
-`sha256(UTF8(seed + NUL + cell_id + NUL + slot_decimal))` with seed
-`arxiv-source-c-rank-sample-v0`, interpret the 32 digest bytes as one unsigned
-big-endian integer, and reduce it modulo `B` to obtain a candidate block index.
+Because `T >= 25`, require `B >= 5`. Before any request, load two distinct,
+byte-identical outside-Git copies of one 32-byte private commitment key and
+require the decoded key SHA-256 to equal the versioned profile commitment. The
+key preimage must never enter Git, command output, or portable evidence. For
+slots `0` through `4` in ascending order, serialize the slot as ASCII base-10
+with no sign and no leading zero. Compute
+`HMAC-SHA256(key, ASCII(domain) + NUL + UTF8(cell_id + NUL + slot_decimal))`
+with domain `arxiv-source-c-rank-sample-v0`, interpret the 32 digest bytes as
+one unsigned big-endian integer, and reduce it modulo `B` to obtain a candidate
+block index.
 If that index was selected by an earlier slot, increment it modulo `B` until
 the first unused block is found. Permit at most `B` probes and fail before any
 sample request if no unused block is found. With five slots and `B >= 5`, this
@@ -196,9 +200,13 @@ Before E4, shared execution hardening must provide:
    any request and again before publication;
 3. create-only canonical JSON/JSONL publication with no overwrite, traversal,
    alias, reparse/symlink, reserved-name, or casefold-collision path;
-4. per-response byte count/SHA-256 plus requested/final URL identity and
-   request-count evidence without retaining response prose or native C/backup-C
-   locators in a portable report; C-family URL identities must be hashes only;
+4. per-response byte count plus request-count evidence without retaining
+   response prose or native C/backup-C locators in a portable report; public
+   A/B inventory responses retain exact-byte SHA-256 and endpoint identity,
+   while C-family response bytes, URLs, ordered identifiers, private artifacts,
+   and failure detail use domain-separated HMAC-SHA256 commitments only; exact
+   C-family response and private-artifact byte lengths are null in portable
+   evidence and remain observable only in the private local bundle;
 5. a strict no-prose-output validator over every nested persisted field;
 6. portable config identities rather than absolute local paths;
 7. honest network evidence: access permitted and the metadata request path
@@ -243,6 +251,18 @@ planning-only Wikimedia directory index were inspected; all adapter plan modes
 and the source registry validated. No evidence-bearing endpoint response,
 source document body, model, or behavioral outcome was retrieved.
 
+**Pre-execution privacy amendment:** before E1 delivery or any evidence-bearing
+request, adversarial review showed that the original public sampler seed plus
+public cell totals/starts and unkeyed C-family URL/identifier hashes would make
+the supposedly private sampled identifiers replayable or dictionary-testable.
+D-039 and this plan therefore replace those unkeyed identities with the frozen
+private-key HMAC construction above and withhold exact C-family response and
+artifact lengths from portable evidence. This materially changes the
+deterministic sample ranks, but it was frozen result-blind: no live response,
+identifier, yield, or model outcome had been observed. The claim ceiling,
+group order, request ceilings, windows, categories, and stop rules are
+unchanged.
+
 ### E1 — Execution contract hardening
 
 - Add one versioned closed metadata-gate config and dependency-light shared
@@ -250,6 +270,14 @@ source document body, model, or behavioral outcome was retrieved.
 - Apply the evidence/privacy contract without weakening current adapter
   content firewalls, host allowlists, ceilings, or delays.
 - Keep fixture parse mode useful and no-network by default.
+
+**Result:** locally Tested in the delivery candidate. The implementation adds
+the exact frozen profile, clean-head/input/runtime binding, lazy direct-origin
+network boundary, ordered state machine, strict private/public schemas,
+source-C HMAC privacy, create-only mirrored publication, and authenticated
+success/failure receipts. Delivery is accepted only if the exact commit that
+contains this record becomes the synchronized draft-PR head and passes every
+attached check; no live request has used it.
 
 ### E2 — Dependency-light validation
 
@@ -265,8 +293,20 @@ source document body, model, or behavioral outcome was retrieved.
   cycles, arbitrary rights prose, group-order drift, and network flag misuse.
 - Add an end-to-end fixture gate producing one portable self-hashed receipt and
   sanitized aggregate.
+- Require the gate runner to start as `python -I -S` before any non-builtin
+  import; reject ordinary, site-enabled, or unsafe-path startup before plan or
+  execution code can load.
 - Require focused tests, full offline suite, source/model/registry validators,
   compilation, and `git diff --check` with no live query.
+
+**Result:** locally Tested. The dependency-light source subset passed 186/186;
+the full offline repository suite collected 627 tests and passed 625 with two
+platform-optional skips. Relevant modules compile, `git diff --check` passes
+apart from line-ending warnings, and the isolated `python -I -S` plan exited 0
+without changing Git status or permitting network access. Parser/OAI adversarial
+review passed 87 focused tests and 19 direct malformed-field probes. No live
+response, identifier, yield, source prose, model, or behavioral outcome was
+observed.
 
 ### E3 — Exact-head delivery
 
@@ -276,7 +316,19 @@ source document body, model, or behavioral outcome was retrieved.
 - Do not execute E4 until that exact head is clean locally, synchronized with
   the remote, and fully green.
 
+**Acceptance:** the scoped commit containing this record is the E3 delivery
+candidate on top of frozen E0 commit `2c4d397`. E3 is fulfilled externally only
+when that unchanged commit is synchronized to the branch and draft PR and every
+attached check is green. Do not create a post-green state-only commit.
+
 ### E4 — Bounded live metadata execution
+
+Before E4, reverify that both replacement commitment-key copies and the two
+immediate private-output inheritance roots use protected, owner-restricted
+local DACLs with only the owner plus accepted OS-recovery principals. The
+earlier key is not accepted by the frozen profile because its inherited ACL did
+not establish confidentiality. Require the exact create-only run children to
+be absent before execution and keep the machine-specific ACL audit private.
 
 - Execute A, B, C-early, C-late, backup-C early-range, and backup-C late-range
   exactly once under the frozen profile.
@@ -285,6 +337,10 @@ source document body, model, or behavioral outcome was retrieved.
 - Preserve one complete portable receipt or one actionable failure receipt.
 - Stop the gate at the first policy, identity, schema, privacy, transport, or
   publication failure; do not silently shrink, substitute, or promote a backup.
+- Invoke the exact-head runner only as
+  `python -I -S scripts/run_source_metadata_gate.py --execute --allow-network`
+  with every required exact-head, create-only output, outside-Git backup, and
+  dual commitment-key argument; the script must reject any weaker startup.
 
 ### E5 — Portable evidence publication
 
@@ -328,9 +384,10 @@ externally blocked. No model execution or scientific claim is authorized.
 
 1. Read `PROGRESS.md`, D-037 through D-039, this plan, and the three source
    protocols.
-2. Verify branch `feat/live-source-metadata-qualification` is based on exact
-   head `d669b4e` and inspect the scoped diff.
-3. Continue the earliest incomplete evidence gate.
+2. Verify branch `feat/live-source-metadata-qualification` has exact stack base
+   `d669b4e`, frozen E0 commit `2c4d397`, and only the scoped E1/E2 diff.
+3. Deliver E3 and require exact-head CI before preparing E4. Before E4, verify
+   the protected private key/output boundary and absent create-only names.
 4. Do not human-inspect transient metadata prose, retrieve an archive/article
    body/source package, execute a model, rerun development-v1 E4, or incur
    external cost.

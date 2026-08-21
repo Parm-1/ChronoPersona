@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T17:43:51-04:00
+**Last updated:** 2026-08-20T21:29:06-04:00
 
 ## Decision
 
@@ -53,18 +53,20 @@ delivered**. Draft PR #37 is open/draft and all 18 push/pull-request checks
 passed on that unchanged head. The scoped change preserves exact failed
 resident-resource observations without changing thresholds or reopening E4.
 
-The next hard boundary is not yet reached. The source protocols explicitly
-authorize CAD-$0 official metadata queries, archive inventories/checksums, and
-aggregate reports without document-body retrieval. D-039 therefore activates
-one bounded metadata-only prequalification across provisional Wikimedia,
-Stack Exchange, arXiv, and PMC roles. No evidence-bearing live query has run
-under D-039.
+The next hard boundary is not yet reached. D-039's fail-closed metadata
+execution contract and dependency-light validation are now **Tested locally**
+in the delivery candidate on `feat/live-source-metadata-qualification`, whose
+frozen E0 commit is `2c4d397`. Delivery is accepted only when the exact commit
+containing this record is synchronized to the draft PR and CI is green. No
+evidence-bearing live query has run under D-039.
 
 ## Current objective and closure condition
 
-Freeze and deliver one fail-closed metadata-evidence contract on
-`feat/live-source-metadata-qualification`, based on exact green head
-`d669b4e`. After exact-head CI, execute only the predeclared no-cost metadata
+Deliver the locally Tested fail-closed metadata-evidence contract on
+`feat/live-source-metadata-qualification`, based on exact green stack base
+`d669b4e` and frozen E0 commit `2c4d397`, through one focused draft PR and
+exact-head CI. Only after that unchanged head is clean and synchronized, execute
+the predeclared no-cost metadata
 inventory/enrichment profile: pinned `enwiki/20260801`, the legacy
 company-attributed Stack Exchange item, one 100-record time-stratified arXiv
 sample plus exact enrichment of all 100 per provisional window, and up to 100
@@ -117,6 +119,13 @@ commit.
   the post-score resident-VRAM gate before publication. The failure receipt is
   canonical and self-hash-valid; no score was retained or inspected. Attempt A
   is consumed, B did not run, and model-level coherence remains unverified.
+- **D-039 metadata execution contract — Tested locally, not delivered:** the
+  frozen profile, exact clean-head/input/runtime binding, no-proxy/no-redirect
+  network envelope, strict parser and privacy schemas, ordered 270-request
+  state machine, create-only mirrored output transaction, and authenticated
+  success/failure receipts pass the current dependency-light and offline
+  suites. No network request was made; this claim remains local-Tested until
+  the exact delivery commit passes CI.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -179,8 +188,18 @@ commit.
 ## Artifacts
 
 - Preserved v0 scoring config: `configs/runs/pythia-development-score-v0.json`
-- Active reliability plan:
-  `.agent/plans/active-development-measurement-reliability.md`
+- Active metadata qualification plan/profile/runner:
+  `.agent/plans/active-source-metadata-qualification.md`,
+  `configs/sources/live-metadata-qualification-v0.json`, and
+  `scripts/run_source_metadata_gate.py`
+- Frozen metadata profile raw/canonical SHA-256 and Git blob:
+  `fa510aff7e96281fbf5ea1e08ea380786a23c848e3342c1c78407eefe1a8194d` /
+  `e471bee5aba864f96fef802723204426362509ab177909ba2de29dd6f013b39e` /
+  `22b7df8ee10cda1e6bcde08f50e9333e3c0da270`
+- Frozen replacement commitment-key SHA-256:
+  `314b9f8e9ef018fcc8f33ff310079e1f42253e04a553e2a0c288124e917d1aca`.
+  Its two preimage copies remain private, distinct, byte-identical, and
+  owner-restricted; the earlier key is preserved but rejected by the profile.
 - Sealed pre-logits registry/criteria:
   `evaluations/registry/development-v1.jsonl` and
   `configs/evaluations/development-v1-reliability-v0.json`
@@ -263,6 +282,12 @@ commit.
 - Draft PR #37 exact delivery head `d669b4e`: 18/18 push/pull-request checks
   passed across Python 3.11–3.13. The branch is synchronized and clean. This
   externally closes D-038 without a follow-up state-only commit.
+- D-039 E1/E2 working-tree validation: 186/186 dependency-light source tests
+  passed; the full offline repository suite collected 627 tests and passed 625
+  with two platform-optional skips. The isolated `python -I -S` plan exited 0,
+  reported zero filesystem writes and no network permission, and left Git
+  status unchanged. Relevant modules compile and `git diff --check` passes
+  apart from line-ending warnings. This is local pre-delivery evidence.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -300,8 +325,10 @@ commit.
 - Current branch: `feat/live-source-metadata-qualification`, created cleanly
   from exact PR #37 head
   `d669b4e3c36069398efdac831c8f1fec7036359c`. D-039 and the E0 result-blind
-  freeze are recorded on this branch; no evidence-bearing live metadata query
-  has run.
+  freeze are recorded at `2c4d3972436935d4279d41c9f0c1bd4395092128`.
+  E1/E2 are locally Tested in the delivery candidate. The exact commit that
+  contains this record must become the synchronized draft-PR head and pass all
+  attached checks before E4. No evidence-bearing live metadata query has run.
 - Draft PR #37: `https://github.com/Parm-1/ChronoPersona/pull/37`, open and
   draft. Exact head `d669b4e` passed all 18 checks and closes D-038.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
@@ -319,12 +346,14 @@ commit.
 
 ## Next write-active deliverable
 
-Implement and test the D-039 shared evidence contract before any live request:
-exact clean-head/input-blob
-binding, strict duplicate-key parsing, response hashes, create-only outputs,
-final self-hashes, portable paths, and source-C privacy checks. Deliver that
-implementation through exact-head CI before executing the bounded metadata
-profile. Do not display or human-review transient metadata prose, retrieve an
+The scoped commit containing this record is the D-039 E3 delivery candidate.
+E3 closes only when that unchanged commit is pushed, is the draft-PR head
+stacked on PR #37, and has all attached checks green; do not add a post-green
+state-only commit. The earlier precommitted key was rotated result-blind; its two
+replacement copies and both future private-output inheritance roots are
+owner-restricted and must be reverified immediately before E4, with all
+create-only run names absent. Only then execute the frozen bounded metadata
+profile once. Do not display or human-review transient metadata prose, retrieve an
 archive/article body or source package, use requester-pays access, run a model,
 retry development-v1 E4, or alter roles/windows/categories after observing
 yields.

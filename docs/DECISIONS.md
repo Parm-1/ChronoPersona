@@ -934,6 +934,37 @@ reconstruction, and scientific feasibility remain unestablished.
 `docs/SOURCE_SAMPLE_PROTOCOL.md`, `docs/SOURCE_ADAPTER_PROTOCOL.md`, and
 `docs/SOURCE_METADATA_PROTOCOL.md`.
 
+**Result-blind privacy amendment (2026-08-20, before E1 delivery or live
+execution):** adversarial implementation review established that the original
+public SHA-256 sampler seed, published page-start evidence, and unkeyed hashes
+of C-family URLs or identifiers would allow third parties to replay the public
+endpoints or dictionary-test the 200 identifiers that this decision requires to
+remain private. No evidence-bearing live request, identifier, yield, or model
+outcome had been observed when this defect was found.
+
+Amend D-039 to use one precommitted 32-byte private key for domain-separated
+HMAC-SHA256. The arXiv block sampler is now
+`HMAC-SHA256(key, ASCII(domain) + NUL + UTF8(cell_id + NUL + slot_decimal))`;
+C-family exact response bytes, requested/final URLs, ordered identifier lists,
+private artifact bytes, and failure detail use separately domain-tagged HMACs.
+Exact C-family response and private-artifact byte lengths are represented as
+null in portable evidence, because unkeyed lengths are also enumerable
+dictionary fingerprints; exact lengths remain available only in the private
+local files/process state.
+Public Wikimedia/Stack Exchange response evidence remains exact-byte SHA-256.
+The complete sanitized success or failure receipt is also authenticated under
+the separate `source-receipt` domain before its public self-hash is computed.
+Only the decoded key commitment
+`314b9f8e9ef018fcc8f33ff310079e1f42253e04a553e2a0c288124e917d1aca`
+is versioned; two byte-identical, non-aliased key copies remain outside every
+Git worktree under owner-restricted access. The earlier precommitted key was
+rotated result-blind before E1 delivery because its inherited local ACL did not
+establish that confidentiality boundary; it is not accepted by this profile.
+This amendment changes deterministic sample ranks, so it is part
+of the pre-execution freeze rather than a post-result security patch. It does
+not change roles, windows, categories, group order, request ceilings, claim
+ceiling, or the prohibition on source-C prose review.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

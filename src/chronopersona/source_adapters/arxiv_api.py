@@ -12,30 +12,87 @@ from datetime import datetime, timezone
 import hashlib
 import re
 from typing import Any
-from urllib.parse import quote, urlparse
+from urllib.parse import quote, urlsplit
 import xml.etree.ElementTree as ET
 
-from ..source_metadata import EraWindows
+from ..source_metadata import (
+    EraWindows,
+    arxiv_category_evidence,
+    normalize_arxiv_categories,
+)
 
 
 class ArxivApiError(ValueError):
     """Raised when an arXiv API Atom response is malformed or reports an error."""
 
 
-_VERSION_SUFFIX = re.compile(r"v(\d+)$")
+_VERSION_SUFFIX = re.compile(r"v([1-9]\d*)$")
+_BASE_IDENTIFIER = re.compile(
+    r"(?:\d{4}\.\d{4,5}|[A-Za-z][A-Za-z0-9.-]*/\d{7})"
+)
+_CATEGORY = re.compile(r"[a-z][a-z0-9-]*(?:\.[A-Za-z][A-Za-z0-9-]*)?")
+_CATEGORY_ROOTS = frozenset(
+    {
+        "astro-ph",
+        "cond-mat",
+        "cs",
+        "econ",
+        "eess",
+        "gr-qc",
+        "hep-ex",
+        "hep-lat",
+        "hep-ph",
+        "hep-th",
+        "math",
+        "math-ph",
+        "nlin",
+        "nucl-ex",
+        "nucl-th",
+        "physics",
+        "q-bio",
+        "q-fin",
+        "quant-ph",
+        "stat",
+    }
+)
+_ATOM_NAMESPACE = "http://www.w3.org/2005/Atom"
+_OPENSEARCH_NAMESPACE = "http://a9.com/-/spec/opensearch/1.1/"
+_ARXIV_ATOM_NAMESPACE = "http://arxiv.org/schemas/atom"
 
 
-def _local(tag: str) -> str:
-    return tag.rsplit("}", 1)[-1]
+def _direct_text(
+    element: ET.Element,
+    name: str,
+    *,
+    namespace: str = _ATOM_NAMESPACE,
+) -> str | None:
+    exact_tag = f"{{{namespace}}}{name}"
+    values = [
+        " ".join(child.text.split())
+        for child in element
+        if child.tag == exact_tag and child.text and child.text.strip()
+    ]
+    if len(values) > 1:
+        raise ArxivApiError(f"arXiv API {name} field is not singular")
+    return values[0] if values else None
 
 
-def _direct_text(element: ET.Element, name: str) -> str | None:
-    for child in element:
-        if _local(child.tag) == name and child.text:
-            value = " ".join(child.text.split())
-            if value:
-                return value
-    return None
+def _direct_canonical_scalar(element: ET.Element, name: str) -> str:
+    exact_tag = f"{{{_ATOM_NAMESPACE}}}{name}"
+    fields = [child for child in element if child.tag == exact_tag]
+    if len(fields) != 1:
+        raise ArxivApiError(f"arXiv API {name} field is not singular")
+    field = fields[0]
+    raw = field.text
+    if (
+        field.attrib
+        or list(field)
+        or raw is None
+        or not raw
+        or raw != raw.strip()
+    ):
+        raise ArxivApiError(f"arXiv API {name} field is not canonical")
+    return raw
 
 
 def _sha256_text(value: str) -> str:
@@ -45,36 +102,51 @@ def _sha256_text(value: str) -> str:
 def _timestamp(raw: str | None, *, field: str) -> datetime:
     if raw is None:
         raise ArxivApiError(f"arXiv API entry is missing {field}")
-    normalized = raw[:-1] + "+00:00" if raw.endswith("Z") else raw
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", raw) is None:
+        raise ArxivApiError(f"arXiv API {field} timestamp is not canonical")
     try:
-        parsed = datetime.fromisoformat(normalized)
+        parsed = datetime.strptime(raw, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
     except ValueError as error:
         raise ArxivApiError(
             f"invalid arXiv API {field} timestamp: {raw!r}"
         ) from error
-    if parsed.tzinfo is None:
-        raise ArxivApiError(
-            f"arXiv API {field} timestamp lacks timezone: {raw!r}"
-        )
-    return parsed.astimezone(timezone.utc)
+    return parsed
 
 
 def _arxiv_id(raw_url: str | None) -> tuple[str, int | None]:
     if raw_url is None:
         raise ArxivApiError("arXiv API entry is missing id")
-    path = urlparse(raw_url).path.rstrip("/")
-    marker = "/abs/"
-    if marker not in path:
+    parsed = urlsplit(raw_url)
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise ArxivApiError("arXiv API entry id has an invalid port") from error
+    if (
+        parsed.scheme not in {"http", "https"}
+        or parsed.hostname != "arxiv.org"
+        or port is not None
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+        or "%" in parsed.path
+        or not parsed.path.startswith("/abs/")
+        or parsed.path.count("/abs/") != 1
+    ):
         raise ArxivApiError(f"unrecognized arXiv API entry id: {raw_url!r}")
-    identifier = path.split(marker, 1)[1]
-    if not identifier:
-        raise ArxivApiError("arXiv API entry id is empty")
+    identifier = parsed.path[len("/abs/") :]
+    if not identifier or identifier.endswith("/"):
+        raise ArxivApiError("arXiv API entry id is empty or noncanonical")
     match = _VERSION_SUFFIX.search(identifier)
     if match is None:
+        if _BASE_IDENTIFIER.fullmatch(identifier) is None:
+            raise ArxivApiError("arXiv API entry base id is noncanonical")
         return identifier, None
     base_identifier = identifier[: match.start()]
-    if not base_identifier:
-        raise ArxivApiError("arXiv API entry version has no base id")
+    if _BASE_IDENTIFIER.fullmatch(base_identifier) is None:
+        raise ArxivApiError("arXiv API entry version has no canonical base id")
     return base_identifier, int(match.group(1))
 
 
@@ -86,14 +158,62 @@ def _category_matches(categories: list[str], prefixes: tuple[str, ...]) -> bool:
     )
 
 
+def _require_canonical_categories(categories: list[str]) -> None:
+    if not categories or any(
+        _CATEGORY.fullmatch(category) is None
+        or category.split(".", 1)[0] not in _CATEGORY_ROOTS
+        for category in categories
+    ):
+        raise ArxivApiError("arXiv API entry contains a noncanonical category")
+
+
+def _entry_categories(entry: ET.Element) -> list[str]:
+    category_tags = {
+        f"{{{_ATOM_NAMESPACE}}}category",
+        f"{{{_ARXIV_ATOM_NAMESPACE}}}primary_category",
+    }
+    values: set[str] = set()
+    for element in entry:
+        if element.tag not in category_tags:
+            continue
+        expected_attributes = (
+            {"term", "scheme"}
+            if element.tag == f"{{{_ATOM_NAMESPACE}}}category"
+            and "scheme" in element.attrib
+            else {"term"}
+        )
+        if (
+            set(element.attrib) != expected_attributes
+            or (
+                "scheme" in element.attrib
+                and element.attrib["scheme"] != _ARXIV_ATOM_NAMESPACE
+            )
+            or list(element)
+            or element.text not in {None, ""}
+        ):
+            raise ArxivApiError("arXiv API category field is not exact")
+        term = element.attrib["term"]
+        if not term or term != term.strip():
+            raise ArxivApiError("arXiv API category field is not exact")
+        values.add(term)
+    categories = sorted(values)
+    _require_canonical_categories(categories)
+    return categories
+
+
 def _author_evidence(entry: ET.Element) -> tuple[int, str]:
     authors: list[str] = []
-    for author in [child for child in entry if _local(child.tag) == "author"]:
+    for author in [
+        child
+        for child in entry
+        if child.tag == f"{{{_ATOM_NAMESPACE}}}author"
+    ]:
         name = _direct_text(author, "name") or ""
         affiliations = [
             " ".join(child.text.split())
             for child in author
-            if _local(child.tag) == "affiliation" and child.text
+            if child.tag == f"{{{_ARXIV_ATOM_NAMESPACE}}}affiliation"
+            and child.text
         ]
         normalized = " | ".join([name, *affiliations]).strip(" |")
         if normalized:
@@ -102,15 +222,22 @@ def _author_evidence(entry: ET.Element) -> tuple[int, str]:
 
 
 def _feed_integer(root: ET.Element, name: str) -> int | None:
-    for child in root:
-        if _local(child.tag) == name and child.text:
-            try:
-                return int(child.text.strip())
-            except ValueError as error:
-                raise ArxivApiError(
-                    f"arXiv API {name} is not an integer"
-                ) from error
-    return None
+    exact_tag = f"{{{_OPENSEARCH_NAMESPACE}}}{name}"
+    fields = [child for child in root if child.tag == exact_tag]
+    if len(fields) > 1:
+        raise ArxivApiError(f"arXiv API {name} field is not singular")
+    if not fields:
+        return None
+    field = fields[0]
+    raw = field.text
+    if (
+        field.attrib
+        or list(field)
+        or raw is None
+        or re.fullmatch(r"0|[1-9]\d*", raw) is None
+    ):
+        raise ArxivApiError(f"arXiv API {name} is not a canonical integer")
+    return int(raw)
 
 
 def parse_arxiv_api_feed(
@@ -127,7 +254,7 @@ def parse_arxiv_api_feed(
         root = ET.fromstring(xml_bytes)
     except ET.ParseError as error:
         raise ArxivApiError(f"invalid arXiv API XML: {error}") from error
-    if _local(root.tag) != "feed":
+    if root.tag != f"{{{_ATOM_NAMESPACE}}}feed":
         raise ArxivApiError("arXiv API response root must be an Atom feed")
 
     page = {
@@ -136,25 +263,28 @@ def parse_arxiv_api_feed(
         "items_per_page": _feed_integer(root, "itemsPerPage"),
     }
     records: list[dict[str, Any]] = []
-    for entry in [child for child in root if _local(child.tag) == "entry"]:
-        identifier, returned_version = _arxiv_id(_direct_text(entry, "id"))
+    for entry in [
+        child
+        for child in root
+        if child.tag == f"{{{_ATOM_NAMESPACE}}}entry"
+    ]:
+        identifier, returned_version = _arxiv_id(
+            _direct_canonical_scalar(entry, "id")
+        )
         published = _timestamp(
-            _direct_text(entry, "published"),
+            _direct_canonical_scalar(entry, "published"),
             field="published",
         )
         updated = _timestamp(
-            _direct_text(entry, "updated"),
+            _direct_canonical_scalar(entry, "updated"),
             field="updated",
         )
+        if updated < published:
+            raise ArxivApiError(
+                "arXiv API updated timestamp precedes its published timestamp"
+            )
         era_window = windows.classify(published)
-        categories = sorted(
-            {
-                str(child.attrib["term"])
-                for child in entry
-                if _local(child.tag) in {"category", "primary_category"}
-                and child.attrib.get("term")
-            }
-        )
+        categories = _entry_categories(entry)
         category_allowed = _category_matches(
             categories,
             allowed_category_prefixes,
@@ -163,6 +293,15 @@ def parse_arxiv_api_feed(
             categories,
             forbidden_category_prefixes,
         )
+        try:
+            persisted_categories = normalize_arxiv_categories(
+                categories,
+                allowed_category_prefixes=allowed_category_prefixes,
+                forbidden_category_prefixes=forbidden_category_prefixes,
+            )
+        except ValueError as error:
+            raise ArxivApiError(str(error)) from error
+        raw_category_count, raw_categories_sha256 = arxiv_category_evidence(categories)
         title = _direct_text(entry, "title") or ""
         summary = _direct_text(entry, "summary") or ""
         author_count, authors_sha256 = _author_evidence(entry)
@@ -188,7 +327,7 @@ def parse_arxiv_api_feed(
                 "timestamp_semantics": "submission-version",
                 "era_window": era_window,
                 "version_status": "unresolved",
-                "version_count": 1,
+                "version_count": returned_version if returned_version is not None else 1,
                 "rights_status": "unresolved",
                 "license_id": "pending-arXivRaw-enrichment",
                 "license_locator": (
@@ -197,7 +336,7 @@ def parse_arxiv_api_feed(
                     f"{quote('oai:arXiv.org:' + identifier)}"
                 ),
                 "authorship_provenance": "human",
-                "categories": categories,
+                "categories": persisted_categories,
                 "review_strata": [
                     "exposure-boundary"
                     if category_forbidden or not category_allowed
@@ -224,6 +363,8 @@ def parse_arxiv_api_feed(
                     "authors_sha256": authors_sha256,
                     "category_allowed": category_allowed,
                     "category_forbidden": category_forbidden,
+                    "raw_category_count": raw_category_count,
+                    "raw_categories_sha256": raw_categories_sha256,
                 },
             }
         )

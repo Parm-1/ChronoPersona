@@ -42,10 +42,11 @@ failure-observability work is complete; future resident-resource failures now
 retain the exact captured audit without authorizing another model run.
 Real-source scientific execution still requires the separate source evidence
 listed below. D-038 failure-observability hardening is exact-head delivered at
-`d669b4e` after 18/18 checks passed on draft PR #37. D-039 now activates a
-no-cost metadata-only gate over the provisional Wikimedia, Stack Exchange,
-arXiv, and PMC interfaces. No evidence-bearing live request has run under that
-decision. Incidental API metadata prose may transit only for hash/count
+`d669b4e` after 18/18 checks passed on draft PR #37. D-039's no-cost
+metadata-only execution contract is locally Tested on the frozen E0 branch.
+Its delivery is accepted externally only when the unchanged candidate commit is
+the synchronized draft-PR head and exact-head CI is green. No evidence-bearing
+live request has run under that decision. Incidental API metadata prose may transit only for hash/count
 evidence; it may not be displayed, persisted as prose, or human-reviewed.
 Document bodies and source packages are not authorized, and the source roles
 remain unqualified.
@@ -163,9 +164,9 @@ remain unqualified.
 
 ## Exact next action
 
-Freeze, implement, and test the D-039 metadata evidence contract on
-`feat/live-source-metadata-qualification` from exact head `d669b4e`. Require
-create-only portable outputs, exact Git/input binding, strict payload parsing,
-response hashes, final self-hashes, and source-C privacy before exact-head CI.
-Only then run the bounded metadata profile. Do not retrieve archive/article
+Deliver the locally Tested D-039 metadata evidence contract on
+`feat/live-source-metadata-qualification` from stack base `d669b4e` through
+exact-head CI. Reverify the owner-restricted private key/output locations and
+absent create-only names, then run the bounded metadata profile exactly once.
+Do not retrieve archive/article
 text, use requester-pays access, execute a model, or reopen consumed E4.

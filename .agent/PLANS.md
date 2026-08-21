@@ -8,8 +8,10 @@ One result-blind source ExecPlan is write-active:
   archive/article body, source package, requester-pays object, model, or
   behavioral outcome is in scope. Incidental API metadata prose is transient
   hash/count-only. Baseline `d669b4e`; branch
-  `feat/live-source-metadata-qualification`. E0 is frozen; E1 implementation
-  is active.
+  `feat/live-source-metadata-qualification`. E0 is frozen; E1/E2 are locally
+  Tested in the delivery candidate. E3 closes only when that exact commit is
+  the synchronized draft-PR head and every attached check is green. No
+  evidence-bearing live request has run.
 
 The latest engineering plan is complete:
 

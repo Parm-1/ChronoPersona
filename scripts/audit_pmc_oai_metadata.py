@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 import json
 from pathlib import Path
 import sys
@@ -168,8 +169,10 @@ def main() -> int:
         records: list[dict] = []
         diagnostics: dict[str, int] = {}
         token: str | None = None
+        seen_header_identifiers: set[str] = set()
         first_request = True
         while len(records) < args.max_records:
+            request_token = token
             if args.input is not None:
                 if not first_request:
                     break
@@ -188,6 +191,36 @@ def main() -> int:
                 payload,
                 windows=windows,
                 allowed_subject_terms=allowed,
+                expected_from_date=(
+                    None
+                    if args.input is not None
+                    else date.fromisoformat(args.from_date)
+                ),
+                expected_until_date=(
+                    None
+                    if args.input is not None
+                    else date.fromisoformat(args.until_date)
+                ),
+                seen_header_identifiers=seen_header_identifiers,
+                expected_request_attributes=(
+                    {
+                        "verb": "ListRecords",
+                        "metadataPrefix": "oai_dc",
+                        "set": args.set_spec,
+                    }
+                    if args.input is not None
+                    else (
+                        {"verb": "ListRecords", "resumptionToken": request_token}
+                        if request_token is not None
+                        else {
+                            "verb": "ListRecords",
+                            "metadataPrefix": "oai_dc",
+                            "from": args.from_date,
+                            "until": args.until_date,
+                            "set": args.set_spec,
+                        }
+                    )
+                ),
             )
             _merge_diagnostics(diagnostics, page_diagnostics)
             remaining = args.max_records - len(records)
@@ -218,8 +251,9 @@ def main() -> int:
             "source": "pmc-oai-oai_dc",
             "endpoint": ENDPOINT,
             "config": str(args.config),
-            "oai_from_date": args.from_date,
-            "oai_until_date": args.until_date,
+            "oai_from_date": None if args.input is not None else args.from_date,
+            "oai_until_date": None if args.input is not None else args.until_date,
+            "oai_query_bounds_verified": args.input is None,
             "oai_datestamp_filter_semantics": (
                 "PMC release/update datestamp; not publication date"
             ),

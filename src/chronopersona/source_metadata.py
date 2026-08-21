@@ -23,6 +23,7 @@ _ALLOWED_TIMESTAMP_SEMANTICS = {
     "initial-post-version",
     "submission-version",
     "publication-version",
+    "release-or-update-datestamp",
 }
 _ALLOWED_WINDOWS = {"early", "late", "outside", "unresolved"}
 _ALLOWED_VERSION_STATUS = {
@@ -47,6 +48,57 @@ _ALLOWED_AUTHORSHIP = {
     "unknown",
 }
 _ALLOWED_ELIGIBILITY = {"eligible", "excluded", "unresolved"}
+FROZEN_ARXIV_PERSISTED_CATEGORIES = frozenset(
+    {
+        "astro-ph.CO",
+        "astro-ph.EP",
+        "astro-ph.GA",
+        "astro-ph.HE",
+        "astro-ph.IM",
+        "astro-ph.SR",
+        "cond-mat.mtrl-sci",
+        "physics.atom-ph",
+        "physics.chem-ph",
+        "physics.optics",
+        "forbidden-arxiv-category",
+        "other-arxiv-category",
+    }
+)
+
+
+def normalize_arxiv_categories(
+    categories: Sequence[str],
+    *,
+    allowed_category_prefixes: Sequence[str],
+    forbidden_category_prefixes: Sequence[str] = (),
+) -> list[str]:
+    """Return closed persisted labels without retaining arbitrary category text."""
+
+    normalized: set[str] = set()
+    for category in categories:
+        if category in FROZEN_ARXIV_PERSISTED_CATEGORIES:
+            normalized.add(category)
+        elif any(
+            category == prefix or category.startswith(prefix + ".")
+            for prefix in allowed_category_prefixes
+        ):
+            raise ValueError("arXiv category inside the frozen stratum is unknown")
+        elif any(
+            category == prefix or category.startswith(prefix + ".")
+            for prefix in forbidden_category_prefixes
+        ):
+            normalized.add("forbidden-arxiv-category")
+        else:
+            normalized.add("other-arxiv-category")
+    return sorted(normalized)
+
+
+def arxiv_category_evidence(categories: Sequence[str]) -> tuple[int, str]:
+    """Return count and digest without retaining upstream category strings."""
+
+    ordered = sorted(set(categories))
+    payload = "\0".join(ordered).encode("utf-8")
+    return len(ordered), hashlib.sha256(payload).hexdigest()
 _ALLOWED_REVIEW_STRATA = {
     "eligible-random",
     "timestamp-boundary",
