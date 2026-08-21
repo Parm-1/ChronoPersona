@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.11/ http://www.mediawiki.org/xml/export-0.11.xsd" version="0.11" xml:lang="en">
+  <page>
+    <title>Synthetic stellar nursery</title>
+    <ns>0</ns>
+    <id>1001</id>
+    <revision>
+      <id>1102</id>
+      <parentid>1101</parentid>
+      <timestamp>2012-02-02T10:00:00Z</timestamp>
+      <contributor><username>Synthetic Editor</username><id>11</id></contributor>
+      <origin>1102</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="44" sha1="490pnma2guxrvm9zl4t2pqfj27dfzq2">Current snapshot text must not be selected.
+</text>
+      <sha1>490pnma2guxrvm9zl4t2pqfj27dfzq2</sha1>
+    </revision>
+    <revision>
+      <id>1101</id>
+      <parentid>1100</parentid>
+      <timestamp>2012-02-01T10:00:00Z</timestamp>
+      <contributor><username>Synthetic Editor</username><id>11</id></contributor>
+      <minor />
+      <comment>ordinary synthetic edit</comment>
+      <origin>1101</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="86" sha1="1t9y6n97w0jryf1e63we424j8dekyyi">Alpha stars form slowly.
+
+A [[new star|young star]] shines brightly.&lt;ref&gt;Source&lt;/ref&gt;
+</text>
+      <sha1>1t9y6n97w0jryf1e63we424j8dekyyi</sha1>
+    </revision>
+    <revision>
+      <id>1100</id>
+      <timestamp>2012-02-01T10:00:00Z</timestamp>
+      <contributor><ip>192.0.2.10</ip></contributor>
+      <origin>1100</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="25" sha1="p8qlrat15fh2f5s27yzpdfbxn5gatem">Alpha stars form slowly.
+</text>
+      <sha1>p8qlrat15fh2f5s27yzpdfbxn5gatem</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Synthetic coral restoration</title>
+    <ns>0</ns>
+    <id>2001</id>
+    <revision>
+      <id>2100</id>
+      <timestamp>2019-07-01T09:00:00Z</timestamp>
+      <contributor><username>Synthetic Contributor</username><id>0</id></contributor>
+      <origin>2100</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="34" sha1="sv8drcuq7r9arp3bmpmtnnjdfrtfl0w">Coral reefs support many species.
+</text>
+      <sha1>sv8drcuq7r9arp3bmpmtnnjdfrtfl0w</sha1>
+    </revision>
+    <revision>
+      <id>2102</id>
+      <parentid>2101</parentid>
+      <timestamp>2019-07-03T09:00:00Z</timestamp>
+      <contributor><username>Synthetic Contributor</username><id>0</id></contributor>
+      <origin>2102</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="52" sha1="7czw4zw0qhte6ykn68ndm8akhs3ge8q">Later snapshot must not replace the selected child.
+</text>
+      <sha1>7czw4zw0qhte6ykn68ndm8akhs3ge8q</sha1>
+    </revision>
+    <revision>
+      <id>2101</id>
+      <parentid>2100</parentid>
+      <timestamp>2019-07-02T09:00:00Z</timestamp>
+      <contributor><username>Synthetic Contributor</username><id>0</id></contributor>
+      <comment>Imported from synthetic archive</comment>
+      <origin>2101</origin>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="85" sha1="ot5hoojkuia2xad5vokb6jnc1vzgq7u">Coral reefs support many species.
+
+Restoration projects can rebuild damaged habitat.
+</text>
+      <sha1>ot5hoojkuia2xad5vokb6jnc1vzgq7u</sha1>
+    </revision>
+  </page>
+</mediawiki>

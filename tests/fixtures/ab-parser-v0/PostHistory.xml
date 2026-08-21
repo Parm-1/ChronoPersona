@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ContentLicense
+  CC BY-SA 2.5 - Url: https://creativecommons.org/licenses/by-sa/2.5/
+  CC BY-SA 3.0 - Url: https://creativecommons.org/licenses/by-sa/3.0/
+  CC BY-SA 4.0 - Url: https://creativecommons.org/licenses/by-sa/4.0/
+-->
+<posthistory>
+  <row Id="5001" PostHistoryTypeId="1" PostId="3001" RevisionGUID="11111111-1111-1111-1111-111111111111" CreationDate="2012-02-01T10:00:00.000" UserId="41" Text="How do stars form?" ContentLicense="CC BY-SA 3.0" />
+  <row Id="5002" PostHistoryTypeId="2" PostId="3001" RevisionGUID="11111111-1111-1111-1111-111111111111" CreationDate="2012-02-01T10:00:00.000" UserId="41" Text="I observed **young stars** in the nebula.&#xA;&#xA;&gt; Quoted material should disappear.&#xA;&#xA;`code()` should disappear.&#xA;&#xA;See [background](https://example.invalid).&#xA;Thanks!" ContentLicense="CC BY-SA 3.0" />
+  <row Id="5003" PostHistoryTypeId="3" PostId="3001" RevisionGUID="11111111-1111-1111-1111-111111111111" CreationDate="2012-02-01T10:00:00.000" UserId="41" Text="&lt;astronomy&gt;&lt;stars&gt;" ContentLicense="CC BY-SA 3.0" />
+  <row Id="5004" PostHistoryTypeId="4" PostId="3001" RevisionGUID="11111111-1111-1111-1111-222222222222" CreationDate="2012-03-01T10:00:00.000" UserId="41" Text="Edited early question" ContentLicense="CC BY-SA 3.0" />
+  <row Id="5005" PostHistoryTypeId="5" PostId="3001" RevisionGUID="11111111-1111-1111-1111-222222222222" CreationDate="2012-03-01T10:00:00.000" UserId="41" Text="Edited body now." ContentLicense="CC BY-SA 3.0" />
+  <row Id="5101" PostHistoryTypeId="2" PostId="3002" RevisionGUID="22222222-2222-2222-2222-111111111111" CreationDate="2012-02-02T11:00:00.000" UserId="42" Text="Stars form when dense clouds collapse.&#xA;&#xA;    hidden_code()&#xA;&#xA;The process can take a long time." ContentLicense="CC BY-SA 3.0" />
+  <row Id="5102" PostHistoryTypeId="5" PostId="3002" RevisionGUID="22222222-2222-2222-2222-222222222222" CreationDate="2012-03-02T11:00:00.000" UserId="42" Text="Edited answer now." ContentLicense="CC BY-SA 3.0" />
+  <row Id="6001" PostHistoryTypeId="1" PostId="4001" RevisionGUID="AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA" CreationDate="2019-07-01T09:00:00.000" UserId="51" Text="How can reefs recover?" ContentLicense="CC BY-SA 4.0" />
+  <row Id="6002" PostHistoryTypeId="2" PostId="4001" RevisionGUID="AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA" CreationDate="2019-07-01T09:00:00.000" UserId="51" Text="Recovery &amp;amp; resilience matter.&#xA;&#xA;&lt;blockquote&gt;Remove this quotation.&lt;/blockquote&gt;&#xA;&#xA;Coral nurseries can support damaged reefs." ContentLicense="CC BY-SA 4.0" />
+  <row Id="6003" PostHistoryTypeId="3" PostId="4001" RevisionGUID="AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA" CreationDate="2019-07-01T09:00:00.000" UserId="51" Text="&lt;ecology&gt;&lt;restoration&gt;" ContentLicense="CC BY-SA 4.0" />
+  <row Id="6004" PostHistoryTypeId="4" PostId="4001" RevisionGUID="AAAAAAAA-AAAA-AAAA-AAAA-BBBBBBBBBBBB" CreationDate="2019-08-01T09:00:00.000" UserId="51" Text="Edited late question" ContentLicense="CC BY-SA 4.0" />
+  <row Id="6005" PostHistoryTypeId="5" PostId="4001" RevisionGUID="AAAAAAAA-AAAA-AAAA-AAAA-BBBBBBBBBBBB" CreationDate="2019-08-01T09:00:00.000" UserId="51" Text="Edited reef body now." ContentLicense="CC BY-SA 4.0" />
+  <row Id="6101" PostHistoryTypeId="2" PostId="4002" RevisionGUID="BBBBBBBB-BBBB-BBBB-BBBB-AAAAAAAAAAAA" CreationDate="2019-07-02T09:30:00.000" UserDisplayName="Removed Synthetic User" Text="Fragments placed on stable substrate can regrow.&#xA;&#xA;[Reference][reef]&#xA;&#xA;[reef]: https://example.invalid/reef" ContentLicense="CC BY-SA 4.0" />
+  <row Id="6102" PostHistoryTypeId="5" PostId="4002" RevisionGUID="BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB" CreationDate="2019-08-02T09:30:00.000" UserDisplayName="Removed Synthetic User" Text="Edited reef answer now." ContentLicense="CC BY-SA 4.0" />
+</posthistory>

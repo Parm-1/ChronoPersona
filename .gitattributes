@@ -29,3 +29,15 @@ src/chronopersona/source_adapters/network.py text eol=lf
 src/chronopersona/source_adapters/pmc_oai.py text eol=lf
 src/chronopersona/source_adapters/stackexchange_inventory.py text eol=lf
 src/chronopersona/source_adapters/wikimedia_inventory.py text eol=lf
+
+# The offline A/B parser gate binds its frozen profile, synthetic XML bundle,
+# runner, and parser runtime as exact portable UTF-8/LF bytes.
+.gitattributes text eol=lf
+configs/sources/ab-parser-sample-v0.json text eol=lf
+scripts/run_ab_parser_sample.py text eol=lf
+src/chronopersona/ab_parser_sample.py text eol=lf
+src/chronopersona/ab_parser_common.py text eol=lf
+src/chronopersona/content_manifest.py text eol=lf
+src/chronopersona/wikimedia_ab_parser.py text eol=lf
+src/chronopersona/stackexchange_ab_parser.py text eol=lf
+tests/fixtures/ab-parser-v0/*.xml text eol=lf

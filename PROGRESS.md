@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T22:53:49-04:00
+**Last updated:** 2026-08-21T01:44:09-04:00
 
 ## Decision
 
@@ -79,14 +79,23 @@ initial-version reconstruction. This is result-blind, offline, CAD $0 work. It
 does not open private D-039 inventories, retrieve real source content, inspect
 source C, or qualify a source.
 
+Accept the settled D-041 E1/E2 candidate as **Tested offline synthetic parser
+engineering**, not yet exact-head delivered. The byte-stable candidate scope
+`80cb6c77fb52735089813a148845e08c7b661b9e71bdd98918f686287dee78dc`
+passed the 162-test focused suite and the 787-test full suite on Python
+3.11–3.13, with five and seven platform-optional skips respectively. It made no
+network request, opened no D-039 private artifact, retrieved no real source
+record, ran no model, and incurred no spend.
+
 ## Current objective and closure condition
 
-Commit the D-041 result-blind E0 freeze before implementation. Then implement
-and validate the closed, dependency-light A/B parser-fixture path through E1/E2
-and exact-head delivery E3. No live flag or real content path may exist under
-this plan. A later live micro-sample requires its own frozen decision after
-official access, selection, site/license, request/byte, private-output, and
-zero-retry contracts are resolved.
+Deliver the settled D-041 E1/E2 candidate through E3: record the tested state,
+create one scoped clean commit, push the authorized feature branch, open one
+draft PR stacked on PR #38, and require every attached check green on one
+unchanged head. No live flag or real content path may exist under this plan. A
+later live micro-sample requires its own frozen decision after official access,
+selection, site/license, request/byte, private-output, and zero-retry contracts
+are resolved.
 
 ## Current verified boundary
 
@@ -145,8 +154,10 @@ zero-retry contracts are resolved.
 - **D-039 E5 closure — exact-head delivered:** evidence head `c245e7a` passed
   all 24 attached checks. The failure record is preserved without a retry or
   post-green state-only commit.
-- **D-041 A/B parser engineering — Frozen/design:** synthetic official-shape
-  fixtures only; no real-source Target Verified claim is possible in E0–E3.
+- **D-041 A/B parser engineering — Tested offline / E3 pending:** exact
+  official-shape synthetic fixtures, closed validators, deterministic evidence,
+  and fail-closed publication passed locally across Python 3.11–3.13. No
+  real-source Target Verified claim is possible in E0–E3.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -351,6 +362,15 @@ zero-retry contracts are resolved.
   platform-optional skips; `git diff --check` passed apart from checkout
   line-ending warnings. No source-data request, D-039 private-artifact access,
   model execution, or spend occurred.
+- D-041 E1/E2 settled candidate: exact scope SHA-256
+  `80cb6c77fb52735089813a148845e08c7b661b9e71bdd98918f686287dee78dc`
+  stayed unchanged around the authoritative matrix. The focused suite passed
+  162 with five platform-only skips and the full suite passed 787 with seven
+  platform-only skips on each of Python 3.11, 3.12, and 3.13. All 16 bound
+  paths were exact LF, all fixture/profile/blob identities matched, 11 runtime
+  files compiled, isolated plan output was byte-identical with empty stderr,
+  and `git diff --check` passed. Independent parser, evidence, and Windows
+  transaction reviews returned GO.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -380,6 +400,12 @@ zero-retry contracts are resolved.
 - D-041 fixture success can prove only parser behavior. It must not be promoted
   to evidence of real format prevalence, rights, authorship, source yield,
   continuity, exposure burden, or scientific suitability.
+- D-041 POSIX rollback assumes the output namespace becomes quiescent after a
+  failure. Linux has no conditional unlink-by-open-file-description primitive,
+  so resistance to an actively hostile same-UID final-component swap is outside
+  this synthetic-fixture gate. Do not reuse this transaction for live/private
+  source publication without a separately frozen containment design; Windows
+  retains the stronger exact-handle boundary.
 - Public visibility exposes branch history, issues, PRs, commit metadata, and
   retained Actions logs. A personal commit email and historical local path
   strings are public; returning the repository to private cannot recall copies.
@@ -405,8 +431,9 @@ zero-retry contracts are resolved.
   draft, stacked on PR #37. Execution head `eb0f794` passed 30/30 checks; E5
   evidence head `c245e7a` passed all 24 attached checks and closes D-039.
 - Current write branch: `feat/ab-parser-sample-engineering`, created from exact
-  green D-039 E5 head `c245e7a`. D-041 E0 is the result-blind freeze; no parser
-  implementation or live access is included in that freeze commit.
+  green D-039 E5 head `c245e7a`. D-041 E0 is frozen at `3c49e2a`; the settled
+  E1/E2 implementation is locally Tested and awaiting one clean E3 delivery
+  commit/draft PR. No live access is included.
 - Draft PR #37: `https://github.com/Parm-1/ChronoPersona/pull/37`, open and
   draft. Exact head `d669b4e` passed all 18 checks and closes D-038.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
@@ -424,10 +451,9 @@ zero-retry contracts are resolved.
 
 ## Next write-active deliverable
 
-Commit the D-041 E0 plan/state freeze on exact baseline `c245e7a`, then build
-the offline synthetic-fixture A/B parser path. Preserve the ignored D-039
-receipt/inventories and no-retry boundary. Do not open them, issue a network
-request, retrieve a real archive/record, inspect source C, infer real-source
-eligibility, execute a model, or incur cost. E1/E2 close only on adversarial
-fixture coverage and the full offline validation ladder; E3 requires one
-unchanged exact-head draft-PR delivery.
+Commit the settled D-041 E1/E2 candidate, push the authorized feature branch,
+open its stacked draft PR, and require all E3 checks green on one unchanged
+head. Preserve the ignored D-039 receipt/inventories and no-retry boundary. Do
+not open them, issue a network request, retrieve a real archive/record, inspect
+source C, infer real-source eligibility, execute a model, or incur cost. Stop
+after E3: any live A/B micro-sample requires a separate result-blind decision.

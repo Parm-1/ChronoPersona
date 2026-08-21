@@ -29,6 +29,7 @@
 | R-25 | Development item wording or continuation length changes score direction | High | Preserve the failed v0 reliability diagnosis; v1 passed blind pre-logits review and exact common-count tokenizer checks, but E4 attempt A failed operationally after all forwards and before score publication, so model-level eight-form coherence remains untested; no B or retry without a separately accepted result-blind defect rescue |
 | R-26 | A metadata transport failure is mistaken for source infeasibility or silently retried | Critical | Preserve the authenticated partial evidence; distinguish transport from source eligibility/yield; prohibit same-profile retry, continuation, query change, or backup substitution; require a separately frozen, versioned, result-blind transport-adjudication decision before another request |
 | R-27 | Synthetic parser fixtures are promoted to real-source qualification | Critical | Label E0–E3 as offline parser engineering only; keep live access disabled; require a later exact selection/access/license decision and Target Verified micro-sample before any claim about format prevalence, yield, rights, authorship, continuity, or suitability |
+| R-28 | A synthetic POSIX output rollback is treated as safe against an actively hostile same-UID namespace mutator or reused for live private evidence | High | D-041 assumes the namespace becomes quiescent after failure; retain retryable ownership on detected drift, use exact Windows handles on the target host, and require a separately frozen containment design before any live/private POSIX publication |
 
 ## Current highest risks
 
@@ -42,6 +43,9 @@
    or used to justify an unplanned retry; D-040 explicitly forbids both.
 7. Passing A/B parser fixtures could be mistaken for evidence about real
    archives; D-041 fixes the claim ceiling at Tested offline engineering.
+8. Linux cannot conditionally unlink an already verified inode by open file
+   description; D-041 does not claim protection from continuous same-UID
+   final-component substitution during rollback.
 
 ## Current risk decision
 
@@ -65,8 +69,11 @@ source-C review, requester-pays retrieval, and later calibration/model-compute
 gates remain blocked; any new request requires a separate versioned,
 result-blind adjudication.
 
-The next local gate is D-041 offline A/B parser engineering on synthetic
-official-shape fixtures. It may improve deterministic parent/initial-version
-reconstruction code, but it cannot qualify a source or authorize live access.
-Stop on any network path, non-synthetic input, current-snapshot/body fallback,
-portable prose/ID leakage, or attempt to infer real-source yield or eligibility.
+The settled D-041 E1/E2 candidate is Tested offline across Python 3.11–3.13;
+E3 exact-head draft-PR delivery is next. It improves deterministic
+parent/initial-version reconstruction code, but it cannot qualify a source or
+authorize live access. Its POSIX cleanup contract assumes a quiescent namespace
+after failure and must not be reused for live/private publication without a
+separately frozen containment design. Stop on any network path, non-synthetic
+input, current-snapshot/body fallback, portable prose/ID leakage, or attempt to
+infer real-source yield or eligibility.

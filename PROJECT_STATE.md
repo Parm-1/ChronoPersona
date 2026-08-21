@@ -1,12 +1,12 @@
 # Project State
 
-**Updated:** 2026-08-20
+**Updated:** 2026-08-21
 **Design:** ChronoPersona / CSTG v1.0  
 **Working title:** *From Archive to Policy: A Prospective Test of Cross-Source Temporal Generalization in Language Models*
 
 ## Current phase
 
-**Stage 0 — model engineering gates closed; D-039 preserved failed; offline A/B parser engineering active; bulk and source-C text externally blocked**
+**Stage 0 — model engineering gates closed; D-039 preserved failed; offline A/B parser engineering Tested with E3 delivery active; bulk and source-C text externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — D-041 synthetic-fixture A/B parser engineering; no network, real source record, source C, or model execution is authorized**
+**Current gate — D-041 exact-head delivery of the Tested synthetic-fixture A/B parser; no network, real source record, source C, or model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -55,10 +55,12 @@ Document bodies and source packages are not authorized, and the source roles
 remain unqualified.
 
 D-039 E5 evidence head `c245e7a` subsequently passed all 24 attached checks and
-closed that failed gate without a state-only commit. D-041 now freezes an
-offline-only engineering path for Wikimedia parent/child added spans and Stack
-Exchange initial-version reconstruction using synthetic official-shape fixtures.
-No live access or scientific source claim is part of E0–E3.
+closed that failed gate without a state-only commit. D-041 froze an offline-only
+engineering path for Wikimedia parent/child added spans and Stack Exchange
+initial-version reconstruction using synthetic official-shape fixtures. Its
+settled E1/E2 candidate passed focused and full suites on Python 3.11–3.13; E3
+exact-head draft-PR delivery remains. No live access or scientific source claim
+is part of E0–E3.
 
 ## Latest verified evidence
 
@@ -68,6 +70,10 @@ No live access or scientific source claim is part of E0–E3.
 - ProgressGym-aware design v1.0 was merged as `c2d2d0c3a5d67656e3dc3b2e3d903559b27ead2d` after CI passed on Python 3.11, 3.12, and 3.13 and the Content Integrity and Run Registry Smoke workflows passed on the exact PR head.
 - The development content-integrity gate passed on bounded redistributable fixtures.
 - The repository has deterministic manifests, scoring, synthetic-package generation, run identity/resumption, source metadata adapters, and bounded lexical content-integrity tooling.
+- The settled D-041 offline parser candidate passed 162 focused tests and 787
+  full-suite tests on each supported Python version, with only declared
+  platform-optional skips. This is Tested synthetic-fixture engineering, not
+  real-source qualification.
 - PyTorch `2.13.0+cu130` reports CUDA 13.0 available on the local RTX 2060
   (compute capability 7.5, 6,144 MiB VRAM).
 - Metadata-only Hub audits resolved the selected DatedGPT, Kairos, OLMo early,
@@ -149,6 +155,11 @@ No live access or scientific source claim is part of E0–E3.
 
 ## Remaining blockers and active gates
 
+Immediate delivery gate: commit and deliver the settled D-041 candidate through
+one unchanged E3 draft-PR head. The subsequent live A/B micro-sample remains
+unauthorized and requires a separate result-blind access/license/containment
+decision.
+
 1. Bounded rights-qualified, historically versioned samples from at least four source candidates.
    D-039 produced only a provisional A/B metadata inventory prefix; its first
    source-C request failed at transport and cannot be retried without a new
@@ -183,9 +194,10 @@ No live access or scientific source claim is part of E0–E3.
 
 ## Exact next action
 
-Commit the D-041 result-blind offline plan freeze from exact green baseline
-`c245e7a`, then implement and adversarially validate the synthetic-fixture A/B
-parser path. Preserve the ignored D-039 evidence and do not rerun D-039, open a
-private inventory, make a network request, retrieve real archive/article text,
-inspect source C, use requester-pays access, execute a model, or reopen the
-consumed development-v1 E4. A live A/B micro-sample requires a later decision.
+Commit the settled D-041 E1/E2 candidate, push the authorized feature branch,
+open its draft PR stacked on PR #38, and require all attached E3 checks green on
+one unchanged head. Preserve the ignored D-039 evidence and do not rerun D-039,
+open a private inventory, make a network request, retrieve real archive/article
+text, inspect source C, use requester-pays access, execute a model, or reopen
+the consumed development-v1 E4. A live A/B micro-sample requires a later
+decision.
