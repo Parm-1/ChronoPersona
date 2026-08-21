@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "profile_id": "live-source-metadata-qualification-v0",
+  "status": "frozen",
+  "claim_ceiling": "endpoint-and-metadata-yield-prequalification-only",
+  "external_spend_cad": 0,
+  "canonical_inputs": {
+    "source_registry": {
+      "path": "artifacts/manifests/SOURCE_REGISTRY.json",
+      "git_blob": "949180212d98c8c997dc51a9449dff6a73542cad"
+    },
+    "arxiv_metadata_config": {
+      "path": "configs/sources/arxiv-metadata-v0.json",
+      "git_blob": "3e9a9ca9cd59273b348d6a39f763d0affa650e32"
+    },
+    "pmc_metadata_config": {
+      "path": "configs/sources/pmc-metadata-v0.json",
+      "git_blob": "7a564b68ec934e1c92ec6a62da6b370ec2941a90"
+    }
+  },
+  "runtime_paths": [
+    "scripts/run_source_metadata_gate.py",
+    "src/chronopersona/__init__.py",
+    "src/chronopersona/file_integrity.py",
+    "src/chronopersona/path_policy.py",
+    "src/chronopersona/source_audit.py",
+    "src/chronopersona/source_inventory.py",
+    "src/chronopersona/source_metadata.py",
+    "src/chronopersona/source_metadata_gate.py",
+    "src/chronopersona/source_registry.py",
+    "src/chronopersona/source_adapters/__init__.py",
+    "src/chronopersona/source_adapters/arxiv_api.py",
+    "src/chronopersona/source_adapters/arxiv_oai.py",
+    "src/chronopersona/source_adapters/network.py",
+    "src/chronopersona/source_adapters/pmc_oai.py",
+    "src/chronopersona/source_adapters/stackexchange_inventory.py",
+    "src/chronopersona/source_adapters/wikimedia_inventory.py"
+  ],
+  "source_roles": {
+    "A": "wikimedia-article-additions",
+    "B": "stackexchange-initial-nontechnical-posts",
+    "C": "arxiv-cc-single-version-descriptive",
+    "backup_C": "pmc-oa-cc-version-bounded"
+  },
+  "group_order": [
+    "wikimedia-inventory",
+    "stackexchange-inventory",
+    "arxiv-early-candidate-sample",
+    "arxiv-early-exact-enrichment",
+    "arxiv-late-candidate-sample",
+    "arxiv-late-exact-enrichment",
+    "pmc-early-range-metadata",
+    "pmc-late-range-metadata"
+  ],
+  "network": {
+    "access_permitted": true,
+    "observation": "not-instrumented",
+    "method": "GET",
+    "https_only": true,
+    "credentials_allowed": false,
+    "serial": true,
+    "redirect_policy": "reject",
+    "proxy_policy": "direct-no-proxy",
+    "allowed_hosts": [
+      "dumps.wikimedia.org",
+      "archive.org",
+      "export.arxiv.org",
+      "oaipmh.arxiv.org",
+      "pmc.ncbi.nlm.nih.gov"
+    ],
+    "timeout_seconds": 60,
+    "user_agent": "ChronoPersona/0.1 metadata-gate (github.com/Parm-1/ChronoPersona)",
+    "maximum_happy_path_requests": 270,
+    "retry_count": 0,
+    "transport_failure_subtypes": [
+      "authorization",
+      "request-policy",
+      "redirect",
+      "http-status",
+      "response-size",
+      "timeout",
+      "tls",
+      "dns",
+      "other"
+    ]
+  },
+  "privacy": {
+    "private_output_prefix": "artifacts/local/source-audit",
+    "outside_git_backup_required": true,
+    "commitment_algorithm": "hmac-sha256",
+    "commitment_key_size_bytes": 32,
+    "commitment_key_sha256": "314b9f8e9ef018fcc8f33ff310079e1f42253e04a553e2a0c288124e917d1aca",
+    "persist_response_prose": false,
+    "display_response_prose": false,
+    "human_review_response_prose": false,
+    "persist_native_source_c_identifiers_publicly": false,
+    "persist_exact_source_c_lengths_publicly": false
+  },
+  "publication": {
+    "aggregate_file": "aggregate.json",
+    "receipt_file": "receipt.json",
+    "private_artifact_files": [
+      "wikimedia-inventory.json",
+      "stackexchange-inventory.json",
+      "arxiv-early-candidates.jsonl",
+      "arxiv-early-enriched.jsonl",
+      "arxiv-late-candidates.jsonl",
+      "arxiv-late-enriched.jsonl",
+      "pmc-early-metadata.jsonl",
+      "pmc-late-metadata.jsonl"
+    ],
+    "private_artifact_format": "canonical-json-or-jsonl-utf8-lf",
+    "portable_receipt_format": "canonical-pretty-json-utf8-lf",
+    "publication_mode": "create-only",
+    "success_receipt_type": "source-metadata-qualification-success",
+    "failure_receipt_type": "source-metadata-qualification-failure",
+    "self_hash_field": "receipt_sha256",
+    "self_hash_serialization": "sorted-compact-json-utf8-without-self-hash",
+    "receipt_hmac_field": "receipt_hmac_sha256",
+    "receipt_hmac_serialization": "hmac-sha256-domain-source-receipt-of-sorted-compact-json-utf8-without-receipt-hmac-or-self-hash",
+    "response_hash_serialization": "sha256-for-public-a-b-hmac-sha256-for-private-c-family-exact-bytes",
+    "url_hash_serialization": "hmac-sha256-of-exact-utf8-c-family-url",
+    "ordered_id_hash_serialization": "hmac-sha256-of-utf8-ids-joined-by-nul-in-frozen-order",
+    "private_artifact_hash_serialization": "hmac-sha256-of-exact-private-artifact-bytes",
+    "failure_detail_hash_serialization": "hmac-sha256-of-utf8-detail",
+    "c_family_length_serialization": "null-in-portable-evidence"
+  },
+  "wikimedia": {
+    "endpoint": "https://dumps.wikimedia.org/enwiki/20260801/dumpstatus.json",
+    "project": "enwiki",
+    "snapshot": "20260801",
+    "maximum_response_bytes": 20000000,
+    "maximum_requests": 1,
+    "required_job_status": "done",
+    "required_job_name": "metahistorybz2dump",
+    "required_file_name_fragment": "pages-meta-history",
+    "storage_margin_numerator": 5,
+    "storage_margin_denominator": 4
+  },
+  "stackexchange": {
+    "endpoint": "https://archive.org/metadata/stackexchange",
+    "maximum_response_bytes": 30000000,
+    "maximum_requests": 1,
+    "company_attribution_required": true,
+    "required_item_identifier": "stackexchange",
+    "required_creator": "Stack Exchange, Inc.",
+    "archive_download_authorized": false,
+    "delivery_status": "legacy-archive-not-current-official-delivery"
+  },
+  "arxiv": {
+    "api_endpoint": "https://export.arxiv.org/api/query",
+    "oai_endpoint": "https://oaipmh.arxiv.org/oai",
+    "sampler_domain": "arxiv-source-c-rank-sample-v0",
+    "sort_by": "submittedDate",
+    "sort_order": "ascending",
+    "count_page_size": 1,
+    "sample_page_size": 5,
+    "sample_slots_per_cell": 5,
+    "minimum_total_results_per_cell": 25,
+    "maximum_total_results_per_cell": 30005,
+    "maximum_start": 30000,
+    "records_per_cell": 25,
+    "records_per_window": 100,
+    "records_total": 200,
+    "maximum_api_response_bytes": 8000000,
+    "maximum_oai_response_bytes": 2000000,
+    "delay_seconds": 3,
+    "early_cells": [
+      {
+        "cell_id": "2012-h1",
+        "start_date": "2012-01-01",
+        "end_date": "2012-06-30"
+      },
+      {
+        "cell_id": "2012-h2",
+        "start_date": "2012-07-01",
+        "end_date": "2012-12-31"
+      },
+      {
+        "cell_id": "2013-h1",
+        "start_date": "2013-01-01",
+        "end_date": "2013-06-30"
+      },
+      {
+        "cell_id": "2013-h2",
+        "start_date": "2013-07-01",
+        "end_date": "2013-12-31"
+      }
+    ],
+    "late_cells": [
+      {
+        "cell_id": "2018-h1",
+        "start_date": "2018-01-01",
+        "end_date": "2018-06-30"
+      },
+      {
+        "cell_id": "2018-h2",
+        "start_date": "2018-07-01",
+        "end_date": "2018-12-31"
+      },
+      {
+        "cell_id": "2019-h1",
+        "start_date": "2019-01-01",
+        "end_date": "2019-06-30"
+      },
+      {
+        "cell_id": "2019-h2",
+        "start_date": "2019-07-01",
+        "end_date": "2019-12-31"
+      }
+    ],
+    "candidate_requests_per_window": 24,
+    "enrichment_requests_per_window": 100,
+    "metadata_prefix": "arXivRaw",
+    "resumption_token_policy": "forbid",
+    "query_categories": [
+      "astro-ph.CO",
+      "astro-ph.EP",
+      "astro-ph.GA",
+      "astro-ph.HE",
+      "astro-ph.IM",
+      "astro-ph.SR",
+      "cond-mat.mtrl-sci",
+      "physics.atom-ph",
+      "physics.chem-ph",
+      "physics.optics"
+    ],
+    "allowed_category_prefixes": [
+      "astro-ph",
+      "cond-mat.mtrl-sci",
+      "physics.atom-ph",
+      "physics.chem-ph",
+      "physics.optics"
+    ],
+    "forbidden_category_prefixes": [
+      "cs",
+      "econ",
+      "math",
+      "physics.soc-ph",
+      "q-fin",
+      "stat"
+    ],
+    "category_policy_source": "arxiv_metadata_config",
+    "category_policy_match": "exact-frozen-git-blob",
+    "sampler_digest": "hmac-sha256",
+    "sampler_digest_input": "private-key-and-utf8-domain-nul-cell-id-nul-ascii-slot-decimal",
+    "sampler_digest_integer": "unsigned-big-endian",
+    "sampler_slot_serialization": "ascii-base10-no-sign-no-leading-zero",
+    "sampler_collision_resolution": "increment-block-index-modulo-complete-block-count",
+    "sampler_maximum_probes": "complete-block-count",
+    "sample_record_order": "chronological-cell-then-slot-then-response-entry",
+    "enrichment_order": "exact-sample-record-order"
+  },
+  "pmc": {
+    "endpoint": "https://pmc.ncbi.nlm.nih.gov/api/oai/v1/mh/",
+    "metadata_prefix": "oai_dc",
+    "set_spec": "pmc-open",
+    "allowed_subject_terms": [
+      "cell biology",
+      "molecular biology",
+      "genetics",
+      "biochemistry",
+      "structural biology"
+    ],
+    "maximum_response_bytes": 8000000,
+    "delay_seconds": 1,
+    "maximum_requests_per_range": 10,
+    "maximum_upstream_records_per_range": 100,
+    "maximum_resumption_token_bytes": 4096,
+    "resumption_token_character_policy": "printable-ascii-no-whitespace",
+    "resumption_token_policy": "reject-any-repeat",
+    "successful_termination": "no-resumption-token-or-exact-upstream-record-cap",
+    "early_range": {
+      "from_date": "2012-01-01",
+      "until_date": "2013-12-31"
+    },
+    "late_range": {
+      "from_date": "2018-01-01",
+      "until_date": "2019-12-31"
+    },
+    "date_semantics": "release-or-update-datestamp-not-publication-date",
+    "era_and_version_status": "unresolved"
+  },
+  "prohibitions": {
+    "archive_download": true,
+    "article_body_download": true,
+    "source_package_download": true,
+    "requester_pays": true,
+    "model_execution": true,
+    "behavioral_outcome_use": true,
+    "automatic_retry": true,
+    "role_or_era_promotion": true
+  }
+}

@@ -882,6 +882,173 @@ on the unchanged head. After delivery, the next scientific gate remains
 externally blocked on rights-qualified source evidence and explicit held-out
 source-C authorization.
 
+## D-039 — Advance to a bounded metadata-only source prequalification
+
+**Date:** 2026-08-20
+**Status:** accepted; result-blind metadata implementation gate
+
+Accept exact failure-observability delivery head
+`d669b4e3c36069398efdac831c8f1fec7036359c` as Tested and exact-head
+delivered on draft PR #37. All 18 push/pull-request checks passed across Python
+3.11–3.13. This closes D-038 without a state-only follow-up commit and without
+model execution. D-037 remains controlling: development-v1 attempt A is
+consumed, attempt B and an A retry remain prohibited, and no score recovery or
+threshold change is authorized.
+
+The next hard boundary has not yet been reached because the frozen source
+protocol explicitly authorizes CAD-$0 official documentation research,
+metadata queries, archive inventories/checksums, bounded metadata parser
+samples, and aggregate reports. Authorize one result-blind, metadata-only
+prequalification for provisional roles A=`wikimedia-article-additions`,
+B=`stackexchange-initial-nontechnical-posts`,
+C=`arxiv-cc-single-version-descriptive`, and backup
+C=`pmc-oa-cc-version-bounded`.
+
+Freeze one immutable `enwiki/20260801` dumpstatus inventory, one legacy
+company-attributed Stack Exchange item inventory, a deterministic 100-record
+time-stratified arXiv submitted-date metadata sample per provisional window with
+exact enrichment of all 100, and up to 100 upstream PMC Dublin Core records per
+OAI release/update-datestamp range, capped at ten responses per range. Keep
+native source-C identifiers and locators
+ignored/private. Publish only hashes and portable aggregates. Exact endpoints,
+limits, dates, categories, delays, input blobs, execution head, create-only
+outputs, privacy rules, and fail-fast group order must be fail-closed before
+live execution. The complete happy-path ceiling is 270 serial HTTP requests.
+
+This decision does not authorize separate archive/article-body/source-package
+retrieval, requester-pays arXiv access, source-C prose review, training, model scoring,
+role/era promotion, or temporal/CSTG inference. Wikimedia and Stack Exchange
+inventories cannot by themselves establish early/late record continuity or
+clean usable volume. PMC OAI dates remain release/update semantics and cannot
+promote the backup. Stop rather than substitute, shrink, unblind, or inspect
+content after a failed gate. arXiv/PMC metadata responses can inherently include
+prose; it may transit memory only for hash/count evidence and must not be
+displayed, persisted as prose, or human-reviewed.
+
+**Claim ceiling:** endpoint and metadata-yield prequalification only. Source
+roles, rights-qualified content, composition, exposure, historical
+reconstruction, and scientific feasibility remain unestablished.
+
+**Procedure:**
+`.agent/plans/active-source-metadata-qualification.md`,
+`docs/SOURCE_SAMPLE_PROTOCOL.md`, `docs/SOURCE_ADAPTER_PROTOCOL.md`, and
+`docs/SOURCE_METADATA_PROTOCOL.md`.
+
+**Result-blind privacy amendment (2026-08-20, before E1 delivery or live
+execution):** adversarial implementation review established that the original
+public SHA-256 sampler seed, published page-start evidence, and unkeyed hashes
+of C-family URLs or identifiers would allow third parties to replay the public
+endpoints or dictionary-test the 200 identifiers that this decision requires to
+remain private. No evidence-bearing live request, identifier, yield, or model
+outcome had been observed when this defect was found.
+
+Amend D-039 to use one precommitted 32-byte private key for domain-separated
+HMAC-SHA256. The arXiv block sampler is now
+`HMAC-SHA256(key, ASCII(domain) + NUL + UTF8(cell_id + NUL + slot_decimal))`;
+C-family exact response bytes, requested/final URLs, ordered identifier lists,
+private artifact bytes, and failure detail use separately domain-tagged HMACs.
+Exact C-family response and private-artifact byte lengths are represented as
+null in portable evidence, because unkeyed lengths are also enumerable
+dictionary fingerprints; exact lengths remain available only in the private
+local files/process state.
+Public Wikimedia/Stack Exchange response evidence remains exact-byte SHA-256.
+The complete sanitized success or failure receipt is also authenticated under
+the separate `source-receipt` domain before its public self-hash is computed.
+Only the decoded key commitment
+`314b9f8e9ef018fcc8f33ff310079e1f42253e04a553e2a0c288124e917d1aca`
+is versioned; two byte-identical, non-aliased key copies remain outside every
+Git worktree under owner-restricted access. The earlier precommitted key was
+rotated result-blind before E1 delivery because its inherited local ACL did not
+establish that confidentiality boundary; it is not accepted by this profile.
+This amendment changes deterministic sample ranks, so it is part
+of the pre-execution freeze rather than a post-result security patch. It does
+not change roles, windows, categories, group order, request ceilings, claim
+ceiling, or the prohibition on source-C prose review.
+
+## D-040 — Preserve the consumed metadata run and stop at source-C transport
+
+**Date:** 2026-08-20
+**Status:** accepted; D-039 E4 Target Failed operationally, root cause unresolved
+
+Accept exact clean execution head
+`eb0f7949c552e0e733f33c63dd33b9e9d603d83b` and run
+`source-metadata-v0-eb0f7949` as the one consumed D-039 E4 invocation. Draft PR
+#38 had passed all 30 push/pull-request checks across Python 3.11–3.13 on that
+unchanged head. The runner completed the Wikimedia and Stack Exchange
+inventory groups, then the first `arxiv-early-candidate-sample` count request
+failed before response acceptance with `metadata-transport-failed` /
+`transport` / `http-status`. The run made three request attempts, completed two
+responses, retried zero times, preserved the completed prefix, marked every
+later group `not-started`, and published no aggregate.
+
+The canonical failure receipt passed its public self-hash, private full-receipt
+HMAC, exact-head/input/runtime binding, privacy schema, group-prefix, and
+create-only mirror validation. Its raw/self SHA-256 values are
+`765acc89ce4cf0128cc2c385c684c2ccb0edc3332edabfbb076a1fda5e9471ec` /
+`62c260fec086f8f593f15e56ae5eb878ff133a94009ed50603e329df5c94d72f`.
+The two completed inventory files and receipt have byte-identical protected
+private backups. No response prose or native source-C identifier was displayed
+or human-reviewed, and no arXiv, PMC, or aggregate artifact exists.
+
+Under the predeclared stop rule, do not resume later groups, retry the failed
+request, shrink the sample, substitute PMC, change the URL/query after the
+failure, or infer yield from the completed prefix. The receipt deliberately
+withholds the exact private URL, response body, and HTTP status code, so static
+review cannot distinguish upstream service policy or throttling from a
+request-shape incompatibility. No implementation defect is independently
+proven. A new metadata request requires a separately frozen and versioned
+transport-adjudication decision supported by new result-blind evidence or an
+explicit material user choice.
+
+**Claim ceiling:** Target Failed operationally for the exact D-039 metadata
+prequalification gate. The failure does not qualify or reject any source role,
+establish arXiv infeasibility, measure source-C yield, or support temporal,
+behavioral, causal, or CSTG claims.
+
+**Evidence:**
+`reports/stage0/source_metadata_qualification_failure_2026-08-20.md` and the
+ignored mirrored run directory `source-metadata-v0-eb0f7949`.
+
+## D-041 — Freeze offline A/B parser engineering before real source content
+
+**Date:** 2026-08-20
+**Status:** accepted; E0 result-blind offline freeze
+
+Accept D-039 E5 evidence head
+`c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` as the exact green baseline. Draft
+PR #38 remained open/draft and passed all 24 attached checks across Python
+3.11–3.13. D-040 continues to prohibit another D-039/source-C request.
+
+The project has not reached a hard boundary because
+`docs/SOURCE_SAMPLE_PROTOCOL.md` separately authorizes bounded no-cost A/B
+parser samples. Before any real record is opened, freeze one offline engineering
+gate for two source-specific representations:
+
+- Wikimedia namespace-0 revision histories must resolve an exact child and
+  parent, clean both wikitext versions conservatively, and derive candidate
+  added spans without treating a current page snapshot as historical text;
+- Stack Exchange dump records must reconstruct the initial question/answer
+  title/body from `PostHistory` and must never fall back to current
+  `Posts.Body` or `Posts.Title`.
+
+E0–E3 use synthetic official-shape fixtures only. They may add a closed config,
+dependency-light parsers, an isolated fixture runner, private parsed records,
+portable count-only aggregates, canonical receipts, adversarial tests, and
+exact-head delivery. They may not access the network, open D-039 private
+inventories, retrieve an archive or real source record, inspect source C, infer
+rights/human/bot eligibility, execute a model, or support source/scientific
+claims. Every successfully parsed candidate remains
+`accepted-for-parser-audit` or unresolved, never scientifically eligible;
+explicit exclusions and parser failures remain preserved as such.
+
+**Claim ceiling:** Tested offline parser engineering only. A live micro-sample
+requires a later result-blind decision that independently freezes official
+no-cost access, selection identities, the Stack Exchange site panel and license
+schedule, Wikimedia page/revision selection, request/byte ceilings, private
+publication, zero-retry order, and stop rules.
+
+**Plan:** `.agent/plans/active-ab-parser-sample-engineering.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

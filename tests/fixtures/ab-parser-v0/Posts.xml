@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ContentLicense
+  CC BY-SA 2.5 - Url: https://creativecommons.org/licenses/by-sa/2.5/
+  CC BY-SA 3.0 - Url: https://creativecommons.org/licenses/by-sa/3.0/
+  CC BY-SA 4.0 - Url: https://creativecommons.org/licenses/by-sa/4.0/
+-->
+<posts>
+  <row Id="3001" PostTypeId="1" CreationDate="2012-02-01T10:00:00.000" Score="3" Body="&lt;p&gt;Edited body now.&lt;/p&gt;" OwnerUserId="41" LastActivityDate="2012-03-01T10:00:00.000" Title="Edited early question" Tags="&lt;astronomy&gt;&lt;stars&gt;" AnswerCount="1" CommentCount="0" ContentLicense="CC BY-SA 3.0" />
+  <row Id="3002" PostTypeId="2" ParentId="3001" CreationDate="2012-02-02T11:00:00.000" Score="2" Body="&lt;p&gt;Edited answer now.&lt;/p&gt;" OwnerUserId="42" LastActivityDate="2012-03-02T11:00:00.000" CommentCount="0" ContentLicense="CC BY-SA 3.0" />
+  <row Id="4001" PostTypeId="1" CreationDate="2019-07-01T09:00:00.000" Score="4" Body="&lt;p&gt;Edited reef body now.&lt;/p&gt;" OwnerUserId="51" LastActivityDate="2019-08-01T09:00:00.000" Title="Edited late question" Tags="&lt;ecology&gt;&lt;restoration&gt;" AnswerCount="1" CommentCount="0" ContentLicense="CC BY-SA 4.0" />
+  <row Id="4002" PostTypeId="2" ParentId="4001" CreationDate="2019-07-02T09:30:00.000" Score="5" Body="&lt;p&gt;Edited reef answer now.&lt;/p&gt;" OwnerDisplayName="Removed Synthetic User" LastActivityDate="2019-08-02T09:30:00.000" CommentCount="0" ContentLicense="CC BY-SA 4.0" />
+</posts>

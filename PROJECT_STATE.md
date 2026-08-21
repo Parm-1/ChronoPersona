@@ -1,12 +1,12 @@
 # Project State
 
-**Updated:** 2026-08-20
+**Updated:** 2026-08-21
 **Design:** ChronoPersona / CSTG v1.0  
 **Working title:** *From Archive to Policy: A Prospective Test of Cross-Source Temporal Generalization in Language Models*
 
 ## Current phase
 
-**Stage 0 — development content-integrity gate passed; bounded local model engineering measured; development-v1 scoring stopped; real-source science externally blocked**
+**Stage 0 — model engineering gates closed; D-039 preserved failed; offline A/B parser engineering Tested with E3 delivery active; bulk and source-C text externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — harden future failed-receipt observability; no further model execution is authorized**
+**Current gate — D-041 exact-head delivery of the Tested synthetic-fixture A/B parser; no network, real source record, source C, or model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -25,9 +25,9 @@ state equality. The exact Pythia tokenizer now also passed two byte-identical
 12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
 loader. The development-v0 model scorer then completed two fresh exact-head
 invocations with byte-identical deterministic scores and complete verifier-
-valid receipts. The
-containing E5 evidence head `a7dd27c` passed all 18 exact-head checks and
-closed the scorer plan. The separate versioned measurement-reliability plan
+valid receipts. The containing scorer evidence head `a7dd27c` passed all 18
+exact-head checks and closed the scorer plan. The separate versioned
+measurement-reliability plan
 then passed blind pre-logits review, dependency-light contract validation, and
 two exact clean-head 14-item/112-form/224-candidate tokenizer audits at
 `fb8cff1`. The E3 scorer profile is Tested and exact-head delivered. Draft PR
@@ -37,12 +37,30 @@ post-score resident-VRAM gate before score publication. Attempt A is consumed;
 no A score, B run, comparison, or coherence result exists, and no pole value
 was inspected. A result-blind receipt/code review found an observability gap
 but no evidence that the resource rejection was erroneous, so no rescue
-qualifies. Failure evidence is delivered and green at `8fc16af`. The active
-work is delivery of one dependency-light Tested observability fix so future
-resident-resource failures retain the exact captured audit; it is not another
-model run.
+qualifies. Failure evidence is delivered and green at `8fc16af`. The delivered
+failure-observability work is complete; future resident-resource failures now
+retain the exact captured audit without authorizing another model run.
 Real-source scientific execution still requires the separate source evidence
-listed below.
+listed below. D-038 failure-observability hardening is exact-head delivered at
+`d669b4e` after 18/18 checks passed on draft PR #37. D-039's no-cost
+metadata-only implementation is exact-head delivered at `eb0f794` after 30/30
+checks passed on draft PR #38. Its one E4 invocation completed the Wikimedia
+and Stack Exchange inventory groups, then stopped on the first arXiv early
+candidate-count request with an authenticated HTTP-status transport failure.
+Five later groups did not start, the final binding matched, and no aggregate was
+published. D-040 consumes that run; a same-profile retry or substitution is not
+authorized. Incidental API metadata prose may transit only for hash/count
+evidence; it may not be displayed, persisted as prose, or human-reviewed.
+Document bodies and source packages are not authorized, and the source roles
+remain unqualified.
+
+D-039 E5 evidence head `c245e7a` subsequently passed all 24 attached checks and
+closed that failed gate without a state-only commit. D-041 froze an offline-only
+engineering path for Wikimedia parent/child added spans and Stack Exchange
+initial-version reconstruction using synthetic official-shape fixtures. Its
+settled E1/E2 candidate passed focused and full suites on Python 3.11–3.13; E3
+exact-head draft-PR delivery remains. No live access or scientific source claim
+is part of E0–E3.
 
 ## Latest verified evidence
 
@@ -52,6 +70,10 @@ listed below.
 - ProgressGym-aware design v1.0 was merged as `c2d2d0c3a5d67656e3dc3b2e3d903559b27ead2d` after CI passed on Python 3.11, 3.12, and 3.13 and the Content Integrity and Run Registry Smoke workflows passed on the exact PR head.
 - The development content-integrity gate passed on bounded redistributable fixtures.
 - The repository has deterministic manifests, scoring, synthetic-package generation, run identity/resumption, source metadata adapters, and bounded lexical content-integrity tooling.
+- The settled D-041 offline parser candidate passed 162 focused tests and 787
+  full-suite tests on each supported Python version, with only declared
+  platform-optional skips. This is Tested synthetic-fixture engineering, not
+  real-source qualification.
 - PyTorch `2.13.0+cu130` reports CUDA 13.0 available on the local RTX 2060
   (compute capability 7.5, 6,144 MiB VRAM).
 - Metadata-only Hub audits resolved the selected DatedGPT, Kairos, OLMo early,
@@ -62,7 +84,7 @@ listed below.
   from the exact clean Git head, verifies the CUDA-enabled Torch runtime,
   enforces the 2.5× same-filesystem disk margin before download, measures peak
   process RAM on Windows, and preserves structured failure evidence.
-- The active integrity change binds final Pythia to five exact files totaling
+- The delivered integrity change binds final Pythia to five exact files totaling
   2,092,816,302 bytes, separates allowlisted acquisition from offline loading,
   rehashes the snapshot, validates config/model/logits identity, and captures a
   fresh live resource audit immediately before load.
@@ -87,6 +109,13 @@ listed below.
   then failed `post-score-resource-check` below the frozen resident-VRAM floor.
   The create-only transaction published no score; the canonical failure
   receipt validates and no outcome was inspected. Attempt B did not run.
+- Exact head `eb0f794` passed 30/30 draft PR #38 checks before D-039 E4. Run
+  `source-metadata-v0-eb0f7949` made three serial metadata request attempts, completed
+  the Wikimedia and Stack Exchange responses, retried zero times, and stopped
+  before accepting the first arXiv candidate-count response. Its canonical,
+  authenticated failure receipt passed validation, preserved matched final
+  bindings, and published no aggregate. No arXiv/PMC yield was observed; no
+  source-C identifier or prose was displayed or human-reviewed.
 - The pinned 2.09 GB model was downloaded and loaded locally. The bounded v1
   LoRA control and resumed condition each completed five optimizer steps on
   synthetic fixtures and independently verified exact final semantic state
@@ -126,7 +155,15 @@ listed below.
 
 ## Remaining blockers and active gates
 
+Immediate delivery gate: commit and deliver the settled D-041 candidate through
+one unchanged E3 draft-PR head. The subsequent live A/B micro-sample remains
+unauthorized and requires a separate result-blind access/license/containment
+decision.
+
 1. Bounded rights-qualified, historically versioned samples from at least four source candidates.
+   D-039 produced only a provisional A/B metadata inventory prefix; its first
+   source-C request failed at transport and cannot be retried without a new
+   result-blind, versioned transport-adjudication decision.
 2. Measured source continuity, composition, duplication, exposure, and extraction cost.
 3. Data-only era-window and cross-source decodability decision.
 4. Predesignated A/B/C roles and one feasibility backup before behavioral inspection.
@@ -145,7 +182,7 @@ listed below.
 - One training job at a time.
 - Model downloads and bounded local training are explicitly authorized as of
   2026-08-20.
-- The active gate requires one pinned licensed artifact at a time, measured
+- Any later model gate requires one pinned licensed artifact at a time, measured
   headroom, and preserved stop/failure evidence.
 - No paid license, cloud rental, requester-pays operation, or public model/data
   release is needed or inferred. The repository is public only by the user's
@@ -157,10 +194,10 @@ listed below.
 
 ## Exact next action
 
-Deliver the Tested D-038 change on `fix/scoring-failure-observability`: commit,
-push, open one draft PR stacked on PR #36, and require every attached check to
-pass on the unchanged head. The implementation preserves the pending resident
-audit and the original fail-closed validator order without a model run. This
-does not authorize rerunning A or starting B. After that bounded delivery,
-rights-qualified source samples and any new scoring-condition decision are the
-hard boundaries.
+Commit the settled D-041 E1/E2 candidate, push the authorized feature branch,
+open its draft PR stacked on PR #38, and require all attached E3 checks green on
+one unchanged head. Preserve the ignored D-039 evidence and do not rerun D-039,
+open a private inventory, make a network request, retrieve real archive/article
+text, inspect source C, use requester-pays access, execute a model, or reopen
+the consumed development-v1 E4. A live A/B micro-sample requires a later
+decision.

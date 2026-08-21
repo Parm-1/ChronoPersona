@@ -1,15 +1,30 @@
 # Active Plans
 
-One result-blind engineering ExecPlan is write-active:
+One result-blind offline source-engineering ExecPlan is write-active:
 
-- `.agent/plans/active-scoring-failure-observability.md` — preserve an exact
-  captured resident-resource observation in future failed scorer receipts
-  before threshold validation can raise. This is evidence-observability
-  hardening only: it does not reopen E4, authorize a model run, or imply the
-  consumed resource rejection was erroneous. Baseline `8fc16af`; branch
-  `fix/scoring-failure-observability`. Implementation and local validation are
-  Tested; the unchanged delivery head must pass every attached check. The plan
-  completes from that external result without a state-only follow-up commit.
+- `.agent/plans/active-ab-parser-sample-engineering.md` — E1/E2 Wikimedia
+  parent/child added-span parsing and Stack Exchange initial-version
+  reconstruction are Tested on synthetic official-shape fixtures; E3 exact-head
+  draft-PR delivery is active. Baseline `c245e7a`; E0 commit `3c49e2a`; branch
+  `feat/ab-parser-sample-engineering`. No network, D-039 private artifact, real
+  source content, source C, model, or scientific outcome is in scope; a live
+  micro-sample needs a later plan and decision.
+
+The latest source-execution plan is closed as a preserved failed gate:
+
+- `.agent/plans/active-source-metadata-qualification.md` — exact E5 evidence
+  head `c245e7a` passed all 24 attached checks on draft PR #38. D-039 E4
+  completed the Wikimedia and Stack Exchange inventory prefix, then failed at
+  the first arXiv HTTP-status transport boundary with no aggregate. D-040
+  prohibits resume, retry, or substitution. Raw receipt/inventories/keys remain
+  private.
+
+The latest engineering plan is complete:
+
+- `.agent/plans/active-scoring-failure-observability.md` — exact delivery head
+  `d669b4e` passed all 18 push/pull-request checks on draft PR #37. Future
+  failed scorer receipts now preserve the exact resident-resource observation
+  without weakening thresholds or reopening consumed E4 attempt A.
 
 The latest experiment plan is closed as a preserved failed gate:
 

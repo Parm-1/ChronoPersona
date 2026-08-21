@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T17:28:04-04:00
+**Last updated:** 2026-08-21T01:44:09-04:00
 
 ## Decision
 
@@ -47,23 +47,61 @@ workflow tokens remain read-only, and secret scanning plus push protection are
 enabled. The prior zero-step billing blocker is empirically closed: draft PR
 #34 passed all 18 exact-head checks. No billing setting changed.
 
+Accept failure-observability delivery head
+`d669b4e3c36069398efdac831c8f1fec7036359c` as **Tested and exact-head
+delivered**. Draft PR #37 is open/draft and all 18 push/pull-request checks
+passed on that unchanged head. The scoped change preserves exact failed
+resident-resource observations without changing thresholds or reopening E4.
+
+Accept D-039 implementation/execution head
+`eb0f7949c552e0e733f33c63dd33b9e9d603d83b` as **Tested and exact-head
+delivered**. Draft PR #38 passed all 30 push/pull-request checks across Python
+3.11–3.13 on that unchanged head before execution.
+
+Classify run `source-metadata-v0-eb0f7949` as **Target Failed operationally**
+at the source-C transport gate. The exact invocation completed the Wikimedia
+and Stack Exchange inventory groups, then stopped on the first arXiv early
+candidate-count request with `metadata-transport-failed` / `transport` /
+`http-status`. It made three attempts, completed two responses, retried zero
+times, left exactly five later groups not started, matched its final binding,
+and published no aggregate. D-040 consumes the run. Do not resume, retry,
+substitute PMC, or infer arXiv or source-role feasibility from this stop.
+
+Accept D-039 E5 evidence head
+`c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` as exact-head delivered after all
+24 attached PR #38 checks passed. D-040 remains controlling; no state-only
+follow-up commit or new D-039 request occurred.
+
+Freeze D-041 as the next local engineering gate. It uses exact green baseline
+`c245e7a` on branch `feat/ab-parser-sample-engineering` to build only synthetic-
+fixture Wikimedia parent/child added-span parsing and Stack Exchange
+initial-version reconstruction. This is result-blind, offline, CAD $0 work. It
+does not open private D-039 inventories, retrieve real source content, inspect
+source C, or qualify a source.
+
+Accept the settled D-041 E1/E2 candidate as **Tested offline synthetic parser
+engineering**, not yet exact-head delivered. The byte-stable candidate scope
+`80cb6c77fb52735089813a148845e08c7b661b9e71bdd98918f686287dee78dc`
+passed the 162-test focused suite and the 787-test full suite on Python
+3.11–3.13, with five and seven platform-optional skips respectively. It made no
+network request, opened no D-039 private artifact, retrieved no real source
+record, ran no model, and incurred no spend.
+
 ## Current objective and closure condition
 
-Deliver the Tested future-failure observability hardening from green baseline
-`8fc16af` on `fix/scoring-failure-observability`. The implementation preserves
-an exact resident-resource observation before threshold validation can raise,
-while retaining the original validator order, exception precedence, threshold,
-and successful receipt schema. This is result-blind observability work, not a
-rescue: do not run A or B, alter a threshold, or infer that the frozen resource
-rejection was erroneous. The plan completes if every attached check passes on
-the unchanged delivery head; a failure leaves the first failed delivery gate
-active. Do not create a post-green state-only closure commit.
+Deliver the settled D-041 E1/E2 candidate through E3: record the tested state,
+create one scoped clean commit, push the authorized feature branch, open one
+draft PR stacked on PR #38, and require every attached check green on one
+unchanged head. No live flag or real content path may exist under this plan. A
+later live micro-sample requires its own frozen decision after official access,
+selection, site/license, request/byte, private-output, and zero-retry contracts
+are resolved.
 
 ## Current verified boundary
 
 - **Development content-integrity gate — Target Verified:** bounded
-  redistributable fixtures passed. Real-source qualification remains
-  **externally blocked**.
+  redistributable fixtures passed. Bounded no-cost A/B parser samples remain a
+  later authorized gate; bulk and source-C content remain blocked.
 - **Artifact/load — Target Verified:** immutable final Pythia 1B deduped at
   revision `7199d8fc61a6d565cd1f3c62bf11525b563e13b2` was hash verified,
   loaded offline in CUDA FP16, and produced finite logits under frozen
@@ -100,6 +138,26 @@ active. Do not create a post-green state-only closure commit.
   the post-score resident-VRAM gate before publication. The failure receipt is
   canonical and self-hash-valid; no score was retained or inspected. Attempt A
   is consumed, B did not run, and model-level coherence remains unverified.
+- **D-039 metadata implementation — Tested and delivered:** exact head
+  `eb0f794` passed all 30 PR #38 checks. All frozen profile, parser/privacy,
+  state-machine, transaction, and authenticated-receipt contracts passed the
+  offline suites. The live run exercised exact bindings, the no-proxy/no-
+  redirect envelope, Wikimedia/Stack Exchange parsing, the arXiv transport-
+  failure path, ordered stopping, mirrored failure publication, and receipt
+  authentication; arXiv response parsing and PMC execution did not run.
+- **D-039 metadata execution — Target Failed operationally:** Wikimedia and
+  Stack Exchange inventory acquisition are Target Verified within the narrow
+  metadata-only claim ceiling. The first arXiv candidate-count attempt failed
+  at HTTP-status transport before response acceptance; five later groups did
+  not start, and no aggregate was published. No A/B content or source role is
+  qualified, and no arXiv/PMC yield was observed.
+- **D-039 E5 closure — exact-head delivered:** evidence head `c245e7a` passed
+  all 24 attached checks. The failure record is preserved without a retry or
+  post-green state-only commit.
+- **D-041 A/B parser engineering — Tested offline / E3 pending:** exact
+  official-shape synthetic fixtures, closed validators, deterministic evidence,
+  and fail-closed publication passed locally across Python 3.11–3.13. No
+  real-source Target Verified claim is possible in E0–E3.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -156,14 +214,47 @@ active. Do not create a post-green state-only closure commit.
   `reports/stage0/pythia_v1_scoring_failure_2026-08-20.md`
 - failure-evidence delivery head:
   `8fc16af35b27089b1f0bde68c249d0313e8f0e9e` (18/18 checks passed)
+- D-039 implementation/execution head:
+  `eb0f7949c552e0e733f33c63dd33b9e9d603d83b` (30/30 checks passed before E4)
+- D-039 run: `source-metadata-v0-eb0f7949`; three attempts, two completed
+  responses, zero retries; final binding `matched`; no aggregate
+- D-039 receipt raw/self SHA-256:
+  `765acc89ce4cf0128cc2c385c684c2ccb0edc3332edabfbb076a1fda5e9471ec` /
+  `62c260fec086f8f593f15e56ae5eb878ff133a94009ed50603e329df5c94d72f`
+- D-039 receipt full-payload HMAC:
+  `6b888165641f18b2ee50135449c5f3678f35823704bfc59b26c3d698856c94e5`
+- D-040 failure report:
+  `reports/stage0/source_metadata_qualification_failure_2026-08-20.md`
+- D-039 E5 evidence head:
+  `c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` (24/24 attached checks passed)
+- D-041 plan: `.agent/plans/active-ab-parser-sample-engineering.md`
 - compute ledger: failed v0 training, completed v1 load/control/resume, completed
   v0 scorer A/B, and failed v1 scorer A rows in `COMPUTE_LEDGER.csv`
 
 ## Artifacts
 
 - Preserved v0 scoring config: `configs/runs/pythia-development-score-v0.json`
-- Active reliability plan:
-  `.agent/plans/active-development-measurement-reliability.md`
+- Preserved metadata qualification plan/profile/runner:
+  `.agent/plans/active-source-metadata-qualification.md`,
+  `configs/sources/live-metadata-qualification-v0.json`, and
+  `scripts/run_source_metadata_gate.py`
+- Frozen metadata profile raw/canonical SHA-256 and Git blob:
+  `fa510aff7e96281fbf5ea1e08ea380786a23c848e3342c1c78407eefe1a8194d` /
+  `e471bee5aba864f96fef802723204426362509ab177909ba2de29dd6f013b39e` /
+  `22b7df8ee10cda1e6bcde08f50e9333e3c0da270`
+- Frozen replacement commitment-key SHA-256:
+  `314b9f8e9ef018fcc8f33ff310079e1f42253e04a553e2a0c288124e917d1aca`.
+  Its two preimage copies remain private, distinct, byte-identical, and
+  owner-restricted; the earlier key is preserved but rejected by the profile.
+- Ignored D-039 failure evidence: the canonical receipt plus completed
+  Wikimedia and Stack Exchange inventories under the create-only run directory
+  `source-metadata-v0-eb0f7949`. The exact three-file set has a byte-identical,
+  owner-restricted backup outside Git. No aggregate, arXiv, or PMC artifact
+  exists; do not stage or inspect the private inventory payloads.
+- Sanitized D-040 report:
+  `reports/stage0/source_metadata_qualification_failure_2026-08-20.md`
+- Frozen D-041 offline parser plan:
+  `.agent/plans/active-ab-parser-sample-engineering.md`
 - Sealed pre-logits registry/criteria:
   `evaluations/registry/development-v1.jsonl` and
   `configs/evaluations/development-v1-reliability-v0.json`
@@ -243,6 +334,43 @@ active. Do not create a post-green state-only closure commit.
   returned the unchanged eight-field resident-resource schema. Three focused
   regressions and the full offline suite (536 passed, two skipped) passed; no
   model import, deserialization, logits, or network action occurred.
+- Draft PR #37 exact delivery head `d669b4e`: 18/18 push/pull-request checks
+  passed across Python 3.11–3.13. The branch is synchronized and clean. This
+  externally closes D-038 without a follow-up state-only commit.
+- D-039 E1/E2 validation: 186/186 dependency-light source tests passed; the
+  full offline repository suite collected 627 tests and passed 625 with two
+  platform-optional skips. The isolated `python -I -S` plan exited 0, reported
+  zero filesystem writes and no network permission, and left Git status
+  unchanged. Relevant modules compiled and `git diff --check` passed apart
+  from line-ending warnings. Exact head `eb0f794` then passed all 30 attached
+  PR #38 checks across five workflows, two events, and Python 3.11–3.13.
+- D-039 E4 receipt validation: canonical bytes, raw/self hashes, the keyed
+  full-receipt HMAC, exact clean-head bindings, privacy schema, group prefix,
+  and local/backup three-file equality all passed. The private roots and files
+  retained their protected owner/recovery-principal ACL boundary. The run made
+  no retry, accepted no source-C response, published no aggregate, displayed no
+  source prose or native identifier, ran no model, and incurred no spend.
+- D-039 E5 exact evidence head `c245e7a`: 24/24 attached checks passed across
+  CI, Content Integrity, Run Registry Smoke, Source Adapters, and Source
+  Metadata on Python 3.11–3.13. Draft PR #38 remains open/draft and clean.
+- D-041 E0 docs-only candidate: two independent read-only reviews returned GO
+  after reconciling the fixture contract with the MediaWiki 0.11 XSD/current
+  writer and Stack Exchange's maintained dump schema/staff wrapper. Frozen plan
+  SHA-256 is
+  `dcc993c0e0edb230f0a79bf0c87bb341b308b181a3930beef4fa7b0aa14b42ac`.
+  Repository-state tests passed 6/6; the full offline suite passed 625 with two
+  platform-optional skips; `git diff --check` passed apart from checkout
+  line-ending warnings. No source-data request, D-039 private-artifact access,
+  model execution, or spend occurred.
+- D-041 E1/E2 settled candidate: exact scope SHA-256
+  `80cb6c77fb52735089813a148845e08c7b661b9e71bdd98918f686287dee78dc`
+  stayed unchanged around the authoritative matrix. The focused suite passed
+  162 with five platform-only skips and the full suite passed 787 with seven
+  platform-only skips on each of Python 3.11, 3.12, and 3.13. All 16 bound
+  paths were exact LF, all fixture/profile/blob identities matched, 11 runtime
+  files compiled, isolated plan output was byte-identical with empty stderr,
+  and `git diff --check` passed. Independent parser, evidence, and Windows
+  transaction reviews returned GO.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -265,6 +393,19 @@ active. Do not create a post-green state-only closure commit.
   observability gap, not proof that the threshold failure was erroneous.
 - The five-step LoRA smoke does not establish sustained stability,
   broad-update feasibility, or causal-training adequacy.
+- The D-039 HTTP-status evidence deliberately withholds the numeric status,
+  response body, and private URL. It cannot distinguish upstream throttling or
+  service policy from request-shape incompatibility. That uncertainty is not
+  authority to retry and is not evidence that arXiv is unsuitable.
+- D-041 fixture success can prove only parser behavior. It must not be promoted
+  to evidence of real format prevalence, rights, authorship, source yield,
+  continuity, exposure burden, or scientific suitability.
+- D-041 POSIX rollback assumes the output namespace becomes quiescent after a
+  failure. Linux has no conditional unlink-by-open-file-description primitive,
+  so resistance to an actively hostile same-UID final-component swap is outside
+  this synthetic-fixture gate. Do not reuse this transaction for live/private
+  source publication without a separately frozen containment design; Windows
+  retains the stronger exact-handle boundary.
 - Public visibility exposes branch history, issues, PRs, commit metadata, and
   retained Actions logs. A personal commit email and historical local path
   strings are public; returning the repository to private cannot recall copies.
@@ -277,10 +418,24 @@ active. Do not create a post-green state-only closure commit.
 
 - Repository: public by explicit user authorization; anonymous access and
   security settings verified.
-- Current branch: `feat/development-v1-scoring`, based on accepted E2 evidence
-  head `dfa52a0aec11ad8f88fc4378c753a5dafb1ecab8`. Exact E3 closure / E4
-  execution head `e435c40` was clean and passed all 18 checks before the
-  consumed target attempt.
+- D-039 delivery branch: `feat/live-source-metadata-qualification`, created cleanly
+  from exact PR #37 head
+  `d669b4e3c36069398efdac831c8f1fec7036359c`. D-039 and the E0 result-blind
+  freeze are recorded at `2c4d3972436935d4279d41c9f0c1bd4395092128`.
+  E1/E2/E3 are complete at exact execution head `eb0f794`, which passed 30/30
+  checks on draft PR #38 before E4. D-039 E4 is consumed and failed
+  operationally. Exact E5 evidence head `c245e7a` contains D-040 and the
+  sanitized failure record, is synchronized to PR #38, and passed every
+  attached check without a post-green state-only commit.
+- Draft PR #38: `https://github.com/Parm-1/ChronoPersona/pull/38`, open and
+  draft, stacked on PR #37. Execution head `eb0f794` passed 30/30 checks; E5
+  evidence head `c245e7a` passed all 24 attached checks and closes D-039.
+- Current write branch: `feat/ab-parser-sample-engineering`, created from exact
+  green D-039 E5 head `c245e7a`. D-041 E0 is frozen at `3c49e2a`; the settled
+  E1/E2 implementation is locally Tested and awaiting one clean E3 delivery
+  commit/draft PR. No live access is included.
+- Draft PR #37: `https://github.com/Parm-1/ChronoPersona/pull/37`, open and
+  draft. Exact head `d669b4e` passed all 18 checks and closes D-038.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
   draft. Its final E2 evidence head `dfa52a0` passed 18/18 checks and is the
   intended stack base for E3.
@@ -296,9 +451,9 @@ active. Do not create a post-green state-only closure commit.
 
 ## Next write-active deliverable
 
-Commit and push the Tested D-038 hardening, open one draft PR stacked on PR
-#36, and require every check to pass on the unchanged delivery head. Do not run
-B, rerun A, recover transient scores, change thresholds, or alter
-content/metrics. This fix cannot authorize a future scoring condition; after
-delivery, rights-qualified source evidence and any new scoring-condition
-decision are the hard boundaries.
+Commit the settled D-041 E1/E2 candidate, push the authorized feature branch,
+open its stacked draft PR, and require all E3 checks green on one unchanged
+head. Preserve the ignored D-039 receipt/inventories and no-retry boundary. Do
+not open them, issue a network request, retrieve a real archive/record, inspect
+source C, infer real-source eligibility, execute a model, or incur cost. Stop
+after E3: any live A/B micro-sample requires a separate result-blind decision.

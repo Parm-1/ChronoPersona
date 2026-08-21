@@ -1,0 +1,490 @@
+{
+  "schema_version": 1,
+  "profile_id": "ab-parser-sample-v0",
+  "status": "frozen",
+  "claim_ceiling": "tested-offline-synthetic-parser-engineering-only",
+  "external_spend_cad": 0,
+  "network_allowed": false,
+  "live_source_access_enabled": false,
+  "canonical_inputs": {
+    "baseline_commit": "c245e7aaa16b2be35293fc5ca4d965efb7f5b84e",
+    "e0_commit": "3c49e2af27f0da36113085d5f746824f9a8148df",
+    "decision": {
+      "path": "docs/DECISIONS.md",
+      "git_blob": "bc19830cf097ac196e878a0e1cf1a2236cb92042"
+    },
+    "plan": {
+      "path": ".agent/plans/active-ab-parser-sample-engineering.md",
+      "git_blob": "452c17fbdc8336946a3b378bac3d2df90e56d264"
+    }
+  },
+  "limits": {
+    "max_mediawiki_pages": 8,
+    "max_mediawiki_revisions": 32,
+    "max_posts_rows": 16,
+    "max_posthistory_rows": 32,
+    "max_combined_revisions_and_rows": 64,
+    "max_xml_input_bytes": 4194304,
+    "max_total_xml_input_bytes": 8388608,
+    "max_decoded_text_bytes": 262144,
+    "max_normalized_tokens": 16384,
+    "max_alignment_product": 16777216,
+    "max_private_output_bytes": 16777216,
+    "max_aggregate_output_bytes": 262144,
+    "max_receipt_output_bytes": 262144
+  },
+  "fixture_bundle": {
+    "schema_version": 1,
+    "bundle_id": "ab-parser-v0-synthetic-official-shape",
+    "bundle_hash_serialization": "utf8-bundle-id-nul-selection-labels-nul-file-label-nul-raw-sha256-nul-v0",
+    "synthetic_fixture": true,
+    "expected_parsed_object_counts": {
+      "mediawiki_pages": 2,
+      "mediawiki_revisions": 6,
+      "posts_rows": 4,
+      "posthistory_rows": 14
+    },
+    "file_order": [
+      "wikimedia",
+      "stack_posts",
+      "stack_history"
+    ],
+    "files": {
+      "wikimedia": {
+        "path": "tests/fixtures/ab-parser-v0/wikimedia.xml",
+        "git_blob": "60a5b8ba8240b18a61acfdc75f4bef9080282da5",
+        "raw_sha256": "ed7588e80f480db48357baff84d28b6ae292507b035e184f741b5768871b7b05"
+      },
+      "stack_posts": {
+        "path": "tests/fixtures/ab-parser-v0/Posts.xml",
+        "git_blob": "03e22d6871ad5cdf1e7d2fc2dedaa54cadec59d3",
+        "raw_sha256": "79da2c494802fe9df808435f51b30ddba928bc1fa3717c3e10199757c74a1c7c"
+      },
+      "stack_history": {
+        "path": "tests/fixtures/ab-parser-v0/PostHistory.xml",
+        "git_blob": "e48a81feb970596e57a2f7b04d85bde5c0c1bdb9",
+        "raw_sha256": "6e1da3b0469fa80cb443b1963389f952c2888f0323e92acacc3490c64813c5dc"
+      }
+    },
+    "selection_order": [
+      "wikimedia-early",
+      "wikimedia-late",
+      "stack-early-question",
+      "stack-early-answer",
+      "stack-late-question",
+      "stack-late-answer"
+    ],
+    "selections": {
+      "wikimedia-early": {
+        "source": "wikimedia",
+        "fixture_window": "early",
+        "page_id": "1001",
+        "parent_revision_id": "1100",
+        "child_revision_id": "1101",
+        "history_coverage": "complete-synthetic-page"
+      },
+      "wikimedia-late": {
+        "source": "wikimedia",
+        "fixture_window": "late",
+        "page_id": "2001",
+        "parent_revision_id": "2100",
+        "child_revision_id": "2101",
+        "history_coverage": "complete-synthetic-page"
+      },
+      "stack-early-question": {
+        "source": "stackexchange",
+        "fixture_window": "early",
+        "site_id": "synthetic-nontechnical-site",
+        "post_id": "3001",
+        "post_type": "question",
+        "creation_timestamp": "2012-02-01T10:00:00.000Z",
+        "current_fields_must_differ": [
+          "body",
+          "title"
+        ]
+      },
+      "stack-early-answer": {
+        "source": "stackexchange",
+        "fixture_window": "early",
+        "site_id": "synthetic-nontechnical-site",
+        "post_id": "3002",
+        "post_type": "answer",
+        "parent_post_id": "3001",
+        "creation_timestamp": "2012-02-02T11:00:00.000Z",
+        "current_fields_must_differ": [
+          "body"
+        ]
+      },
+      "stack-late-question": {
+        "source": "stackexchange",
+        "fixture_window": "late",
+        "site_id": "synthetic-nontechnical-site",
+        "post_id": "4001",
+        "post_type": "question",
+        "creation_timestamp": "2019-07-01T09:00:00.000Z",
+        "current_fields_must_differ": [
+          "body",
+          "title"
+        ]
+      },
+      "stack-late-answer": {
+        "source": "stackexchange",
+        "fixture_window": "late",
+        "site_id": "synthetic-nontechnical-site",
+        "post_id": "4002",
+        "post_type": "answer",
+        "parent_post_id": "4001",
+        "creation_timestamp": "2019-07-02T09:30:00.000Z",
+        "current_fields_must_differ": [
+          "body"
+        ]
+      }
+    }
+  },
+  "transformations": {
+    "content_tokenizer": "nfkc-casefold-words-v1",
+    "wikimedia": {
+      "version": "wikimedia-added-span-v0",
+      "export_namespace": "http://www.mediawiki.org/xml/export-0.11/",
+      "export_version": "0.11",
+      "schema_location": "http://www.mediawiki.org/xml/export-0.11/ http://www.mediawiki.org/xml/export-0.11.xsd",
+      "model": "wikitext",
+      "format": "text/x-wiki",
+      "alignment": "difflib-sequencematcher-autojunk-false-v0",
+      "drop_block_tags": [
+        "blockquote",
+        "code",
+        "dl",
+        "gallery",
+        "math",
+        "nowiki",
+        "ol",
+        "pre",
+        "ref",
+        "references",
+        "source",
+        "syntaxhighlight",
+        "table",
+        "ul",
+        "caption",
+        "tbody",
+        "tfoot",
+        "thead",
+        "tr",
+        "dd",
+        "dt",
+        "li",
+        "td",
+        "th"
+      ],
+      "drop_link_prefixes": [
+        "category",
+        "file",
+        "image"
+      ],
+      "external_link_schemes": [
+        "bitcoin",
+        "ftp",
+        "ftps",
+        "geo",
+        "git",
+        "gopher",
+        "http",
+        "https",
+        "irc",
+        "ircs",
+        "magnet",
+        "mailto",
+        "mms",
+        "news",
+        "nntp",
+        "redis",
+        "sip",
+        "sips",
+        "sms",
+        "ssh",
+        "svn",
+        "tel",
+        "telnet",
+        "worldwind",
+        "xmpp"
+      ],
+      "navigation_magic_words": [
+        "__FORCETOC__",
+        "__NEWSECTIONLINK__",
+        "__NOEDITSECTION__",
+        "__NONEWSECTIONLINK__",
+        "__NOTOC__",
+        "__TOC__"
+      ],
+      "import_comment_markers": [
+        "copied from",
+        "imported from"
+      ]
+    },
+    "stackexchange": {
+      "version": "stackexchange-initial-version-v0",
+      "xml_encoding": "utf-8",
+      "xml_declaration": "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+      "allowed_prolog_comment_lines": [
+        "ContentLicense",
+        "CC BY-SA 2.5 - Url: https://creativecommons.org/licenses/by-sa/2.5/",
+        "CC BY-SA 3.0 - Url: https://creativecommons.org/licenses/by-sa/3.0/",
+        "CC BY-SA 4.0 - Url: https://creativecommons.org/licenses/by-sa/4.0/"
+      ],
+      "timestamp_format": "YYYY-MM-DDTHH:MM:SS.fff",
+      "posts_attribute_allowlist": [
+        "AcceptedAnswerId",
+        "AnswerCount",
+        "Body",
+        "ClosedDate",
+        "CommentCount",
+        "CommunityOwnedDate",
+        "ContentLicense",
+        "CreationDate",
+        "FavoriteCount",
+        "Id",
+        "LastActivityDate",
+        "LastEditDate",
+        "LastEditorDisplayName",
+        "LastEditorUserId",
+        "OwnerDisplayName",
+        "OwnerUserId",
+        "ParentId",
+        "PostTypeId",
+        "Score",
+        "Tags",
+        "Title",
+        "ViewCount"
+      ],
+      "posthistory_attribute_allowlist": [
+        "Comment",
+        "ContentLicense",
+        "CreationDate",
+        "Id",
+        "PostHistoryTypeId",
+        "PostId",
+        "RevisionGUID",
+        "Text",
+        "UserDisplayName",
+        "UserId"
+      ],
+      "documented_history_type_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        24,
+        25,
+        31,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        50,
+        52,
+        53,
+        66
+      ],
+      "history_type_categories": {
+        "1": "initial-title",
+        "2": "initial-body",
+        "3": "initial-tags",
+        "4": "edit-title",
+        "5": "edit-body",
+        "6": "edit-tags",
+        "7": "rollback-title",
+        "8": "rollback-body",
+        "9": "rollback-tags",
+        "10": "close",
+        "11": "reopen",
+        "12": "delete",
+        "13": "undelete",
+        "14": "lock",
+        "15": "unlock",
+        "16": "community-owned",
+        "17": "migration",
+        "18": "merge",
+        "19": "protect",
+        "20": "unprotect",
+        "21": "disassociate",
+        "22": "unmerge",
+        "24": "suggested-edit-applied",
+        "25": "tweeted",
+        "31": "moved-to-chat",
+        "33": "notice-added",
+        "34": "notice-removed",
+        "35": "migration",
+        "36": "migration",
+        "37": "merge",
+        "38": "merge",
+        "50": "other-documented",
+        "52": "other-documented",
+        "53": "other-documented",
+        "66": "other-documented"
+      },
+      "deletion_migration_type_ids": [
+        12,
+        13,
+        17,
+        35,
+        36
+      ],
+      "generated_post_ids": [
+        1000000001,
+        1000000010
+      ],
+      "drop_html_block_tags": [
+        "blockquote",
+        "code",
+        "pre",
+        "script",
+        "style"
+      ],
+      "boilerplate_lines_casefolded": [
+        "any help appreciated",
+        "thank you",
+        "thanks",
+        "thanks!"
+      ],
+      "signature_delimiter_lines": [
+        "-- "
+      ],
+      "external_link_schemes": [
+        "bitcoin",
+        "ftp",
+        "ftps",
+        "geo",
+        "git",
+        "gopher",
+        "http",
+        "https",
+        "irc",
+        "ircs",
+        "magnet",
+        "mailto",
+        "mms",
+        "news",
+        "nntp",
+        "redis",
+        "sip",
+        "sips",
+        "sms",
+        "ssh",
+        "svn",
+        "tel",
+        "telnet",
+        "worldwind",
+        "xmpp"
+      ]
+    }
+  },
+  "publication": {
+    "mode": "create-only",
+    "json_serialization": "utf8-sort-keys-indent-2-lf-allow-nan-false",
+    "jsonl_serialization": "utf8-compact-sort-keys-one-object-per-lf-allow-nan-false",
+    "receipt_self_hash": "sha256-canonical-compact-json-without-receipt-sha256",
+    "artifact_hash": "sha256-exact-published-bytes",
+    "output_prefix": "artifacts/local/ab-parser-sample",
+    "private_records_file": "private-records.jsonl",
+    "aggregate_file": "aggregate.json",
+    "receipt_file": "receipt.json",
+    "outside_git_mirror_required": false
+  },
+  "runtime_paths": [
+    "scripts/run_ab_parser_sample.py",
+    "src/chronopersona/__init__.py",
+    "src/chronopersona/file_integrity.py",
+    "src/chronopersona/path_policy.py",
+    "src/chronopersona/content_manifest.py",
+    "src/chronopersona/source_registry.py",
+    "src/chronopersona/source_audit.py",
+    "src/chronopersona/ab_parser_common.py",
+    "src/chronopersona/wikimedia_ab_parser.py",
+    "src/chronopersona/stackexchange_ab_parser.py",
+    "src/chronopersona/ab_parser_sample.py"
+  ],
+  "closed_vocabularies": {
+    "dispositions": [
+      "accepted-for-parser-audit",
+      "excluded",
+      "unresolved"
+    ],
+    "failure_stages": [
+      "arguments",
+      "binding",
+      "input-preflight",
+      "parse-wikimedia",
+      "parse-stackexchange",
+      "validation",
+      "rebind",
+      "publication"
+    ],
+    "failure_reasons": [
+      "argument-contract-failed",
+      "binding-failed",
+      "input-contract-failed",
+      "parser-contract-failed",
+      "validation-failed",
+      "rebind-failed",
+      "publication-failed",
+      "interrupted"
+    ],
+    "published_failure_pairs": [
+      "input-preflight/input-contract-failed",
+      "parse-stackexchange/parser-contract-failed",
+      "parse-wikimedia/parser-contract-failed",
+      "validation/interrupted",
+      "validation/parser-contract-failed",
+      "validation/validation-failed"
+    ],
+    "scientific_statuses": [
+      "unresolved"
+    ],
+    "record_reasons": [
+      "authorship-unresolved",
+      "chronology-unresolved",
+      "creation-action-time-mismatch",
+      "deletion-signal",
+      "generated-post-id",
+      "inherited-or-rollback-signal",
+      "license-unresolved",
+      "migration-signal",
+      "non-authoritative-import-comment-signal",
+      "persistence-unresolved",
+      "rights-unresolved",
+      "zero-added-prose",
+      "zero-clean-prose"
+    ]
+  },
+  "prohibitions": {
+    "current_snapshot_or_body_fallback": true,
+    "d039_private_artifact_access": true,
+    "live_source_input": true,
+    "model_execution": true,
+    "network_access": true,
+    "output_overwrite": true,
+    "scientific_eligibility_claim": true,
+    "source_c_access": true
+  }
+}
