@@ -28,6 +28,7 @@
 | R-24 | Registry scoring loads unverified bytes from a populated cache | High | The exact tokenizer and model stages now verify manifest-bound bytes, private copies, load identity, fresh resources, and final rebinding; preserve this Target Verified invariant and fail closed on any identity drift |
 | R-25 | Development item wording or continuation length changes score direction | High | Preserve the failed v0 reliability diagnosis; v1 passed blind pre-logits review and exact common-count tokenizer checks, but E4 attempt A failed operationally after all forwards and before score publication, so model-level eight-form coherence remains untested; no B or retry without a separately accepted result-blind defect rescue |
 | R-26 | A metadata transport failure is mistaken for source infeasibility or silently retried | Critical | Preserve the authenticated partial evidence; distinguish transport from source eligibility/yield; prohibit same-profile retry, continuation, query change, or backup substitution; require a separately frozen, versioned, result-blind transport-adjudication decision before another request |
+| R-27 | Synthetic parser fixtures are promoted to real-source qualification | Critical | Label E0–E3 as offline parser engineering only; keep live access disabled; require a later exact selection/access/license decision and Target Verified micro-sample before any claim about format prevalence, yield, rights, authorship, continuity, or suitability |
 
 ## Current highest risks
 
@@ -39,6 +40,8 @@
 5. A/B discovery may fail prospective C transport; that is a valid falsification, not a reason to replace C.
 6. A consumed metadata transport stop may be overread as source infeasibility
    or used to justify an unplanned retry; D-040 explicitly forbids both.
+7. Passing A/B parser fixtures could be mistaken for evidence about real
+   archives; D-041 fixes the claim ceiling at Tested offline engineering.
 
 ## Current risk decision
 
@@ -61,3 +64,9 @@ substitute PMC, or infer arXiv/source infeasibility. Rights-qualified content,
 source-C review, requester-pays retrieval, and later calibration/model-compute
 gates remain blocked; any new request requires a separate versioned,
 result-blind adjudication.
+
+The next local gate is D-041 offline A/B parser engineering on synthetic
+official-shape fixtures. It may improve deterministic parent/initial-version
+reconstruction code, but it cannot qualify a source or authorize live access.
+Stop on any network path, non-synthetic input, current-snapshot/body fallback,
+portable prose/ID leakage, or attempt to infer real-source yield or eligibility.

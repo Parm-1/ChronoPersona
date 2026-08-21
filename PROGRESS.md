@@ -1,6 +1,6 @@
 # ChronoPersona Progress
 
-**Last updated:** 2026-08-20T22:09:40-04:00
+**Last updated:** 2026-08-20T22:53:49-04:00
 
 ## Decision
 
@@ -67,20 +67,26 @@ times, left exactly five later groups not started, matched its final binding,
 and published no aggregate. D-040 consumes the run. Do not resume, retry,
 substitute PMC, or infer arXiv or source-role feasibility from this stop.
 
+Accept D-039 E5 evidence head
+`c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` as exact-head delivered after all
+24 attached PR #38 checks passed. D-040 remains controlling; no state-only
+follow-up commit or new D-039 request occurred.
+
+Freeze D-041 as the next local engineering gate. It uses exact green baseline
+`c245e7a` on branch `feat/ab-parser-sample-engineering` to build only synthetic-
+fixture Wikimedia parent/child added-span parsing and Stack Exchange
+initial-version reconstruction. This is result-blind, offline, CAD $0 work. It
+does not open private D-039 inventories, retrieve real source content, inspect
+source C, or qualify a source.
+
 ## Current objective and closure condition
 
-The exact scoped commit containing the sanitized D-040 failure record, state
-reconciliation, and no-retry decision is the E5 closure candidate. It fulfills
-E5 when synchronized as draft PR #38's head with every attached check green;
-do not create a post-green state-only commit. This closure performs no network
-request and does not publish the private receipt or inventories.
-
-After E5 is green, audit the next authorized evidence gate. D-039 itself cannot
-issue another request: any source-C metadata rerun requires a separately
-frozen, versioned, result-blind transport-adjudication decision or an explicit
-material user choice. Bounded no-cost A/B parser samples remain separately
-authorized by `docs/SOURCE_SAMPLE_PROTOCOL.md`, but require their own frozen
-plan before execution.
+Commit the D-041 result-blind E0 freeze before implementation. Then implement
+and validate the closed, dependency-light A/B parser-fixture path through E1/E2
+and exact-head delivery E3. No live flag or real content path may exist under
+this plan. A later live micro-sample requires its own frozen decision after
+official access, selection, site/license, request/byte, private-output, and
+zero-retry contracts are resolved.
 
 ## Current verified boundary
 
@@ -136,6 +142,11 @@ plan before execution.
   at HTTP-status transport before response acceptance; five later groups did
   not start, and no aggregate was published. No A/B content or source role is
   qualified, and no arXiv/PMC yield was observed.
+- **D-039 E5 closure — exact-head delivered:** evidence head `c245e7a` passed
+  all 24 attached checks. The failure record is preserved without a retry or
+  post-green state-only commit.
+- **D-041 A/B parser engineering — Frozen/design:** synthetic official-shape
+  fixtures only; no real-source Target Verified claim is possible in E0–E3.
 - **Scientific boundary — Externally blocked:** no rights-qualified A/B/C
   source roles, causal insertion checkpoint, evaluation freeze, synthetic
   calibration, temporal contrast, or CSTG result exists.
@@ -203,13 +214,16 @@ plan before execution.
   `6b888165641f18b2ee50135449c5f3678f35823704bfc59b26c3d698856c94e5`
 - D-040 failure report:
   `reports/stage0/source_metadata_qualification_failure_2026-08-20.md`
+- D-039 E5 evidence head:
+  `c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` (24/24 attached checks passed)
+- D-041 plan: `.agent/plans/active-ab-parser-sample-engineering.md`
 - compute ledger: failed v0 training, completed v1 load/control/resume, completed
   v0 scorer A/B, and failed v1 scorer A rows in `COMPUTE_LEDGER.csv`
 
 ## Artifacts
 
 - Preserved v0 scoring config: `configs/runs/pythia-development-score-v0.json`
-- Active metadata qualification plan/profile/runner:
+- Preserved metadata qualification plan/profile/runner:
   `.agent/plans/active-source-metadata-qualification.md`,
   `configs/sources/live-metadata-qualification-v0.json`, and
   `scripts/run_source_metadata_gate.py`
@@ -228,6 +242,8 @@ plan before execution.
   exists; do not stage or inspect the private inventory payloads.
 - Sanitized D-040 report:
   `reports/stage0/source_metadata_qualification_failure_2026-08-20.md`
+- Frozen D-041 offline parser plan:
+  `.agent/plans/active-ab-parser-sample-engineering.md`
 - Sealed pre-logits registry/criteria:
   `evaluations/registry/development-v1.jsonl` and
   `configs/evaluations/development-v1-reliability-v0.json`
@@ -323,6 +339,18 @@ plan before execution.
   retained their protected owner/recovery-principal ACL boundary. The run made
   no retry, accepted no source-C response, published no aggregate, displayed no
   source prose or native identifier, ran no model, and incurred no spend.
+- D-039 E5 exact evidence head `c245e7a`: 24/24 attached checks passed across
+  CI, Content Integrity, Run Registry Smoke, Source Adapters, and Source
+  Metadata on Python 3.11–3.13. Draft PR #38 remains open/draft and clean.
+- D-041 E0 docs-only candidate: two independent read-only reviews returned GO
+  after reconciling the fixture contract with the MediaWiki 0.11 XSD/current
+  writer and Stack Exchange's maintained dump schema/staff wrapper. Frozen plan
+  SHA-256 is
+  `dcc993c0e0edb230f0a79bf0c87bb341b308b181a3930beef4fa7b0aa14b42ac`.
+  Repository-state tests passed 6/6; the full offline suite passed 625 with two
+  platform-optional skips; `git diff --check` passed apart from checkout
+  line-ending warnings. No source-data request, D-039 private-artifact access,
+  model execution, or spend occurred.
 - Draft PR #35 implementation head `fb8cff1` passed 18/18 exact-head checks
   across Python 3.11–3.13. Both subsequent tokenizer invocations exited 0; the
   dependency-light verifier and an independent 5,824-assertion replay found no
@@ -349,6 +377,9 @@ plan before execution.
   response body, and private URL. It cannot distinguish upstream throttling or
   service policy from request-shape incompatibility. That uncertainty is not
   authority to retry and is not evidence that arXiv is unsuitable.
+- D-041 fixture success can prove only parser behavior. It must not be promoted
+  to evidence of real format prevalence, rights, authorship, source yield,
+  continuity, exposure burden, or scientific suitability.
 - Public visibility exposes branch history, issues, PRs, commit metadata, and
   retained Actions logs. A personal commit email and historical local path
   strings are public; returning the repository to private cannot recall copies.
@@ -361,17 +392,21 @@ plan before execution.
 
 - Repository: public by explicit user authorization; anonymous access and
   security settings verified.
-- Current branch: `feat/live-source-metadata-qualification`, created cleanly
+- D-039 delivery branch: `feat/live-source-metadata-qualification`, created cleanly
   from exact PR #37 head
   `d669b4e3c36069398efdac831c8f1fec7036359c`. D-039 and the E0 result-blind
   freeze are recorded at `2c4d3972436935d4279d41c9f0c1bd4395092128`.
   E1/E2/E3 are complete at exact execution head `eb0f794`, which passed 30/30
   checks on draft PR #38 before E4. D-039 E4 is consumed and failed
-  operationally. The exact scoped commit containing D-040 and the sanitized
-  failure record is the E5 closure candidate; it must become the synchronized
-  PR head and pass all attached checks without a post-green state-only commit.
+  operationally. Exact E5 evidence head `c245e7a` contains D-040 and the
+  sanitized failure record, is synchronized to PR #38, and passed every
+  attached check without a post-green state-only commit.
 - Draft PR #38: `https://github.com/Parm-1/ChronoPersona/pull/38`, open and
-  draft, stacked on PR #37. Execution head `eb0f794` passed 30/30 checks.
+  draft, stacked on PR #37. Execution head `eb0f794` passed 30/30 checks; E5
+  evidence head `c245e7a` passed all 24 attached checks and closes D-039.
+- Current write branch: `feat/ab-parser-sample-engineering`, created from exact
+  green D-039 E5 head `c245e7a`. D-041 E0 is the result-blind freeze; no parser
+  implementation or live access is included in that freeze commit.
 - Draft PR #37: `https://github.com/Parm-1/ChronoPersona/pull/37`, open and
   draft. Exact head `d669b4e` passed all 18 checks and closes D-038.
 - Draft PR #35: `https://github.com/Parm-1/ChronoPersona/pull/35`, open and
@@ -389,14 +424,10 @@ plan before execution.
 
 ## Next write-active deliverable
 
-The scoped commit containing this record is the D-039 E5 failure-evidence
-closure candidate. E5 closes only when that unchanged commit is pushed, is
-draft PR #38's synchronized head, and has every attached check green; do not add
-a post-green state-only commit. Preserve the ignored receipt, two private
-inventories, their exact mirrors, and the owner-restricted key boundary. Do not
-resume or retry D-039, display or human-review transient metadata prose,
-retrieve an archive/article body or source package, use requester-pays access,
-run a model, substitute PMC, or infer source feasibility from the transport
-stop. After exact-head closure, audit the separately authorized A/B parser-
-sample gate and stop for a new frozen decision before any further network
-request.
+Commit the D-041 E0 plan/state freeze on exact baseline `c245e7a`, then build
+the offline synthetic-fixture A/B parser path. Preserve the ignored D-039
+receipt/inventories and no-retry boundary. Do not open them, issue a network
+request, retrieve a real archive/record, inspect source C, infer real-source
+eligibility, execute a model, or incur cost. E1/E2 close only on adversarial
+fixture coverage and the full offline validation ladder; E3 requires one
+unchanged exact-head draft-PR delivery.

@@ -1,17 +1,23 @@
 # Active Plans
 
-One source ExecPlan is at its final external closure gate:
+One result-blind offline source-engineering ExecPlan is write-active:
 
-- `.agent/plans/active-source-metadata-qualification.md` — preserve and deliver
-  the one consumed no-cost metadata-only prequalification. E0–E3 are complete
-  at exact green execution head `eb0f794`; E4 completed the Wikimedia and Stack
-  Exchange inventory prefix, then failed at the first arXiv HTTP-status
-  transport boundary with no aggregate. D-040 prohibits resume, retry, or
-  substitution. E5 is the sanitized failure-record closure candidate and is
-  complete only when its unchanged commit is the synchronized draft-PR head and
-  every attached check is green. Raw identifiers, receipt, inventories, and
-  keys remain private; no archive/article body, source package, requester-pays
-  object, model, or behavioral outcome is in scope.
+- `.agent/plans/active-ab-parser-sample-engineering.md` — implement and
+  adversarially validate Wikimedia parent/child added-span parsing and Stack
+  Exchange initial-version reconstruction on synthetic official-shape fixtures
+  only. Baseline `c245e7a`; branch `feat/ab-parser-sample-engineering`. E0 is
+  frozen before implementation. No network, D-039 private artifact, real source
+  content, source C, model, or scientific outcome is in scope; a live
+  micro-sample needs a later plan and decision.
+
+The latest source-execution plan is closed as a preserved failed gate:
+
+- `.agent/plans/active-source-metadata-qualification.md` — exact E5 evidence
+  head `c245e7a` passed all 24 attached checks on draft PR #38. D-039 E4
+  completed the Wikimedia and Stack Exchange inventory prefix, then failed at
+  the first arXiv HTTP-status transport boundary with no aggregate. D-040
+  prohibits resume, retry, or substitution. Raw receipt/inventories/keys remain
+  private.
 
 The latest engineering plan is complete:
 

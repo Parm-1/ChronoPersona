@@ -203,6 +203,14 @@ machine path for hash/count evidence and must not be displayed, persisted as
 prose, or human-reviewed. Bounded no-cost A/B parser samples remain a later
 authorized gate under `docs/SOURCE_SAMPLE_PROTOCOL.md`.
 
+The current local gate is D-041 offline A/B parser engineering from exact green
+D-039 E5 head `c245e7a`. E0–E3 may use only synthetic official-shape fixtures to
+test Wikimedia parent/child added-span parsing and Stack Exchange initial-
+version reconstruction. Do not open D-039 private inventories, add a live flag,
+retrieve a real record/archive, inspect source C, infer rights/authorship/source
+eligibility, execute a model, or claim Target Verified source behavior. A live
+micro-sample requires a separate frozen decision.
+
 The first frozen tiny-LoRA v0 control is preserved as a pre-backward numeric
 failure. Its single versioned v1 attention-policy rescue passed the bounded
 five-step control/interruption/resume engineering gate with exact semantic

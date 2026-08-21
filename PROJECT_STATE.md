@@ -6,7 +6,7 @@
 
 ## Current phase
 
-**Stage 0 — model engineering gates closed; D-039 metadata run consumed at source-C transport; portable failure closure active; bulk and source-C text externally blocked**
+**Stage 0 — model engineering gates closed; D-039 preserved failed; offline A/B parser engineering active; bulk and source-C text externally blocked**
 
 The project’s decisive test is now prospective source transport: estimate a shared early-versus-late component from independent naturalistic discovery sources A and B, freeze it, and predict a predesignated sealed source C.
 
@@ -14,7 +14,7 @@ ProgressGym is treated as the closest predecessor. Historical model construction
 
 ## Current gate
 
-**Current gate — D-039 operational failure preserved; E5 closes when its unchanged evidence commit passes exact-head CI; no retry, document body, source package, or model execution is authorized**
+**Current gate — D-041 synthetic-fixture A/B parser engineering; no network, real source record, source C, or model execution is authorized**
 
 The design and repository-governance gates have passed. The immutable final-
 Pythia snapshot was acquired, verified, and loaded offline with finite logits.
@@ -25,9 +25,9 @@ state equality. The exact Pythia tokenizer now also passed two byte-identical
 12-item/24-form/48-candidate boundary audits through the hash-verified snapshot
 loader. The development-v0 model scorer then completed two fresh exact-head
 invocations with byte-identical deterministic scores and complete verifier-
-valid receipts. The
-containing E5 evidence head `a7dd27c` passed all 18 exact-head checks and
-closed the scorer plan. The separate versioned measurement-reliability plan
+valid receipts. The containing scorer evidence head `a7dd27c` passed all 18
+exact-head checks and closed the scorer plan. The separate versioned
+measurement-reliability plan
 then passed blind pre-logits review, dependency-light contract validation, and
 two exact clean-head 14-item/112-form/224-candidate tokenizer audits at
 `fb8cff1`. The E3 scorer profile is Tested and exact-head delivered. Draft PR
@@ -37,7 +37,7 @@ post-score resident-VRAM gate before score publication. Attempt A is consumed;
 no A score, B run, comparison, or coherence result exists, and no pole value
 was inspected. A result-blind receipt/code review found an observability gap
 but no evidence that the resource rejection was erroneous, so no rescue
-qualifies. Failure evidence is delivered and green at `8fc16af`. The active
+qualifies. Failure evidence is delivered and green at `8fc16af`. The delivered
 failure-observability work is complete; future resident-resource failures now
 retain the exact captured audit without authorizing another model run.
 Real-source scientific execution still requires the separate source evidence
@@ -53,6 +53,12 @@ authorized. Incidental API metadata prose may transit only for hash/count
 evidence; it may not be displayed, persisted as prose, or human-reviewed.
 Document bodies and source packages are not authorized, and the source roles
 remain unqualified.
+
+D-039 E5 evidence head `c245e7a` subsequently passed all 24 attached checks and
+closed that failed gate without a state-only commit. D-041 now freezes an
+offline-only engineering path for Wikimedia parent/child added spans and Stack
+Exchange initial-version reconstruction using synthetic official-shape fixtures.
+No live access or scientific source claim is part of E0–E3.
 
 ## Latest verified evidence
 
@@ -72,7 +78,7 @@ remain unqualified.
   from the exact clean Git head, verifies the CUDA-enabled Torch runtime,
   enforces the 2.5× same-filesystem disk margin before download, measures peak
   process RAM on Windows, and preserves structured failure evidence.
-- The active integrity change binds final Pythia to five exact files totaling
+- The delivered integrity change binds final Pythia to five exact files totaling
   2,092,816,302 bytes, separates allowlisted acquisition from offline loading,
   rehashes the snapshot, validates config/model/logits identity, and captures a
   fresh live resource audit immediately before load.
@@ -165,7 +171,7 @@ remain unqualified.
 - One training job at a time.
 - Model downloads and bounded local training are explicitly authorized as of
   2026-08-20.
-- The active gate requires one pinned licensed artifact at a time, measured
+- Any later model gate requires one pinned licensed artifact at a time, measured
   headroom, and preserved stop/failure evidence.
 - No paid license, cloud rental, requester-pays operation, or public model/data
   release is needed or inferred. The repository is public only by the user's
@@ -177,10 +183,9 @@ remain unqualified.
 
 ## Exact next action
 
-Deliver D-040, the sanitized D-039 failure report, and reconciled project state
-on one scoped E5 evidence commit through draft PR #38 exact-head CI. Preserve
-the ignored authenticated receipt, completed-prefix inventories, mirrors, and
-private key boundary. Do not rerun or resume D-039, substitute PMC, retrieve
-archive/article text, use requester-pays access, execute a model, or reopen the
-consumed development-v1 E4. After exact-head closure, audit the separately
-authorized A/B parser-sample gate before freezing any new live request.
+Commit the D-041 result-blind offline plan freeze from exact green baseline
+`c245e7a`, then implement and adversarially validate the synthetic-fixture A/B
+parser path. Preserve the ignored D-039 evidence and do not rerun D-039, open a
+private inventory, make a network request, retrieve real archive/article text,
+inspect source C, use requester-pays access, execute a model, or reopen the
+consumed development-v1 E4. A live A/B micro-sample requires a later decision.

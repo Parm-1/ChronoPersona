@@ -1009,6 +1009,46 @@ behavioral, causal, or CSTG claims.
 `reports/stage0/source_metadata_qualification_failure_2026-08-20.md` and the
 ignored mirrored run directory `source-metadata-v0-eb0f7949`.
 
+## D-041 — Freeze offline A/B parser engineering before real source content
+
+**Date:** 2026-08-20
+**Status:** accepted; E0 result-blind offline freeze
+
+Accept D-039 E5 evidence head
+`c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` as the exact green baseline. Draft
+PR #38 remained open/draft and passed all 24 attached checks across Python
+3.11–3.13. D-040 continues to prohibit another D-039/source-C request.
+
+The project has not reached a hard boundary because
+`docs/SOURCE_SAMPLE_PROTOCOL.md` separately authorizes bounded no-cost A/B
+parser samples. Before any real record is opened, freeze one offline engineering
+gate for two source-specific representations:
+
+- Wikimedia namespace-0 revision histories must resolve an exact child and
+  parent, clean both wikitext versions conservatively, and derive candidate
+  added spans without treating a current page snapshot as historical text;
+- Stack Exchange dump records must reconstruct the initial question/answer
+  title/body from `PostHistory` and must never fall back to current
+  `Posts.Body` or `Posts.Title`.
+
+E0–E3 use synthetic official-shape fixtures only. They may add a closed config,
+dependency-light parsers, an isolated fixture runner, private parsed records,
+portable count-only aggregates, canonical receipts, adversarial tests, and
+exact-head delivery. They may not access the network, open D-039 private
+inventories, retrieve an archive or real source record, inspect source C, infer
+rights/human/bot eligibility, execute a model, or support source/scientific
+claims. Every successfully parsed candidate remains
+`accepted-for-parser-audit` or unresolved, never scientifically eligible;
+explicit exclusions and parser failures remain preserved as such.
+
+**Claim ceiling:** Tested offline parser engineering only. A live micro-sample
+requires a later result-blind decision that independently freezes official
+no-cost access, selection identities, the Stack Exchange site panel and license
+schedule, Wikimedia page/revision selection, request/byte ceilings, private
+publication, zero-retry order, and stop rules.
+
+**Plan:** `.agent/plans/active-ab-parser-sample-engineering.md`.
+
 ## Pending decisions
 
 - License-cleared executable public-panel checkpoints.

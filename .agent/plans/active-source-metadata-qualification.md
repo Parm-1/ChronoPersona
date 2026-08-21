@@ -1,15 +1,15 @@
 # Bounded Live Source-Metadata Qualification
 
-**Status:** E0–E3 complete; E4 consumed at the first arXiv transport failure; E5 closes only when this unchanged evidence commit passes exact-head CI; no retry authorized
+**Status:** closed as a preserved failed gate; exact E5 head `c245e7a` passed all 24 attached checks; no retry authorized
 **Started:** 2026-08-20
 **Baseline:** `d669b4e3c36069398efdac831c8f1fec7036359c`
 **Branch:** `feat/live-source-metadata-qualification`
 **Stack base:** draft PR #37 / `fix/scoring-failure-observability`
-**Write-active deliverable:** publish the sanitized failure report, D-040, and
-reconciled state on one exact-head E5 evidence commit. Preserve the private
-receipt and completed-prefix inventories without inspection or publication.
-Do not retry, resume, substitute, retrieve an archive/article body or source
-package, or expose a native source-C identifier.
+**Final delivered artifact:** the sanitized failure report, D-040, and
+reconciled state on exact-head E5 evidence commit `c245e7a`. Preserve the
+private receipt and completed-prefix inventories without inspection or
+publication. Do not retry, resume, substitute, retrieve an archive/article
+body or source package, or expose a native source-C identifier.
 
 ## Objective and claim boundary
 
@@ -376,11 +376,13 @@ state must become draft PR #38's synchronized head and pass every attached
 check. External green checks fulfill E5; do not create a post-green state-only
 commit.
 
-**Candidate evidence:** the private receipt and its mirror are byte-
+**Result:** complete. Exact evidence head
+`c245e7aaa16b2be35293fc5ca4d965efb7f5b84e` passed all 24 attached checks
+across Python 3.11–3.13. The private receipt and its mirror are byte-
 identical, canonical, self-hash-valid, and full-HMAC-valid; the production
 validator reports zero errors. The exact three-file local/backup sets match and
-remain owner-restricted. No aggregate or source-C artifact exists. The portable
-record is ready for exact-head delivery; CI remains the external closure gate.
+remain owner-restricted. No aggregate or source-C artifact exists. No
+post-green state-only commit was created.
 
 ## Stop conditions
 
@@ -414,16 +416,14 @@ externally blocked. No model execution or scientific claim is authorized.
 
 ## Restart procedure
 
-1. Read `PROGRESS.md`, D-037 through D-040, this plan, and the three source
-   protocols.
-2. Verify branch `feat/live-source-metadata-qualification` retains stack base
-   `d669b4e`, frozen E0 commit `2c4d397`, and execution head `eb0f794`.
-3. Deliver only the E5 sanitized failure closure and require exact-head CI. Do
-   not issue another D-039 request or create a post-green state-only commit.
-4. After E5 closes, audit the separately authorized A/B parser-sample gate. Any
-   new source-C metadata request requires a separate frozen, versioned,
-   result-blind transport-adjudication decision or explicit material user
-   choice.
+1. Read `PROGRESS.md`, D-040, this closed plan, and the three source protocols.
+2. Verify the preserved branch retains execution head `eb0f794` and green E5
+   evidence head `c245e7a`; make no state-only closure commit.
+3. Do not issue another D-039 request. A new source-C metadata request requires
+   a separate frozen, versioned, result-blind transport-adjudication decision or
+   explicit material user choice.
+4. Continue bounded A/B parser engineering only under D-041 and
+   `.agent/plans/active-ab-parser-sample-engineering.md`.
 5. Do not human-inspect transient metadata prose, retrieve an archive/article
    body/source package, execute a model, rerun development-v1 E4, or incur
    external cost.
